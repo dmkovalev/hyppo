@@ -51,13 +51,14 @@ if __name__ == '__main__':
     gender_hypothesis = Hypothesis(gender_spec)
     gender_model_men = coa_graph(nonlinear_connectivity_model)
     gender_model_women = coa_graph(nonlinear_connectivity_model)
-    add(ve, 'hypothesis', connectivity_hypothesis)
+    add(ve, 'hypothesis', gender_hypothesis)
     add(ve, 'model', gender_model_men)
     add(ve, 'model', gender_model_women)
 
-    ve._add_relation('connectivity_hypothesis', 'gender_model_men')
+    ve._add_relation('gender_hypothesis', 'gender_model_men')
+    ve._add_relation('gender_hypothesis', 'gender_model_women')
 
-    lattice = build_lattice(ve)
+    lattice = construct_lattice(ve)
     add(ve, 'lattice', lattice)
 
     run_virtual_experiment(ve)
