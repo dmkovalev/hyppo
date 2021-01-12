@@ -95,6 +95,16 @@ def compute_bayesian_hypothesis_score(models, dataset):
         result[key] = probability
     return result
 
+def compare_preds_on_single_dataset(models, dataset, stat_test):
+    linear_prediction = models['model_1'].predict(dataset)
+    gp_prediction = models['model_2'].predict(dataset)
+    if stat_test == 'wilcoxon':
+        result = scipy.stats.wilcoxon(linear_prediction, gp_prediction)
+    else:
+        raise NotImplemented()
+    return result
+
+
 def compare_preds_on_different_datasets(models, dataset_1, dataset_2, stat_test):
     linear_prediction = models['model_1'].predict(dataset_1)
     gp_prediction = models['model_2'].predict(dataset_2)
