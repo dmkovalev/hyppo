@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: neuro-experiment-$
+spec:
+  template:
+    spec:
+      containers:
+       - name: neuro
+         image: neura_image:latest
+         workingDir: /data/shared/neuro
+         imagePullPolicy: Never
+         env:
+         - name: JOB_ID
+           value: "$1"
+         - name: CONFIG_PATH
+           value: "$2"
+         command: ["bash"]
+         args: ["-c","python kubernetes/model_hyperparams_tuning.py"]
+         volumeMounts:
+           - name: data
+             mountPath: /data/shared/
+         resources:
+           requests:
+             cpu: 2
+           limits:
+             cpu: 2
+      restartPolicy: Never
+      volumes:
+        - name: data
+          hostPath:
+             path: /data/shared/
