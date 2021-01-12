@@ -91,7 +91,7 @@ if __name__ == '__main__':
     remove_confounds = bool(config['ATLAS']['remove_confounds'])
     n_jobs = int(config['GENERAL']['n_jobs'])
 
-    data = read_from_hbase('HCP', 'harvord-axford', 'neuro_test')
+    data = read_from_hbase('HCP', 'harvard-oxford', 'neuro_test')
     data_spark = spark.createDataFrame(data)
 
     df1 = data_spark.groupby("people_number").apply(extract_ROI_spark)

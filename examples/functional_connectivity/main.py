@@ -34,7 +34,7 @@ if __name__ == '__main__':
     ve._add_relation('atlas_hypothesis', 'atlas_model')
 
     connectivity_hypothesis = Hypothesis(conn_spec)
-    dataset = read_from_hbase('HCP', 'harvord-oxford', 'neuro_test')
+    dataset = read_from_hbase('HCP', 'harvard-oxford', 'neuro_test')
 
     linear_connectivity_model = \
         generate_hypothesis_from_data(dataset, type='linear')
