@@ -92,7 +92,7 @@ def create_new_virtual_experiment(specification):
 
 
 def add(ve, type, specification):
-    if type == 'hypothesis':
+    if type == 'hypotheses':
         hypothesis = Hypothesis(specification)
         ve.add(hypothesis)
     elif type == 'model':

@@ -20,7 +20,8 @@ def remove_subsets(S, subset):
 
 
 def find_minimal_subsets(S, subsets_cols=[]):
-    if matrix is empty return final result
+    if matrix is empty:
+        return final result
     if S.shape[0] == 0:
         return subsets_cols
 

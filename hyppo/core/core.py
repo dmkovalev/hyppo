@@ -7,18 +7,19 @@ from HypothesisConnection import construct_lattice
 
 class VirtualExperiment(self, specification):
 
-    def __init__(self, workflow, hypotheses, models, ontology):
-        self.workflow = workflow  # No. of vertices
-        self.hypothesis = hypotheses  # default dictionary to store graph
+    def __init__(self, hypotheses=None, models=None, mapping=None):
+        self.hypotheses = hypotheses
         self.models = models
+        self.mapping = mapping
+        self.workflow = workflow
         self.ontology = ontology
-        self.lattice = construct_lattice(hypotheses, workflow)
+        self.lattice = self.lattice.construct_lattice(hypotheses, workflow)
 
-    def __getattr__(self, item):
-        return self.graph[item]
+    def run(self):
+        pass
 
-    def __repr__(self):
-        return str(self.graph)
+    def save(self):
+        pass
 
     def load(db, type, id):
         db.connect()
@@ -27,7 +28,7 @@ class VirtualExperiment(self, specification):
             with open(cls.root / storage / filename, 'rb') as f:
                 return pickle.load(f)
 
-            if type == 'hypothesis':
+            if type == 'hypotheses':
                 artefact = db._load_hypothesis(id)
             elif type == 'model':
                 artefact = db._load_model(id)
@@ -43,8 +44,8 @@ class VirtualExperiment(self, specification):
             print('Объект отсутствует в базе данных.')
 
     def add(self, type, artefact):
-        if type == 'hypothesis':
-            self.hypothesis.append(artefact)
+        if type == 'hypotheses':
+            self.hypotheses.append(artefact)
         elif type == 'model':
             self.model.append(artefact)
         elif type == 'ontology':
@@ -56,7 +57,7 @@ class VirtualExperiment(self, specification):
 
     def modify(self, type, artefact):
 
-        if type == 'hypothesis':
+        if type == 'hypotheses':
             artefacts = []
 
             for i in range(1, len(H_list)):
@@ -81,6 +82,7 @@ class VirtualExperiment(self, specification):
                     artefacts.append((M1, M2))
 
         return artefacts
+
 
 class Hypothesis(self, specification):
     def __init__(self, vertices):

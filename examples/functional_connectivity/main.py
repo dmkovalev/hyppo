@@ -26,7 +26,7 @@ if __name__ == '__main__':
     ve = create_new_virtual_experiment(specification)
 
     atlas_hypothesis = Hypothesis(atl_spec)
-    add(ve, 'hypothesis', atlas_hypothesis)
+    add(ve, 'hypotheses', atlas_hypothesis)
 
     atlas_model = Model(atl_spec_model):
     add(ve, 'Model', atlas_model)
@@ -41,7 +41,7 @@ if __name__ == '__main__':
     nonlinear_connectivity_model = \
         generate_hypothesis_from_data(dataset)
 
-    add(ve, 'hypothesis', connectivity_hypothesis)
+    add(ve, 'hypotheses', connectivity_hypothesis)
     add(ve, 'model', linear_connectivity_model)
     add(ve, 'model', nonlinear_connectivity_model)
 
@@ -51,7 +51,7 @@ if __name__ == '__main__':
     gender_hypothesis = Hypothesis(gender_spec)
     gender_model_men = coa_graph(nonlinear_connectivity_model)
     gender_model_women = coa_graph(nonlinear_connectivity_model)
-    add(ve, 'hypothesis', gender_hypothesis)
+    add(ve, 'hypotheses', gender_hypothesis)
     add(ve, 'model', gender_model_men)
     add(ve, 'model', gender_model_women)
 

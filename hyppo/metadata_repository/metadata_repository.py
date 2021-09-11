@@ -7,7 +7,7 @@ from datetime import datetime
 
 
 class Database:
-    root: Path = Path('./')
+    root: Path = Path('/')
     debug: bool = True
     debug_print_margin: str = '\t'
 
@@ -48,7 +48,7 @@ class Database:
             with open(cls.root / storage / filename, 'rb') as f:
                 return pickle.load(f)
 
-            if type == 'hypothesis':
+            if type == 'hypotheses':
                 artefact = db._load_hypothesis(id)
             elif type == 'model':
                 artefact = db._load_model(id)
