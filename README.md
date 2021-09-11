@@ -1,1 +1,1 @@
-# hypothesis_platform
+# HYPothesis PlatfOrm (Hyppo)
