@@ -1,0 +1,1 @@
+from _generator import generate_hypotheses
