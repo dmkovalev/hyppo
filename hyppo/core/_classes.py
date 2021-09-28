@@ -5,15 +5,12 @@ from utils import set_default_names
 from CreateGraph import Hypothesis_encoding
 from HypothesisConnection import construct_lattice
 
-class VirtualExperiment(self, specification):
+from ._base import Artefact
 
-    def __init__(self, hypotheses=None, models=None, mapping=None):
-        self.hypotheses = hypotheses
-        self.models = models
-        self.mapping = mapping
-        self.workflow = workflow
-        self.ontology = ontology
-        self.lattice = self.lattice.construct_lattice(hypotheses, workflow)
+class VirtualExperiment(Artefact):
+
+    def __init__(self):
+        pass
 
     def run(self):
         pass
@@ -84,20 +81,8 @@ class VirtualExperiment(self, specification):
         return artefacts
 
 
-class Hypothesis(self, specification):
-    def __init__(self, vertices):
-        self.V = vertices  # No. of vertices
-        self.graph = defaultdict(list)  # default dictionary to store graph
-        self.real_V_names = []
 
-    def __getattr__(self, item):
-        return self.graph[item]
-
-    def __repr__(self):
-        return str(self.graph)
-
-
-class Model(self, specification):
+class Model(Artefact):
     def __init__(self, model):
         spec = _parse_specification(model, specification)
         self.model = model  # No. of vertices
@@ -110,7 +95,7 @@ class Model(self, specification):
         return str(self.graph)
 
 
-class Ontology(self, specification):
+class Ontology(Artefact):
     def __init__(self, ontology):
         spec = _parse_specification(ontology, specification)
         self.model = ontology  # No. of vertices
@@ -123,7 +108,7 @@ class Ontology(self, specification):
         return str(self.ontology)
 
 
-class Workflow(self, specification):
+class Workflow(Artefact):
     self.G = Graph(connection_matrix.shape[1])
     self.G.real_V_names = connection_matrix.columns.values
     connection_matrix.columns = ["H" + str(k) for k in range(G.V)]
