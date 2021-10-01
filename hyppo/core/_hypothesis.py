@@ -9,18 +9,28 @@ class Relation:
         assert isinstance(hypothesis, Hypothesis), 'Not a hypothesis'
         assert isinstance(model, Model), 'Not a model'
 
-        if hypothesis.id in cls._mapping.keys():
-            raise ValueError('Hypothesis id is already in use')
+        if (hypothesis.id, model.id) in cls._mapping.items():
+            raise ValueError('This relation already exists')
         else:
             cls._mapping[hypothesis.id] = model.id
 
     @classmethod
-    def delete_mapping(cls):
-        pass
+    def delete_hypothesis(cls, hypothesis):
+        assert isinstance(hypothesis, Hypothesis), 'Not a hypothesis'
+        del cls._mapping[hypothesis.id]
+
+    @classmethod
+    def delete_model(cls, model):
+        assert isinstance(model, Model), 'Not a model'
+        for key in cls._mapping.keys():
+            if (key, model.id) in cls._mapping.items():
+                cls._mapping[key].remove(model.id)
+
 
     @classmethod
     def get_mapping(cls):
         return cls._mapping
+
 
 class Hypothesis(Artefact):
     def __init__(self):
@@ -55,8 +65,8 @@ class Hypothesis(Artefact):
 
 class Model(Artefact):
     def __init__(self, specification=None):
-        self.spec = self._parse_specification(specification)
-
+        # self.spec = self._parse_specification(specification)
+        pass
 
 if __name__ == '__main__':
     h = Hypothesis()
@@ -66,6 +76,9 @@ if __name__ == '__main__':
     h._parameters = 1
     print(h.parameters)
 
+    m = Model()
+    m.id = 2
     relation = Relation
-    relation.add_mapping(h, h)
+    relation.add_mapping(h, m)
+
     print(relation.get_mapping())
