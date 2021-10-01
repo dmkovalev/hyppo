@@ -82,17 +82,6 @@ class VirtualExperiment(Artefact):
 
 
 
-class Model(Artefact):
-    def __init__(self, model):
-        spec = _parse_specification(model, specification)
-        self.model = model  # No. of vertices
-        self.spec = defaultdict(spec)  # default dictionary to store graph
-
-    def __getattr__(self, item):
-        return self.graph[item]
-
-    def __repr__(self):
-        return str(self.graph)
 
 
 class Ontology(Artefact):
