@@ -1,39 +1,8 @@
-from hyppo.core._base import Artefact
+from owlready2 import get_ontology
 
+ve = get_ontology()
 
-class Relation:
-    _mapping = dict()
-
-    @classmethod
-    def add_mapping(cls, hypothesis, model):
-        assert isinstance(hypothesis, Hypothesis), 'Not a hypothesis'
-        assert isinstance(model, Model), 'Not a model'
-
-        if (hypothesis.id, model.id) in cls._mapping.items():
-            raise ValueError('This relation already exists')
-        elif hypothesis.id not in cls._mapping:
-            cls._mapping[hypothesis.id] = {model.id}
-        else:
-            cls._mapping[hypothesis.id].add(model.id)
-
-    @classmethod
-    def delete_hypothesis(cls, hypothesis):
-        assert isinstance(hypothesis, Hypothesis), 'Not a hypothesis'
-        del cls._mapping[hypothesis.id]
-
-    @classmethod
-    def delete_model(cls, model):
-        assert isinstance(model, Model), 'Not a model'
-        for key in cls._mapping:
-            if model.id in cls._mapping[key]:
-                cls._mapping[key].remove(model.id)
-
-    @classmethod
-    def get_mapping(cls):
-        return cls._mapping
-
-
-class Hypothesis(Artefact):
+class PHypothesis(Hypothesis):
     def __init__(self):
         self.probability = None
         self.article = None
