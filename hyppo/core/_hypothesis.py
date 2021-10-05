@@ -89,3 +89,6 @@ if __name__ == '__main__':
     relation.delete_model(m)
 
     print(relation.get_mapping())
+
+    relation.delete_hypothesis(h)
+    print(relation.get_mapping())

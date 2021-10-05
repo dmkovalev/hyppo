@@ -1,10 +1,3 @@
-from utils import check_completeness
-from utils import is_structure
-from utils import save_default_names
-from utils import set_default_names
-from CreateGraph import Hypothesis_encoding
-from HypothesisConnection import construct_lattice
-
 from ._base import Artefact
 
 class VirtualExperiment(Artefact):
@@ -82,19 +75,13 @@ class VirtualExperiment(Artefact):
 
 
 
-
-
 class Ontology(Artefact):
-    def __init__(self, ontology):
-        spec = _parse_specification(ontology, specification)
-        self.model = ontology  # No. of vertices
-        self.spec = defaultdict(spec)  # default dictionary to store graph
 
-    def __getattr__(self, item):
-        return self.ontology[item]
+    def __init__(self, specification):
+        self.spec = self._parse_specification(specification)
 
-    def __repr__(self):
-        return str(self.ontology)
+    def _parse_specification(self, specification):
+        pass
 
 
 class Workflow(Artefact):
