@@ -1,21 +1,10 @@
-from owlready2 import get_ontology
+from hyppo.core._base import virtual_experiment_onto
 
-ve = get_ontology()
 
-class PHypothesis(Hypothesis):
-    def __init__(self):
-        self.probability = None
-        self.article = None
-        self._models = list()
-        self._parameters = dict()
-
-    @property
-    def models(self):
-        return self._models
-
-    @models.setter
-    def models(self, value):
-        self._models = value
+class Hypothesis(virtual_experiment_onto.Artefact):
+    namespace = virtual_experiment_onto.get_namespace("http://synthesis.ipi.ac.ru/virtual_experiment.owl")
+    # def __init__(self):
+    #     self._parameters = dict()
 
     @property
     def parameters(self):
@@ -32,32 +21,25 @@ class PHypothesis(Hypothesis):
     def _parse_specification(self):
         pass
 
-
-class Model(Artefact):
-    def __init__(self, specification=None):
-        # self.spec = self._parse_specification(specification)
+class Model(virtual_experiment_onto.Artefact):
+    namespace = virtual_experiment_onto.get_namespace("http://synthesis.ipi.ac.ru/virtual_experiment.owl")
+    def __init__(self):
         pass
 
 
 if __name__ == '__main__':
     h = Hypothesis()
+    h.has_for_name = 'first'
+    h1 = Hypothesis()
+    h.has_for_probability = 0.0
+    h1.has_for_name = 'second'
+    h2 = Hypothesis()
+    h2.has_for_name = 'third'
 
-    h.parameters = {1: 2}
-    h.id = 1
-    h._parameters = 1
-    print(h.parameters)
-    relation = Relation
+    h.competes = [h1, h2]
 
     m = Model()
-    m.id = 2
-    relation.add_mapping(h, m)
-    m.id = 3
-    relation.add_mapping(h, m)
-    m.id = 2
 
-    relation.delete_model(m)
 
-    print(relation.get_mapping())
-
-    relation.delete_hypothesis(h)
-    print(relation.get_mapping())
+    print([i.has_for_name for i in h.competes])
+    print([i.has_for_name for i in h1.INDIRECT_competes])

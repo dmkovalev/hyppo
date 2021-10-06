@@ -1,13 +1,15 @@
 import datetime
 
-from owlready2 import get_ontology, Thing, DataProperty, FunctionalProperty, ObjectProperty, TransitiveProperty, \
-    AllDisjoint
+# from owlready2 import get_ontology, Thing, DataProperty, FunctionalProperty, ObjectProperty, TransitiveProperty, \
+#     AllDisjoint
 
-ve = get_ontology("http://synthesis.ipi.ac.ru/virtual_experiment.owl")
+from owlready2 import *
+
+virtual_experiment_onto = get_ontology("http://synthesis.ipi.ac.ru/virtual_experiment.owl")
 hcp_onto = get_ontology("http://synthesis.ipi.ac.ru/hcp_onto.owl")
-ve.imported_ontologies.append(hcp_onto)
+virtual_experiment_onto.imported_ontologies.append(hcp_onto)
 
-with ve:
+with virtual_experiment_onto:
     # define base class and its properties
     class Artefact(Thing): pass
     class Specification(Thing): pass
@@ -42,21 +44,17 @@ with ve:
         inverse_property    = is_implemented_by_model
         class_property_type = ["only"]
 
-    class competes(Hypothesis >> Hypothesis, TransitiveProperty): pass
-    class derived_by(Hypothesis >> Hypothesis, TransitiveProperty): pass
+    class competes(Hypothesis >> Hypothesis, TransitiveProperty, SymmetricProperty): pass
+    class derived_by(Hypothesis >> Hypothesis, TransitiveProperty, AsymmetricProperty): pass
     class impacts(ObjectProperty, TransitiveProperty):
         domain              = [Hypothesis]
         range               = [Hypothesis]
         inverse_propert     = derived_by
 
-
     class VirtualExperiment(Artefact): pass
     class Configuration(Artefact): pass
     class Workflow(Artefact): pass
     class Task(Thing): pass
-
-    AllDisjoint([VirtualExperiment, Configuration, Workflow, Hypothesis, Model, Task])
-
 
     class has_for_hypothesis(VirtualExperiment >> Hypothesis): class_property_type = ["some"]
     class has_for_model(VirtualExperiment >> Model): class_property_type = ["some"]
@@ -64,10 +62,12 @@ with ve:
     class has_for_configuration(VirtualExperiment >> Configuration): class_property_type = ["some"]
     class has_for_task(Workflow >> Task): class_property_type = ["some"]
 
+    AllDisjoint([VirtualExperiment, Configuration, Workflow, Hypothesis, Model, Task])
+
 
 if __name__ == '__main__':
-    ve = get_ontology("http://synthesis.ipi.ac.ru/virtual_experiment.owl")
-    print(list(ve.classes()))
+    virtual_experiment_onto = get_ontology("http://synthesis.ipi.ac.ru/virtual_experiment.owl")
+    print(list(virtual_experiment_onto.classes()))
     art = Artefact("123")
     art.has_for_author = [123]
     print(has_for_authors.range)
