@@ -1,6 +1,8 @@
 import numpy as np
+from sklearn.metrics import r2_score, mean_squared_error
 
 from hyppo.core._base import virtual_experiment_onto
+from scipy import stats
 
 
 class Hypothesis(virtual_experiment_onto.Artefact):
@@ -20,8 +22,48 @@ class Hypothesis(virtual_experiment_onto.Artefact):
     def parameters(self):
         return self._parameters
 
-    def _parse_specification(self):
-        pass
+
+    def range_models(self, X, y, metrics, threshold):
+        models = self.is_implemented_by_model()
+        result = {}
+
+        if metrics == 'mae':
+            for key in models.keys():
+                error = models.predict(X) - y
+                if error <= threshold:
+                    result[key] = np.mean(np.abs(error))
+
+        elif metrics == 'r2':
+            for key in models.keys():
+                error = r2_score(y, models[key].predict(X))
+                if error >= threshold:
+                    result[key] = error
+
+        elif metrics == 'mse':
+            for key in models.keys():
+                error = mean_squared_error(y, models[key].predict(X))
+                if error <= threshold:
+                    result[key] = error
+
+    def compare_preds_on_single_dataset(self, dataset, stat_test):
+        models = self.is_implemented_by_model()
+        linear_prediction = models['model_1'].predict(dataset)
+        gp_prediction = models['model_2'].predict(dataset)
+        if stat_test == 'wilcoxon':
+            result = stats.wilcoxon(linear_prediction, gp_prediction)
+        else:
+            raise NotImplemented()
+        return result
+
+    def compare_preds_on_different_datasets(self, dataset_1, dataset_2, stat_test):
+        models = self.is_implemented_by_model()
+        linear_prediction = models['model_1'].predict(dataset_1)
+        gp_prediction = models['model_2'].predict(dataset_2)
+        if stat_test == 'wilcoxon':
+            result = stats.wilcoxon(linear_prediction, gp_prediction)
+        else:
+            raise NotImplemented()
+        return result
 
 
 class Model(virtual_experiment_onto.Artefact):
@@ -35,95 +77,62 @@ class Model(virtual_experiment_onto.Artefact):
     def predict(self, X):
         pass
 
+    def update_bayesian_probability(self, X, prior):
+
+        likelihood = stats.norm.cdf(self.predict(X),
+                                    self.predict(X).mean,
+                                    self.predict(X).std)
+
+        unnormalized_posterior = prior * likelihood
+        posterior = unnormalized_posterior / np.nan_to_num(unnormalized_posterior).sum()
+        return posterior
+
+    def bayesian_score(self, X, y):
+        error = y - self.predict(X)
+        std = np.std(error)
+        probability = np.sum(1/np.sqrt(2*std**2*np.pi)*np.exp(1/(2*std**2)*(error)))
+        return probability
+
 
 class NonLinearModel(Model):
     namespace = virtual_experiment_onto.get_namespace("http://synthesis.ipi.ac.ru/virtual_experiment.owl")
 
+    @property
     def nonlinear_aic(self, X, y):
         prediction = self.predict(X)
         error = prediction - y
         complexity = self.size
         likehood = np.log(np.mean(error ** 2 / error.shape[0]))
         value = likehood - 2 * complexity
-        return value
+        return self._nonlinear_aic
 
+    @property
     def nonlinear_bic(self, X, y):
         prediction = self.predict(X)
         error = prediction - y
-        std = np.std(error)
         likehood = -np.mean(error ** 2 / error.shape[0])
         complexity = self.size
 
         value = likehood - np.log(y.shape[0]) * complexity
-        return value
+        return self._nonlinear_bic
 
 
-def range_models(models, dataset, metrics, threshold):
-    result = {}
-    if metrics == 'mae':
-        for key in models.keys():
-            error = models.predict(dataset.X) - dataset.y
-            if error <= threshold:
-                result[key] = np.mean(np.abs(error))
-
-    elif metrics == 'r2':
-        for key in models.keys():
-            error = r2_score(y, models[key].predict(X))
-            if error >= threshold:
-                result[key] = error
-
-    elif metrics == 'mse':
-        for key in models.keys():
-            error = mean_squared_error(y, models[key].predict(X))
-            if error <= threshold:
-                result[key] = error
+# TODO does not belong here
 
 
-def update_bayesian_probability(model, dataset, prior_probability):
-
-    likelihood = norm.cdf(model.predict(dataset),
-                          model.predict(dataset).mean,
-                          model.predict(dataset).std))
-    unnormalized_posterior = prior_probability * likelihood
-    posterior = unnormalized_posterior / np.nan_to_num(unnormalized_posterior).sum()
-
-    return posterior
-
-def compute_bayesian_hypothesis_score(models, dataset):
-    X = dataset.X
-    y = dataset.y
-    sum_probability = 0
-    result = {}
-    for key in models.keys():
-        error = y-models[key].predict(X)
-        std = np.std(error)
-        probability = 1/np.sqrt(2*std**2*np.pi)*np.exp(1/(2*std**2)*(error))
-        probability = np.sum(probability)
-        sum_probability += probability
-        result[key] = probability
-    return result
-
-def compare_preds_on_single_dataset(models, dataset, stat_test):
-    linear_prediction = models['model_1'].predict(dataset)
-    gp_prediction = models['model_2'].predict(dataset)
-    if stat_test == 'wilcoxon':
-        result = scipy.stats.wilcoxon(linear_prediction, gp_prediction)
-    else:
-        raise NotImplemented()
-    return result
 
 
-def compare_preds_on_different_datasets(models, dataset_1, dataset_2, stat_test):
-    linear_prediction = models['model_1'].predict(dataset_1)
-    gp_prediction = models['model_2'].predict(dataset_2)
-    if stat_test == 'wilcoxon':
-        result = scipy.stats.wilcoxon(linear_prediction, gp_prediction)
-    else:
-        raise NotImplemented()
-    return result
+
+
+
+
+
+
+
+
 
 def compute_diff_dag(models=None, dataset):
-    atlas = datasets.fetch_atlas_harvard_oxford('cort-maxprob-thr25-2mm')
+    atlas = dataset.fetch_atlas_harvard_oxford('cort-maxprob-thr25-2mm')
     labels = atlas.labels[1:]
 
     res = []
