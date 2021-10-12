@@ -1,12 +1,13 @@
 import numpy as np
+from scipy import stats
 from sklearn.metrics import r2_score, mean_squared_error
 
 from hyppo.core._base import virtual_experiment_onto
-from scipy import stats
 
 
 class Hypothesis(virtual_experiment_onto.Artefact):
-    namespace = virtual_experiment_onto.get_namespace("http://synthesis.ipi.ac.ru/virtual_experiment.owl")
+    namespace = virtual_experiment_onto.get_namespace(
+        "http://synthesis.ipi.ac.ru/virtual_experiment.owl")
     # def __init__(self):
     #     self._parameters = dict()
 
