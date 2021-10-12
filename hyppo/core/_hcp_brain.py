@@ -13,6 +13,7 @@ with hcp_brain_onto:
 
     class has_for_age_from(Human >> int, DataProperty, FunctionalProperty): pass
     class has_for_age_to(Human >> int, DataProperty, FunctionalProperty): pass
+    class has_for_condition(Human >> str, DataProperty): pass
 
     class has_for_gender(Human >> str, DataProperty, FunctionalProperty): pass
     class has_for_brain(Human >> Brain): pass
@@ -24,7 +25,16 @@ with hcp_brain_onto:
     class has_for_roi(RoiVoxelMapping >> ROI): class_property_type = ["exactly"]
     class has_for_voxel(RoiVoxelMapping >> Voxel): class_property_type = ["exactly"]
 
+    class fMRI(Image): pass
+    class has_for_x(Voxel >> int, DataProperty, FunctionalProperty): pass
+    class has_for_y(Voxel >> int, DataProperty, FunctionalProperty): pass
+    class has_for_z(Voxel >> int, DataProperty, FunctionalProperty): pass
+    class has_for_t(Voxel >> float, DataProperty, FunctionalProperty): pass
+    class has_for_color(Voxel >> int, DataProperty, FunctionalProperty): pass
 
+
+
+    class rsfMRI(fMRI): pass
 
     class Adult(Human):
         equivalent_to = [Human & has_for_age_from > 18]
