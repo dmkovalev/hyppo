@@ -1,43 +1,8 @@
-import os
-import sys
-import glob
 import configparser
-import subprocess
-import socket
-from multiprocessing.pool import Pool
-import shutil
 
-import numpy as np
 import pandas as pd
-
-from scipy.signal import savgol_filter, medfilt
-
-from pyspark.sql.functions import pandas_udf, PandasUDFType
-from pyspark.sql.types import NullType
-from pyspark.sql import SparkSession
-from pyspark import SparkConf
-import happybase
 from gplearn.genetic import SymbolicRegressor
-
-conf = SparkConf()
-
-conf.setAppName('Test')
-conf.set("spark.hadoop.yarn.resourcemanager.hostname", '172.17.14.17')
-conf.set("spark.hadoop.yarn.resourcemanager.address", '172.17.14.17:8050')
-conf.set('spark.executor.memoryOverhead', '10GB')
-conf.set('spark.executor.instances', '12')
-spark = SparkSession.builder.config(conf=conf).getOrCreate()
-
-
-def read_from_hbase(dataset_name, atlas_name, table_name):
-    connection = happybase.Connection()
-    table = connection.table(table_name)
-
-    data = []
-    for key, data in table.scan():
-        data.append(key, data)
-
-    return data
+from pyspark.sql.functions import pandas_udf, PandasUDFType
 
 
 @pandas_udf("region string, program string", PandasUDFType.GROUPED_MAP)
@@ -53,6 +18,8 @@ def extract_ROI_spark(data):
     X_test = X[split:]
     y_train = y[:split]
     y_test = y[split:]
+
+    # TODO move to configuration
     est_gp = SymbolicRegressor(population_size=1000,
                                tournament_size=20,
                                generations=150, stopping_criteria=0.001,
