@@ -21,6 +21,7 @@ class Hypothesis(virtual_experiment_onto.Artefact):
     def _parse_specification(self):
         pass
 
+
 class Model(virtual_experiment_onto.Artefact):
     namespace = virtual_experiment_onto.get_namespace("http://synthesis.ipi.ac.ru/virtual_experiment.owl")
     def __init__(self):
@@ -39,7 +40,5 @@ if __name__ == '__main__':
     h.competes = [h1, h2]
 
     m = Model()
-
-
     print([i.has_for_name for i in h.competes])
     print([i.has_for_name for i in h1.INDIRECT_competes])
