@@ -6,8 +6,8 @@ import datetime
 from owlready2 import *
 
 virtual_experiment_onto = get_ontology("http://synthesis.ipi.ac.ru/virtual_experiment.owl")
-hcp_onto = get_ontology("http://synthesis.ipi.ac.ru/hcp_onto.owl")
-virtual_experiment_onto.imported_ontologies.append(hcp_onto)
+hcp_brain_onto = get_ontology("http://synthesis.ipi.ac.ru/hcp_brain_onto.owl")
+virtual_experiment_onto.imported_ontologies.append(hcp_brain_onto)
 
 with virtual_experiment_onto:
     # define base class and its properties

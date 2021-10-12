@@ -5,8 +5,6 @@ class Configuration:
         self.mapping = None
 
 
-
-
 class Workflow(Artefact):
     self.G = Graph(connection_matrix.shape[1])
     self.G.real_V_names = connection_matrix.columns.values

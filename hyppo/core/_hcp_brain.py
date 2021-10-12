@@ -33,7 +33,6 @@ with hcp_brain_onto:
     class has_for_color(Voxel >> int, DataProperty, FunctionalProperty): pass
 
 
-
     class rsfMRI(fMRI): pass
 
     class Adult(Human):
