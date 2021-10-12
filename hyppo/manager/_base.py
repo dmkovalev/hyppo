@@ -1,11 +1,27 @@
 from owlready2 import *
 from hyppo.core._base import virtual_experiment_onto
 
-manager_onto = get_ontology("https://synthesis.ipi.ac.ru/manager.owl")
+virtual_experiment_onto = get_ontology("https://synthesis.ipi.ac.ru/manager.owl")
+namespace = virtual_experiment_onto.get_namespace()
 
-with manager_onto:
+with virtual_experiment_onto:
+    namespace = namespace
+
     class Manager(virtual_experiment_onto.Artefact):
+        def _build_lattice(self):
+            pass
+
+        def _make_plan(self):
+            pass
+
         def run(self):
+            # build lattice
+            hypothesis_lattice = self._build_lattice()
+
+            # form plan
+            execution_plan = self._make_execution_plan()
+
+            # run
             pass
 
     class has_for_virtual_experiment(Manager >> virtual_experiment_onto.VirtualExperiment):
