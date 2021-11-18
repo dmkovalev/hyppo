@@ -10,14 +10,16 @@ with hcp_brain_onto:
     class Voxel(Thing): pass
     class Atlas(Thing): pass
     class RoiVoxelMapping(Thing): pass
+    class Connectivity(Thing): pass
+    class FunctionalConncectivity(Connectivity): pass
 
-    class has_for_age_from(Human >> int, DataProperty, FunctionalProperty): pass
-    class has_for_age_to(Human >> int, DataProperty, FunctionalProperty): pass
+    class has_for_age(Human >> int, DataProperty, FunctionalProperty): pass
     class has_for_condition(Human >> str, DataProperty): pass
 
     class has_for_gender(Human >> str, DataProperty, FunctionalProperty): pass
     class has_for_brain(Human >> Brain): pass
     class has_for_image(Brain >> Image): pass
+    class has_for_connectivity(Brain >> Connectivity): pass
     class has_for_voxel(Image >> Voxel): pass
 
 
@@ -36,13 +38,13 @@ with hcp_brain_onto:
     class rsfMRI(fMRI): pass
 
     class Adult(Human):
-        equivalent_to = [Human & has_for_age_from > 18]
+        equivalent_to = [Human & has_for_age > 18]
 
     class YoungAdult(Adult):
-        equivalent_to = [Adult & has_for_age_to < 30]
+        equivalent_to = [Adult & has_for_age < 30]
 
     class MiddleAgedAdult(Adult):
-        equivalent_to = [Adult & has_for_age_from > 30 & has_for_age_to < 40]
+        equivalent_to = [Adult & has_for_age > 30 & has_for_age < 45]
 
     class Man(Human):
         equivalent_to = [Human & has_for_gender == 'male']
@@ -51,3 +53,4 @@ with hcp_brain_onto:
         equivalent_to = [Human & has_for_gender == 'woman']
 
     AllDisjoint([Man, Woman])
+    AllDisjoint([MiddleAgedAdult, YoungAdult])
