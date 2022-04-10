@@ -98,6 +98,26 @@ class Model(virtual_experiment_onto.Artefact):
 class NonLinearModel(Model):
     namespace = virtual_experiment_onto.get_namespace("http://synthesis.ipi.ac.ru/virtual_experiment.owl")
 
+    def fit(self, X, y):
+        est_gp = SymbolicRegressor(population_size=1000,
+                                   tournament_size=20,
+                                   generations=150, stopping_criteria=0.001,
+                                   const_range=(-1, 1),
+                                   p_crossover=0.7, p_subtree_mutation=0.12,
+                                   p_hoist_mutation=0.06, p_point_mutation=0.12,
+                                   p_point_replace=1,
+                                   init_depth=(6, 10),
+                                   function_set=('mul', 'sub', 'div', 'add', 'cos'),
+                                   max_samples=0.9,
+                                   verbose=1,
+                                   metric='mse',
+                                   parsimony_coefficient=0.0005,
+                                   random_state=0,
+                                   n_jobs=1)
+
+        est_gp.fit(X, y)
+        return est_gp
+
     @property
     def nonlinear_aic(self, X, y):
         prediction = self.predict(X)
