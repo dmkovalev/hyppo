@@ -74,6 +74,8 @@ with virtual_experiment_onto:
     class FullStructure(Structure): pass
     class Equation(Thing): pass
     class Variable(Thing): pass
+    class has_for_varname(Variable >> str, DataProperty, FunctionalProperty):
+        python_name = "name"
     class FullCausalMapping(Artefact): pass
 
     class has_for_fcm(FullStructure >> FullCausalMapping): class_property_type = ["only"]
