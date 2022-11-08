@@ -5,66 +5,67 @@ from sklearn.metrics import r2_score, mean_squared_error
 from hyppo.core._base import virtual_experiment_onto
 
 
-class Hypothesis(virtual_experiment_onto.Artefact):
-    namespace = virtual_experiment_onto.get_namespace(
-        "http://synthesis.ipi.ac.ru/virtual_experiment.owl")
+with virtual_experiment_onto:
+    class Hypothesis(virtual_experiment_onto.Artefact):
+        namespace = virtual_experiment_onto.get_namespace(
+            "http://synthesis.ipi.ac.ru/virtual_experiment.owl")
     # def __init__(self):
     #     self._parameters = dict()
 
-    @property
-    def parameters(self):
-        return self._parameters
+        @property
+        def parameters(self):
+            return self._parameters
 
-    @parameters.setter
-    def parameters(self, value):
-        self._parameters = value
+        @parameters.setter
+        def parameters(self, value):
+            self._parameters = value
 
-    @parameters.getter
-    def parameters(self):
-        return self._parameters
+        @parameters.getter
+        def parameters(self):
+            return self._parameters
 
-    def range_models(self, X, y, metrics, threshold):
-        models = self.is_implemented_by_model()
-        result = {}
+        def range_models(self, X, y, metrics, threshold):
+            models = self.is_implemented_by_model()
+            result = {}
 
-        if metrics == 'mae':
-            for key in models.keys():
-                error = models.predict(X) - y
-                if error <= threshold:
-                    result[key] = np.mean(np.abs(error))
+            if metrics == 'mae':
+                for key in models.keys():
+                    error = models.predict(X) - y
+                    if error <= threshold:
+                        result[key] = np.mean(np.abs(error))
 
-        elif metrics == 'r2':
-            for key in models.keys():
-                error = r2_score(y, models[key].predict(X))
-                if error >= threshold:
-                    result[key] = error
+            elif metrics == 'r2':
+                for key in models.keys():
+                    error = r2_score(y, models[key].predict(X))
+                    if error >= threshold:
+                        result[key] = error
 
-        elif metrics == 'mse':
-            for key in models.keys():
-                error = mean_squared_error(y, models[key].predict(X))
-                if error <= threshold:
-                    result[key] = error
+            elif metrics == 'mse':
+                for key in models.keys():
+                    error = mean_squared_error(y, models[key].predict(X))
+                    if error <= threshold:
+                        result[key] = error
 
-    # TODO add several > 2 models
-    def compare_preds_on_single_dataset(self, dataset, stat_test):
-        models = self.is_implemented_by_model()
-        linear_prediction = models['model_1'].predict(dataset)
-        gp_prediction = models['model_2'].predict(dataset)
-        if stat_test == 'wilcoxon':
-            result = stats.wilcoxon(linear_prediction, gp_prediction)
-        else:
-            raise NotImplemented()
-        return result
+        # TODO add several > 2 models
+        def compare_preds_on_single_dataset(self, dataset, stat_test):
+            models = self.is_implemented_by_model()
+            linear_prediction = models['model_1'].predict(dataset)
+            gp_prediction = models['model_2'].predict(dataset)
+            if stat_test == 'wilcoxon':
+                result = stats.wilcoxon(linear_prediction, gp_prediction)
+            else:
+                raise NotImplemented()
+            return result
 
-    def compare_preds_on_different_datasets(self, dataset_1, dataset_2, stat_test):
-        models = self.is_implemented_by_model()
-        linear_prediction = models['model_1'].predict(dataset_1)
-        gp_prediction = models['model_2'].predict(dataset_2)
-        if stat_test == 'wilcoxon':
-            result = stats.wilcoxon(linear_prediction, gp_prediction)
-        else:
-            raise NotImplemented()
-        return result
+        def compare_preds_on_different_datasets(self, dataset_1, dataset_2, stat_test):
+            models = self.is_implemented_by_model()
+            linear_prediction = models['model_1'].predict(dataset_1)
+            gp_prediction = models['model_2'].predict(dataset_2)
+            if stat_test == 'wilcoxon':
+                result = stats.wilcoxon(linear_prediction, gp_prediction)
+            else:
+                raise NotImplemented()
+            return result
 
 
 class Model(virtual_experiment_onto.Artefact):
