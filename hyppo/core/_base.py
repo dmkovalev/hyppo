@@ -87,13 +87,16 @@ with virtual_experiment_onto:
     class ResearchLattice(Artefact): pass
     class has_for_lattice_hypothesis(ResearchLattice >> Hypothesis): class_property_type = ["some"]
 
-    class has_for_variable(Equation >> Variable): class_property_type = ["some"]
-    class has_for_equation(Structure >> Equation):
-        class_property_type = ["some"]
-        python_name = "equations"
-    class has_for_structure_variable(Structure >> Variable):
-        class_property_type = ["some"]
-        python_name = "vars"
+    # class has_for_vars(Equation >> Variable, DataProperty):
+    #     class_property_type = ["some"]
+    #     python_name = "vars"
+
+    # class has_for_equation(Structure >> Equation, DataProperty):
+    #     python_name = "equation"
+
+    # class has_for_structure_variable(Structure >> Variable):
+    #     class_property_type = ["some"]
+    #     python_name = "vars"
 
 
     AllDisjoint([VirtualExperiment, Configuration, Workflow, Hypothesis, Model])

@@ -5,6 +5,7 @@ import numpy as np
 import scipy.stats
 from latex2sympy2 import latex2sympy, latex2latex
 import sympy
+from owlready2 import *
 
 # np.random.seed(3)
 from owlready2 import get_ontology
@@ -13,10 +14,17 @@ from hyppo.core._base import virtual_experiment_onto, Variable
 
 with virtual_experiment_onto:
 
-    class Equation():
+
+    class Equation(Thing):
         namespace = virtual_experiment_onto.get_namespace(
             "http://synthesis.ipi.ac.ru/virtual_experiment.owl")
-        def get_vars(self, latex_str):
+
+        def __init__(self, formula):
+            self.formula = formula
+            self.get_vars()
+            self.get_equation()
+
+        def get_vars(self):
             '''
 
             Args:
@@ -25,16 +33,27 @@ with virtual_experiment_onto:
             Returns:
                 set of free symbols
             '''
-            equation = latex2sympy(latex_str)
-            self.vars = equation.free_symbols
-            # self.vars = sorted(equation.free_symbols, key=lambda symbol: symbol.name)
+            equation = latex2sympy(self.formula)
+            vars = sorted(equation.free_symbols, key=lambda symbol: symbol.name)
+            self.vars = vars
+            return self.vars
 
-        def get_equation(self, latex_str):
-            self.equation = latex2sympy(latex_str)
+        def get_equation(self):
+            self.equation = latex2sympy(self.formula)
+            return self.equation
+
+    class has_for_formula(Equation >> str, FunctionalProperty):
+        class_property_type = ["only"]
+        python_name = "formula"
 
     class Structure(virtual_experiment_onto.Artefact):
         namespace = virtual_experiment_onto.get_namespace(
             "http://synthesis.ipi.ac.ru/virtual_experiment.owl")
+
+        def __int__(self, equations):
+            self.equations = equations
+            vars = [eq.get_vars() for eq in self.equations]
+            self.vars = vars
 
         def is_complete(self):
             return len(self.equations) == len(self.vars)
@@ -188,17 +207,27 @@ with virtual_experiment_onto:
 
 if __name__ == '__main__':
     virtual_experiment_onto = get_ontology("http://synthesis.ipi.ac.ru/virtual_experiment.owl")
-    print(list(virtual_experiment_onto.classes()))
-    var = Variable(name='x1')
+    # print(list(virtual_experiment_onto.classes()))
+    # var = Variable(name='x1')
     # virtual_experiment_onto.save("ve.owl")
     # art = Artefact("123")
     # art.has_for_author = [123]
     # print(has_for_authors.range)
     # print(art.name)
 
-    tex = r"f(x_1, x_2, x_3)"
-    #eq =latex2sympy(tex)
-    e = Equation()
-    e.get_vars(tex)
-    e.get_equation(tex)
-    print(e.vars, e.equation)
+
+    tex1 = r"x_1+x_2+x_3"
+    tex2 = r"x_1"
+    tex3 = r"x_2+x_3"
+
+    e1 = Equation(formula=tex1)
+    e2 = Equation(formula=tex2)
+    e3 = Equation(formula=tex3)
+
+    s = Structure(equations=[e1, e2, e3])
+    print(s.equations[1].vars)
+
+    # e.get_vars()
+    # e.get_equation()
+
+    # print(e.vars, e.equation)
