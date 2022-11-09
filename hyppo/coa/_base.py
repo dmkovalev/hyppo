@@ -109,14 +109,15 @@ with virtual_experiment_onto:
         def build_transitive_closure(self):
             pass
 
-        # def build_full_causal_mapping(self):
-        #     if not self.is_complete():
-        #         raise Exception('Structure is not complete')
-        #     else:
-        #         phi = None
-        #         structure = None
-        #         find_minimal_structure() -> minimal structure is complete and no complete structure as subset
-        #         for minimal_struc
+        def build_full_causal_mapping(self):
+            if not self.is_complete():
+                raise Exception('Structure is not complete')
+            else:
+                fcm = None
+                structure = None
+                for s in self.find_minimal_structure():
+                    #union structures
+                    pass
 
         def find_minimal_structures(self) -> list():
             '''
@@ -159,91 +160,6 @@ with virtual_experiment_onto:
             return matrix
 
 
-        # def remove_subsets(self, subset):
-        #     for s in np.ravel(subset):
-        #         try:
-        #             cols_remove = np.argwhere(S[s] != 0)[0][1]
-        #         except IndexError:
-        #             # continue
-        #             cols_remove = np.argwhere(S[s] != 0)
-        #         S = np.delete(S, cols_remove, axis=1)
-        #     S = np.delete(S, subset, axis=0)
-        #     return S
-        #
-        #
-        # def find_minimal_subsets(S, subsets_cols=[]):
-        #     if matrix is empty:
-        #         return final result
-        #     if S.shape[0] == 0:
-        #         return subsets_cols
-        #
-        #     for i in range(S.shape[0]):
-        #
-        #         all_subsets = set(itertools.combinations(range(S.shape[0]), i + 1))
-        #         found_subset = []
-        #
-        #         for subset in all_subsets:
-        #             subset = [int(s) for s in subset]
-        #             s = S[subset]
-        #             abs_sum = np.sum(np.amax(s, axis=0))
-        #
-        #             if abs_sum == i + 1:
-        #                 found_subset.append(subset)
-        #
-        #         if len(found_subset) != 0:
-        #             # delete and stop
-        #
-        #             found_subset = [item for sublist in found_subset for item in sublist]
-        #             subsets_cols.append(found_subset)
-        #
-        #             # index = index - set(found_subset)
-        #             S = remove_subsets(S, found_subset)
-        #             break
-        #
-        #     return find_minimal_subsets(S, subsets_cols)
-        #
-        #
-        # def map_subsets(subsets_cols):
-        #     N = len([item for sublist in subsets_cols for item in sublist])
-        #     initial_index = np.array(list(range(N)))
-        #     mapped_index = []
-        #     for subset in subsets_cols:
-        #         # print(initial_index, subset)
-        #         mp = initial_index[subset]
-        #         mapped_index.append(tuple(mp))
-        #         initial_index = np.delete(initial_index, subset)
-        #     return mapped_index
-        #
-        #
-        # def COA_step(data):
-        #     # increment = min([int(i.split('F')[1]) for i in data.index.values])
-        #     S = np.asmatrix(data.values)
-        #     subsets = find_minimal_subsets(S, subsets_cols=[])
-        #     subsets = map_subsets(subsets)
-        #
-        #     def step(subset):
-        #         phi = []
-        #         Sc = []
-        #
-        #         for s in subset:
-        #             Sc.append(s)
-        #             V = np.asarray(["x" + str(v) for v in s])
-        #             Se = np.asarray(["F" + str(v) for v in s])
-        #             # print(V)
-        #             for f in Se:
-        #                 x = V[np.random.randint(0, len(V))]
-        #                 phi += [(f, x,)]
-        #                 V = V[V != x]
-        #         return Sc, phi
-        #
-        #     Sc, phi = step(subsets)
-        #
-        #     T = set(subsets).difference(set(Sc))
-        #
-        #     if len(T) == 0:
-        #         return phi
-        #     else:
-        #         return phi + step(T)
         #
         # def find_correlations(graph, dataset, threshold=0.7):
         #     correlated_vars = []
@@ -293,7 +209,7 @@ if __name__ == '__main__':
 
     tex1 = r"x_1+x_2+x_3 =0"
     tex2 = r"x_1 + 6*x_2=0"
-    tex3 = r"f(x_2, x_3)=0"
+    tex3 = r"f(x_2, x_1)=0"
 
     e1 = Equation(formula=tex1)
     e2 = Equation(formula=tex2)
@@ -312,4 +228,4 @@ if __name__ == '__main__':
 
     # print(s.exogenous(), s.endogenous())
     # print(e.vars, e.equation)
-    # print([eq.equations for eq in s.find_minimal_structures()])
+    print([s.equations[0].equation for s in s.find_minimal_structures()])
