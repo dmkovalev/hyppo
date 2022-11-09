@@ -115,6 +115,9 @@ with virtual_experiment_onto:
         def build_transitive_closure(self):
             pass
 
+        def build_causal_graph(self):
+            pass
+
         def build_full_causal_mapping(self):
             if not self.is_complete():
                 raise Exception('Structure is not complete')
@@ -193,8 +196,6 @@ with virtual_experiment_onto:
                             matrix[j, i] = 1
             return matrix
 
-
-        #
         # def find_correlations(graph, dataset, threshold=0.7):
         #     correlated_vars = []
         #     variables = graph.variables
@@ -204,31 +205,7 @@ with virtual_experiment_onto:
         #                 if scipy.stats.pearsonr(dataset[var_i], dataset[var_j])[0] > threshold:
         #                     correlated_vars.append((var_i, var_j))
         #     return correlated_vars
-        #
-        #
-        # def Hypothesis_encoding(data):
-        #     Sum = []
-        #     phi = COA_step(data.copy())
-        #     increment = min([int(i.split('F')[1]) for i in data.index.values])
-        #     variables = data.columns
-        #     print(data)
-        #     print(phi)
-        #     for p in phi:
-        #         k = int(p[0].split('F')[1])
-        #         l = int(p[1].split('x')[1])
-        #
-        #         A = data.loc["F" + str(k)]
-        #         Z = A[A == 1].index.values
-        #
-        #         if len(Z) == 1:
-        #             update = [l, p[1]]
-        #             Sum.append(update)
-        #         else:
-        #             update = list(set(Z).difference({p[1]}.union({k})))
-        #             update.append([p[1]])
-        #             Sum.append(update)
-        #
-        #     return Sum
+
 
 if __name__ == '__main__':
     virtual_experiment_onto = get_ontology("http://synthesis.ipi.ac.ru/virtual_experiment.owl")
