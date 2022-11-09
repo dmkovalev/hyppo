@@ -6,15 +6,16 @@ import scipy.stats
 from latex2sympy2 import latex2sympy, latex2latex
 import sympy
 from owlready2 import *
+from latex2sympy import strToSympy
+
 
 # np.random.seed(3)
 from owlready2 import get_ontology
 
 from hyppo.core._base import virtual_experiment_onto, Variable
+from sympy import Function, Symbol
 
 with virtual_experiment_onto:
-
-
     class Equation(Thing):
         namespace = virtual_experiment_onto.get_namespace(
             "http://synthesis.ipi.ac.ru/virtual_experiment.owl")
@@ -33,13 +34,12 @@ with virtual_experiment_onto:
             Returns:
                 set of free symbols
             '''
-            equation = latex2sympy(self.formula)
-            vars = sorted(equation.free_symbols, key=lambda symbol: symbol.name)
-            self.vars = vars
+            equation = strToSympy(self.formula)
+            self.vars = sorted(equation.free_symbols, key=lambda symbol: symbol.name)
             return self.vars
 
         def get_equation(self):
-            self.equation = latex2sympy(self.formula)
+            self.equation = strToSympy(self.formula)
             return self.equation
 
     class has_for_formula(Equation >> str, FunctionalProperty):
@@ -50,10 +50,10 @@ with virtual_experiment_onto:
         namespace = virtual_experiment_onto.get_namespace(
             "http://synthesis.ipi.ac.ru/virtual_experiment.owl")
 
-        def __int__(self, equations):
+        def __init__(self, equations):
             self.equations = equations
-            vars = [eq.get_vars() for eq in self.equations]
-            self.vars = vars
+            # vars = [eq.get_vars() for eq in self.equations]
+            self.vars = list(set().union(*(map(lambda x: set(x.vars), self.equations))))
 
         def is_complete(self):
             return len(self.equations) == len(self.vars)
@@ -78,11 +78,13 @@ with virtual_experiment_onto:
                 raise Exception("Structure is not complete")
             else:
                 matrix = np.matrix(np.zeros((len(self.vars), len(self.vars))))
-                for i in range(self.vars):
-                    for j in range(self.equations):
-                        if self.vars[i] in self.equations[j].has_for_vars():
-                            matrix[i, j] = 1
+                for i in range(len(self.vars)):
+                    for j in range(len(self.equations)):
+                        if self.vars[i] in self.equations[j].vars:
+                            # print(self.equations[j].vars)
+                            matrix[j, i] = 1
             return matrix
+
 
         # def remove_subsets(self, subset):
         #     for s in np.ravel(subset):
@@ -216,18 +218,23 @@ if __name__ == '__main__':
     # print(art.name)
 
 
-    tex1 = r"x_1+x_2+x_3"
-    tex2 = r"x_1"
-    tex3 = r"x_2+x_3"
+    tex1 = r"x_1+x_2+x_3 =0"
+    tex2 = r"x_1 + 6*x_2=0"
+    tex3 = r"f(x_2,x_3)=0"
 
     e1 = Equation(formula=tex1)
     e2 = Equation(formula=tex2)
     e3 = Equation(formula=tex3)
 
-    s = Structure(equations=[e1, e2, e3])
-    print(s.equations[1].vars)
+    equations = [e1, e2, e3]
+    s = Structure(equations)
 
-    # e.get_vars()
-    # e.get_equation()
+    # s.has_for_equation = equations
+
+    # all_vars = set().union(*(map(lambda x: set(x.vars), equations)))
+    # s.vars = all_vars
+
+    print(s.vars, s.is_complete(), s.build_matrix())
+
 
     # print(e.vars, e.equation)
