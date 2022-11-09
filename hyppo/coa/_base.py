@@ -15,6 +15,14 @@ from owlready2 import get_ontology
 from hyppo.core._base import virtual_experiment_onto, Variable
 from sympy import Function, Symbol
 
+from itertools import chain, combinations
+
+def powerset(iterable):
+    "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
+    s = list(iterable)
+    return chain.from_iterable(combinations(s, r) for r in range(len(s)+1))
+
+
 with virtual_experiment_onto:
     class Equation(Thing):
         namespace = virtual_experiment_onto.get_namespace(
@@ -54,9 +62,29 @@ with virtual_experiment_onto:
             self.equations = equations
             # vars = [eq.get_vars() for eq in self.equations]
             self.vars = set().union(*(map(lambda x: set(x.vars), self.equations)))
+            # if not self.is_structure():
+            #     raise Exception('Not a structure')
+
+        def is_structure(self):
+            is_structure = True
+            all_subsets = powerset(self.equations)
+            for subset in all_subsets:
+                if subset:
+                    eq_num = len(subset)
+                    vars = set().union(*(map(lambda x: set(x.vars), subset)))
+                    var_num = len(vars)
+                    if eq_num > var_num:
+                        is_structure = False
+                    else:
+                        #TODO part b
+                        pass
+            return is_structure
 
         def is_complete(self):
             return len(self.equations) == len(self.vars)
+
+        def is_minimal(self):
+            return self.is_complete() and not self.find_minimal_structures()
 
         def exogenous(self):
             '''
@@ -81,8 +109,33 @@ with virtual_experiment_onto:
         def build_transitive_closure(self):
             pass
 
-        def build_full_causal_mapping(self):
-            pass
+        # def build_full_causal_mapping(self):
+        #     if not self.is_complete():
+        #         raise Exception('Structure is not complete')
+        #     else:
+        #         phi = None
+        #         structure = None
+        #         find_minimal_structure() -> minimal structure is complete and no complete structure as subset
+        #         for minimal_struc
+
+        def find_minimal_structures(self) -> list():
+            '''
+
+            Returns:
+
+            '''
+            min_str = []
+
+            if len(self.equations) == 1 and self.is_complete():
+                return min_str
+
+            all_subsets = powerset(self.equations)
+            for subset in list(all_subsets)[1:-1]:
+                s = Structure(subset)
+                if s.is_complete():
+                    min_str.append(s)
+
+            return min_str
 
         def join(self):
             pass
@@ -240,7 +293,7 @@ if __name__ == '__main__':
 
     tex1 = r"x_1+x_2+x_3 =0"
     tex2 = r"x_1 + 6*x_2=0"
-    tex3 = r"f(x_2)=0"
+    tex3 = r"f(x_2, x_3)=0"
 
     e1 = Equation(formula=tex1)
     e2 = Equation(formula=tex2)
@@ -254,7 +307,9 @@ if __name__ == '__main__':
     # all_vars = set().union(*(map(lambda x: set(x.vars), equations)))
     # s.vars = all_vars
 
-    print(s.vars, s.is_complete(), s.build_matrix())
+    # print(s.is_structure(), s.vars, s.is_complete(), s.build_matrix())
+    print(s.is_minimal())
 
-    print(s.exogenous(), s.endogenous())
+    # print(s.exogenous(), s.endogenous())
     # print(e.vars, e.equation)
+    # print([eq.equations for eq in s.find_minimal_structures()])
