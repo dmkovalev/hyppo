@@ -58,10 +58,14 @@ with virtual_experiment_onto:
         namespace = virtual_experiment_onto.get_namespace(
             "http://synthesis.ipi.ac.ru/virtual_experiment.owl")
 
-        def __init__(self, equations):
+        def __init__(self, equations, vars=None):
             self.equations = equations
             # vars = [eq.get_vars() for eq in self.equations]
-            self.vars = set().union(*(map(lambda x: set(x.vars), self.equations)))
+            if vars is not None:
+                self.vars = vars
+            else:
+                self.vars = set().union(*(map(lambda x: set(x.vars), self.equations)))
+
             # if not self.is_structure():
             #     raise Exception('Not a structure')
 
@@ -85,6 +89,8 @@ with virtual_experiment_onto:
 
         def is_minimal(self):
             return self.is_complete() and not self.find_minimal_structures()
+
+
 
         def exogenous(self):
             '''
@@ -113,13 +119,29 @@ with virtual_experiment_onto:
             if not self.is_complete():
                 raise Exception('Structure is not complete')
             else:
-                fcm = None
-                structure = None
-                for s in self.find_minimal_structure():
-                    #union structures
-                    pass
+                fcm = {}
+                minimal_structures = self.find_minimal_structures()
+                for min_str in minimal_structures:
+                    sorted_vars = sorted(min_str.vars, key=lambda x: x.name)
+                    for eq in min_str.equations:
+                        fcm[eq.formula] = sorted_vars[0]
+                        sorted_vars = [x for x in sorted_vars if x != sorted_vars[0]]
 
-        def find_minimal_structures(self) -> list():
+                left_structures = self.difference(set(minimal_structures))
+                if minimal_structures and left_structures.equations:
+                    fcm.update(left_structures.build_full_causal_mapping())
+
+                if self.is_minimal():
+                    sorted_vars = sorted(self.vars, key=lambda x: x.name)
+                    for eq in self.equations:
+                        fcm[eq.formula] = list(self.vars)[0]
+                        sorted_vars = [x for x in sorted_vars if x != list(self.vars)[0]]
+
+                return fcm
+
+
+
+        def find_minimal_structures(self):
             '''
 
             Returns:
@@ -138,8 +160,20 @@ with virtual_experiment_onto:
 
             return min_str
 
-        def join(self):
+        def union(self):
             pass
+
+        def difference(self, set_structures):
+
+            set_eq = [s.equations for s in set_structures]
+            set_eq = list(itertools.chain(*set_eq))
+
+            set_vars = [s.vars for s in set_structures]
+            set_vars = list(itertools.chain(*set_vars))
+            left_equations = [eq for eq in self.equations if eq not in set_eq]
+            left_variables = set([v for v in self.vars if v not in set_vars])
+
+            return Structure(equations=left_equations, vars=left_variables)
 
         def build_matrix(self) -> np.matrix:
             '''
@@ -224,8 +258,8 @@ if __name__ == '__main__':
     # s.vars = all_vars
 
     # print(s.is_structure(), s.vars, s.is_complete(), s.build_matrix())
-    print(s.is_minimal())
+    # print(s.is_minimal())
 
     # print(s.exogenous(), s.endogenous())
     # print(e.vars, e.equation)
-    print([s.equations[0].equation for s in s.find_minimal_structures()])
+    print(s.build_full_causal_mapping())
