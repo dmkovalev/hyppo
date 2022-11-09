@@ -239,17 +239,23 @@ if __name__ == '__main__':
     # art.has_for_author = [123]
     # print(has_for_authors.range)
     # print(art.name)
-
-
-    tex1 = r"x_1+x_2+x_3 =0"
-    tex2 = r"x_1 + 6*x_2=0"
-    tex3 = r"f(x_2, x_1)=0"
+    tex1 = r"f(x_1)=0"
+    tex2 = r"f(x_2)=0"
+    tex3 = r"f(x_3)=0"
+    tex4 = r"x_1+x_2+x_3+x_4+x_5=0"
+    tex5 = r"x_1 + 6*x_3+x_4+x_5=0"
+    tex6 = r"f(x_4, x_6)=0"
+    tex7 = r"f(x_5, x_7)=0"
 
     e1 = Equation(formula=tex1)
     e2 = Equation(formula=tex2)
     e3 = Equation(formula=tex3)
+    e4 = Equation(formula=tex4)
+    e5 = Equation(formula=tex5)
+    e6 = Equation(formula=tex6)
+    e7 = Equation(formula=tex7)
 
-    equations = [e1, e2, e3]
+    equations = [e1, e2, e3, e4, e5, e6, e7]
     s = Structure(equations)
 
     # s.has_for_equation = equations
