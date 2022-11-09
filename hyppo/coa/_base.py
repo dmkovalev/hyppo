@@ -53,10 +53,30 @@ with virtual_experiment_onto:
         def __init__(self, equations):
             self.equations = equations
             # vars = [eq.get_vars() for eq in self.equations]
-            self.vars = list(set().union(*(map(lambda x: set(x.vars), self.equations))))
+            self.vars = set().union(*(map(lambda x: set(x.vars), self.equations)))
 
         def is_complete(self):
             return len(self.equations) == len(self.vars)
+
+        def exogenous(self):
+            '''
+              get all exogenous variables in a structure
+            Returns:
+                set of exogenous variables
+           '''
+            exogenous = set()
+            for eq in self.equations:
+                if len(eq.get_vars()) == 1:
+                    exogenous = exogenous.union(eq.get_vars())
+            return exogenous
+
+        def endogenous(self):
+            '''
+             get all endogenous variables in a structure
+            Returns:
+                set of endogenous variables
+            '''
+            return self.vars.difference(self.exogenous())
 
         def build_transitive_closure(self):
             pass
@@ -65,7 +85,6 @@ with virtual_experiment_onto:
             pass
 
         def join(self):
-
             pass
 
         def build_matrix(self) -> np.matrix:
@@ -78,10 +97,11 @@ with virtual_experiment_onto:
                 raise Exception("Structure is not complete")
             else:
                 matrix = np.matrix(np.zeros((len(self.vars), len(self.vars))))
+                # sorting of set is needed to preserve the order
+                sorted_vars = sorted(self.vars, key=lambda x: x.name)
                 for i in range(len(self.vars)):
                     for j in range(len(self.equations)):
-                        if self.vars[i] in self.equations[j].vars:
-                            # print(self.equations[j].vars)
+                        if sorted_vars[i] in self.equations[j].vars:
                             matrix[j, i] = 1
             return matrix
 
@@ -220,7 +240,7 @@ if __name__ == '__main__':
 
     tex1 = r"x_1+x_2+x_3 =0"
     tex2 = r"x_1 + 6*x_2=0"
-    tex3 = r"f(x_2,x_3)=0"
+    tex3 = r"f(x_2)=0"
 
     e1 = Equation(formula=tex1)
     e2 = Equation(formula=tex2)
@@ -236,5 +256,5 @@ if __name__ == '__main__':
 
     print(s.vars, s.is_complete(), s.build_matrix())
 
-
+    print(s.exogenous(), s.endogenous())
     # print(e.vars, e.equation)
