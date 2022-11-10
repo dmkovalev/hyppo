@@ -146,9 +146,6 @@ with virtual_experiment_onto:
                         left_structures = Structure(equations=difference.equations, vars=difference.vars)
                     else:
                         left_structures = None
-
-
-
                 return fcm
 
 
@@ -208,7 +205,7 @@ with virtual_experiment_onto:
                 for i in range(len(self.vars)):
                     for j in range(len(self.equations)):
                         if sorted_vars[i] in self.equations[j].vars:
-                            matrix[i, j] = 1
+                            matrix[j, i] = 1
             return matrix
 
         def build_dcg(self):
@@ -221,8 +218,16 @@ with virtual_experiment_onto:
                 fd = {}
                 fcm = self.build_full_causal_mapping()
                 a_s = self.build_matrix()
+                ind = 0
                 for key, value in fcm.items():
-                    pass
+                    dependent = a_s[ind, :]
+                    if dependent.sum() == 1:
+                        fd['phi'] = value
+                    else:
+                        pass
+                    ind += 1
+                return fd
+
 
         # def find_correlations(graph, dataset, threshold=0.7):
         #     correlated_vars = []
@@ -246,13 +251,13 @@ if __name__ == '__main__':
     tex6 = r"f_6(x_4, x_6)=0"
     tex7 = r"f_7(x_5, x_7)=0"
 
-    e1 = Equation(formula=tex7)
+    e1 = Equation(formula=tex1)
     e2 = Equation(formula=tex2)
     e3 = Equation(formula=tex3)
     e4 = Equation(formula=tex4)
     e5 = Equation(formula=tex5)
     e6 = Equation(formula=tex6)
-    e7 = Equation(formula=tex1)
+    e7 = Equation(formula=tex7)
 
     equations = [e1, e2, e3, e4, e5, e6, e7]
     # equations = [e1, e2]
