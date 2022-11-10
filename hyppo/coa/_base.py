@@ -124,8 +124,6 @@ with virtual_experiment_onto:
                 left_structures = Structure(equations=self.equations, vars=self.vars)
                 fcm = {}
 
-
-
                 while(left_structures):
 
                     if left_structures.is_minimal():
@@ -210,8 +208,21 @@ with virtual_experiment_onto:
                 for i in range(len(self.vars)):
                     for j in range(len(self.equations)):
                         if sorted_vars[i] in self.equations[j].vars:
-                            matrix[j, i] = 1
+                            matrix[i, j] = 1
             return matrix
+
+        def build_dcg(self):
+            pass
+
+        def h_encode(self):
+            if not self.is_complete():
+                raise Exception("Structure is not complete")
+            else:
+                fd = {}
+                fcm = self.build_full_causal_mapping()
+                a_s = self.build_matrix()
+                for key, value in fcm.items():
+                    pass
 
         # def find_correlations(graph, dataset, threshold=0.7):
         #     correlated_vars = []
@@ -235,18 +246,19 @@ if __name__ == '__main__':
     tex6 = r"f_6(x_4, x_6)=0"
     tex7 = r"f_7(x_5, x_7)=0"
 
-    e1 = Equation(formula=tex1)
+    e1 = Equation(formula=tex7)
     e2 = Equation(formula=tex2)
     e3 = Equation(formula=tex3)
     e4 = Equation(formula=tex4)
     e5 = Equation(formula=tex5)
     e6 = Equation(formula=tex6)
-    e7 = Equation(formula=tex7)
+    e7 = Equation(formula=tex1)
 
     equations = [e1, e2, e3, e4, e5, e6, e7]
     # equations = [e1, e2]
     s = Structure(equations)
     print(s.build_full_causal_mapping())
+    print(s.build_matrix())
     # print(s.find_minimal_structures())
     # print(s.is_minimal())
     # s.has_for_equation = equations
@@ -272,7 +284,7 @@ if __name__ == '__main__':
     s = Structure(equations)
 
 
-    print(s.build_full_causal_mapping())
+    # print(s.build_full_causal_mapping())
 
     # tex1 = r"f_1(x_4, x_5)=0"
     # tex2 = r"f_2(x_4, x_5)=0"
