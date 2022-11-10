@@ -1,21 +1,12 @@
-import os
-import itertools
-import pandas
+from itertools import combinations
+
 import numpy as np
-import scipy.stats
-from latex2sympy2 import latex2sympy, latex2latex
-import sympy
-from owlready2 import *
 from latex2sympy import strToSympy
-
-
-# np.random.seed(3)
+from owlready2 import *
 from owlready2 import get_ontology
 
-from hyppo.core._base import virtual_experiment_onto, Variable
-from sympy import Function, Symbol
+from hyppo.core._base import virtual_experiment_onto
 
-from itertools import chain, combinations
 
 def powerset(iterable):
     "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
@@ -62,7 +53,15 @@ with virtual_experiment_onto:
             self.equations = equations
             # vars = [eq.get_vars() for eq in self.equations]
             if vars is not None:
+                all_vars = set().union(*(map(lambda x: set(x.vars), self.equations)))
+                subs_vars = all_vars.difference(vars)
+                subs_vars_values = [(var, 0) for var in subs_vars]
+
                 self.vars = vars
+                equalities = list(map(lambda x: x.equation.subs(subs_vars_values), self.equations))
+                for i in range(len(self.equations)):
+                    self.equations[i].equation = equalities[i]
+
             else:
                 self.vars = set().union(*(map(lambda x: set(x.vars), self.equations)))
 
@@ -122,26 +121,37 @@ with virtual_experiment_onto:
             if not self.is_complete():
                 raise Exception('Structure is not complete')
             else:
+                left_structures = Structure(equations=self.equations, vars=self.vars)
                 fcm = {}
-                minimal_structures = self.find_minimal_structures()
-                for min_str in minimal_structures:
-                    sorted_vars = sorted(min_str.vars, key=lambda x: x.name)
-                    for eq in min_str.equations:
-                        fcm[eq.formula] = sorted_vars[0]
-                        sorted_vars = [x for x in sorted_vars if x != sorted_vars[0]]
 
-                left_structures = self.difference(set(minimal_structures))
-                if minimal_structures and left_structures.equations:
-                    fcm.update(left_structures.build_full_causal_mapping())
 
-                if self.is_minimal():
-                    sorted_vars = sorted(self.vars, key=lambda x: x.name)
-                    for eq in self.equations:
-                        fcm[eq.formula] = list(self.vars)[0]
-                        sorted_vars = [x for x in sorted_vars if x != list(self.vars)[0]]
+
+                while(left_structures):
+
+                    if left_structures.is_minimal():
+                        sorted_vars = sorted(left_structures.vars, key=lambda x: x.name)
+                        for eq in left_structures.equations:
+                            fcm[eq.formula] = sorted_vars[0]
+                            sorted_vars = [x for x in sorted_vars if x != list(left_structures.vars)[0]]
+                        break
+
+                    minimal_structures = left_structures.find_minimal_structures()
+                    # print('minimal_structures:', minimal_structures, [eq.equation for eq in left_structures.equations])
+                    for mstr in minimal_structures:
+                        sorted_vars = sorted(mstr.vars, key=lambda x: x.name)
+                        for eq in mstr.equations:
+                            fcm[eq.formula] = sorted_vars[0]
+                            sorted_vars = [x for x in sorted_vars if x != sorted_vars[0]]
+
+                    difference = left_structures.difference(set(minimal_structures))
+                    if len(difference.equations) > 0:
+                        left_structures = Structure(equations=difference.equations, vars=difference.vars)
+                    else:
+                        left_structures = None
+
+
 
                 return fcm
-
 
 
         def find_minimal_structures(self):
@@ -157,8 +167,15 @@ with virtual_experiment_onto:
 
             all_subsets = powerset(self.equations)
             for subset in list(all_subsets)[1:-1]:
-                s = Structure(subset)
-                if s.is_complete():
+                # vars = all_vars.popleft()
+
+                s = Structure(equations=subset)
+                left_vars = [eq.equation.free_symbols for eq in subset]
+                left_vars = set(itertools.chain(*left_vars))
+                # if type(vars) is
+                s.vars = left_vars
+                # vars to be defined as number
+                if s.is_complete() and not s.find_minimal_structures():
                     min_str.append(s)
 
             return min_str
@@ -209,20 +226,14 @@ with virtual_experiment_onto:
 
 if __name__ == '__main__':
     virtual_experiment_onto = get_ontology("http://synthesis.ipi.ac.ru/virtual_experiment.owl")
-    # print(list(virtual_experiment_onto.classes()))
-    # var = Variable(name='x1')
-    # virtual_experiment_onto.save("ve.owl")
-    # art = Artefact("123")
-    # art.has_for_author = [123]
-    # print(has_for_authors.range)
-    # print(art.name)
-    tex1 = r"f(x_1)=0"
-    tex2 = r"f(x_2)=0"
-    tex3 = r"f(x_3)=0"
+
+    tex1 = r"f_1(x_1)=0"
+    tex2 = r"f_2(x_2)=0"
+    tex3 = r"f_3(x_3)=0"
     tex4 = r"x_1+x_2+x_3+x_4+x_5=0"
     tex5 = r"x_1 + 6*x_3+x_4+x_5=0"
-    tex6 = r"f(x_4, x_6)=0"
-    tex7 = r"f(x_5, x_7)=0"
+    tex6 = r"f_6(x_4, x_6)=0"
+    tex7 = r"f_7(x_5, x_7)=0"
 
     e1 = Equation(formula=tex1)
     e2 = Equation(formula=tex2)
@@ -233,8 +244,11 @@ if __name__ == '__main__':
     e7 = Equation(formula=tex7)
 
     equations = [e1, e2, e3, e4, e5, e6, e7]
+    # equations = [e1, e2]
     s = Structure(equations)
-
+    print(s.build_full_causal_mapping())
+    # print(s.find_minimal_structures())
+    # print(s.is_minimal())
     # s.has_for_equation = equations
 
     # all_vars = set().union(*(map(lambda x: set(x.vars), equations)))
@@ -245,4 +259,29 @@ if __name__ == '__main__':
 
     # print(s.exogenous(), s.endogenous())
     # print(e.vars, e.equation)
+
+    tex1 = r"f_1(x_4, x_5)=0"
+    tex2 = r"f_2(x_4, x_5)=0"
+    tex3 = r"f_3(x_4, x_6)=0"
+    tex4 = r"f_4(x_5, x_7)=0"
+    e1 = Equation(formula=tex1)
+    e2 = Equation(formula=tex2)
+    e3 = Equation(formula=tex3)
+    e4 = Equation(formula=tex4)
+    equations = [e1, e2, e3, e4]
+    s = Structure(equations)
+
+
     print(s.build_full_causal_mapping())
+
+    # tex1 = r"f_1(x_4, x_5)=0"
+    # tex2 = r"f_2(x_4, x_5)=0"
+    # tex3 = r"f_3(0, x_6)=0"
+    # tex4 = r"f_4(0, x_7)=0"
+    # e1 = Equation(formula=tex1)
+    # e2 = Equation(formula=tex2)
+    # e3 = Equation(formula=tex3)
+    # e4 = Equation(formula=tex4)
+    # equations = [e3, e4]
+    # s = Structure(equations)
+    # print(s.find_minimal_structures())
