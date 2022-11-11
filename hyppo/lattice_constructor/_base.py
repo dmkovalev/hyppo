@@ -93,3 +93,32 @@ with virtual_experiment_onto:
             python_to_dot(connected_h, output_name="H1H2", folder='./output/')
 
             return connected_hypothesis
+
+        def create_workflow_graph(connection_matrix):
+            G = Graph(connection_matrix.shape[1])
+            G.real_V_names = connection_matrix.columns.values
+            connection_matrix.columns = ["H" + str(k) for k in range(G.V)]
+            connection_matrix.index = ["H" + str(k) for k in range(G.V)]
+
+            for col in connection_matrix.columns:
+                connected = connection_matrix.index[connection_matrix[col] == 1]
+                start = int(col.split("H")[1])
+                for k in range(len(connected)):
+                    G.addEdge(start, int(connected[k].split("H")[1]))
+
+            return G
+
+        def find_connected_H(G):
+            print(G)
+            vertices = G.graph.keys()
+            pairs = itertools.combinations(vertices, 2)
+
+            connected_pairs = []
+            for pair in pairs:
+                print(pair)
+                a = G.isReachable(pair[0], pair[1])
+                if a:
+                    connected_pairs.append((G.real_V_names[pair[0]], G.real_V_names[pair[1]]))
+                    print(pair, "connected")
+
+            return connected_pairs

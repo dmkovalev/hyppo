@@ -1,5 +1,5 @@
 """
-The :mod:`hyplat.coa` module gathers casual ordering algorithm.
+The :mod:`hyppo.coa` module gathers casual ordering algorithm.
 """
 
 __all__ = [
