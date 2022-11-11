@@ -6,8 +6,7 @@ from owlready2 import *
 from owlready2 import get_ontology
 from hyppo.core._base import virtual_experiment_onto
 from collections import defaultdict
-
-
+import graphviz
 from sympy import Symbol
 
 def powerset(iterable):
@@ -211,7 +210,16 @@ with virtual_experiment_onto:
             return matrix
 
         def build_dcg(self):
-            pass
+            dot = graphviz.Digraph('dcg', comment='Directed Causal Graph')
+            h_encode = self.h_encode()
+            for key, value in h_encode.items():
+                for k in key:
+                    for v in value:
+                        dot.edge(str(k), str(v))
+
+            return dot
+
+
 
         def h_encode(self):
             if not self.is_complete():
@@ -226,7 +234,10 @@ with virtual_experiment_onto:
                     dep = equation.get_vars()
 
                     dep.remove(value)
-                    dep.insert(0, Symbol('phi'))
+                    if not dep:
+                        dep.append(Symbol('phi'))
+                    else:
+                        dep.append(Symbol('v'))
                     fd[tuple(dep)].append(value)
                 return fd
 
@@ -271,6 +282,7 @@ if __name__ == '__main__':
     # s.has_for_equation = equations
 
     print(s.h_encode())
+    print(s.build_dcg().source)
 
     # all_vars = set().union(*(map(lambda x: set(x.vars), equations)))
     # s.vars = all_vars
