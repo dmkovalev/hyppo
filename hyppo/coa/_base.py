@@ -242,17 +242,6 @@ with virtual_experiment_onto:
                 return fd
 
 
-        # def find_correlations(graph, dataset, threshold=0.7):
-        #     correlated_vars = []
-        #     variables = graph.variables
-        #     for var_i in variables:
-        #         for var_j in variables:
-        #             if var_i != var_j and not _connected(var_i, var_j):
-        #                 if scipy.stats.pearsonr(dataset[var_i], dataset[var_j])[0] > threshold:
-        #                     correlated_vars.append((var_i, var_j))
-        #     return correlated_vars
-
-
 if __name__ == '__main__':
     virtual_experiment_onto = get_ontology("http://synthesis.ipi.ac.ru/virtual_experiment.owl")
 

@@ -132,6 +132,17 @@ def _make_graph(skeleton, oriented_edges, gene_names, known_edges=set()):
             g.add_edge(gene_names[i], gene_names[j], arrowhead='none', color='gray')
     return g
 
+
+def find_correlations(graph, dataset, threshold=0.7):
+    correlated_vars = []
+    variables = graph.variables
+    for var_i in variables:
+        for var_j in variables:
+            if var_i != var_j and not _connected(var_i, var_j):
+                if scipy.stats.pearsonr(dataset[var_i], dataset[var_j])[0] > threshold:
+                    correlated_vars.append((var_i, var_j))
+    return correlated_vars
+
 def _train_models(X_train, y_train, roi_number, gender):
     '''
 
