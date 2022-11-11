@@ -273,48 +273,11 @@ if __name__ == '__main__':
     e7 = Equation(formula=tex7)
 
     equations = [e1, e2, e3, e4, e5, e6, e7]
-    # equations = [e1, e2]
     s = Structure(equations)
-    # print(s.build_full_causal_mapping())
-    # print(s.build_matrix())
-    # print(s.find_minimal_structures())
-    # print(s.is_minimal())
-    # s.has_for_equation = equations
+    print(s.build_full_causal_mapping())
+    print(s.build_matrix())
+    print(s.find_minimal_structures())
+    print(s.exogenous(), s.endogenous())
 
     print(s.h_encode())
     print(s.build_dcg().source)
-
-    # all_vars = set().union(*(map(lambda x: set(x.vars), equations)))
-    # s.vars = all_vars
-
-    # print(s.is_structure(), s.vars, s.is_complete(), s.build_matrix())
-    # print(s.is_minimal())
-
-    # print(s.exogenous(), s.endogenous())
-    # print(e.vars, e.equation)
-
-    tex1 = r"f_1(x_4, x_5)=0"
-    tex2 = r"f_2(x_4, x_5)=0"
-    tex3 = r"f_3(x_4, x_6)=0"
-    tex4 = r"f_4(x_5, x_7)=0"
-    e1 = Equation(formula=tex1)
-    e2 = Equation(formula=tex2)
-    e3 = Equation(formula=tex3)
-    e4 = Equation(formula=tex4)
-    equations = [e1, e2, e3, e4]
-    s = Structure(equations)
-
-
-    # print(s.build_full_causal_mapping())
-
-    # tex1 = r"f_1(x_4, x_5)=0"
-    # tex2 = r"f_2(x_4, x_5)=0"
-    # tex3 = r"f_3(0, x_6)=0"
-    # tex4 = r"f_4(0, x_7)=0"
-    # e1 = Equation(formula=tex1)
-    # e2 = Equation(formula=tex2)
-    # e3 = Equation(formula=tex3)
-    # e4 = Equation(formula=tex4)
-    # equations = [e3, e4]
-    # s = Structure(equations)
-    # print(s.find_minimal_structures())
