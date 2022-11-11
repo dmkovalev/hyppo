@@ -4,9 +4,11 @@ import numpy as np
 from latex2sympy import strToSympy
 from owlready2 import *
 from owlready2 import get_ontology
-
 from hyppo.core._base import virtual_experiment_onto
+from collections import defaultdict
 
+
+from sympy import Symbol
 
 def powerset(iterable):
     "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
@@ -215,17 +217,17 @@ with virtual_experiment_onto:
             if not self.is_complete():
                 raise Exception("Structure is not complete")
             else:
-                fd = {}
+                fd = defaultdict(list)
                 fcm = self.build_full_causal_mapping()
-                a_s = self.build_matrix()
-                ind = 0
+                # a_s = self.build_matrix()
+
                 for key, value in fcm.items():
-                    dependent = a_s[ind, :]
-                    if dependent.sum() == 1:
-                        fd['phi'] = value
-                    else:
-                        pass
-                    ind += 1
+                    equation = Equation(formula=key)
+                    dep = equation.get_vars()
+
+                    dep.remove(value)
+                    dep.insert(0, Symbol('phi'))
+                    fd[tuple(dep)].append(value)
                 return fd
 
 
@@ -262,11 +264,13 @@ if __name__ == '__main__':
     equations = [e1, e2, e3, e4, e5, e6, e7]
     # equations = [e1, e2]
     s = Structure(equations)
-    print(s.build_full_causal_mapping())
-    print(s.build_matrix())
+    # print(s.build_full_causal_mapping())
+    # print(s.build_matrix())
     # print(s.find_minimal_structures())
     # print(s.is_minimal())
     # s.has_for_equation = equations
+
+    print(s.h_encode())
 
     # all_vars = set().union(*(map(lambda x: set(x.vars), equations)))
     # s.vars = all_vars
