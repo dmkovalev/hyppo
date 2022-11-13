@@ -113,10 +113,24 @@ with virtual_experiment_onto:
             return self.vars.difference(self.exogenous())
 
         def build_transitive_closure(self):
+            fcm = self.build_full_causal_mapping()
+            direct_dependencies = list()
+            for key, value in fcm.items():
+                equation = Equation(formula=key)
+                dep = equation.get_vars()
+                dep.remove(value)
+                for d in dep:
+                    direct_dependencies.append(tuple(value, d))
+
+                closure = self.transitive_closure(direct_dependencies)
+            return
+
+        def transitive_closure(self, direct_dependencies):
+            for dep in direct_dependencies:
+                for all v in vertices:
+
             pass
 
-        def build_causal_graph(self):
-            pass
 
         def build_full_causal_mapping(self):
             if not self.is_complete():
@@ -135,7 +149,7 @@ with virtual_experiment_onto:
                         break
 
                     minimal_structures = left_structures.find_minimal_structures()
-                    # print('minimal_structures:', minimal_structures, [eq.equation for eq in left_structures.equations])
+                    #print('minimal_structures:', minimal_structures, [eq.equation for eq in left_structures.equations])
                     for mstr in minimal_structures:
                         sorted_vars = sorted(mstr.vars, key=lambda x: x.name)
                         for eq in mstr.equations:
