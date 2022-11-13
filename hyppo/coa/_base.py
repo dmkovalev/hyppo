@@ -8,6 +8,7 @@ from hyppo.core._base import virtual_experiment_onto
 from collections import defaultdict
 import graphviz
 from sympy import Symbol
+import networkx as nx
 
 def powerset(iterable):
     "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
@@ -120,16 +121,21 @@ with virtual_experiment_onto:
                 dep = equation.get_vars()
                 dep.remove(value)
                 for d in dep:
-                    direct_dependencies.append(tuple(value, d))
+                    direct_dependencies.append(tuple((d, value)))
 
-                closure = self.transitive_closure(direct_dependencies)
-            return
+            tc = self.transitive_closure(direct_dependencies)
+            return tc
 
         def transitive_closure(self, direct_dependencies):
-            for dep in direct_dependencies:
-                for all v in vertices:
 
-            pass
+            tc = defaultdict(list)
+            G = nx.DiGraph()
+            for dep in direct_dependencies:
+                G.add_edge(dep[0], dep[1])
+
+            for node in G.nodes():
+                tc[node] = nx.algorithms.descendants(G, node)
+            return tc
 
 
         def build_full_causal_mapping(self):
@@ -284,3 +290,4 @@ if __name__ == '__main__':
 
     print(s.h_encode())
     print(s.build_dcg().source)
+    print(s.build_transitive_closure())
