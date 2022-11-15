@@ -10,6 +10,7 @@ import graphviz
 from sympy import Symbol
 import networkx as nx
 
+
 def powerset(iterable):
     "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
     s = list(iterable)
@@ -123,10 +124,10 @@ with virtual_experiment_onto:
                 for d in dep:
                     direct_dependencies.append(tuple((d, value)))
 
-            tc = self.transitive_closure(direct_dependencies)
+            tc = self.deps_transitive_closure(direct_dependencies)
             return tc
 
-        def transitive_closure(self, direct_dependencies):
+        def deps_transitive_closure(self, direct_dependencies):
 
             tc = defaultdict(list)
             G = nx.DiGraph()
