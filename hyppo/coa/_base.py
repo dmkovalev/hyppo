@@ -197,8 +197,14 @@ with virtual_experiment_onto:
 
             return min_str
 
-        def union(self):
-            pass
+        def union(self, set_structures):
+            united = []
+            for eq in self.equations:
+                united.append(eq)
+            for structure in set_structures:
+                for eq in structure.equations:
+                    united.append(eq)
+            return Structure(equations=united)
 
         def difference(self, set_structures):
 
