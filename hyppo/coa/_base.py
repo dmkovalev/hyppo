@@ -247,7 +247,6 @@ with virtual_experiment_onto:
             return dot
 
 
-
         def h_encode(self):
             if not self.is_complete():
                 raise Exception("Structure is not complete")
