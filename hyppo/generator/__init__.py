@@ -1,1 +1,1 @@
-from _generator import generate_hypothesis
+from ._generator import generate_hypothesis, create_random_complete_structure, create_random_complete_structures
