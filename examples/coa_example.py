@@ -1,7 +1,7 @@
 """
 Example demonstrating the use of hyppo's Causal Ordering Analysis (COA) module.
-This example models a complex chemical reaction system with multiple interconnected
-reactions, concentrations, and rate equations.
+This example models a simple chain of relationships between variables, showing
+how causal ordering can be determined from a system of equations.
 """
 
 import time
@@ -63,22 +63,19 @@ def plot_complexity(sizes, times):
     plt.close()
 
 def main():
-    # Example 1: Complex Chemical Reaction System
-    print("Chemical Reaction System Analysis")
+    # Example 1: Simple Chain System
+    print("Simple Chain System Analysis")
     print("-" * 50)
     
-    # Define equations for a complex chemical reaction network
+    # Define equations for a simple chain system
     equations = [
-        Equation(formula=r"k_1*[A] - r_1 = 0"),                    # Rate of first reaction
-        Equation(formula=r"k_2*[B] - r_2 = 0"),                    # Rate of second reaction
-        Equation(formula=r"r_1 - \frac{d[B]}{dt} = 0"),           # B formation
-        Equation(formula=r"r_2 - \frac{d[C]}{dt} = 0"),           # C formation
-        Equation(formula=r"[A]_0 - [A] - [B] - [C] = 0"),         # Mass conservation
-        Equation(formula=r"k_1 - A_0*e^{-E_1/RT} = 0"),           # Arrhenius equation 1
-        Equation(formula=r"k_2 - A_0*e^{-E_2/RT} = 0"),          # Arrhenius equation 2
-        Equation(formula=r"T - T_0 - \alpha t = 0"),              # Temperature profile
-        Equation(formula=r"[A]_0 - 100 = 0"),                     # Initial concentration
-        Equation(formula=r"T_0 - 298 = 0")                        # Initial temperature
+        Equation(formula=r"x_1 - 10 = 0"),                    # Initial value
+        Equation(formula=r"x_2 - 2*x_1 = 0"),                 # x2 depends on x1
+        Equation(formula=r"x_3 - 3*x_2 = 0"),                 # x3 depends on x2
+        Equation(formula=r"x_4 - x_3 - 5 = 0"),               # x4 depends on x3
+        Equation(formula=r"y_1 - x_1*x_2 = 0"),               # y1 depends on x1 and x2
+        Equation(formula=r"y_2 - x_3*x_4 = 0"),               # y2 depends on x3 and x4
+        Equation(formula=r"z - y_1 - y_2 = 0")                # z depends on y1 and y2
     ]
     
     structure = Structure(equations=equations)
