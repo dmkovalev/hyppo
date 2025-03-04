@@ -67,24 +67,63 @@ with virtual_experiment_onto:
 
 
         def derived_by(self, hypothesis):
-            pass
+            """Return hypotheses that are derived by the given hypothesis."""
+            if hypothesis not in self.hypotheses:
+                return set()
+            return set(self.lattice.predecessors(hypothesis))
 
         def _build_hypothesis_var_mapping(self, transitive_closure):
-            pass
-
+            """
+            Build mapping between hypotheses based on their variable relationships.
+            
+            Args:
+                transitive_closure (defaultdict): Dictionary mapping hypotheses to their transitive closure relations
+                
+            Returns:
+                list: List of tuples representing hypothesis dependencies (h1, h2) where h1 depends on h2
+            """
+            dependencies = []
+            for h1, relations1 in transitive_closure.items():
+                for h2, relations2 in transitive_closure.items():
+                    if h1 != h2:
+                        # If all relations in h1 are contained in h2's relations, h1 depends on h2
+                        if relations1.issubset(relations2):
+                            dependencies.append((h1, h2))
+            return dependencies
 
         def competes(self, hypothesis):
-            pass
+            """Return hypotheses that compete with the given hypothesis."""
+            if hypothesis not in self.hypotheses:
+                return set()
+            # Competing hypotheses are those that share predecessors but aren't in a direct relationship
+            predecessors = set(self.lattice.predecessors(hypothesis))
+            competitors = set()
+            for h in self.hypotheses:
+                if h != hypothesis and h not in self.derived_by(hypothesis):
+                    h_predecessors = set(self.lattice.predecessors(h))
+                    if predecessors & h_predecessors:  # If they share any predecessors
+                        competitors.add(h)
+            return competitors
 
         def impacts(self, hypothesis):
-            pass
-
+            """Return hypotheses that are impacted by the given hypothesis."""
+            if hypothesis not in self.hypotheses:
+                return set()
+            # Impacted hypotheses are those that are reachable from this hypothesis
+            return set(nx.descendants(self.lattice, hypothesis))
 
         def remove_hypothesis(self, hypothesis):
-            pass
+            """Remove a hypothesis from the lattice."""
+            if hypothesis in self.hypotheses:
+                self.hypotheses.remove(hypothesis)
+                self.lattice.remove_node(hypothesis)
 
         def _is_correct(self):
-            pass
-
-
-
+            """Check if all hypotheses are present in the workflow."""
+            workflow_hypotheses = set()
+            tasks = self.workflow.get_tasks()
+            while tasks:
+                current_task = tasks.get_current()
+                workflow_hypotheses.update(current_task)
+                
+            return all(h in workflow_hypotheses for h in self.hypotheses)
