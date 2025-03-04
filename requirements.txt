@@ -9,3 +9,4 @@ graphviz~=0.17
 latex2sympy
 sympy
 networkx
+matplotlib~=3.3.4
