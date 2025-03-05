@@ -1,9 +1,85 @@
+import random
+import string
+from sympy import Symbol
+from hyppo.coa._base import Structure, Equation
+
 def generate_hypothesis():
     pass
 
 
 def _generate_single_hypothesis():
     pass
+
+
+def create_random_complete_structure(num_vars=5, min_vars_per_eq=1, max_vars_per_eq=3, exogenous_ratio=0.2):
+    """
+    Create a random complete structure with the specified number of variables.
+    
+    Args:
+        num_vars (int): Number of variables in the structure
+        min_vars_per_eq (int): Minimum number of variables per equation
+        max_vars_per_eq (int): Maximum number of variables per equation
+        exogenous_ratio (float): Ratio of exogenous variables (equations with only one variable)
+        
+    Returns:
+        Structure: A complete structure with random equations
+    """
+    # Create variable symbols
+    variables = [Symbol(f"x_{i+1}") for i in range(num_vars)]
+    
+    # Determine how many exogenous variables to create
+    num_exogenous = max(1, int(num_vars * exogenous_ratio))
+    
+    # Create equations
+    equations = []
+    
+    # Create exogenous variable equations (equations with only one variable)
+    for i in range(num_exogenous):
+        var = variables[i]
+        formula = f"f_{i+1}({var})=0"
+        equations.append(Equation(formula=formula))
+    
+    # Create remaining equations to ensure completeness
+    for i in range(num_exogenous, num_vars):
+        # Determine how many variables to include in this equation
+        num_vars_in_eq = random.randint(min_vars_per_eq, min(max_vars_per_eq, num_vars))
+        
+        # Ensure the equation includes the current variable
+        eq_vars = [variables[i]]
+        
+        # Add additional random variables
+        available_vars = [v for v in variables if v != variables[i]]
+        additional_vars = random.sample(available_vars, min(num_vars_in_eq - 1, len(available_vars)))
+        eq_vars.extend(additional_vars)
+        
+        # Create a formula string
+        var_terms = [f"{var}" for var in eq_vars]
+        formula = f"{'+'.join(var_terms)}=0"
+        
+        equations.append(Equation(formula=formula))
+    
+    # Create and return the structure
+    return Structure(equations=equations)
+
+def create_random_complete_structures(num_structures=5, min_vars=3, max_vars=10, **kwargs):
+    """
+    Create multiple random complete structures.
+    
+    Args:
+        num_structures (int): Number of structures to create
+        min_vars (int): Minimum number of variables per structure
+        max_vars (int): Maximum number of variables per structure
+        **kwargs: Additional arguments to pass to create_random_complete_structure
+        
+    Returns:
+        list: A list of complete structures with random equations
+    """
+    structures = []
+    for _ in range(num_structures):
+        num_vars = random.randint(min_vars, max_vars)
+        structures.append(create_random_complete_structure(num_vars=num_vars, **kwargs))
+    return structures
+
 
 
 
