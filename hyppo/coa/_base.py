@@ -1,4 +1,4 @@
-from itertools import combinations
+from itertools import chain, combinations
 
 import numpy as np
 from latex2sympy import strToSympy
@@ -188,7 +188,7 @@ with virtual_experiment_onto:
 
                 s = Structure(equations=subset)
                 left_vars = [eq.equation.free_symbols for eq in subset]
-                left_vars = set(itertools.chain(*left_vars))
+                left_vars = set(chain(*left_vars))
                 # if type(vars) is
                 s.vars = left_vars
                 # vars to be defined as number
@@ -209,10 +209,10 @@ with virtual_experiment_onto:
         def difference(self, set_structures):
 
             set_eq = [s.equations for s in set_structures]
-            set_eq = list(itertools.chain(*set_eq))
+            set_eq = list(chain(*set_eq))
 
             set_vars = [s.vars for s in set_structures]
-            set_vars = list(itertools.chain(*set_vars))
+            set_vars = list(chain(*set_vars))
             left_equations = [eq for eq in self.equations if eq not in set_eq]
             left_variables = set([v for v in self.vars if v not in set_vars])
 

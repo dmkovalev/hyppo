@@ -1,0 +1,29 @@
+[project]
+name = "hyppo"
+version = "1.0.0"
+description = "Hypothesis Platform for Virtual Experiments (Hyppo)"
+requires-python = ">=3.13"
+dependencies = [
+    "owlready2>=0.46",
+    "networkx>=3.0",
+    "numpy>=2.0",
+    "scipy>=1.14",
+    "sympy>=1.13",
+    "pandas>=2.2",
+    "scikit-learn>=1.5",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "pytest-cov"]
+gp = ["deap>=1.4"]
+coa = ["latex2sympy2>=1.9", "graphviz>=0.20"]
+
+[tool.setuptools.packages.find]
+include = ["hyppo*"]
+
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

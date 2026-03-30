@@ -1,8 +1,33 @@
+import math
+
 import numpy as np
 from scipy import stats
 from sklearn.metrics import r2_score, mean_squared_error
 
 from hyppo.core._base import virtual_experiment_onto
+
+
+# ---------------------------------------------------------------------------
+# Module-level pure functions (Definitions from Chapter 2)
+# ---------------------------------------------------------------------------
+
+def get_aic(n_params: int, log_likelihood: float) -> float:
+    """AIC = 2k - 2ln(L). Определение 10 из Главы 2."""
+    return 2 * n_params - 2 * log_likelihood
+
+
+def get_bic(n_params: int, n_observations: int, log_likelihood: float) -> float:
+    """BIC = k*ln(n) - 2ln(L). Определение 10 из Главы 2."""
+    return n_params * math.log(n_observations) - 2 * log_likelihood
+
+
+def range_models(scores: dict[str, float], threshold: float = 0.7) -> list[tuple[str, float]]:
+    """Ранжирование моделей по метрике с отсечением по порогу.
+
+    Returns sorted list of (model_name, score) pairs above threshold.
+    """
+    filtered = [(name, score) for name, score in scores.items() if score >= threshold]
+    return sorted(filtered, key=lambda x: x[1], reverse=True)
 
 
 with virtual_experiment_onto:
@@ -45,6 +70,8 @@ with virtual_experiment_onto:
                     error = mean_squared_error(y, models[key].predict(X))
                     if error <= threshold:
                         result[key] = error
+
+            return result
 
         # TODO add several > 2 models
         def compare_preds_on_single_dataset(self, dataset, stat_test):
@@ -100,6 +127,7 @@ class NonLinearModel(Model):
     namespace = virtual_experiment_onto.get_namespace("http://synthesis.ipi.ac.ru/virtual_experiment.owl")
 
     def fit(self, X, y):
+        from gplearn.genetic import SymbolicRegressor
         est_gp = SymbolicRegressor(population_size=1000,
                                    tournament_size=20,
                                    generations=150, stopping_criteria=0.001,
@@ -119,24 +147,19 @@ class NonLinearModel(Model):
         est_gp.fit(X, y)
         return est_gp
 
-    @property
-    def nonlinear_aic(self, X, y):
+    def compute_aic(self, X, y):
         prediction = self.predict(X)
         error = prediction - y
         complexity = self.size
-        likehood = np.log(np.mean(error ** 2 / error.shape[0]))
-        value = likehood - 2 * complexity
-        return self._nonlinear_aic
+        log_likelihood = np.log(np.mean(error ** 2 / error.shape[0]))
+        return log_likelihood - 2 * complexity
 
-    @property
-    def nonlinear_bic(self, X, y):
+    def compute_bic(self, X, y):
         prediction = self.predict(X)
         error = prediction - y
-        likehood = -np.mean(error ** 2 / error.shape[0])
+        log_likelihood = -np.mean(error ** 2 / error.shape[0])
         complexity = self.size
-
-        value = likehood - np.log(y.shape[0]) * complexity
-        return self._nonlinear_bic
+        return log_likelihood - np.log(y.shape[0]) * complexity
 
 
 if __name__ == '__main__':

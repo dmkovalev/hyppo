@@ -1,178 +1,103 @@
-import cloudpickle as pickle
-from storage.core.pickled import Pickled
+"""MetadataRepository — persistent storage for virtual experiment artifacts.
+
+Implements the repository described in Section 3.1.8 of the dissertation.
+Uses SQLite for storage with composite key (hypothesis_id, config_hash) for caching.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import sqlite3
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Any, List, Union
-
-from datetime import datetime
 
 
-class Database:
-    root: Path = Path('/')
-    debug: bool = True
-    debug_print_margin: str = '\t'
-
-    @classmethod
-    def set_root(cls, root: str) -> None:
-        cls.root = Path(root)
-
-    @classmethod
-    def _save(cls, obj: Any, filename: str, storage: str = '', **kwargs: Dict[str, Any]) -> None:
-
-        filename = Path(filename)
-
-        if cls.debug:
-            print(f'{cls.debug_print_margin}Текущая директория: {Path.cwd()}')
-            print(f'{cls.debug_print_margin}Корень базы данных: {cls.root}')
-            print(f'{cls.debug_print_margin}Хранилище: {storage}')
-
-        cls.root.mkdir(parents=True, exist_ok=True)
-        if not filename.is_absolute():
-            (cls.root / storage / filename).parent.mkdir(parents=True, exist_ok=True)
-        filename = Path(f'{filename}.pickle')
-
-        try:
-            pickled_obj = Pickled(obj=obj)
-            pickled_obj.save_data_hook(**kwargs)
-            with open(cls.root / storage / filename, 'wb') as f:
-                pickle.dump(pickled_obj, f)
-        except Exception as e:
-            print('Тип данных не соответвует базе данных.')
-            print('Тип объекта: ', type(obj))
-            print('Исключение:', e)
-
-    @classmethod
-    def load(db, type, id):
-        db.connect()
-        try:
-            print(f'Loading from: {cls.root / storage / filename}') if cls.debug else None
-            with open(cls.root / storage / filename, 'rb') as f:
-                return pickle.load(f)
-
-            if type == 'hypotheses':
-                artefact = db._load_hypothesis(id)
-            elif type == 'model':
-                artefact = db._load_model(id)
-            elif type == 'ontology':
-                artefact =  db._load_ontology(id)
-            elif type == 'workflow':
-                artefact =  db._load_workflow(id)
-            elif type == 'lattice':
-                artefact = db._load_lattice(id)
-
-            return artefact
-        except FileNotFoundError:
-            print('Объект отсутствует в базе данных.')
-
-    @classmethod
-    def save(db, artefact) -> None:
-        db.connect()
-        _save(artefact)
-        return
-
-    @classmethod
-    def _all_storages(cls) -> List[str]:
-        """
-        Метод, отдающий список `баз данных` содержащихся в корневой базе данных
-
-        Returns: List[str]
-        --------
-            Список `баз данных` в виде массива строк
-        """
-        return [p.stem for p in cls.root.glob('*') if p.is_dir()]
-
-    @classmethod
-    def _get_all_names(cls, storage: Union[str, Path] = '', ext: str = 'pickle') -> List[str]:
-        """
-        Метод, отдающий список `баз данных` содержащихся в корневой базе данных
-
-        Parameters:
-        -----------
-        ext: str
-            Расширение файлов
-        Returns: List[str]
-        --------
-            Список всех названий объектов в базе данных в виде массива строк
-        """
-        return [f.stem for f in cls.root.glob(f'{storage}/*.{ext}') if f.is_file()]
-
-    @classmethod
-    def _load_all(cls) -> List[Pickled]:
-
-        objs = [cls.load(f) for f in cls.get_all_names()]
-        return objs
+@dataclass
+class ResultRecord:
+    hypothesis_id: str
+    config: dict
+    metrics: dict
+    status: str  # SUCCESS, FAILED, SKIPPED
+    timestamp: str | None = None
 
 
-db = Database
+class MetadataRepository:
+    """Relational repository for virtual experiment metadata (Section 3.1.8)."""
 
-def load_yaml(filepath, type):
-    pass
+    def __init__(self, db_path: str | Path = ":memory:") -> None:
+        self.db_path = str(db_path)
+        self._conn = sqlite3.connect(self.db_path)
+        self._conn.row_factory = sqlite3.Row
+        self._create_tables()
 
+    def _create_tables(self) -> None:
+        self._conn.executescript("""
+            CREATE TABLE IF NOT EXISTS results (
+                hypothesis_id TEXT NOT NULL,
+                config_hash TEXT NOT NULL,
+                config_json TEXT NOT NULL,
+                metrics_json TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'SUCCESS',
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (hypothesis_id, config_hash)
+            );
+            CREATE TABLE IF NOT EXISTS lattices (
+                lattice_id TEXT PRIMARY KEY,
+                nodes_json TEXT NOT NULL,
+                edges_json TEXT NOT NULL,
+                created DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
+        """)
+        self._conn.commit()
 
-def save_yaml(filepath, artefact):
-    pass
+    @staticmethod
+    def _config_hash(config: dict) -> str:
+        return hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest()[:16]
 
+    def save_result(self, hypothesis_id: str, config: dict, metrics: dict, status: str = "SUCCESS") -> None:
+        self._conn.execute(
+            "INSERT OR REPLACE INTO results (hypothesis_id, config_hash, config_json, metrics_json, status) VALUES (?, ?, ?, ?, ?)",
+            (hypothesis_id, self._config_hash(config), json.dumps(config), json.dumps(metrics), status),
+        )
+        self._conn.commit()
 
-def create_yaml(is_csv=True, is_cut=True, name='dataset.csv'):
+    def load_result(self, hypothesis_id: str, config: dict) -> dict | None:
+        row = self._conn.execute(
+            "SELECT * FROM results WHERE hypothesis_id = ? AND config_hash = ?",
+            (hypothesis_id, self._config_hash(config)),
+        ).fetchone()
+        if row is None:
+            return None
+        return {"hypothesis_id": row["hypothesis_id"], "config": json.loads(row["config_json"]),
+                "metrics": json.loads(row["metrics_json"]), "status": row["status"], "timestamp": row["timestamp"]}
 
-#     data = [pd.read_csv(path) for path in data_path]
+    def has_result(self, hypothesis_id: str, config: dict) -> bool:
+        return self.load_result(hypothesis_id, config) is not None
 
-    db._return()
+    def save_lattice(self, lattice_id: str, nodes: set[str], edges: set[tuple[str, str]]) -> None:
+        self._conn.execute(
+            "INSERT OR REPLACE INTO lattices (lattice_id, nodes_json, edges_json) VALUES (?, ?, ?)",
+            (lattice_id, json.dumps(sorted(nodes)), json.dumps(sorted([list(e) for e in edges]))),
+        )
+        self._conn.commit()
 
-    dataset.loc[:, 'datetime'] = \
-        dataset.datetime.apply(_adjust_date)
+    def find_nearest_lattice(self, nodes: set[str], edges: set[tuple[str, str]]) -> dict | None:
+        """Find nearest lattice by Definition 12: d(L, L_j) = |V triangle V_j| + |E triangle E_j|."""
+        rows = self._conn.execute("SELECT * FROM lattices").fetchall()
+        if not rows:
+            return None
+        best, best_dist = None, float("inf")
+        for row in rows:
+            stored_nodes = set(json.loads(row["nodes_json"]))
+            stored_edges = {tuple(e) for e in json.loads(row["edges_json"])}
+            dist = len(nodes ^ stored_nodes) + len(edges ^ stored_edges)
+            if dist < best_dist:
+                best, best_dist = row, dist
+        if best is None:
+            return None
+        return {"lattice_id": best["lattice_id"], "nodes": set(json.loads(best["nodes_json"])),
+                "edges": {tuple(e) for e in json.loads(best["edges_json"])}, "distance": best_dist}
 
-    modified_data = []
-    for df, path in zip(data, [os.path.basename(x) for x in data_path]):
-        df.time = pd.to_datetime(df.time,
-                                    format='%Y-%m-%d %H:%M:%S')
-        # format='%d-%b-%y %I.%M.%S.%f %p')
-        df.columns = map(str.lower, df.columns)
-        modified_data.append(df)
-
-    output = pd.concat(modified_data, sort=False)
-
-    if is_csv:
-        output.to_csv('../data/' + name + '.csv', sep=',', index=False)
-
-    return output
-
-
-def _create_params(interval,
-                   step,
-                   start_date=None,
-                   end_date=None,
-                   from_db=False,
-                   from_file=True):
-
-    if from_db:
-        engine = (
-            create_engine(
-                'postgresql://postgres:localhost@localhost:54321/metadata_repository'))
-
-        db_connection = engine.connect()
-        all_df = pd.read_sql("select * from metadata_repository", db_connection)
-    else:
-        if from_file:
-            all_df = pd.read_csv('../data/metadata_repository.csv',
-                                 sep=',',
-                                 parse_dates=['time'])
-        else:
-            all_df = _create_csv()
-
-    params = []
-
-    for name, group in all_df.groupby('main_column'):
-        group.set_index(['time'], inplace=True)
-        group['main_column'] = name
-        start_date = group.index.min()
-        end_date = group.index.max()
-        while start_date + pd.Timedelta(interval, unit='m') < end_date:
-            params.append([group[(group.index > start_date) &
-                                  (group.index < start_date +
-                                   pd.Timedelta(interval,
-                                                unit='m'))]
-                           ])
-            start_date += pd.Timedelta(step, unit='m')
-
-    return params
-
+    def close(self) -> None:
+        self._conn.close()

@@ -1,18 +1,32 @@
+"""Workflow — DAG of tasks for virtual experiment execution."""
+
+from __future__ import annotations
+import networkx as nx
 
 
-class Configuration:
-    def __init__(self):
-        self.mapping = None
+class Workflow:
+    """Directed acyclic graph representing task dependencies in a virtual experiment."""
 
+    def __init__(self, tasks: list[str], edges: list[tuple[str, str]]) -> None:
+        self.graph = nx.DiGraph()
+        self.graph.add_nodes_from(tasks)
+        self.graph.add_edges_from(edges)
+        if not self.is_dag():
+            raise ValueError("Workflow must be a DAG (no cycles allowed)")
 
-class Workflow(Artefact):
-    self.G = Graph(connection_matrix.shape[1])
-    self.G.real_V_names = connection_matrix.columns.values
-    connection_matrix.columns = ["H" + str(k) for k in range(G.V)]
-    connection_matrix.index = ["H" + str(k) for k in range(G.V)]
+    def is_dag(self) -> bool:
+        return nx.is_directed_acyclic_graph(self.graph)
 
-    for col in self.connection_matrix.columns:
-        self.connected = self.connection_matrix.index[connection_matrix[col] == 1]
-        sself.tart = int(col.split("H")[1])
-        for k in range(len(self.connected)):
-            self.G.addEdge(start, int(connected[k].split("H")[1]))
+    def topological_order(self) -> list[str]:
+        return list(nx.topological_sort(self.graph))
+
+    def reachable_from(self, task: str) -> set[str]:
+        return nx.descendants(self.graph, task)
+
+    @property
+    def tasks(self) -> list[str]:
+        return list(self.graph.nodes)
+
+    @property
+    def edges(self) -> list[tuple[str, str]]:
+        return list(self.graph.edges)

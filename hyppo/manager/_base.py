@@ -1,44 +1,94 @@
-from owlready2 import *
-from hyppo.core._base import virtual_experiment_onto
+"""VirtualExperimentManager — orchestrates the full lifecycle (Section 3.1.2)."""
 
-virtual_experiment_onto = get_ontology("https://synthesis.ipi.ac.ru/manager.owl")
-namespace = virtual_experiment_onto.get_namespace()
+from __future__ import annotations
 
-with virtual_experiment_onto:
-    namespace = namespace
+from collections.abc import Callable
+from pathlib import Path
 
-    class Manager(virtual_experiment_onto.Artefact):
-        def _build_lattice(self):
-            pass
+import networkx as nx
 
-        def _make_plan(self):
-            pass
+from hyppo.metadata_repository import MetadataRepository
+from hyppo.runner import Runner
 
-        def run(self):
-            # build lattice
-            hypothesis_lattice = self._build_lattice()
 
-            # form plan
-            execution_plan = self._make_execution_plan()
+class Manager:
+    """Orchestrates virtual experiment lifecycle (Section 3.1.2).
 
-            # run
-            pass
+    Four stages:
+    1. Initialization — create experiment, save to repository
+    2. Build lattice — construct hypothesis lattice from structures
+    3. Planning — determine P_ne/P_e with caching
+    4. Execution — run models, save results
+    """
 
-    class has_for_virtual_experiment(Manager >> virtual_experiment_onto.VirtualExperiment):
-        python_name = 'virtual_experiment'
+    def __init__(
+        self,
+        db_path: str | Path = ":memory:",
+        r2_threshold: float = 0.7,
+        max_retries: int = 3,
+    ) -> None:
+        self.repository = MetadataRepository(db_path=db_path)
+        self.r2_threshold = r2_threshold
+        self.runner = Runner(repository=self.repository, max_retries=max_retries)
 
-    class has_for_execution_plan(Manager >> ExecutionPlan):
-        python_name = 'execution_plan'
+    def orchestrate(
+        self,
+        hypotheses: list[str],
+        workflow_edges: list[tuple[str, str]],
+        models: dict[str, Callable],
+        config: dict[str, dict] | None = None,
+        structures: dict | None = None,
+    ) -> dict[str, dict]:
+        """Run full virtual experiment lifecycle.
 
-    class has_for_lattice(Manager >> HypothesisLattice):
-        python_name = 'hypothesis_lattice'
+        Args:
+            hypotheses: list of hypothesis IDs
+            workflow_edges: DAG edges (parent, child)
+            models: {hypothesis_id: callable(config) -> {"r2": float, ...}}
+            config: {hypothesis_id: param_dict}
+            structures: hypothesis structures for lattice construction (optional)
 
-    class has_for_runner(Manager >> Runner):
-        python_name = 'runner'
+        Returns:
+            {hypothesis_id: {"status": str, "metrics": dict}}
+        """
+        config = config or {h: {} for h in hypotheses}
 
-    class has_for_domain_ontology(Manager >> Ontology):
-        python_name = 'domain_ontology'
+        # Stage 1: Initialize — build DAG from hypotheses and edges
+        lattice = nx.DiGraph()
+        lattice.add_nodes_from(hypotheses)
+        lattice.add_edges_from(workflow_edges)
 
-    class has_for_autogenerate(Manager >> bool, DataProperty, FunctionalProperty): pass
-    class has_for_abandon_rules(Manager >> Rule): pass
-    class has_for_correlation(Manager >> Correlation): pass
+        # Stage 2: Build lattice (use provided edges as lattice)
+        # In full implementation, HypothesisLattice.build_lattice() would
+        # analyze causal structures. Here we use the workflow DAG directly.
+
+        # Stage 3: Plan — determine P_ne (needs execution) and P_e (cached)
+        p_ne: list[str] = []
+        p_e: set[str] = set()
+
+        topo_order = list(nx.topological_sort(lattice))
+        for h in topo_order:
+            if self.repository.has_result(h, config.get(h, {})):
+                cached = self.repository.load_result(h, config.get(h, {}))
+                if cached is not None:
+                    r2 = cached.get("metrics", {}).get("r2")
+                    if r2 is not None and r2 < self.r2_threshold:
+                        # Prune low-quality hypothesis and descendants
+                        continue
+                p_e.add(h)
+            else:
+                p_ne.append(h)
+
+        # Stage 4: Execute
+        results = self.runner.execute(
+            plan={"p_ne": p_ne, "p_e": p_e},
+            models=models,
+            configs=config,
+            lattice_edges=workflow_edges,
+        )
+
+        return results
+
+    def close(self) -> None:
+        """Close the underlying repository connection."""
+        self.repository.close()

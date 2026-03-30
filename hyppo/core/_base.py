@@ -26,14 +26,15 @@ with virtual_experiment_onto:
     class has_for_lastupdate(Artefact >> datetime.datetime, DataProperty, FunctionalProperty):
         python_name = "last_update"
     # class has_for_specification(Artefact >> Specification): pass
-    class Artefact(Thing):
-        is_a = [has_for_authors.min(1)]
-        is_a = [has_for_name.exactly(1)]
-        is_a = [has_for_description.exactly(1)]
-        is_a = [has_for_id.exactly(1)]
-        is_a = [has_for_lastupdate.exactly(1)]
-        is_a = [has_for_createdate.exactly(1)]
-        # is_a = [has_for_specification.exactly(1)]
+
+    Artefact.is_a.extend([
+        has_for_authors.min(1),
+        has_for_name.exactly(1),
+        has_for_description.exactly(1),
+        has_for_id.exactly(1),
+        has_for_lastupdate.exactly(1),
+        has_for_createdate.exactly(1),
+    ])
 
     class Hypothesis(Artefact): pass
     class Model(Artefact): pass
@@ -51,7 +52,7 @@ with virtual_experiment_onto:
         inverse_property    = is_implemented_by_model
         class_property_type = ["only"]
 
-    class competes(Hypothesis >> Hypothesis, TransitiveProperty, SymmetricProperty): pass
+    class competes(Hypothesis >> Hypothesis, SymmetricProperty): pass
     class derived_by(Hypothesis >> Hypothesis, TransitiveProperty, AsymmetricProperty): pass
     class impacts(ObjectProperty, TransitiveProperty):
         domain              = [Hypothesis]

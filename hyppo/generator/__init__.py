@@ -1,1 +1,3 @@
-from ._generator import generate_hypothesis, create_random_complete_structure, create_random_complete_structures
+from hyppo.generator._generator import generate_hypothesis
+
+__all__ = ["generate_hypothesis"]

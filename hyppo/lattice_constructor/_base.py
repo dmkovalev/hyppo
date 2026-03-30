@@ -1,7 +1,13 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from hyppo.core._base import virtual_experiment_onto
-from hyppo.coa._base import Structure, Equation
 import networkx as nx
 from collections import defaultdict
+
+if TYPE_CHECKING:
+    from hyppo.coa._base import Structure, Equation
 
 
 with virtual_experiment_onto:
@@ -14,18 +20,23 @@ with virtual_experiment_onto:
 
 
         def build_lattice(self):
+            """Algorithm 1: Build hypothesis lattice from workflow tasks.
+
+            For each pair of hypotheses (h_i, h_j) from different tasks:
+            - Unite their structures S_i ∪ S_j
+            - If the union is complete, build transitive closure
+            - Use the closure to derive edges in the lattice
+            """
             lattice = nx.DiGraph()
             # check if all hypotheses are in workflow
             if not self._is_correct():
                 raise Exception("Hypotheses not found in workflow")
 
-            transitive_closure = defaultdict(list)
+            transitive_closure = defaultdict(set)
 
             tasks = self.workflow.get_tasks()
-            while (tasks):
-                current_task = tasks.get_current()
-                # remove current_task from tasks
-                remaining_tasks = self.workflow.get_remaining(current_task)
+            for i, current_task in enumerate(tasks):
+                remaining_tasks = tasks[i + 1:]
                 for h_i in current_task:
                     for t in remaining_tasks:
                         for h_j in t:
@@ -34,7 +45,8 @@ with virtual_experiment_onto:
                             united_str = structure_i.union(structure_j)
                             if united_str.is_complete():
                                 tc = united_str.build_transitive_closure()
-                                transitive_closure.add(tc)
+                                for key, descendants in tc.items():
+                                    transitive_closure[key].update(descendants)
 
             hyp_var_map = self._build_hypothesis_var_mapping(transitive_closure)
 
@@ -44,21 +56,26 @@ with virtual_experiment_onto:
             return lattice
 
         def add_hypothesis(self, hypothesis):
+            """Algorithm 2: Add a hypothesis to an existing lattice.
+
+            For the added hypothesis h_add and each existing h_i:
+            - If S_i ∪ S_add is complete, build transitive closure
+            - Add derived edges to the existing lattice
+            """
             # check if all hypotheses are in workflow
             if not self._is_correct():
                 raise Exception("Hypotheses not found in workflow")
             tasks = self.workflow.get_tasks()
-            transitive_closure = defaultdict(list)
+            transitive_closure = defaultdict(set)
 
-            while (tasks):
-                current_task = tasks.get_current()
-                # remove current_task from tasks
+            for current_task in tasks:
                 for h_i in current_task:
                     structure_i = h_i.structure
                     united_str = structure_i.union(hypothesis.structure)
                     if united_str.is_complete():
                         tc = united_str.build_transitive_closure()
-                        transitive_closure.add(tc)
+                        for key, descendants in tc.items():
+                            transitive_closure[key].update(descendants)
 
             hyp_var_map = self._build_hypothesis_var_mapping(transitive_closure)
 
@@ -75,12 +92,14 @@ with virtual_experiment_onto:
         def _build_hypothesis_var_mapping(self, transitive_closure):
             """
             Build mapping between hypotheses based on their variable relationships.
-            
+
             Args:
-                transitive_closure (defaultdict): Dictionary mapping hypotheses to their transitive closure relations
-                
+                transitive_closure (defaultdict): Dictionary mapping variables to their
+                    transitive closure relations (sets of reachable variables)
+
             Returns:
-                list: List of tuples representing hypothesis dependencies (h1, h2) where h1 depends on h2
+                list: List of tuples representing hypothesis dependencies (h1, h2)
+                    where h1 depends on h2
             """
             dependencies = []
             for h1, relations1 in transitive_closure.items():
@@ -122,8 +141,7 @@ with virtual_experiment_onto:
             """Check if all hypotheses are present in the workflow."""
             workflow_hypotheses = set()
             tasks = self.workflow.get_tasks()
-            while tasks:
-                current_task = tasks.get_current()
-                workflow_hypotheses.update(current_task)
-                
+            for task in tasks:
+                workflow_hypotheses.update(task)
+
             return all(h in workflow_hypotheses for h in self.hypotheses)
