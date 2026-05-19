@@ -53,7 +53,10 @@ with virtual_experiment_onto:
         class_property_type = ["only"]
 
     class competes(Hypothesis >> Hypothesis, SymmetricProperty): pass
-    class derived_by(Hypothesis >> Hypothesis, TransitiveProperty, AsymmetricProperty): pass
+    class derived_by(Hypothesis >> Hypothesis, TransitiveProperty): pass
+    # Note: AsymmetricProperty and IrreflexiveProperty removed because
+    # OWL 2 DL simplicity constraint forbids them on transitive properties.
+    # Acyclicity is enforced by Algorithm 3 (consistency check), not OWL axioms.
     class impacts(ObjectProperty, TransitiveProperty):
         domain              = [Hypothesis]
         range               = [Hypothesis]
