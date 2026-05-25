@@ -30,35 +30,42 @@ class BuildVirtualExperimentInput(BaseModel):
 
 
 class HypothesisRef(BaseModel):
+    model_config = {"frozen": True}
+
     kind: str = Field(description="One of h_CRM, h_ML, h_LPR, h_MB, h_BL, h_WCT.")
     description: str
-    model_classes: list[str] = Field(
+    model_classes: tuple[str, ...] = Field(
         description="MRO of the OWL model class implementing this hypothesis "
-                    "(e.g. ['HybridModel', 'Model', 'Thing']).",
+                    "(e.g. ('HybridModel', 'Model', 'Thing')).",
     )
-    hyperparam_axes: list[str] = Field(
+    hyperparam_axes: tuple[str, ...] = Field(
         description="default_space.yaml axes that toggle inside this hypothesis.",
     )
 
 
 class LatticeEdge(BaseModel):
+    # serialize_by_alias=True ensures wire format uses "from"/"to", not "from_"/"to".
+    model_config = {"populate_by_name": True, "serialize_by_alias": True, "frozen": True}
+
     from_: str = Field(alias="from")
     to: str
 
-    model_config = {"populate_by_name": True}
-
 
 class ConfigurationAxis(BaseModel):
+    model_config = {"frozen": True}
+
     name: str
     section: str
-    levels: list
+    levels: tuple[str | int | float | bool, ...]
 
 
 class VirtualExperimentSnapshot(BaseModel):
+    model_config = {"frozen": True}
+
     domain: Domain
-    hypotheses: list[HypothesisRef]
-    edges: list[LatticeEdge]
-    configuration_space: list[ConfigurationAxis]
+    hypotheses: tuple[HypothesisRef, ...]
+    edges: tuple[LatticeEdge, ...]
+    configuration_space: tuple[ConfigurationAxis, ...]
 
 
 class GetHypothesisLatticeInput(BaseModel):
@@ -66,9 +73,11 @@ class GetHypothesisLatticeInput(BaseModel):
 
 
 class LatticeGraph(BaseModel):
+    model_config = {"frozen": True}
+
     domain: Domain
-    nodes: list[str]
-    edges: list[LatticeEdge]
+    nodes: tuple[str, ...]
+    edges: tuple[LatticeEdge, ...]
 
 
 _OIL_SNAPSHOT_CACHE: VirtualExperimentSnapshot | None = None
@@ -139,9 +148,12 @@ def _build_oil_snapshot() -> VirtualExperimentSnapshot:
 def build_virtual_experiment(
     payload: BuildVirtualExperimentInput,
 ) -> VirtualExperimentSnapshot:
-    """Return the current VirtualExperiment snapshot (hypotheses + lattice + config)."""
-    if payload.domain != "oil_waterflood":
-        raise ValueError(f"domain={payload.domain!r} not supported in MVP")
+    """Return the current VirtualExperiment snapshot (hypotheses + lattice + config).
+
+    Domain validation runs in :class:`BuildVirtualExperimentInput` via the
+    ``Literal`` type — invalid values fail at construction with
+    ``pydantic.ValidationError`` (a ``ValueError`` subclass).
+    """
     return _build_oil_snapshot()
 
 
@@ -155,12 +167,13 @@ def build_virtual_experiment(
                    AgentRole.ProductionEngineer, AgentRole.Economist},
 )
 def get_hypothesis_lattice(payload: GetHypothesisLatticeInput) -> LatticeGraph:
-    """Return only the derived_by graph (nodes + edges) — cheap, for UI."""
-    if payload.domain != "oil_waterflood":
-        raise ValueError(f"domain={payload.domain!r} not supported in MVP")
+    """Return only the derived_by graph (nodes + edges) — cheap, for UI.
+
+    Domain validation runs in :class:`GetHypothesisLatticeInput`.
+    """
     snap = _build_oil_snapshot()
     return LatticeGraph(
         domain=snap.domain,
-        nodes=[h.kind for h in snap.hypotheses],
+        nodes=tuple(h.kind for h in snap.hypotheses),
         edges=snap.edges,
     )
