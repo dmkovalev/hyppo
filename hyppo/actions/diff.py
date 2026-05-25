@@ -17,29 +17,41 @@ from hyppo.actions.virtual_experiment import ALL_HYPOTHESIS_KINDS
 
 class HypothesisSnapshot(BaseModel):
     """One side of a diff: which hypotheses are active + their hyperparams."""
+    model_config = {"frozen": True}
+
     active_hypotheses: list[str] = Field(
         description="Subset of canonical kinds present in this snapshot.",
     )
     hyperparams: dict[str, dict[str, Any]] = Field(
-        description="kind -> {axis_name: value}. Axes outside default_space "
-                    "are accepted but flagged in tests.",
+        description="kind -> {axis_name: value}. Only kinds in "
+                    "ALL_HYPOTHESIS_KINDS are accepted; axis names are not "
+                    "validated against default_space.",
     )
 
 
 class DiffHypothesisStatesInput(BaseModel):
+    model_config = {"frozen": True}
+
     snapshot_a: HypothesisSnapshot
     snapshot_b: HypothesisSnapshot
     base_snapshot: HypothesisSnapshot | None = Field(
         default=None,
-        description="If supplied, lattice edges come from this snapshot. "
-                    "Otherwise the default oil_waterflood lattice is used.",
+        description="Reserved; currently ignored. Future extension: supply "
+                    "a snapshot whose lattice replaces the hardcoded "
+                    "oil_waterflood edges. Until then this field is a no-op.",
     )
 
 
 class HypothesisDiff(BaseModel):
+    model_config = {"frozen": True}
+
     changed_hypotheses: list[str]
-    hyperparam_diff: dict[str, dict[str, list]]  # kind -> axis -> [val_a, val_b]
+    hyperparam_diff: dict[str, dict[str, list[Any]]]  # kind -> axis -> [val_a, val_b]
     stale_cascade: list[str]
+
+
+_MISSING = object()
+"""Sentinel for hyperparam_diff: distinguishes 'axis absent' from 'axis = None'."""
 
 
 def _validate_kinds(snap: HypothesisSnapshot, label: str) -> None:
@@ -109,17 +121,23 @@ def diff_hypothesis_states(payload: DiffHypothesisStatesInput) -> HypothesisDiff
     active_b = set(payload.snapshot_b.active_hypotheses)
     activity_changes = active_a.symmetric_difference(active_b)
 
-    hp_diff: dict[str, dict[str, list]] = {}
+    hp_diff: dict[str, dict[str, list[Any]]] = {}
     for kind in active_a & active_b:
         params_a = payload.snapshot_a.hyperparams.get(kind, {})
         params_b = payload.snapshot_b.hyperparams.get(kind, {})
         axes = set(params_a.keys()) | set(params_b.keys())
-        per_axis: dict[str, list] = {}
+        per_axis: dict[str, list[Any]] = {}
         for axis in axes:
-            va = params_a.get(axis)
-            vb = params_b.get(axis)
-            if va != vb:
-                per_axis[axis] = [va, vb]
+            # _MISSING sentinel preserves the 'absent vs None' distinction.
+            va = params_a.get(axis, _MISSING)
+            vb = params_b.get(axis, _MISSING)
+            if va is _MISSING and vb is _MISSING:
+                continue
+            if va != vb or (va is _MISSING) != (vb is _MISSING):
+                per_axis[axis] = [
+                    None if va is _MISSING else va,
+                    None if vb is _MISSING else vb,
+                ]
         if per_axis:
             hp_diff[kind] = per_axis
 
