@@ -105,6 +105,25 @@ with virtual_experiment_onto:
 
     AllDisjoint([VirtualExperiment, Configuration, Workflow, Hypothesis, Model])
 
+    # ── Theorem 1 axiomatic support (iip2026_planning.tex §3) ──────────────
+    # Adds the three OWL axioms required for the C2 source-of-inconsistency
+    # bijection in the consistency-check correctness proof:
+    #   (i)  is_implemented_by_model is Functional → uniqueness of m
+    #        (each hypothesis is implemented by at most one model);
+    #   (ii) refers_to_hypothesis is Functional → uniqueness of h per model
+    #        (paired-functional design across the inverse property);
+    #   (iii) Hypothesis ⊑ ∃is_implemented_by_model.Model → existence of m
+    #        (every Hypothesis has at least one implementing model).
+    # Together these give the ∃! m ∈ Model. R(m) = h required by C2.
+    # NOTE on UNA: OWL 2 DL does not assume Unique Name Assumption, so
+    # FunctionalProperty alone only unifies (m1 ≡ m2) rather than yielding
+    # owl:Nothing. Concrete VE instantiations must add AllDifferent on the
+    # set of Model individuals to enforce C2-uniqueness inconsistency
+    # detection by HermiT (see paper §2, Theorem 1 proof).
+    is_implemented_by_model.is_a.append(FunctionalProperty)
+    refers_to_hypothesis.is_a.append(FunctionalProperty)
+    Hypothesis.is_a.append(is_implemented_by_model.some(Model))
+
 
 if __name__ == '__main__':
     virtual_experiment_onto = get_ontology("http://synthesis.ipi.ac.ru/virtual_experiment.owl")

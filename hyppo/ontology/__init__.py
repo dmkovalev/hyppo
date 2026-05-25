@@ -22,3 +22,8 @@ from .quality_gates import *  # noqa: F401,F403
 from .multi_experiment import *  # noqa: F401,F403
 from .model_compatibility import *  # noqa: F401,F403
 from .lifecycle import *  # noqa: F401,F403
+from .consistency import (  # noqa: F401
+    ConsistencyResult,
+    Status,
+    check_consistency,
+)

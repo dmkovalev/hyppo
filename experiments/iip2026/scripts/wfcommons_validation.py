@@ -168,7 +168,10 @@ def cascade(adj, n: int, r: float, n_reps: int, np_rng) -> float:
 
 
 def gen_er(n: int, d_bar: float, rng) -> dict[int, set[int]]:
-    p = d_bar / max(n - 1, 1)
+    # WfCommons d_bar = |E|/n; для ER-DAG с i<j: E[|E|] = p·n(n-1)/2,
+    # откуда E[d_bar_ER] = p(n-1)/2. Чтобы совпасть с real d_bar нужно
+    # p* = 2·d_bar/(n-1) (R11/A04-G1 fix).
+    p = min(1.0, 2.0 * d_bar / max(n - 1, 1))
     adj = defaultdict(set)
     for i in range(n):
         for j in range(i + 1, n):
