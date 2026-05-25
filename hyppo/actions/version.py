@@ -217,3 +217,49 @@ async def mark_run_with_version(
         run_id=payload.run_id,
         n_links_written=n_written,
     )
+
+
+class RunRef(BaseModel):
+    model_config = {"frozen": True}
+
+    run_id: str
+    hypothesis_kind: str
+    version_id: str
+
+
+class ResolveStaleRunsInput(BaseModel):
+    model_config = {"frozen": True}
+
+    version_id: str
+
+
+class ResolveStaleRunsOutput(BaseModel):
+    model_config = {"frozen": True}
+
+    runs: list[RunRef]
+
+
+@action(
+    kind="ResolveStaleRuns",
+    trust=TrustLevel.SAFE,
+    inputs=ResolveStaleRunsInput,
+    outputs=ResolveStaleRunsOutput,
+    allowed_roles={AgentRole.Coordinator, AgentRole.ReservoirEngineer,
+                   AgentRole.Auditor, AgentRole.Geologist,
+                   AgentRole.ProductionEngineer, AgentRole.Economist},
+)
+async def resolve_stale_runs(payload: ResolveStaleRunsInput) -> ResolveStaleRunsOutput:
+    """Find runs pinned to `version_id` after a newer version of the same
+    hypothesis_kind has been registered."""
+    version_row = await wfdb_client.select_version_by_id(payload.version_id)
+    if version_row is None:
+        raise RuntimeError(f"version not found: {payload.version_id!r}")
+
+    superseding = await wfdb_client.select_superseding_versions(payload.version_id)
+    if not superseding:
+        return ResolveStaleRunsOutput(runs=[])
+
+    rows = await wfdb_client.select_runs_for_version(payload.version_id)
+    return ResolveStaleRunsOutput(
+        runs=[RunRef(**r) for r in rows],
+    )
