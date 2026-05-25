@@ -29,3 +29,26 @@ pytest tests/ -v
 | Planner | `hyppo.planner` | 3.1.6 |
 | Runner | `hyppo.runner` | 3.1.7 |
 | MetadataRepository | `hyppo.metadata_repository` | 3.1.8 |
+
+## MCP server
+
+Hyppo exposes 8 typed actions and a `Lattice Steward` persona via MCP.
+
+```bash
+# stdio (Claude Code / Desktop)
+uv run python -m hyppo.mcp
+
+# streamable HTTP for cross-MCP callers (e.g. the wfonto bridge)
+uv run python -m hyppo.mcp --transport http --port 8082
+```
+
+After connecting, clients see tools `mcp__hyppo__BuildVirtualExperiment`,
+`...DiffHypothesisStates`, `...RegisterHypothesisVersion`, etc., and the
+persona resource `hyppo://personas/lattice_steward.md`.
+
+Write actions (`RegisterHypothesisVersion`, `MarkRunWithVersion`) require
+the `hypothesis_version` + `hypothesis_run_link` tables to be present in
+the wfdb-backed Postgres. Until that migration ships (sub-project B of the
+2026-05-25 hyppo×wfonto bridge spec), write actions return a structured
+`{"error":"not_implemented", "detail":"blocked on sub-project B"}` and
+non-blocking agents route around them.
