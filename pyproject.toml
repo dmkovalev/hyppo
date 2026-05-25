@@ -31,6 +31,9 @@ include = ["hyppo*"]
 requires = ["setuptools>=75"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools.package-data]
+hyppo = ["personas/*.md"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"

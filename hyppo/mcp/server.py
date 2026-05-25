@@ -3,17 +3,14 @@ from __future__ import annotations
 
 from mcp.server import Server
 
+from hyppo.mcp.resources import register_resources
 from hyppo.mcp.tools import register_tools
 
 
 def create_server() -> Server:
-    """Build the hyppo MCP server with all actions registered.
-
-    Pure factory — no transport binding. resources.register_resources is
-    called by Task 10 once it lands."""
     server = Server("hyppo")
     register_tools(server)
-    # Task 10 will append: register_resources(server)
+    register_resources(server)
     return server
 
 
