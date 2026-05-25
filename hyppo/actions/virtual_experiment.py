@@ -95,11 +95,11 @@ def _build_oil_snapshot() -> VirtualExperimentSnapshot:
     ve = build_oil_virtual_experiment()
     hyps = []
     for kind, h in ve["hypotheses_map"].items():
-        models = h.is_implemented_by_model or []
+        # is_implemented_by_model is FunctionalProperty (R3+); single value or None.
+        model = h.is_implemented_by_model
         model_classes: list[str] = []
-        if models:
-            # MRO of the first model — wfopt_adapter assigns exactly one per hypothesis.
-            for cls in type(models[0]).mro():
+        if model is not None:
+            for cls in type(model).mro():
                 if cls.__name__ != "object":
                     model_classes.append(cls.__name__)
         hyps.append(HypothesisRef(
