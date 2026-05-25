@@ -1,6 +1,6 @@
 [project]
 name = "hyppo"
-version = "1.0.0"
+version = "1.1.0"
 description = "Hypothesis Platform for Virtual Experiments (Hyppo)"
 requires-python = ">=3.13"
 dependencies = [
@@ -12,12 +12,17 @@ dependencies = [
     "pandas>=2.2",
     "scikit-learn>=1.5",
     "pydantic>=2.0",
+    "sqlalchemy>=2.0,<3",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0", "pytest-cov"]
+dev = ["pytest>=8.0", "pytest-cov", "pytest-asyncio>=0.24", "mcp>=1.0,<2.0", "uvicorn>=0.30", "starlette>=0.37", "httpx>=0.27"]
 gp = ["deap>=1.4"]
 coa = ["latex2sympy2>=1.9", "graphviz>=0.20"]
+mcp = ["mcp>=1.0,<2.0", "uvicorn>=0.30", "starlette>=0.37"]
+
+[project.scripts]
+hyppo-mcp = "hyppo.mcp.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["hyppo*"]
@@ -26,5 +31,9 @@ include = ["hyppo*"]
 requires = ["setuptools>=75"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools.package-data]
+hyppo = ["personas/*.md"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+asyncio_mode = "auto"

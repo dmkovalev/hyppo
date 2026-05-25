@@ -201,12 +201,15 @@ def _build_hypotheses() -> dict[str, Hypothesis]:
     m_phys_bl = PhysicsModel(_uid("m_phys_bl"))
     m_hybrid_wct = HybridModel(_uid("m_hybrid_wct"))
 
-    h_CRM.is_implemented_by_model = [m_phys]
-    h_ML.is_implemented_by_model = [m_dd]
-    h_LPR.is_implemented_by_model = [m_hybrid]
-    h_MB.is_implemented_by_model = [m_phys_mb]
-    h_BL.is_implemented_by_model = [m_phys_bl]
-    h_WCT.is_implemented_by_model = [m_hybrid_wct]
+    # is_implemented_by_model is FunctionalProperty after _base.py R3+
+    # (Theorem 1 axiom — see commit 911172c). Each Hypothesis gets at most
+    # one Model; single-value assignment required.
+    h_CRM.is_implemented_by_model = m_phys
+    h_ML.is_implemented_by_model = m_dd
+    h_LPR.is_implemented_by_model = m_hybrid
+    h_MB.is_implemented_by_model = m_phys_mb
+    h_BL.is_implemented_by_model = m_phys_bl
+    h_WCT.is_implemented_by_model = m_hybrid_wct
 
     # -- Lattice edges (derived_by) --
     # h_CRM -> h_LPR   (physics feeds fusion)
@@ -274,10 +277,12 @@ def build_oil_virtual_experiment() -> dict[str, Any]:
     hyps = _build_hypotheses()
     lattice = _build_lattice_graph(hyps)
 
-    # Collect all models from hypotheses
+    # Collect all models from hypotheses (single value per hypothesis after R3+).
     models: list[Model] = []
     for h in hyps.values():
-        models.extend(h.is_implemented_by_model)
+        m = h.is_implemented_by_model
+        if m is not None:
+            models.append(m)
 
     workflow = _make_artefact(
         Workflow, "hybridcrm_workflow",
