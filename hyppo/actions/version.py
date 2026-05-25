@@ -109,3 +109,61 @@ async def register_hypothesis_version(
         created_at=created_at,
         created_by=created_by,
     )
+
+
+class GetHypothesisVersionInput(BaseModel):
+    model_config = {"frozen": True}
+
+    version_id: str
+
+
+@action(
+    kind="GetHypothesisVersion",
+    trust=TrustLevel.SAFE,
+    inputs=GetHypothesisVersionInput,
+    outputs=HypothesisVersionRecord,
+    allowed_roles={AgentRole.Coordinator, AgentRole.ReservoirEngineer,
+                   AgentRole.Auditor, AgentRole.Geologist,
+                   AgentRole.ProductionEngineer, AgentRole.Economist},
+)
+async def get_hypothesis_version(
+    payload: GetHypothesisVersionInput,
+) -> HypothesisVersionRecord:
+    """Read one hypothesis_version row by version_id."""
+    row = await wfdb_client.select_version_by_id(payload.version_id)
+    if row is None:
+        raise RuntimeError(f"version not found: {payload.version_id!r}")
+    return HypothesisVersionRecord(**row)
+
+
+class ListVersionsForHypothesisInput(BaseModel):
+    model_config = {"frozen": True}
+
+    hypothesis_kind: str
+
+
+class HypothesisVersionList(BaseModel):
+    model_config = {"frozen": True}
+
+    records: list[HypothesisVersionRecord]
+
+
+@action(
+    kind="ListVersionsForHypothesis",
+    trust=TrustLevel.SAFE,
+    inputs=ListVersionsForHypothesisInput,
+    outputs=HypothesisVersionList,
+    allowed_roles={AgentRole.Coordinator, AgentRole.ReservoirEngineer,
+                   AgentRole.Auditor, AgentRole.Geologist,
+                   AgentRole.ProductionEngineer, AgentRole.Economist},
+)
+async def list_versions_for_hypothesis(
+    payload: ListVersionsForHypothesisInput,
+) -> HypothesisVersionList:
+    """Return all hypothesis_version rows for `hypothesis_kind`, newest first."""
+    if payload.hypothesis_kind not in ALL_HYPOTHESIS_KINDS:
+        raise ValueError(
+            f"hypothesis_kind={payload.hypothesis_kind!r} not in {ALL_HYPOTHESIS_KINDS}"
+        )
+    rows = await wfdb_client.select_versions_by_kind(payload.hypothesis_kind)
+    return HypothesisVersionList(records=[HypothesisVersionRecord(**r) for r in rows])
