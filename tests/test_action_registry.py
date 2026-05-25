@@ -11,6 +11,21 @@ from hyppo.actions.registry import (
 from hyppo.actions.types import AgentRole, TrustLevel
 
 
+@pytest.fixture(autouse=True)
+def _preserve_action_registry():
+    """Snapshot ACTION_REGISTRY before each test; restore on teardown.
+
+    These tests call clear_registry() and register synthetic OrderA/OrderB
+    fixtures. Without this fixture, suite-wide ordering after this file
+    would see a 1- or 2-entry registry instead of the 8 production actions
+    (test_mcp_server_factory et al. would fail).
+    """
+    snapshot = dict(ACTION_REGISTRY)
+    yield
+    ACTION_REGISTRY.clear()
+    ACTION_REGISTRY.update(snapshot)
+
+
 class _FooIn(BaseModel):
     x: int
 

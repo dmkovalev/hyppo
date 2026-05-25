@@ -1,6 +1,4 @@
 """Smoke tests for hyppo.mcp server factory + tool wiring."""
-import importlib
-
 import pytest
 
 
@@ -14,25 +12,6 @@ EXPECTED_TOOLS = {
     "ResolveStaleRuns",
     "MarkRunWithVersion",
 }
-
-
-@pytest.fixture(autouse=True)
-def _repopulate_action_registry():
-    """Defend against test-suite-wide registry pollution from
-    `test_action_registry.py` (which calls clear_registry() then registers
-    OrderA/OrderB fixtures). Reloads the action side-effect modules so
-    ACTION_REGISTRY contains the 8 production tools regardless of ordering."""
-    from hyppo.actions.registry import ACTION_REGISTRY, clear_registry
-
-    clear_registry()
-    import hyppo.actions.diff
-    import hyppo.actions.version
-    import hyppo.actions.virtual_experiment
-
-    importlib.reload(hyppo.actions.diff)
-    importlib.reload(hyppo.actions.version)
-    importlib.reload(hyppo.actions.virtual_experiment)
-    yield
 
 
 def test_hyppo_mcp_package_importable():

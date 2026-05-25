@@ -23,6 +23,8 @@ ALL_HYPOTHESIS_KINDS = ("h_CRM", "h_ML", "h_LPR", "h_MB", "h_BL", "h_WCT")
 
 
 class BuildVirtualExperimentInput(BaseModel):
+    model_config = {"frozen": True}
+
     domain: Domain = Field(
         default="oil_waterflood",
         description="Single-domain MVP. Future: 'production_optimization', 'refining'.",
@@ -69,6 +71,8 @@ class VirtualExperimentSnapshot(BaseModel):
 
 
 class GetHypothesisLatticeInput(BaseModel):
+    model_config = {"frozen": True}
+
     domain: Domain = "oil_waterflood"
 
 
