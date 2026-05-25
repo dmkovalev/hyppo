@@ -13,6 +13,7 @@ dependencies = [
     "scikit-learn>=1.5",
     "pydantic>=2.0",
     "sqlalchemy>=2.0,<3",
+    "wfdb",
 ]
 
 [project.optional-dependencies]
@@ -37,3 +38,6 @@ hyppo = ["personas/*.md"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+
+[tool.uv.sources]
+wfdb = { path = "../../wfdb", editable = true }
