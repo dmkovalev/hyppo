@@ -167,3 +167,53 @@ async def list_versions_for_hypothesis(
         )
     rows = await wfdb_client.select_versions_by_kind(payload.hypothesis_kind)
     return HypothesisVersionList(records=[HypothesisVersionRecord(**r) for r in rows])
+
+
+class MarkRunWithVersionInput(BaseModel):
+    model_config = {"frozen": True}
+
+    run_id: str = Field(min_length=1)
+    version_ids: dict[str, str] = Field(
+        description="hypothesis_kind -> version_id. Must be non-empty.",
+    )
+
+
+class MarkRunWithVersionOutput(BaseModel):
+    model_config = {"frozen": True}
+
+    run_id: str
+    n_links_written: int = Field(ge=0)
+
+
+@action(
+    kind="MarkRunWithVersion",
+    trust=TrustLevel.STAGING,
+    inputs=MarkRunWithVersionInput,
+    outputs=MarkRunWithVersionOutput,
+    allowed_roles={AgentRole.Coordinator, AgentRole.ReservoirEngineer},
+    requires_audit=True,
+)
+async def mark_run_with_version(
+    payload: MarkRunWithVersionInput,
+) -> MarkRunWithVersionOutput:
+    """Pin a run to its hypothesis-version set (idempotent UPSERT per kind)."""
+    if not payload.version_ids:
+        raise ValueError("version_ids is empty — supply at least one kind")
+    bad = [k for k in payload.version_ids if k not in ALL_HYPOTHESIS_KINDS]
+    if bad:
+        raise ValueError(f"unknown hypothesis_kinds in version_ids: {bad}")
+
+    n_written = 0
+    for kind, version_id in payload.version_ids.items():
+        inserted = await wfdb_client.upsert_run_link(
+            run_id=payload.run_id,
+            hypothesis_kind=kind,
+            version_id=version_id,
+        )
+        if inserted:
+            n_written += 1
+
+    return MarkRunWithVersionOutput(
+        run_id=payload.run_id,
+        n_links_written=n_written,
+    )
