@@ -179,7 +179,7 @@ def test_rule1_physics_hypothesis_classification():
     """PhysicsHypothesis is inferred when a hypothesis has only PhysicsModels."""
     h = Hypothesis(_uid("h"))
     m = PhysicsModel(_uid("m"))
-    h.is_implemented_by_model = [m]
+    h.is_implemented_by_model = m
     _reason()
     assert PhysicsHypothesis in h.is_a
 
@@ -189,7 +189,7 @@ def test_rule1_datadriven_hypothesis_classification():
     """DataDrivenHypothesis is inferred for purely data-driven models."""
     h = Hypothesis(_uid("h"))
     m = DataDrivenModel(_uid("m"))
-    h.is_implemented_by_model = [m]
+    h.is_implemented_by_model = m
     _reason()
     assert DataDrivenHypothesis in h.is_a
 
@@ -199,7 +199,7 @@ def test_rule1_hybrid_hypothesis_classification():
     """HybridHypothesis is inferred when at least one HybridModel is present."""
     h = Hypothesis(_uid("h"))
     m = HybridModel(_uid("m"))
-    h.is_implemented_by_model = [m]
+    h.is_implemented_by_model = m
     _reason()
     assert HybridHypothesis in h.is_a
 

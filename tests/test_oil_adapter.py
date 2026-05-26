@@ -142,9 +142,9 @@ class TestBuildOilExperiment:
         assert all_params.issubset(config_keys)
 
     def test_models_attached(self, ve_data):
-        """Each hypothesis must have at least one model attached."""
+        """Each hypothesis must have a model attached (FunctionalProperty: single value)."""
         for h in ve_data["hypotheses"]:
-            assert len(h.is_implemented_by_model) >= 1
+            assert h.is_implemented_by_model is not None
 
     def test_virtual_experiment_has_ontology(self, ve_data):
         """The VE individual must have an OilFieldOntology attached."""
@@ -160,19 +160,19 @@ class TestHypothesisClassificationStructural:
         """h_CRM must be implemented by a PhysicsModel."""
         from hyppo.ontology.core_rules import PhysicsModel
         h = ve_data["hypotheses_map"]["h_CRM"]
-        assert any(isinstance(m, PhysicsModel) for m in h.is_implemented_by_model)
+        assert isinstance(h.is_implemented_by_model, PhysicsModel)
 
     def test_h_ML_has_datadriven_model(self, ve_data):
         """h_ML must be implemented by a DataDrivenModel."""
         from hyppo.ontology.core_rules import DataDrivenModel
         h = ve_data["hypotheses_map"]["h_ML"]
-        assert any(isinstance(m, DataDrivenModel) for m in h.is_implemented_by_model)
+        assert isinstance(h.is_implemented_by_model, DataDrivenModel)
 
     def test_h_LPR_has_hybrid_model(self, ve_data):
         """h_LPR must be implemented by a HybridModel."""
         from hyppo.ontology.core_rules import HybridModel
         h = ve_data["hypotheses_map"]["h_LPR"]
-        assert any(isinstance(m, HybridModel) for m in h.is_implemented_by_model)
+        assert isinstance(h.is_implemented_by_model, HybridModel)
 
 
 class TestCascadeInvalidation:
