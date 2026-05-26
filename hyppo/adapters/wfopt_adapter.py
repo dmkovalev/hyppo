@@ -257,8 +257,17 @@ def _build_lattice_graph(hyps: dict[str, Hypothesis]) -> Any:
 # Public API
 # ---------------------------------------------------------------------------
 
+_VE_CACHE: dict[str, Any] | None = None
+
+
 def build_oil_virtual_experiment() -> dict[str, Any]:
     """Build virtual experiment for HybridCRM waterflood optimization.
+
+    Memoised at module scope: owlready2 raises sqlite3.IntegrityError
+    when creating OWL individuals with the same IRIs in a second call.
+    The output is deterministic — callers that need mutation isolation
+    (e.g. cascade-invalidation tests) must snapshot and restore
+    ``hypothesis.is_a`` themselves.
 
     Returns dict with keys matching the VE tuple:
 
@@ -270,6 +279,10 @@ def build_oil_virtual_experiment() -> dict[str, Any]:
     - ``configuration_space``: dict from CONFIGURATION_SPACE
     - ``lattice``: networkx DiGraph with 6 nodes and 6 edges
     """
+    global _VE_CACHE
+    if _VE_CACHE is not None:
+        return _VE_CACHE
+
     ontology = _make_artefact(
         OilFieldOntology, "oil_waterflood",
         "HybridCRM waterflood domain ontology",
@@ -305,7 +318,7 @@ def build_oil_virtual_experiment() -> dict[str, Any]:
     ve.has_for_model = models
     ve.has_for_configuration = [configuration]
 
-    return {
+    _ve_result = {
         "ontology": ontology,
         "hypotheses": list(hyps.values()),
         "hypotheses_map": hyps,
@@ -315,6 +328,8 @@ def build_oil_virtual_experiment() -> dict[str, Any]:
         "lattice": lattice,
         "virtual_experiment": ve,
     }
+    _VE_CACHE = _ve_result
+    return _ve_result
 
 
 def run_oil_experiment_demo() -> dict[str, Any]:

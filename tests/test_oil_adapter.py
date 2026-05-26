@@ -74,15 +74,26 @@ from hyppo.adapters.wfopt_adapter import (
 
 # ── Fixtures ─────────────────────────────────────────────────────────────────
 
-@pytest.fixture()
+@pytest.fixture(scope="module")
 def ve_data():
-    """Build a fresh virtual experiment for each test."""
-    data = build_oil_virtual_experiment()
-    yield data
-    # Cleanup OWL individuals to avoid ABox pollution
-    from owlready2 import destroy_entity
-    for ind in list(onto.individuals()):
-        destroy_entity(ind)
+    """Build VE once per module (adapter caches to avoid IRI collision)."""
+    return build_oil_virtual_experiment()
+
+
+@pytest.fixture(autouse=True)
+def _restore_owl_state(ve_data):
+    """Snapshot and restore is_a for all hypotheses after each test.
+
+    Cascade-invalidation tests mutate h.is_a (append InvalidHypothesis,
+    StaleHypothesis). Without restoration, these mutations leak into
+    subsequent tests that read the same cached individuals.
+    """
+    hyps = ve_data.get("hypotheses_map", {})
+    snapshots = {k: list(h.is_a) for k, h in hyps.items()}
+    yield
+    for k, h in hyps.items():
+        h.is_a.clear()
+        h.is_a.extend(snapshots[k])
 
 
 # ============================================================================
@@ -325,19 +336,14 @@ class TestDemoRun:
     """Test the demo function runs without errors."""
 
     def test_run_oil_experiment_demo(self):
-        """Demo must complete and return expected keys."""
-        # Cleanup first
-        from owlready2 import destroy_entity
-        for ind in list(onto.individuals()):
-            destroy_entity(ind)
+        """Demo must complete and return expected keys.
 
+        Uses the adapter's cached VE; mutations are restored by the
+        module-level _restore_owl_state autouse fixture.
+        """
         result = run_oil_experiment_demo()
         assert "ve" in result
         assert "classifications" in result
         assert "stale_after_invalidation" in result
         assert "provenance" in result
         assert len(result["stale_after_invalidation"]) >= 4
-
-        # Cleanup
-        for ind in list(onto.individuals()):
-            destroy_entity(ind)
