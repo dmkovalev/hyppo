@@ -65,15 +65,17 @@ def slope(xs, ys):
 
 
 def main():
-    er_build, medians = {}, []
+    er_build, medians, raw = {}, [], {}
     print(f"{'|H|':>5} {'median, ms':>14} {'p05':>12} {'p95':>12}", flush=True)
     for n_h in GRID:
         ts = sorted(measure(n_h))
+        raw[n_h] = ts
         med, p05, p95 = pct(ts, 0.5), pct(ts, 0.05), pct(ts, 0.95)
         mean = sum(ts) / len(ts)
         std = math.sqrt(sum((t - mean) ** 2 for t in ts) / len(ts))
         er_build[str(n_h)] = {"median_ms": med, "mean_ms": mean, "std_ms": std,
-                              "p05_ms": p05, "p95_ms": p95, "n_reps": len(ts)}
+                              "p05_ms": p05, "p95_ms": p95, "n_reps": len(ts),
+                              "raw_ms": ts}
         medians.append(med)
         print(f"{n_h:>5} {med:>14.4f} {p05:>12.4f} {p95:>12.4f}", flush=True)
 
@@ -87,17 +89,27 @@ def main():
     ss_tot = sum((y - my) ** 2 for y in lt)
     r2 = 1 - ss_res / ss_tot
 
+    # Honest bootstrap: resample the n_reps replicas at EACH size (capturing timing
+    # noise), recompute per-size medians, refit the slope -> exponent distribution.
+    # (The earlier variant resampled the 8 grid points, which understates variance.)
     rng = random.Random(42)
-    n = len(lh)
-    samp = sorted(slope([lh[k] for k in idx], [lt[k] for k in idx])
-                  for idx in ([rng.randrange(n) for _ in range(n)] for _ in range(2000)))
+    samp = []
+    for _ in range(2000):
+        bs_med = []
+        for n_h in GRID:
+            rs = raw[n_h]
+            boot = sorted(rs[rng.randrange(len(rs))] for _ in range(len(rs)))
+            bs_med.append(pct(boot, 0.5))
+        samp.append(slope(lh, [math.log(m) for m in bs_med]))
+    samp.sort()
     lo, hi = samp[50], samp[1949]
-    print(f"\nDM core [10..500]: a = {a:.3f}  95%-CI [{lo:.3f}, {hi:.3f}]  "
-          f"a0={a0:.6f}  R2={r2:.4f}", flush=True)
+    print(f"\nDM core [10..500]: a = {a:.3f}  95%-CI [{lo:.3f}, {hi:.3f}] (bootstrap "
+          f"over reps)  a0={a0:.6f}  R2={r2:.4f}", flush=True)
 
     out = {"platform": "Windows 11", "python": "3.13", "algorithm": "DM (Kuhn+Tarjan)",
            "h_grid": GRID, "n_reps": N_REPS, "er_build": er_build,
-           "er_powerlaw": {"a": a, "a0": a0, "R2": r2, "ci95": [lo, hi]}}
+           "er_powerlaw": {"a": a, "a0": a0, "R2": r2, "ci95": [lo, hi],
+                           "ci_method": "bootstrap over replicas (B=2000)"}}
     dst = Path(__file__).resolve().parent.parent / "data" / "asymptotic_results_dm.json"
     # preserve speedup/planning if already present (added by dm_speedup_planning.py)
     if dst.exists():
