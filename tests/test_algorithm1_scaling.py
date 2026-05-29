@@ -5,6 +5,8 @@ import math
 import random
 import time
 
+from sympy import Symbol
+
 from hyppo.coa._base import Structure, Equation
 
 
@@ -15,7 +17,8 @@ def _gen_struct(rng, n_eq=5, pool=20):
     for i in range(n_eq):
         extras = rng.sample([v for v in chosen if v != chosen[i]],
                             rng.randint(1, min(3, n_eq - 1)))
-        eqs.append(Equation(formula="+".join([chosen[i], *extras]) + "=0"))
+        names = [chosen[i], *extras]
+        eqs.append(Equation(vars={Symbol(nm) for nm in names}))
     return Structure(eqs)
 
 

@@ -93,7 +93,13 @@ class Structure:
         return {self.equations[i].formula: self._name2sym[v] for i, v in m.items()}
 
     def build_transitive_closure(self):
-        """{variable Symbol: set of transitively dependent variable Symbols}."""
+        """{variable Symbol: set of transitively dependent variable Symbols}.
+
+        Returns {} when the structure is incomplete OR structurally singular
+        (no perfect matching). This is deliberate: lattice construction calls
+        this over many candidate unions, some legitimately unsolvable, and must
+        not raise. (build_full_causal_mapping, a direct query, raises instead.)
+        """
         tc = causal.transitive_closure(self._eqsets)
         if tc is None:
             return {}
