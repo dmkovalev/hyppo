@@ -57,6 +57,7 @@ git-ignored), `out/` (figures, git-ignored), `data/` (result JSON).
 | `scripts/bootstrap_ci_cascade.py` | bootstrap 95% CI for median ρ by family |
 | `scripts/recompute_spearman_hyp_level.py` | Spearman ρ(`|H|`, recompute fraction) |
 | `scripts/draw_fig2_composite.py`, `scripts/draw_rho_vs_r.py` | composite ρ figures (into `out/`) |
+| `scripts/resume_vs_cascade.py` | Nextflow `-resume` (faithful content-hash model) vs `HypothesisGraph.plan()`: identical recompute set on file-DAGs (1000 random, 0 mismatches), and the hidden-staleness case file-hashing misses |
 
 External data is **downloaded into `cache/`** (not bundled): WfCommons traces,
 Gene Ontology `go-basic.obo`, nf-core workflow DAGs, EDAM ontology.
