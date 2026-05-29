@@ -1,6 +1,6 @@
 {
   "experiment": "chapter4_synthetic_ab",
-  "timestamp": "2026-05-26T07:37:51.190554+00:00",
+  "timestamp": "2026-05-26T08:29:56.405458+00:00",
   "field": {
     "n_producers": 12,
     "n_injectors": 8,

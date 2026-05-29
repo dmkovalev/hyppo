@@ -24,6 +24,8 @@ import urllib.request
 from collections import defaultdict, deque
 from pathlib import Path
 
+from hyppo.coa import HypothesisGraph
+
 import numpy as np
 import matplotlib
 matplotlib.use("Agg")
@@ -126,34 +128,8 @@ def parse_wfformat(path: Path) -> tuple[int, dict[int, set[int]], int]:
 
 
 def plan(n: int, adj: dict[int, set[int]], cached: set[int]) -> int:
-    in_deg = defaultdict(int)
-    for vs in adj.values():
-        for v in vs:
-            in_deg[v] += 1
-    q = deque(i for i in range(n) if in_deg[i] == 0)
-    topo = []
-    in_d = dict(in_deg)
-    while q:
-        x = q.popleft()
-        topo.append(x)
-        for v in adj.get(x, ()):
-            in_d[v] -= 1
-            if in_d[v] == 0:
-                q.append(v)
-    p_ne: set[int] = set()
-    for h in topo:
-        if h in p_ne:
-            continue
-        if h not in cached:
-            st = [h]
-            while st:
-                u = st.pop()
-                if u in p_ne:
-                    continue
-                p_ne.add(u)
-                for v in adj.get(u, ()):
-                    if v not in p_ne:
-                        st.append(v)
+    edges = [(u, v) for u, vs in adj.items() for v in vs]
+    p_ne = HypothesisGraph.from_edges(n, edges).plan(cached)
     return len(p_ne)
 
 

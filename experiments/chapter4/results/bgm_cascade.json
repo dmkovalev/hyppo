@@ -1,0 +1,72 @@
+{
+  "nodes": [
+    "age_cells",
+    "density_law",
+    "IMF",
+    "SFR",
+    "rho",
+    "birthrate"
+  ],
+  "edges": [
+    [
+      "age_cells",
+      "SFR"
+    ],
+    [
+      "SFR",
+      "rho"
+    ],
+    [
+      "density_law",
+      "rho"
+    ],
+    [
+      "SFR",
+      "birthrate"
+    ],
+    [
+      "rho",
+      "birthrate"
+    ],
+    [
+      "IMF",
+      "birthrate"
+    ]
+  ],
+  "n_hypotheses": 6,
+  "cascade": {
+    "change_SFR": {
+      "recompute": [
+        "SFR",
+        "birthrate",
+        "rho"
+      ],
+      "fraction": 0.5
+    },
+    "change_IMF": {
+      "recompute": [
+        "IMF",
+        "birthrate"
+      ],
+      "fraction": 0.3333333333333333
+    }
+  },
+  "imf_ranking_chi2": [
+    {
+      "hypothesis": "Kroupa (2001)",
+      "chi2": 187.0,
+      "rank": 1
+    },
+    {
+      "hypothesis": "Haywood (1997)",
+      "chi2": 342.0,
+      "rank": 2
+    },
+    {
+      "hypothesis": "Salpeter (1955)",
+      "chi2": 518.0,
+      "rank": 3
+    }
+  ],
+  "data_note": "chi^2 from Czekaj+2014 (Tycho-2 thin-disc); cascade structure reproduced from hyppo.coa.HypothesisGraph"
+}

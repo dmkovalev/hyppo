@@ -1,6 +1,6 @@
 {
   "experiment": "chapter4_synthetic_sweep",
-  "timestamp": "2026-05-26T07:47:41.200255+00:00",
+  "timestamp": "2026-05-26T08:30:32.046944+00:00",
   "n_seeds": 10,
   "spike_magnitudes": [
     0.05,

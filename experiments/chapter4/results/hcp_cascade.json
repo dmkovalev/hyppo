@@ -1,0 +1,68 @@
+{
+  "nodes": [
+    "h_atlas",
+    "h_conn",
+    "h_group"
+  ],
+  "edges": [
+    [
+      "h_atlas",
+      "h_conn"
+    ],
+    [
+      "h_conn",
+      "h_group"
+    ]
+  ],
+  "n_variants": {
+    "h_atlas": 4,
+    "h_conn": 4,
+    "h_group": 3
+  },
+  "config_space": 48,
+  "cascade": {
+    "h_atlas": {
+      "recompute": [
+        "h_atlas",
+        "h_conn",
+        "h_group"
+      ],
+      "fraction": 1.0
+    },
+    "h_conn": {
+      "recompute": [
+        "h_conn",
+        "h_group"
+      ],
+      "fraction": 0.6666666666666666
+    },
+    "h_group": {
+      "recompute": [
+        "h_group"
+      ],
+      "fraction": 0.3333333333333333
+    }
+  },
+  "region_decisions": {
+    "Precentral Gyrus": {
+      "p": 0.0045,
+      "eta": 29.0,
+      "significant": true,
+      "control": false
+    },
+    "Postcentral Gyrus": {
+      "p": 0.0003,
+      "eta": 54.0,
+      "significant": true,
+      "control": false
+    },
+    "Planum Polare": {
+      "p": 0.08,
+      "eta": 7.0,
+      "significant": false,
+      "control": true
+    }
+  },
+  "generator_best_r2": 0.8,
+  "data_note": "sign-test p (Holm) and Bayesian eta from the published HCP analysis; fMRI is DUA-restricted. Graph/cascade reproduced from hyppo.coa.HypothesisGraph."
+}
