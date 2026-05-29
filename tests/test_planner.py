@@ -177,3 +177,22 @@ def test_plan_empty_lattice():
 
     assert len(plan.needs_execution) == 0
     assert len(plan.cached) == 0
+
+
+def test_plan_rejects_cyclic_graph():
+    """Cyclic hypothesis graph must raise ValueError (Algorithm 4 precondition)."""
+    h1 = FakeHypothesis("h1")
+    h2 = FakeHypothesis("h2")
+    h3 = FakeHypothesis("h3")
+    g = nx.DiGraph()
+    g.add_nodes_from([h1, h2, h3])
+    g.add_edge(h1, h2)
+    g.add_edge(h2, h3)
+    g.add_edge(h3, h1)  # cycle: h1 -> h2 -> h3 -> h1
+
+    lattice = FakeLattice(g)
+    db = FakeDatabase()
+    config = FakeConfiguration()
+
+    with pytest.raises(ValueError, match="cycle"):
+        build_optimal_plan(config, lattice, db)

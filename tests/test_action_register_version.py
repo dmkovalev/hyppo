@@ -12,14 +12,14 @@ from hyppo.actions.version import (
 
 
 @pytest.fixture
-def mock_wfdb(monkeypatch):
-    from hyppo.mcp import wfdb_client
-    monkeypatch.setattr(wfdb_client, "insert_hypothesis_version", AsyncMock())
-    monkeypatch.setattr(wfdb_client, "find_latest_active", AsyncMock(return_value=None))
-    return wfdb_client
+def mock_store(monkeypatch):
+    from hyppo.mcp import version_store
+    monkeypatch.setattr(version_store, "insert_hypothesis_version", AsyncMock())
+    monkeypatch.setattr(version_store, "find_latest_active", AsyncMock(return_value=None))
+    return version_store
 
 
-async def test_register_happy_path_no_prior(mock_wfdb):
+async def test_register_happy_path_no_prior(mock_store):
     out: HypothesisVersionRecord = await register_hypothesis_version(
         RegisterHypothesisVersionInput(
             hypothesis_kind="h_CRM",
@@ -31,18 +31,18 @@ async def test_register_happy_path_no_prior(mock_wfdb):
     assert out.supersedes is None
     assert len(out.content_sha256) == 64
     assert out.version_id  # non-empty UUID
-    mock_wfdb.insert_hypothesis_version.assert_awaited_once()
-    call_kwargs = mock_wfdb.insert_hypothesis_version.await_args.kwargs
+    mock_store.insert_hypothesis_version.assert_awaited_once()
+    call_kwargs = mock_store.insert_hypothesis_version.await_args.kwargs
     assert call_kwargs["hypothesis_kind"] == "h_CRM"
     assert call_kwargs["model_id"] == "sha256:abc"
     assert call_kwargs["supersedes"] is None
 
 
 async def test_register_supersedes_prior_version(monkeypatch):
-    from hyppo.mcp import wfdb_client
-    monkeypatch.setattr(wfdb_client, "insert_hypothesis_version", AsyncMock())
+    from hyppo.mcp import version_store
+    monkeypatch.setattr(version_store, "insert_hypothesis_version", AsyncMock())
     monkeypatch.setattr(
-        wfdb_client, "find_latest_active",
+        version_store, "find_latest_active",
         AsyncMock(return_value="prior-uuid-xxxx"),
     )
     out = await register_hypothesis_version(
@@ -57,13 +57,13 @@ async def test_register_supersedes_prior_version(monkeypatch):
 
 async def test_register_duplicate_raises(monkeypatch):
     from sqlalchemy.exc import IntegrityError
-    from hyppo.mcp import wfdb_client
+    from hyppo.mcp import version_store
 
     monkeypatch.setattr(
-        wfdb_client, "insert_hypothesis_version",
+        version_store, "insert_hypothesis_version",
         AsyncMock(side_effect=IntegrityError("stmt", {}, Exception("dup"))),
     )
-    monkeypatch.setattr(wfdb_client, "find_latest_active", AsyncMock(return_value=None))
+    monkeypatch.setattr(version_store, "find_latest_active", AsyncMock(return_value=None))
     with pytest.raises(RuntimeError, match="already registered"):
         await register_hypothesis_version(
             RegisterHypothesisVersionInput(

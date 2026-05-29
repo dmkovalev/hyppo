@@ -13,10 +13,10 @@ from hyppo.actions.version import (
 
 
 async def test_runs_pinned_to_superseded_version_are_returned(monkeypatch):
-    from hyppo.mcp import wfdb_client
+    from hyppo.mcp import version_store
 
     monkeypatch.setattr(
-        wfdb_client, "select_version_by_id",
+        version_store, "select_version_by_id",
         AsyncMock(return_value={
             "version_id": "v1",
             "hypothesis_kind": "h_CRM",
@@ -29,14 +29,14 @@ async def test_runs_pinned_to_superseded_version_are_returned(monkeypatch):
         }),
     )
     monkeypatch.setattr(
-        wfdb_client, "select_superseding_versions",
+        version_store, "select_superseding_versions",
         AsyncMock(return_value=[
             {"version_id": "v2", "created_at": datetime(2026, 2, 1)},
             {"version_id": "v3", "created_at": datetime(2026, 3, 1)},
         ]),
     )
     monkeypatch.setattr(
-        wfdb_client, "select_runs_for_version",
+        version_store, "select_runs_for_version",
         AsyncMock(return_value=[
             {"run_id": "run-A", "hypothesis_kind": "h_CRM", "version_id": "v1"},
             {"run_id": "run-B", "hypothesis_kind": "h_CRM", "version_id": "v1"},
@@ -51,9 +51,9 @@ async def test_runs_pinned_to_superseded_version_are_returned(monkeypatch):
 
 
 async def test_no_superseding_versions_returns_empty(monkeypatch):
-    from hyppo.mcp import wfdb_client
+    from hyppo.mcp import version_store
     monkeypatch.setattr(
-        wfdb_client, "select_version_by_id",
+        version_store, "select_version_by_id",
         AsyncMock(return_value={"version_id": "vlatest",
                                  "hypothesis_kind": "h_CRM",
                                  "content_sha256": "0"*64,
@@ -63,12 +63,12 @@ async def test_no_superseding_versions_returns_empty(monkeypatch):
                                  "created_by": "hyppo-mcp"}),
     )
     monkeypatch.setattr(
-        wfdb_client, "select_superseding_versions", AsyncMock(return_value=[]),
+        version_store, "select_superseding_versions", AsyncMock(return_value=[]),
     )
     # If nothing supersedes this version, no runs are stale relative to it,
     # so we should not even consult select_runs_for_version.
     runs_for_version = AsyncMock(return_value=[])
-    monkeypatch.setattr(wfdb_client, "select_runs_for_version", runs_for_version)
+    monkeypatch.setattr(version_store, "select_runs_for_version", runs_for_version)
 
     out = await resolve_stale_runs(ResolveStaleRunsInput(version_id="vlatest"))
     assert out.runs == []
@@ -76,9 +76,9 @@ async def test_no_superseding_versions_returns_empty(monkeypatch):
 
 
 async def test_unknown_version_raises(monkeypatch):
-    from hyppo.mcp import wfdb_client
+    from hyppo.mcp import version_store
     monkeypatch.setattr(
-        wfdb_client, "select_version_by_id", AsyncMock(return_value=None),
+        version_store, "select_version_by_id", AsyncMock(return_value=None),
     )
     with pytest.raises(RuntimeError, match="not found"):
         await resolve_stale_runs(ResolveStaleRunsInput(version_id="zzz"))

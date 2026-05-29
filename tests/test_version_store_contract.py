@@ -1,4 +1,4 @@
-"""Contract sanity for hyppo.mcp.wfdb_client.
+"""Contract sanity for hyppo.mcp.version_store.
 
 These tests do NOT hit Postgres. They check the module exposes the right
 async coroutine functions with the right names — later action tests
@@ -22,12 +22,12 @@ EXPECTED_FUNCTIONS = {
 
 
 def test_module_exports_expected_async_functions():
-    from hyppo.mcp import wfdb_client
+    from hyppo.mcp import version_store
 
     missing = set()
     not_coro = set()
     for name in EXPECTED_FUNCTIONS:
-        fn = getattr(wfdb_client, name, None)
+        fn = getattr(version_store, name, None)
         if fn is None:
             missing.add(name)
         elif not asyncio.iscoroutinefunction(fn):
@@ -39,7 +39,7 @@ def test_module_exports_expected_async_functions():
 def test_wfworker_grpc_address_helper_is_present():
     """Mirror wfonto.mcp.wfworker_client — gives bridge clients a uniform
     way to read connection config, even though we won't use gRPC."""
-    from hyppo.mcp import wfdb_client
-    assert hasattr(wfdb_client, "database_url"), (
+    from hyppo.mcp import version_store
+    assert hasattr(version_store, "database_url"), (
         "Expected a database_url() helper that reads DATABASE_URL env var"
     )

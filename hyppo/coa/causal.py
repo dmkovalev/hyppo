@@ -8,7 +8,7 @@ irreducible ("minimal complete") blocks in polynomial time.
 """
 from __future__ import annotations
 
-from collections import defaultdict
+from collections import defaultdict, deque
 
 
 def variables(equations: list[frozenset[str]]) -> set[str]:
@@ -25,29 +25,87 @@ def is_complete(equations: list[frozenset[str]]) -> bool:
 
 
 def perfect_matching(equations: list[frozenset[str]]) -> dict[int, str] | None:
-    """Match each equation to a distinct variable it contains (Kuhn's algorithm).
+    """Match each equation to a distinct variable it contains (Hopcroft-Karp).
 
     Returns ``{eq_index: var}`` saturating every equation, or ``None`` if no such
     matching exists (the structure is structurally singular). Candidate variables
-    are tried in sorted order, giving a deterministic, name-stable result.
-    Returns an empty dict (not None) for an empty equation list.
+    are tried in sorted order and free equations in index order, giving a
+    deterministic, name-stable result. Returns an empty dict for an empty list.
+
+    Uses the Hopcroft-Karp algorithm -- ``O(|E|*sqrt(|V|))`` -- which augments along
+    all shortest alternating paths of a BFS phase before re-layering, matching the
+    complexity stated for the causal-ordering construction. Both the BFS phase and
+    the augmenting DFS are iterative (explicit stacks), so a long alternating path
+    (e.g. a dependency chain of thousands of equations) never hits Python's
+    recursion limit.
     """
     cand = [sorted(eq) for eq in equations]
-    match_var = {}  # var -> eq index
+    n = len(equations)
+    match_eq: dict[int, str] = {}   # eq index -> var
+    match_var: dict[str, int] = {}  # var -> eq index
+    INF = float("inf")
+    dist: dict[int, float] = {}
 
-    def try_aug(i: int, seen: set[str]) -> bool:
-        for v in cand[i]:
-            if v not in seen:
-                seen.add(v)
-                if v not in match_var or try_aug(match_var[v], seen):
+    def bfs() -> bool:
+        """Layer free equations by alternating-path distance; return True if any
+        augmenting path to a free variable exists."""
+        q: deque[int] = deque()
+        for i in range(n):
+            if i not in match_eq:
+                dist[i] = 0
+                q.append(i)
+            else:
+                dist[i] = INF
+        reachable_free = False
+        while q:
+            i = q.popleft()
+            for v in cand[i]:
+                w = match_var.get(v)
+                if w is None:
+                    reachable_free = True
+                elif dist.get(w, INF) == INF:
+                    dist[w] = dist[i] + 1
+                    q.append(w)
+        return reachable_free
+
+    def augment(start: int) -> bool:
+        """Iterative layered DFS: find one shortest augmenting path from free
+        equation ``start`` and flip it. ``dist`` confines the search to BFS layers
+        and dead ends are pruned via ``dist[i] = INF``."""
+        stack = [(start, iter(cand[start]))]
+        trail: list[tuple[int, str]] = []   # (eq, var) edges descended into
+        while stack:
+            i, it = stack[-1]
+            descended = False
+            for v in it:
+                w = match_var.get(v)
+                if w is None:               # free var -> flip the whole path
+                    match_eq[i] = v
                     match_var[v] = i
+                    for eq_p, var_p in reversed(trail):
+                        match_eq[eq_p] = var_p
+                        match_var[var_p] = eq_p
                     return True
+                if dist.get(w, INF) == dist[i] + 1:
+                    trail.append((i, v))
+                    stack.append((w, iter(cand[w])))
+                    descended = True
+                    break
+            if not descended:
+                dist[i] = INF               # exhausted in this phase
+                stack.pop()
+                if trail:
+                    trail.pop()
         return False
 
-    for i in range(len(equations)):
-        if not try_aug(i, set()):
-            return None
-    return {i: v for v, i in match_var.items()}
+    while bfs():
+        for i in range(n):
+            if i not in match_eq:
+                augment(i)
+
+    if len(match_eq) != n:
+        return None
+    return dict(match_eq)
 
 
 def _dependency_graph(

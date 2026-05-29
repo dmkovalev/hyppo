@@ -12,6 +12,8 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 
+from hyppo.core._epistemic import EpistemicStatus, evaluate_status
+
 logger = logging.getLogger(__name__)
 
 
@@ -27,6 +29,7 @@ class RunResult:
     status: Status
     metrics: dict = field(default_factory=dict)
     error: str | None = None
+    epistemic_status: EpistemicStatus = EpistemicStatus.PROPOSED
 
 
 class Runner:
@@ -49,17 +52,24 @@ class Runner:
         models: dict[str, Callable],
         configs: dict[str, dict] | None = None,
         lattice_edges: list[tuple[str, str]] | None = None,
+        competes: dict[str, set[str]] | None = None,
+        theta_sup: float = 0.7,
+        theta_aic: float = 10.0,
     ) -> dict[str, dict]:
         """Execute plan and return results.
 
         Args:
             plan: {"p_ne": set of hypothesis IDs to compute, "p_e": set to load from cache}
-            models: {hypothesis_id: callable(config) -> {"r2": float, ...}}
+            models: {hypothesis_id: callable(config) -> {"r2": float, "aic": float, ...}}
             configs: {hypothesis_id: config_dict}
             lattice_edges: list of (parent, child) derived_by edges
+            competes: {hypothesis_id: set of competing hypothesis IDs} -- used to
+                assign the SUPERSEDED epistemic status via Delta AIC.
+            theta_sup: R^2 support threshold for SUPPORTED/REFUTED (default 0.7).
+            theta_aic: Delta AIC threshold for SUPERSEDED (default 10).
 
         Returns:
-            {hypothesis_id: {"status": str, "metrics": dict}}
+            {hypothesis_id: {"status": str, "metrics": dict, "epistemic_status": str}}
         """
         results: dict[str, dict] = {}
         p_ne = plan.get("p_ne", set())
@@ -119,7 +129,38 @@ class Runner:
                 self._cascade_skip(h_id, dependents, failed_ancestors)
                 logger.error(f"Failed {h_id} after {self.max_retries} attempts")
 
+        self._assign_epistemic_status(results, competes or {}, theta_sup, theta_aic)
         return results
+
+    def _assign_epistemic_status(
+        self,
+        results: dict[str, dict],
+        competes: dict[str, set[str]],
+        theta_sup: float,
+        theta_aic: float,
+    ) -> None:
+        """Write ``epistemic_status`` for every result (Section 2). A successfully
+        evaluated hypothesis is SUPPORTED/REFUTED by its R^2, or SUPERSEDED if a
+        competitor's AIC beats it by more than ``theta_aic``; anything not evaluated
+        (no R^2, or FAILED/SKIPPED) stays PROPOSED."""
+        def aic_of(hid: str) -> float | None:
+            r = results.get(hid)
+            if r and r["status"] == Status.SUCCESS.value:
+                return r["metrics"].get("aic")
+            return None
+
+        for h_id, res in results.items():
+            if res["status"] != Status.SUCCESS.value:
+                res["epistemic_status"] = EpistemicStatus.PROPOSED.value
+                continue
+            r2 = res["metrics"].get("r2")
+            own_aic = res["metrics"].get("aic")
+            competitor_aics = [a for c in competes.get(h_id, set())
+                               if (a := aic_of(c)) is not None]
+            best = min(competitor_aics) if competitor_aics else None
+            status = evaluate_status(r2, own_aic, best,
+                                     theta_sup=theta_sup, theta_aic=theta_aic)
+            res["epistemic_status"] = status.value
 
     def _cascade_skip(self, h_id: str, dependents: dict[str, set[str]], failed_set: set[str]) -> None:
         """Recursively mark all dependents as needing skip."""

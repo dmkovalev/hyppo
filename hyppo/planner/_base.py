@@ -250,10 +250,13 @@ def build_optimal_plan(
             if all(pred in finished for pred in graph.predecessors(h))
         ]
 
-        # Если нет доступных корней -- в графе есть цикл.
-        # Берем произвольную вершину, чтобы не зависнуть.
         if not roots:
-            roots = [next(iter(remaining))]
+            raise ValueError(
+                "Hypothesis graph contains a cycle — "
+                "precondition of Algorithm 4 violated "
+                "(Theorem 1 requires a DAG). "
+                "Run check_consistency() before build_optimal_plan()."
+            )
 
         for h in roots:
             if h in finished:

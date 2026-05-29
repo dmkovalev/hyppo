@@ -106,21 +106,19 @@ class Model(virtual_experiment_onto.Artefact):
     def predict(self, X):
         pass
 
-    def update_bayesian_probability(self, X, prior):
-
-        likelihood = stats.norm.cdf(self.predict(X),
-                                    self.predict(X).mean,
-                                    self.predict(X).std)
-
-        unnormalized_posterior = prior * likelihood
-        posterior = unnormalized_posterior / np.nan_to_num(unnormalized_posterior).sum()
-        return posterior
+    def update_bayesian_probability(self, X, y, prior):
+        """Unnormalised Bayesian posterior weight for this hypothesis given data
+        (X, y): ``prior * exp(log-likelihood)`` with a Gaussian likelihood at the
+        MLE residual variance. Normalise across competing hypotheses with
+        :func:`hyppo.comparison.bayesian_posterior`."""
+        from hyppo.comparison.compare import gaussian_log_likelihood
+        ll = gaussian_log_likelihood(y, self.predict(X))
+        return float("inf") if ll == float("inf") else prior * math.exp(ll)
 
     def bayesian_score(self, X, y):
-        error = y - self.predict(X)
-        std = np.std(error)
-        probability = np.sum(1/np.sqrt(2*std**2*np.pi)*np.exp(1/(2*std**2)*(error)))
-        return probability
+        """Gaussian log-likelihood of this model's predictions on (X, y)."""
+        from hyppo.comparison.compare import gaussian_log_likelihood
+        return gaussian_log_likelihood(y, self.predict(X))
 
 
 class NonLinearModel(Model):

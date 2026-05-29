@@ -27,13 +27,13 @@ def pytest_collection_modifyitems(items):
     items[:] = owl_items + other_items
 
 
-# ── wfdb aiosqlite fixture ──────────────────────────────────────────────────
+# ── version-store aiosqlite fixture ──────────────────────────────────────────────────
 
 @pytest_asyncio.fixture
-async def wfdb_session(monkeypatch, tmp_path):
+async def version_db_session(monkeypatch, tmp_path):
     """Per-test aiosqlite database with all ORM tables provisioned."""
     from sqlalchemy.ext.asyncio import create_async_engine
-    from wfdb.base import Base
+    from hyppo.mcp._db import Base
 
     db_path = tmp_path / "hyppo_test.sqlite"
     db_url = f"sqlite+aiosqlite:///{db_path}"

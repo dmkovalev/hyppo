@@ -1,8 +1,9 @@
-"""Async wfdb helpers for hyppo MCP write actions.
+"""Async persistence helpers for hyppo MCP write actions (hypothesis versioning
+and run provenance).
 
-Real implementations using wfdb.get_engine / get_session_factory.
-Each function opens an async session, performs the query, and commits
-where needed.
+Self-contained: models and engine live in :mod:`hyppo.mcp._db` -- no dependency
+on any external ORM. Each function opens an async session, performs the query,
+and commits where needed.
 """
 from __future__ import annotations
 
@@ -12,9 +13,12 @@ from typing import Any
 
 from sqlalchemy import select
 
-from wfdb import get_engine, get_session_factory
-from wfdb.models.hypothesis_version import HypothesisVersion
-from wfdb.models.hypothesis_run_link import HypothesisRunLink
+from hyppo.mcp._db import (
+    HypothesisRunLink,
+    HypothesisVersion,
+    get_engine,
+    get_session_factory,
+)
 
 
 def database_url() -> str | None:

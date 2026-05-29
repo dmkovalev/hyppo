@@ -11,9 +11,9 @@ from hyppo.actions.version import (
 
 
 async def test_mark_writes_one_row_per_kind(monkeypatch):
-    from hyppo.mcp import wfdb_client
+    from hyppo.mcp import version_store
     upsert = AsyncMock(return_value=True)
-    monkeypatch.setattr(wfdb_client, "upsert_run_link", upsert)
+    monkeypatch.setattr(version_store, "upsert_run_link", upsert)
     out: MarkRunWithVersionOutput = await mark_run_with_version(
         MarkRunWithVersionInput(
             run_id="run-xxx",
@@ -27,8 +27,8 @@ async def test_mark_writes_one_row_per_kind(monkeypatch):
 
 async def test_mark_idempotent_returns_zero(monkeypatch):
     """Second call with identical inputs upserts no new rows."""
-    from hyppo.mcp import wfdb_client
-    monkeypatch.setattr(wfdb_client, "upsert_run_link", AsyncMock(return_value=False))
+    from hyppo.mcp import version_store
+    monkeypatch.setattr(version_store, "upsert_run_link", AsyncMock(return_value=False))
     out = await mark_run_with_version(
         MarkRunWithVersionInput(
             run_id="run-xxx",
