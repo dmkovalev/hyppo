@@ -31,11 +31,11 @@ been removed; the scripts below are thin measurement harnesses over the library.
 | `scripts/dm_speedup_planning.py` | **Section 5.2 + 5.4** — Algorithm 2 speedup (incremental `add_hypothesis` is `O(|H|)`; full-rebuild baseline taken from `er_build`) and Algorithm 4 planning cascade (`|P_ne|/|H|` vs cache rate `r`, via `HypothesisGraph.plan`). Merges `speedup` + `planning` into `asymptotic_results_dm.json`. Light allocation → stable in one process. |
 | `scripts/dm_worstcase.py` | Worst-case regime of Lemma 1: structures **grow** with `|H|` (`k = α·|H|`), variable-disjoint, full DAG → every pair-union complete → `O(|H|⁴)`. Measures the build exponent (expect `a ≈ 4`). Writes `data/worstcase_dm.json`. |
 | `scripts/dm_figure.py` | Regenerates `asymp_build_lattice.pdf`, `asymp_add_hypothesis.pdf`, `asymp_planning_cache.pdf` (into `../../thesis/images/`) from `asymptotic_results_dm.json`. Needs matplotlib. |
-| `scripts/wfcommons_validation.py` | **Section 5.3** — cascade-effect experiment on 157 real workflow execution traces from [WfCommons](https://wfcommons.org) (Nextflow nf-core, Snakemake RASflow, Pegasus). Writes `data/wfcommons_validation_results.json`. |
+| `scripts/wfcommons_validation.py` | **Section 5.3** — cascade-effect experiment on 171 real workflow execution traces from [WfCommons](https://wfcommons.org) (Nextflow nf-core, Snakemake RASflow/rna-seq-star-deseq2/varlociraptor, Pegasus). Writes `data/wfcommons_validation_results.json`. |
 | `scripts/algorithm1_bench.py` | OWL 2 DL consistency-check timing (HermiT Stage A + Stage B C3/C4/C5) — separate "Algorithm 1" of the ontology section; needs Java 11+. |
 | `data/asymptotic_results_dm.json` | DM measurements: build power law `a ≈ 2.11` (`R² ≈ 0.9999`), Algorithm 2 speedup, Algorithm 4 planning. |
 | `data/worstcase_dm.json` | Worst-case build exponent (growing structures). |
-| `data/wfcommons_validation_results.json` | Per-workflow cascade ρ at `r=0.7` for all 157 instances + per-family medians. |
+| `data/wfcommons_validation_results.json` | Per-workflow cascade ρ at `r=0.7` for all 171 instances + per-family medians. |
 
 ## Cascade-validation suite (Section 5.3–5.4 / Chapter 4)
 
@@ -46,14 +46,14 @@ git-ignored), `out/` (figures, git-ignored), `data/` (result JSON).
 | Path | Purpose |
 |---|---|
 | `scripts/wfcommons_multi_r.py` | cascade ρ on WfCommons at `r ∈ {0.3,0.5,0.7,0.9}` |
-| `scripts/baseline_and_overhead.py` (+ `_bench_one_baseline.py`) | reuse speedup + planning overhead on 157 WfCommons (subprocess-isolated) |
+| `scripts/baseline_and_overhead.py` (+ `_bench_one_baseline.py`) | reuse speedup + planning overhead on 171 WfCommons (subprocess-isolated) |
 | `scripts/cascade_on_hypothesis_graphs.py` | cascade on hypothesis graphs + EDAM ontology |
 | `scripts/cascade_on_curated_graphs.py` | cascade on hand-curated nf-core hypothesis graphs |
 | `scripts/build_hand_curated_hypothesis_graphs.py` | (re)generates `data/hand_curated_hypothesis_graphs.json` |
 | `scripts/go_validation.py` | cascade on the real Gene Ontology DAG (downloads `go-basic.obo`); also exports plan/generator helpers |
 | `scripts/nfcore_validation.py` | cascade on nf-core pipeline DAGs (reuses `go_validation` helpers) |
 | `scripts/weighted_planning.py` | weighted planning via min-cut — confirms ratio ≡ 1.0 (under strict axioms the unweighted `plan()` is already weight-optimal) |
-| `scripts/nextflow_157_benchmark.py` | Nextflow `-resume` empirical baseline on 157 traces |
+| `scripts/nextflow_157_benchmark.py` | Nextflow `-resume` empirical baseline on the WfCommons traces (171 as of latest fetch) |
 | `scripts/bootstrap_ci_cascade.py` | bootstrap 95% CI for median ρ by family |
 | `scripts/recompute_spearman_hyp_level.py` | Spearman ρ(`|H|`, recompute fraction) |
 | `scripts/draw_fig2_composite.py`, `scripts/draw_rho_vs_r.py` | composite ρ figures (into `out/`) |

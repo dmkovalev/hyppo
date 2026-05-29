@@ -55,10 +55,10 @@ BGM_EDGES = [
 ]
 BGM_SEED = [3]  # IMF → cascade SBR, LL, DSC = 4/10
 
-# ── HCP (4 nodes, 3 edges, from Hypothesis_Lattice.pdf) ─────────────
-HCP_NODES = ["Atlas", "Conn", "Gender\ndiff", "Age\ndiff"]
-HCP_EDGES = [(0, 1), (1, 2), (1, 3)]  # atlas→conn, conn→gender, conn→age
-HCP_SEED = [0]  # atlas → cascade conn + gender + age = 4/4
+# ── HCP (3 nodes, 2 edges, from part4.tex: atlas→conn→group) ────────
+HCP_NODES = ["Atlas", "Conn", "Group"]
+HCP_EDGES = [(0, 1), (1, 2)]  # atlas→conn→group
+HCP_SEED = [0]  # atlas → cascade conn + group = 2/3
 
 # ── Oil/HybridCRM (19 nodes, from part4.tex) ────────────────────────
 OIL_NODES = [
