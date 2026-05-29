@@ -37,6 +37,30 @@ been removed; the scripts below are thin measurement harnesses over the library.
 | `data/worstcase_dm.json` | Worst-case build exponent (growing structures). |
 | `data/wfcommons_validation_results.json` | Per-workflow cascade ρ at `r=0.7` for all 157 instances + per-family medians. |
 
+## Cascade-validation suite (Section 5.3–5.4 / Chapter 4)
+
+Reproducibility scripts for the empirical cascade results, all driven by
+`hyppo.coa.HypothesisGraph`. They share the layout: `cache/` (downloaded data,
+git-ignored), `out/` (figures, git-ignored), `data/` (result JSON).
+
+| Path | Purpose |
+|---|---|
+| `scripts/wfcommons_multi_r.py` | cascade ρ on WfCommons at `r ∈ {0.3,0.5,0.7,0.9}` |
+| `scripts/baseline_and_overhead.py` (+ `_bench_one_baseline.py`) | reuse speedup + planning overhead on 157 WfCommons (subprocess-isolated) |
+| `scripts/cascade_on_hypothesis_graphs.py` | cascade on hypothesis graphs + EDAM ontology |
+| `scripts/cascade_on_curated_graphs.py` | cascade on hand-curated nf-core hypothesis graphs |
+| `scripts/build_hand_curated_hypothesis_graphs.py` | (re)generates `data/hand_curated_hypothesis_graphs.json` |
+| `scripts/go_validation.py` | cascade on the real Gene Ontology DAG (downloads `go-basic.obo`); also exports plan/generator helpers |
+| `scripts/nfcore_validation.py` | cascade on nf-core pipeline DAGs (reuses `go_validation` helpers) |
+| `scripts/weighted_planning.py` | weighted planning via min-cut — confirms ratio ≡ 1.0 (under strict axioms the unweighted `plan()` is already weight-optimal) |
+| `scripts/nextflow_157_benchmark.py` | Nextflow `-resume` empirical baseline on 157 traces |
+| `scripts/bootstrap_ci_cascade.py` | bootstrap 95% CI for median ρ by family |
+| `scripts/recompute_spearman_hyp_level.py` | Spearman ρ(`|H|`, recompute fraction) |
+| `scripts/draw_fig2_composite.py`, `scripts/draw_rho_vs_r.py` | composite ρ figures (into `out/`) |
+
+External data is **downloaded into `cache/`** (not bundled): WfCommons traces,
+Gene Ontology `go-basic.obo`, nf-core workflow DAGs, EDAM ontology.
+
 ## Reproduction
 
 Requirements: Python 3.11+ (stdlib only for the DM scripts — `numpy`/`matplotlib`

@@ -5,3 +5,5 @@ dist/
 build/
 .venv/
 *.db
+experiments/iip2026/cache/
+experiments/iip2026/out/
