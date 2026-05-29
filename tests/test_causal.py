@@ -78,3 +78,29 @@ def test_block_decomposition_partitions_all_equations():
         assert not (covered & b)
         covered |= b
     assert covered == set(range(len(eqs)))
+
+
+def test_causal_mapping_valid():
+    eqs = [frozenset({"x_0", "x_1"}), frozenset({"x_1", "x_2"}),
+           frozenset({"x_0", "x_2"})]
+    m = causal.causal_mapping(eqs)
+    for i, v in m.items():
+        assert v in eqs[i]
+    assert len(set(m.values())) == 3
+
+
+def test_transitive_closure_triangular():
+    eqs = [frozenset({"x_0"}), frozenset({"x_0", "x_1"}),
+           frozenset({"x_0", "x_1", "x_2"})]
+    tc = causal.transitive_closure(eqs)
+    assert tc["x_0"] == {"x_1", "x_2"}
+    assert tc["x_2"] == set()
+    assert "x_0" not in tc["x_0"]
+
+
+def test_transitive_closure_excludes_self_in_cycle():
+    eqs = [frozenset({"x_0", "x_1"}), frozenset({"x_1", "x_2"}),
+           frozenset({"x_0", "x_2"})]
+    tc = causal.transitive_closure(eqs)
+    for v in ("x_0", "x_1", "x_2"):
+        assert v not in tc[v]

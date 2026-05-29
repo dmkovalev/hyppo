@@ -139,3 +139,32 @@ def minimal_blocks(equations: list[frozenset[str]]) -> list[frozenset[int]] | No
         if referenced <= own:
             out.append(b)
     return out
+
+
+def causal_mapping(equations: list[frozenset[str]]) -> dict[int, str] | None:
+    """Full causal mapping eq_index -> variable (deterministic, sorted tie-break).
+    None if the structure admits no perfect matching."""
+    return perfect_matching(equations)
+
+
+def transitive_closure(equations: list[frozenset[str]]) -> dict[str, set[str]] | None:
+    """Reachability in the dependency digraph: {var: set(vars that depend on it,
+    transitively)}. The variable itself is excluded from its own set. None if
+    unmatchable."""
+    m = perfect_matching(equations)
+    if m is None:
+        return None
+    adj = _dependency_graph(equations, m)
+    tc = {}
+    for start in adj:
+        seen = set()
+        st = [start]
+        while st:
+            node = st.pop()
+            for nb in adj[node]:
+                if nb not in seen:
+                    seen.add(nb)
+                    st.append(nb)
+        seen.discard(start)
+        tc[start] = seen
+    return tc
