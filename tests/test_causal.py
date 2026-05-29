@@ -104,3 +104,23 @@ def test_transitive_closure_excludes_self_in_cycle():
     tc = causal.transitive_closure(eqs)
     for v in ("x_0", "x_1", "x_2"):
         assert v not in tc[v]
+
+
+def test_stress_10k_no_crash():
+    """10000 random complete structures through the full core in one process.
+    The pure core has no native deps, so this must complete without segfault."""
+    rng = random.Random(2026)
+    runs = 0
+    for _ in range(10000):
+        n = rng.randint(2, 12)
+        eqs = _random_complete(n, rng)
+        if not causal.is_complete(eqs):
+            continue
+        m = causal.causal_mapping(eqs)
+        assert m is not None
+        for i, v in m.items():                 # bug-fix invariant
+            assert v in eqs[i]
+        causal.minimal_blocks(eqs)
+        causal.transitive_closure(eqs)
+        runs += 1
+    assert runs > 9000
