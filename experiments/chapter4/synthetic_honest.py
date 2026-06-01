@@ -15,8 +15,10 @@ Result design:
     >> no-mgmt. So hyppo claims no magic accuracy -- the 44%->6% drop is just
     "refit vs not". This disarms the straw-man objection.
   * COST: hyppo refits |cascade(anomaly)| hypotheses; full-retrain refits all of
-    them. For a water-breakthrough (leaf hypothesis h_WCT) the cascade is small,
-    so hyppo achieves the same MAPE at a fraction of the refit cost.
+    them. For a water-breakthrough (Buckley-Leverett hypothesis H12 in the 19-node
+    HybridCRM graph) the cascade spans 5 of 19 hypotheses; a connectivity change
+    (root H1) spans 10. Both are smaller than a full 19-hypothesis retrain, so
+    hyppo achieves the same MAPE at a fraction of the refit cost.
   * STATISTICS: each scenario is an independent field (one MAPE per field), so the
     n_eff>>1; CIs are block-bootstrap over scenarios (not over autocorrelated
     months of a single field).
@@ -62,6 +64,21 @@ HYBRIDCRM_19_EDGES = [
     ("H15", "H16"), ("H16", "H17"), ("H17", "H18"),     # ветвь B (WCT)
     ("H10", "H19"), ("H18", "H19"),                     # слияние → OPR
 ]
+
+
+def _longest_path(edges: list[tuple[str, str]]) -> int:
+    """Длина (в рёбрах) самого длинного пути в ОАГ."""
+    import functools
+    from collections import defaultdict
+    adj: dict[str, list[str]] = defaultdict(list)
+    for a, b in edges:
+        adj[a].append(b)
+
+    @functools.lru_cache(None)
+    def lp(n: str) -> int:
+        return 0 if not adj[n] else 1 + max(lp(c) for c in adj[n])
+    all_nodes = list(adj)
+    return max((lp(n) for n in all_nodes), default=0)
 
 
 def _field_with_spike(seed: int, well: str, mag: float) -> dict:
@@ -169,7 +186,7 @@ def main():
         "n_scenarios": len(scen),
         "design": {"wells": SPIKE_WELLS, "mags": SPIKE_MAGS, "seeds": N_SEEDS},
         "graph": {"nodes": len(HYBRIDCRM_19_NODES), "edges": len(HYBRIDCRM_19_EDGES),
-                  "longest_path": 7},
+                  "longest_path": _longest_path(HYBRIDCRM_19_EDGES)},
         "arms": {
             "no_mgmt": {"median_mape": med_n, "ci95": ci_n},
             "full_retrain": {"median_mape": med_f, "ci95": ci_f, "refits": refits_full},
