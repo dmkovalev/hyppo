@@ -51,6 +51,19 @@ SPIKE_MAGS = [0.20, 0.30, 0.40]
 N_SEEDS = 6                       # 4 wells x 3 mags x 6 seeds = 72 independent fields
 ALL_HYPOTHESES = ["h_CRM", "h_ML", "h_LPR", "h_MB", "h_BL", "h_WCT"]
 
+# Полный граф HybridCRM (19 гипотез), part4.tex §4.4.
+# Ветвь A (жидкость, LPR): H1-H10. Ветвь B (обводнённость, WCT): H11-H18.
+# H19 (OPR) объединяет обе ветви. Топология идентична scripts/draw_fig2_composite.py.
+HYBRIDCRM_19_NODES = [f"H{i}" for i in range(1, 20)]
+HYBRIDCRM_19_EDGES = [
+    ("H1", "H2"), ("H1", "H3"), ("H2", "H4"), ("H3", "H4"), ("H4", "H5"),
+    ("H5", "H6"), ("H5", "H7"), ("H5", "H8"), ("H6", "H9"), ("H7", "H9"),
+    ("H8", "H10"), ("H9", "H10"),                       # ветвь A (LPR)
+    ("H11", "H12"), ("H12", "H14"), ("H13", "H16"), ("H14", "H16"),
+    ("H15", "H16"), ("H16", "H17"), ("H17", "H18"),     # ветвь B (WCT)
+    ("H10", "H19"), ("H18", "H19"),                     # слияние → OPR
+]
+
 
 def _field_with_spike(seed: int, well: str, mag: float) -> dict:
     rng = np.random.default_rng(seed)
