@@ -40,7 +40,7 @@ from experiments.chapter4.synthetic_ab import (
     generate_synthetic_field, phase1_initial_training, forecast_with_model,
     compute_mape,
 )
-from hyppo.actions.diff import derived_by_closure, _default_oil_edges
+from hyppo.actions.diff import derived_by_closure
 
 SCRIPT_DIR = Path(__file__).parent
 RESULTS_DIR = SCRIPT_DIR / "results"
@@ -49,7 +49,6 @@ RESULTS_DIR.mkdir(exist_ok=True)
 SPIKE_WELLS = ["P-03", "P-05", "P-08", "P-11"]
 SPIKE_MAGS = [0.20, 0.30, 0.40]
 N_SEEDS = 6                       # 4 wells x 3 mags x 6 seeds = 72 independent fields
-ALL_HYPOTHESES = ["h_CRM", "h_ML", "h_LPR", "h_MB", "h_BL", "h_WCT"]
 
 # Полный граф HybridCRM (19 гипотез), part4.tex §4.4.
 # Ветвь A (жидкость, LPR): H1-H10. Ветвь B (обводнённость, WCT): H11-H18.
@@ -103,17 +102,22 @@ def run_scenario(seed: int, well: str, mag: float) -> dict:
     v1 = phase1_initial_training(field)
     v2 = {**v1, "model_id": "v2", "uses_actual_wct": True}  # refit sees actual WCT
 
-    # cascade of the invalidated hypothesis (water breakthrough -> h_WCT)
-    cascade = derived_by_closure(_default_oil_edges(), ["h_WCT"])
-    cascade_set = set(cascade) | {"h_WCT"}
+    # Каскады на полном 19-узловом графе (потомки + сама инвалидированная гипотеза).
+    # Прорыв воды = скачок фракц. потока f_w → гипотеза Баклея–Леверетта H12.
+    wbt_desc = derived_by_closure(HYBRIDCRM_19_EDGES, ["H12"])
+    refits_wbt = len(wbt_desc) + 1          # 5 потомков + H12 = 6
+    # Изменение связности скважин (ГТМ) → корневая гипотеза агрегации закачки H1.
+    conn_desc = derived_by_closure(HYBRIDCRM_19_EDGES, ["H1"])
+    refits_conn = len(conn_desc) + 1        # 10 потомков + H1 = 11
 
     return {
         "seed": seed, "well": well, "mag": mag,
         "mape_nomgmt": round(_mape(field, v1), 2),       # stale, no refit
         "mape_full": round(_mape(field, v2), 2),         # retrain everything
         "mape_hyppo": round(_mape(field, v2), 2),        # selective refit (same forecast)
-        "refits_full": len(ALL_HYPOTHESES),              # cost: all hypotheses
-        "refits_hyppo": len(cascade_set),                # cost: cascade subset only
+        "refits_full": len(HYBRIDCRM_19_NODES),          # cost: all 19 hypotheses
+        "refits_wbt": refits_wbt,                        # cost: water-breakthrough cascade
+        "refits_conn": refits_conn,                      # cost: connectivity-change cascade
     }
 
 
@@ -136,7 +140,8 @@ def main():
     med_f, ci_f = block_bootstrap_ci(full)
     med_h, ci_h = block_bootstrap_ci(hyppo)
     refits_full = scen[0]["refits_full"]
-    refits_hyppo = scen[0]["refits_hyppo"]
+    refits_wbt = scen[0]["refits_wbt"]
+    refits_conn = scen[0]["refits_conn"]
 
     # per-well for a representative scenario (P-05, mag 0.40, base seed)
     rep_field = _field_with_spike(RANDOM_SEED, "P-05", 0.40)
@@ -149,10 +154,12 @@ def main():
     print(f"scenarios (independent fields): {len(scen)}")
     print(f"  no-mgmt (stale):   median MAPE {med_n}%  95%-CI {ci_n}")
     print(f"  full-retrain:      median MAPE {med_f}%  95%-CI {ci_f}  (refits={refits_full})")
-    print(f"  hyppo (selective): median MAPE {med_h}%  95%-CI {ci_h}  (refits={refits_hyppo})")
-    print(f"  => accuracy parity hyppo==full-retrain; cost saving "
-          f"{refits_full}/{refits_hyppo} = {refits_full/refits_hyppo:.0f}x fewer refits "
-          f"(water breakthrough = leaf h_WCT)")
+    print(f"  hyppo (selective): median MAPE {med_h}%  95%-CI {ci_h}")
+    print(f"  cascade cost on 19-node graph:")
+    print(f"    water breakthrough (H12, Buckley-Leverett f_w): {refits_wbt}/19 "
+          f"= {refits_full/refits_wbt:.1f}x fewer refits")
+    print(f"    connectivity change (H1, well-connectivity/GTM): {refits_conn}/19 "
+          f"= {refits_full/refits_conn:.1f}x fewer refits")
     print(f"  per-well (P-05 spike): worst stale well = "
           f"{max(per_well, key=lambda w: per_well[w]['nomgmt'])}")
 
@@ -161,12 +168,19 @@ def main():
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "n_scenarios": len(scen),
         "design": {"wells": SPIKE_WELLS, "mags": SPIKE_MAGS, "seeds": N_SEEDS},
+        "graph": {"nodes": len(HYBRIDCRM_19_NODES), "edges": len(HYBRIDCRM_19_EDGES),
+                  "longest_path": 7},
         "arms": {
             "no_mgmt": {"median_mape": med_n, "ci95": ci_n},
             "full_retrain": {"median_mape": med_f, "ci95": ci_f, "refits": refits_full},
-            "hyppo_selective": {"median_mape": med_h, "ci95": ci_h, "refits": refits_hyppo},
+            "hyppo_selective": {"median_mape": med_h, "ci95": ci_h},
         },
-        "cost_saving_factor": round(refits_full / refits_hyppo, 1),
+        "cascades": {
+            "water_breakthrough": {"seed_hypothesis": "H12", "refits": refits_wbt,
+                                   "saving_factor": round(refits_full / refits_wbt, 1)},
+            "connectivity_change": {"seed_hypothesis": "H1", "refits": refits_conn,
+                                    "saving_factor": round(refits_full / refits_conn, 1)},
+        },
         "ci_method": "block bootstrap over independent scenario fields (B=5000)",
         "per_well_representative": per_well,
         "raw": scen,
