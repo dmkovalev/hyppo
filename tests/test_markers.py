@@ -505,8 +505,8 @@ class TestApplyMarkers:
         assert report.hermit_skipped is True
 
     def test_rollback_on_inconsistency(self):
-        """_assert_marker rolls back the marker and emits a warning on inconsistency."""
-        from unittest.mock import patch, MagicMock
+        """_assert_marker rolls back the marker, emits a warning, and records the IRI."""
+        from unittest.mock import patch
         import hyppo.ontology.markers as _markers_mod
         from owlready2 import OwlReadyInconsistentOntologyError
 
@@ -514,15 +514,51 @@ class TestApplyMarkers:
         marker_cls = OrphanHypothesis
 
         exc = OwlReadyInconsistentOntologyError("fake inconsistency")
+        sink: list[str] = []
 
         with patch.object(_markers_mod, "_HERMIT_AVAILABLE", True):
             with patch.object(_markers_mod, "sync_reasoner_hermit", side_effect=exc):
                 with warnings.catch_warnings(record=True) as caught:
                     warnings.simplefilter("always")
-                    result = _markers_mod._assert_marker(h, marker_cls, onto, run_hermit=True)
+                    result = _markers_mod._assert_marker(
+                        h, marker_cls, onto,
+                        run_hermit=True, rolled_back=sink,
+                    )
 
+        # marker must have been retracted
         assert result is False
-        assert marker_cls not in h.is_a  # rolled back
-        assert any("rolled back" in str(w.message).lower() or
-                   "inconsistency" in str(w.message).lower()
-                   for w in caught)
+        assert marker_cls not in h.is_a
+
+        # a warning must be emitted
+        assert any(
+            "rolled back" in str(w.message).lower()
+            or "inconsistency" in str(w.message).lower()
+            for w in caught
+        )
+
+        # IRI must be recorded in the sink
+        assert h.iri in sink
+
+    def test_rollback_populates_report_rolled_back(self):
+        """apply_markers propagates rollback IRI into MarkerReport.rolled_back."""
+        from unittest.mock import patch
+        import hyppo.ontology.markers as _markers_mod
+        from owlready2 import OwlReadyInconsistentOntologyError
+
+        # A lone hypothesis (no WorkflowTask) triggers rule 9 → OrphanHypothesis.
+        # Mock HermiT to reject *that* assertion as inconsistent.
+        h = Hypothesis(_uid("h"))
+        exc = OwlReadyInconsistentOntologyError("fake inconsistency")
+
+        with patch.object(_markers_mod, "_HERMIT_AVAILABLE", True):
+            with patch.object(_markers_mod, "sync_reasoner_hermit", side_effect=exc):
+                with warnings.catch_warnings(record=True):
+                    warnings.simplefilter("always")
+                    report = apply_markers(onto, run_hermit=True)
+
+        # The marker must not stick
+        assert OrphanHypothesis not in h.is_a
+        # The IRI must appear in rolled_back
+        assert h.iri in report.rolled_back
+        # The IRI must NOT appear in rule9_marked (the success list)
+        assert h.iri not in report.rule9_marked

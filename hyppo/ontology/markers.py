@@ -130,10 +130,25 @@ class MarkerReport:
 # Internal helpers
 # ---------------------------------------------------------------------------
 
-def _assert_marker(individual, marker_cls, ontology, *, run_hermit: bool) -> bool:
+def _assert_marker(
+    individual,
+    marker_cls,
+    ontology,
+    *,
+    run_hermit: bool,
+    rolled_back: list[str] | None = None,
+) -> bool:
     """Step 2-4: assert marker, optionally run HermiT, roll back on contradiction.
 
     Returns True if the marker was successfully asserted and retained.
+
+    Parameters
+    ----------
+    rolled_back
+        Optional list to which the IRI of *individual* is appended when the
+        marker is retracted due to an inconsistency.  Pass ``report.rolled_back``
+        from the calling ``apply_rule_*`` function to propagate rollback events
+        into :class:`MarkerReport`.
     """
     if marker_cls in individual.is_a:
         return True  # already marked — idempotent
@@ -168,6 +183,8 @@ def _assert_marker(individual, marker_cls, ontology, *, run_hermit: bool) -> boo
             "Marker rolled back: %s ∈ %s (inconsistency: %s)",
             individual.iri, marker_cls.__name__, exc,
         )
+        if rolled_back is not None:
+            rolled_back.append(individual.iri)
         return False
 
     return True
@@ -177,7 +194,12 @@ def _assert_marker(individual, marker_cls, ontology, *, run_hermit: bool) -> boo
 # Rule 2: CompleteExperiment
 # ---------------------------------------------------------------------------
 
-def apply_rule_2(ontology, *, run_hermit: bool = True) -> list[str]:
+def apply_rule_2(
+    ontology,
+    *,
+    run_hermit: bool = True,
+    rolled_back: list[str] | None = None,
+) -> list[str]:
     """Mark VirtualExperiment individuals that are fully specified (Rule 2).
 
     CWA condition: the experiment has at least one model AND at least one
@@ -203,7 +225,10 @@ def apply_rule_2(ontology, *, run_hermit: bool = True) -> list[str]:
         has_model = bool(ve.has_for_model)
         has_cfg = bool(ve.has_for_configuration)
         if has_onto and has_wf and has_hyp and has_model and has_cfg:
-            ok = _assert_marker(ve, CompleteExperiment, ontology, run_hermit=run_hermit)
+            ok = _assert_marker(
+                ve, CompleteExperiment, ontology,
+                run_hermit=run_hermit, rolled_back=rolled_back,
+            )
             if ok:
                 marked.append(ve.iri)
     return marked
@@ -213,7 +238,12 @@ def apply_rule_2(ontology, *, run_hermit: bool = True) -> list[str]:
 # Rule 9: OrphanHypothesis
 # ---------------------------------------------------------------------------
 
-def apply_rule_9(ontology, *, run_hermit: bool = True) -> list[str]:
+def apply_rule_9(
+    ontology,
+    *,
+    run_hermit: bool = True,
+    rolled_back: list[str] | None = None,
+) -> list[str]:
     """Mark hypothesis individuals not referenced by any WorkflowTask (Rule 9).
 
     CWA condition: no WorkflowTask individual has the hypothesis in its
@@ -234,7 +264,10 @@ def apply_rule_9(ontology, *, run_hermit: bool = True) -> list[str]:
     marked: list[str] = []
     for h in Hypothesis.instances():
         if h not in referenced:
-            ok = _assert_marker(h, OrphanHypothesis, ontology, run_hermit=run_hermit)
+            ok = _assert_marker(
+                h, OrphanHypothesis, ontology,
+                run_hermit=run_hermit, rolled_back=rolled_back,
+            )
             if ok:
                 marked.append(h.iri)
     return marked
@@ -244,7 +277,12 @@ def apply_rule_9(ontology, *, run_hermit: bool = True) -> list[str]:
 # Rule 11: PrunableSubtree
 # ---------------------------------------------------------------------------
 
-def apply_rule_11(ontology, *, run_hermit: bool = True) -> list[str]:
+def apply_rule_11(
+    ontology,
+    *,
+    run_hermit: bool = True,
+    rolled_back: list[str] | None = None,
+) -> list[str]:
     """Mark low-quality hypotheses whose entire descendant subtree is also low-quality (Rule 11).
 
     CWA condition (universal quantifier ∀ has_leaf.LowScoreHypothesis):
@@ -264,7 +302,10 @@ def apply_rule_11(ontology, *, run_hermit: bool = True) -> list[str]:
         # Step 1: CWA — all transitive descendants must be LowQuality
         descendants = _collect_descendants(h)
         if all(isinstance(d, LowQuality) or LowQuality in d.is_a for d in descendants):
-            ok = _assert_marker(h, PrunableSubtree, ontology, run_hermit=run_hermit)
+            ok = _assert_marker(
+                h, PrunableSubtree, ontology,
+                run_hermit=run_hermit, rolled_back=rolled_back,
+            )
             if ok:
                 marked.append(h.iri)
     return marked
@@ -290,7 +331,12 @@ def _collect_descendants(root) -> list:
 # Rule 13: SharedHypothesis
 # ---------------------------------------------------------------------------
 
-def apply_rule_13(ontology, *, run_hermit: bool = True) -> list[str]:
+def apply_rule_13(
+    ontology,
+    *,
+    run_hermit: bool = True,
+    rolled_back: list[str] | None = None,
+) -> list[str]:
     """Mark hypotheses used by two or more distinct experiments (Rule 13).
 
     CWA condition (minimum cardinality on inverse ``usesHypothesis``):
@@ -315,7 +361,10 @@ def apply_rule_13(ontology, *, run_hermit: bool = True) -> list[str]:
     for h in Hypothesis.instances():
         exps = hyp_to_exps.get(h, [])
         if len(exps) >= 2:
-            ok = _assert_marker(h, SharedHypothesis, ontology, run_hermit=run_hermit)
+            ok = _assert_marker(
+                h, SharedHypothesis, ontology,
+                run_hermit=run_hermit, rolled_back=rolled_back,
+            )
             if ok:
                 marked.append(h.iri)
     return marked
@@ -325,7 +374,12 @@ def apply_rule_13(ontology, *, run_hermit: bool = True) -> list[str]:
 # Rule 15: DatasetNotInConfig
 # ---------------------------------------------------------------------------
 
-def apply_rule_15(ontology, *, run_hermit: bool = True) -> list[str]:
+def apply_rule_15(
+    ontology,
+    *,
+    run_hermit: bool = True,
+    rolled_back: list[str] | None = None,
+) -> list[str]:
     """Mark models needing a dataset that have no accessible dataset (Rule 15).
 
     CWA condition (negation ¬hasAccessibleDataset.some(Dataset)):
@@ -354,7 +408,10 @@ def apply_rule_15(ontology, *, run_hermit: bool = True) -> list[str]:
             has_accessible = True
 
         if not has_accessible:
-            ok = _assert_marker(m, DatasetNotInConfig, ontology, run_hermit=run_hermit)
+            ok = _assert_marker(
+                m, DatasetNotInConfig, ontology,
+                run_hermit=run_hermit, rolled_back=rolled_back,
+            )
             if ok:
                 marked.append(m.iri)
     return marked
@@ -390,11 +447,11 @@ def apply_markers(ontology, *, run_hermit: bool = True) -> MarkerReport:
         report.hermit_skipped = True
         run_hermit = False
 
-    report.rule2_marked = apply_rule_2(ontology, run_hermit=run_hermit)
-    report.rule9_marked = apply_rule_9(ontology, run_hermit=run_hermit)
-    report.rule11_marked = apply_rule_11(ontology, run_hermit=run_hermit)
-    report.rule13_marked = apply_rule_13(ontology, run_hermit=run_hermit)
-    report.rule15_marked = apply_rule_15(ontology, run_hermit=run_hermit)
+    report.rule2_marked = apply_rule_2(ontology, run_hermit=run_hermit, rolled_back=report.rolled_back)
+    report.rule9_marked = apply_rule_9(ontology, run_hermit=run_hermit, rolled_back=report.rolled_back)
+    report.rule11_marked = apply_rule_11(ontology, run_hermit=run_hermit, rolled_back=report.rolled_back)
+    report.rule13_marked = apply_rule_13(ontology, run_hermit=run_hermit, rolled_back=report.rolled_back)
+    report.rule15_marked = apply_rule_15(ontology, run_hermit=run_hermit, rolled_back=report.rolled_back)
 
     log.info(
         "apply_markers complete: rule2=%d rule9=%d rule11=%d rule13=%d rule15=%d",
