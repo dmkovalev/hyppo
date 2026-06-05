@@ -285,7 +285,7 @@ def apply_rule_11(
 ) -> list[str]:
     """Mark low-quality hypotheses whose entire descendant subtree is also low-quality (Rule 11).
 
-    CWA condition (universal quantifier ∀ has_leaf.LowScoreHypothesis):
+    CWA condition (universal quantifier ∀ hasDescendant.LowQuality):
     a hypothesis is a PrunableSubtree root if:
       1. it is already classified as LowQuality, AND
       2. every descendant reachable via ``hasDescendant`` is also LowQuality.
