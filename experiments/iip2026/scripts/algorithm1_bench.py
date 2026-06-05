@@ -109,6 +109,19 @@ def benchmark(
     rng = np.random.default_rng(seed)
     results: list[dict[str, Any]] = []
 
+    # JVM / JIT warmup: one full consistency check (with HermiT if available)
+    # before any timed measurements, so that t_b and t_ab are both measured
+    # on a warm JVM.  Without this, t_b (measured first) suffers cold-JVM
+    # overhead, causing t_a = t_ab - t_b to be underestimated.
+    if run_hermit:
+        print("Warming up JVM (1 pre-run)...", flush=True)
+        try:
+            _warmup_lattice = _build_synthetic_lattice(sizes[0], mean_deg, rng)
+            _warmup_onto, _, _ = _build_synthetic_ontology(sizes[0], _warmup_lattice)
+            check_consistency(None, _warmup_onto, _warmup_lattice, run_hermit=True)
+        except Exception as exc:  # pragma: no cover
+            print(f"  warmup failed (non-fatal): {exc}", file=sys.stderr)
+
     for n in sizes:
         for rep in range(n_reps):
             lattice = _build_synthetic_lattice(n, mean_deg, rng)
@@ -132,23 +145,22 @@ def benchmark(
                     # We time only the HermiT call by running check_consistency
                     # with run_hermit=True (stages A+B combined) then subtract
                     # the independently-measured stage B duration.
-                    # This avoids the previous bug where t_b was computed as
-                    # (time after full call) - (full call duration), yielding
-                    # negative values.
+                    # Both measurements are on a warm JVM (see warmup above),
+                    # so the subtraction t_ab - t_b correctly isolates HermiT.
+                    t_ab_start = time.perf_counter()
+                    res = check_consistency(
+                        ve, onto, lattice, run_hermit=True
+                    )
+                    t_ab = time.perf_counter() - t_ab_start
+
                     t_b_start = time.perf_counter()
                     res_b = check_consistency(
                         ve, onto, lattice, run_hermit=False
                     )
                     t_b = time.perf_counter() - t_b_start
 
-                    t_ab_start = time.perf_counter()
-                    res = check_consistency(
-                        ve, onto, lattice, run_hermit=True
-                    )
-                    t_ab = time.perf_counter() - t_ab_start
-                    # Stage A time = combined - stage B (both measured with
-                    # time.perf_counter(); guaranteed non-negative because
-                    # HermiT dominates for any non-trivial ontology).
+                    # Stage A time = combined - stage B (both on warm JVM;
+                    # guaranteed non-negative because HermiT dominates).
                     t_a = max(0.0, t_ab - t_b)
                     status = res.status
                 else:
