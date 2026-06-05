@@ -1,15 +1,23 @@
-"""OWL 2 DL lifecycle rule (16).
+"""OWL 2 DL lifecycle rules (16-17).
 
 Rule 16 -- BlockingDeprecation: a deprecated hypothesis that still has active
     dependants, preventing safe removal.  Also defines a disjoint-union of
     lifecycle states (Draft / Active / Deprecated / Archived).
+Rule 17 -- ConflictingHypothesis: an active hypothesis that competes with
+    another active hypothesis -- a hypothesis-level conflict signalling that a
+    resolution decision is required (diagnostic marker, not an inconsistency).
 """
 
 from __future__ import annotations
 
 from owlready2 import AllDisjoint, Inverse, ObjectProperty
 
-from hyppo.core._base import Hypothesis, derived_by, virtual_experiment_onto
+from hyppo.core._base import (
+    Hypothesis,
+    competes,
+    derived_by,
+    virtual_experiment_onto,
+)
 
 __all__ = [
     "DraftHypothesis",
@@ -17,6 +25,7 @@ __all__ = [
     "DeprecatedHypothesis",
     "ArchivedHypothesis",
     "BlockingDeprecation",
+    "ConflictingHypothesis",
 ]
 
 with virtual_experiment_onto:
@@ -57,4 +66,22 @@ with virtual_experiment_onto:
         equivalent_to = [
             DeprecatedHypothesis
             & Inverse(derived_by).some(ActiveHypothesis)
+        ]
+
+    # ── Rule 17: ConflictingHypothesis ────────────────────────────────────
+    class ConflictingHypothesis(ActiveHypothesis):
+        """An active hypothesis that competes with another active hypothesis.
+
+        Hypothesis-level conflict (cf. Rule 10 ConflictingTask, which lifts
+        the same signal to the task level).  Two active, mutually competing
+        hypotheses are a diagnostic signal that a resolution decision is
+        required -- this is a marker class, NOT an inconsistency, so the
+        ABox stays satisfiable.
+
+        Formally: ActiveHypothesis AND competes SOME ActiveHypothesis.
+        Uses only existential (SOME) and conjunction (AND) -- EL-compatible
+        (layer 1, domain-independent, auto-inferred by the OWL DL reasoner).
+        """
+        equivalent_to = [
+            ActiveHypothesis & competes.some(ActiveHypothesis)
         ]

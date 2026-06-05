@@ -135,6 +135,7 @@ if _OWL_AVAILABLE:
         DeprecatedHypothesis,
         ArchivedHypothesis,
         BlockingDeprecation,
+        ConflictingHypothesis,
     )
 
 
@@ -534,6 +535,43 @@ def test_rule16_safe_deprecation():
     dep = DeprecatedHypothesis(_uid("dep"))
     _reason()
     assert BlockingDeprecation not in dep.is_a
+
+
+# ============================================================================
+# Rule 17: ConflictingHypothesis
+# ============================================================================
+
+@needs_pellet
+def test_rule17_conflicting_hypothesis():
+    """Two active competing hypotheses are both ConflictingHypothesis."""
+    h1 = ActiveHypothesis(_uid("h1"))
+    h2 = ActiveHypothesis(_uid("h2"))
+    h1.competes = [h2]  # competes is symmetric -> h2 competes h1 too
+    _reason()
+    assert ConflictingHypothesis in h1.is_a
+    assert ConflictingHypothesis in h2.is_a
+
+
+@needs_pellet
+def test_rule17_no_conflict_without_competes():
+    """An active hypothesis with no competes relation is NOT conflicting."""
+    h = ActiveHypothesis(_uid("h"))
+    _reason()
+    assert ConflictingHypothesis not in h.is_a
+
+
+@needs_pellet
+def test_rule17_conflict_requires_active_partner():
+    """An active hypothesis competing only with a draft is NOT conflicting.
+
+    ConflictingHypothesis requires the competing partner to be active too
+    (ActiveHypothesis AND competes SOME ActiveHypothesis).
+    """
+    h = ActiveHypothesis(_uid("h"))
+    d = DraftHypothesis(_uid("d"))
+    h.competes = [d]
+    _reason()
+    assert ConflictingHypothesis not in h.is_a
 
 
 # ============================================================================
