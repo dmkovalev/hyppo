@@ -12,7 +12,7 @@ import pytest_asyncio
 # On Unix: pytest-forked would give true process isolation.
 # On Windows: we reorder so OWL-heavy files run first in a clean world.
 
-_OWL_FIRST_FILES = ("test_owl_reasoning.py", "test_oil_adapter.py")
+_OWL_FIRST_FILES = ("test_owl_reasoning.py", "test_oil_adapter.py", "test_markers.py")
 
 
 def pytest_collection_modifyitems(items):
