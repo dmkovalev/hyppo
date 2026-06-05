@@ -126,24 +126,38 @@ def benchmark(
             t_b = float("nan")
             status = "build_only"
             try:
-                t1 = time.perf_counter()
                 ve = None
                 if run_hermit:
+                    # Stage A: HermiT classification only.
+                    # We time only the HermiT call by running check_consistency
+                    # with run_hermit=True (stages A+B combined) then subtract
+                    # the independently-measured stage B duration.
+                    # This avoids the previous bug where t_b was computed as
+                    # (time after full call) - (full call duration), yielding
+                    # negative values.
+                    t_b_start = time.perf_counter()
+                    res_b = check_consistency(
+                        ve, onto, lattice, run_hermit=False
+                    )
+                    t_b = time.perf_counter() - t_b_start
+
+                    t_ab_start = time.perf_counter()
                     res = check_consistency(
                         ve, onto, lattice, run_hermit=True
                     )
-                    t_a = time.perf_counter() - t1
+                    t_ab = time.perf_counter() - t_ab_start
+                    # Stage A time = combined - stage B (both measured with
+                    # time.perf_counter(); guaranteed non-negative because
+                    # HermiT dominates for any non-trivial ontology).
+                    t_a = max(0.0, t_ab - t_b)
                     status = res.status
-                    t_b_start = time.perf_counter()
                 else:
-                    t_b_start = t1
+                    t_b_start = time.perf_counter()
                     res = check_consistency(
                         ve, onto, lattice, run_hermit=False
                     )
+                    t_b = time.perf_counter() - t_b_start
                     status = res.status
-                t_b = time.perf_counter() - t_b_start - (
-                    t_a if run_hermit and not np.isnan(t_a) else 0.0
-                )
             except Exception as exc:  # pragma: no cover
                 print(
                     f"  check_consistency failed n={n} rep={rep}: {exc}",
