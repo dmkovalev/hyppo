@@ -9,6 +9,12 @@ class ProjectStore:
 
     def __init__(self, db_path: str) -> None:
         self.db_path = db_path
+        # One persistent connection per store: with ":memory:" every fresh
+        # sqlite3.connect() would be a *separate* database, so tables created
+        # here would be invisible to later calls. check_same_thread=False lets
+        # the uvicorn worker threads share it.
+        self._connection = sqlite3.connect(db_path, check_same_thread=False)
+        self._connection.row_factory = sqlite3.Row
         with self._conn() as c:
             c.execute(
                 "CREATE TABLE IF NOT EXISTS projects ("
@@ -26,9 +32,8 @@ class ProjectStore:
             )
 
     def _conn(self) -> sqlite3.Connection:
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        return conn
+        # `with conn` commits/rolls back the transaction without closing it.
+        return self._connection
 
     def create(self, name: str, description: str = "") -> str:
         pid = uuid.uuid4().hex[:12]

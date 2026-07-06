@@ -17,3 +17,7 @@ def main() -> None:
     if not args.no_browser:
         webbrowser.open(f"http://{args.host}:{args.port}")
     uvicorn.run(app, host=args.host, port=args.port)
+
+
+if __name__ == "__main__":
+    main()
