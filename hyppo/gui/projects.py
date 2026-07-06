@@ -13,6 +13,10 @@ class ProjectStore:
                 "id TEXT PRIMARY KEY, name TEXT NOT NULL, "
                 "description TEXT, created_order INTEGER)"
             )
+            c.execute(
+                "CREATE TABLE IF NOT EXISTS ve_defs ("
+                "project_id TEXT PRIMARY KEY, payload TEXT)"
+            )
 
     def _conn(self) -> sqlite3.Connection:
         conn = sqlite3.connect(self.db_path)
@@ -44,3 +48,18 @@ class ProjectStore:
     def delete(self, pid: str) -> None:
         with self._conn() as c:
             c.execute("DELETE FROM projects WHERE id=?", (pid,))
+
+    def save_ve(self, pid: str, payload: str) -> None:
+        with self._conn() as c:
+            c.execute(
+                "INSERT INTO ve_defs VALUES (?,?) "
+                "ON CONFLICT(project_id) DO UPDATE SET payload=excluded.payload",
+                (pid, payload),
+            )
+
+    def load_ve(self, pid: str) -> str | None:
+        with self._conn() as c:
+            row = c.execute(
+                "SELECT payload FROM ve_defs WHERE project_id=?", (pid,)
+            ).fetchone()
+        return row[0] if row else None
