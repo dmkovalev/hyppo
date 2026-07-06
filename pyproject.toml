@@ -20,9 +20,11 @@ dev = ["pytest>=8.0", "pytest-cov", "pytest-asyncio>=0.24", "mcp>=1.0,<2.0", "uv
 gp = ["deap>=1.4"]
 coa = ["graphviz>=0.20"]
 mcp = ["mcp>=1.0,<2.0", "uvicorn>=0.30", "starlette>=0.37"]
+gui = ["fastapi>=0.110", "uvicorn>=0.30", "websockets>=12", "httpx>=0.27"]
 
 [project.scripts]
 hyppo-mcp = "hyppo.mcp.cli:main"
+hyppo-gui = "hyppo.gui.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["hyppo*"]
