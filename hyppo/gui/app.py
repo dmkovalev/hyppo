@@ -21,4 +21,7 @@ def create_app(db_path: str = "hyppo_gui.db") -> FastAPI:
     app.include_router(graph_api.router)
     app.include_router(plan_api.router)
 
+    from hyppo.gui.api import runs as runs_api
+    app.include_router(runs_api.router)
+
     return app

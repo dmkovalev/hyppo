@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import sqlite3
 import uuid
 
@@ -16,6 +18,11 @@ class ProjectStore:
             c.execute(
                 "CREATE TABLE IF NOT EXISTS ve_defs ("
                 "project_id TEXT PRIMARY KEY, payload TEXT)"
+            )
+            c.execute(
+                "CREATE TABLE IF NOT EXISTS iterations ("
+                "project_id TEXT, iteration INTEGER, payload TEXT, "
+                "PRIMARY KEY (project_id, iteration))"
             )
 
     def _conn(self) -> sqlite3.Connection:
@@ -63,3 +70,25 @@ class ProjectStore:
                 "SELECT payload FROM ve_defs WHERE project_id=?", (pid,)
             ).fetchone()
         return row[0] if row else None
+
+    def add_iteration(self, pid: str, payload: str) -> int:
+        with self._conn() as c:
+            n = c.execute(
+                "SELECT COALESCE(MAX(iteration),0) FROM iterations WHERE project_id=?",
+                (pid,),
+            ).fetchone()[0]
+            it = n + 1
+            c.execute(
+                "INSERT INTO iterations VALUES (?,?,?)", (pid, it, payload)
+            )
+        return it
+
+    def list_iterations(self, pid: str) -> list[dict]:
+        import json as _json
+        with self._conn() as c:
+            rows = c.execute(
+                "SELECT payload FROM iterations WHERE project_id=? "
+                "ORDER BY iteration DESC",
+                (pid,),
+            ).fetchall()
+        return [_json.loads(r[0]) for r in rows]
