@@ -32,4 +32,10 @@ def create_app(db_path: str = "hyppo_gui.db") -> FastAPI:
     from hyppo.gui import ws as ws_module
     app.include_router(ws_module.router)
 
+    from pathlib import Path
+    from fastapi.staticfiles import StaticFiles
+    dist = Path(__file__).resolve().parents[2] / "webui" / "dist"
+    if dist.exists():
+        app.mount("/", StaticFiles(directory=str(dist), html=True), name="spa")
+
     return app
