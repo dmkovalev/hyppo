@@ -15,6 +15,18 @@ pip install -e ".[dev]"
 pytest tests/ -v
 ```
 
+## GUI
+
+Launch the web GUI locally:
+
+    pip install "hyppo[gui]"
+    hyppo gui
+
+Opens a browser at http://127.0.0.1:8787 with a preloaded `norne-brugge`
+demo. Walk the full virtual-experiment lifecycle: define hypotheses →
+graph → plan → run → compare → iterate. The legacy `hyppo.streamlit`
+module is deprecated.
+
 ## Architecture
 
 8 components corresponding to Section 3.1:
