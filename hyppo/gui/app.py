@@ -9,4 +9,9 @@ def create_app(db_path: str = "hyppo_gui.db") -> FastAPI:
     def health() -> dict:
         return {"status": "ok"}
 
+    from hyppo.gui.projects import ProjectStore
+    from hyppo.gui.api import projects as projects_api
+    app.state.projects = ProjectStore(db_path=db_path)
+    app.include_router(projects_api.router)
+
     return app
