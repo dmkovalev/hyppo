@@ -12,6 +12,8 @@ def create_app(db_path: str = "hyppo_gui.db") -> FastAPI:
     from hyppo.gui.projects import ProjectStore
     from hyppo.gui.api import projects as projects_api
     app.state.projects = ProjectStore(db_path=db_path)
+    from hyppo.gui.demo import seed_demo
+    seed_demo(app.state.projects)
     app.include_router(projects_api.router)
 
     from hyppo.gui.api import hypotheses as hypotheses_api
