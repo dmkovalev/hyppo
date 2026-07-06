@@ -1,48 +1,65 @@
-// webui/src/App.tsx
 import { useEffect, useState } from "react";
 import { get } from "./api";
-import { Overview } from "./routes/Overview";
-import { Hypotheses } from "./routes/Hypotheses";
-import { Graph } from "./routes/Graph";
-import { Runs } from "./routes/Runs";
-import { Comparison } from "./routes/Comparison";
+import type { RealData } from "./types";
+import { Experiment } from "./routes/Experiment";
+import { GraphView } from "./routes/GraphView";
+import { Algorithms } from "./routes/Algorithms";
+import { Fields } from "./routes/Fields";
 
-type Project = { id: string; name: string };
+const NAV = [
+  { key: "ve", glyph: "⟨⟩", label: "Виртуальный эксперимент" },
+  { key: "graph", glyph: "⋔", label: "Граф гипотез" },
+  { key: "algo", glyph: "∑", label: "Алгоритмы и теоремы" },
+  { key: "fields", glyph: "◉", label: "Данные: Brugge / Norne" },
+];
 
 export default function App() {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [pid, setPid] = useState<string>("");
-  const [tab, setTab] = useState("Обзор");
-  const TABS = ["Обзор", "Гипотезы", "Граф", "Запуски", "Сравнение"];
+  const [real, setReal] = useState<RealData | null>(null);
+  const [field, setField] = useState<string>("Brugge");
+  const [tab, setTab] = useState<string>("ve");
+
   useEffect(() => {
-    get<Project[]>("/api/projects").then((ps) => {
-      setProjects(ps);
-      if (ps[0]) setPid(ps[0].id);
-    });
+    get<RealData>("/api/real").then(setReal).catch(() => setReal(null));
   }, []);
+
   return (
-    <div style={{ display: "flex" }}>
-      <nav style={{ width: 180, borderRight: "1px solid #ddd", padding: 8 }}>
-        <b>Проекты</b>
-        {projects.map((p) => (
-          <div key={p.id} onClick={() => setPid(p.id)}
-               style={{ cursor: "pointer", fontWeight: p.id === pid ? 700 : 400 }}>
-            {p.name}
-          </div>
-        ))}
-      </nav>
-      <main style={{ flex: 1, padding: 16 }}>
-        <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-          {TABS.map((t) => (
-            <button key={t} onClick={() => setTab(t)}
-                    style={{ fontWeight: t === tab ? 700 : 400 }}>{t}</button>
+    <div className="app">
+      <aside className="sidebar">
+        <div className="brand">
+          <div className="mark"><b>H</b>yppo</div>
+          <div className="sub">virtual experiments</div>
+        </div>
+
+        <div className="side-label">Проект</div>
+        <div className="proj active">
+          <span className="dot" />
+          <span>HybridCRM · заводнение</span>
+        </div>
+
+        <div className="side-label">Разделы</div>
+        <div className="nav">
+          {NAV.map((n) => (
+            <div key={n.key}
+                 className={"nav-item" + (n.key === tab ? " active" : "")}
+                 onClick={() => setTab(n.key)}>
+              <span className="g">{n.glyph}</span>
+              <span>{n.label}</span>
+            </div>
           ))}
         </div>
-        {pid && tab === "Обзор" && <Overview pid={pid} />}
-        {pid && tab === "Гипотезы" && <Hypotheses pid={pid} />}
-        {pid && tab === "Граф" && <Graph pid={pid} />}
-        {pid && tab === "Запуски" && <Runs pid={pid} />}
-        {pid && tab === "Сравнение" && <Comparison pid={pid} />}
+
+        <div className="foot">
+          {real ? <>реальные данные · {real.ve.hypotheses.length} гипотез</> : "загрузка…"}
+          <br />ФИЦ ИУ РАН · 2.3.5
+        </div>
+      </aside>
+
+      <main className="main">
+        {!real && <div className="empty">Загрузка реальных данных…</div>}
+        {real && tab === "ve" && <Experiment real={real} field={field} />}
+        {real && tab === "graph" && <GraphView real={real} field={field} setField={setField} />}
+        {real && tab === "algo" && <Algorithms real={real} />}
+        {real && tab === "fields" && <Fields real={real} field={field} setField={setField} />}
       </main>
     </div>
   );

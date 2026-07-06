@@ -1,0 +1,800 @@
+{
+  "domain": "HybridCRM — прогноз нефтедобычи при заводнении",
+  "ve": {
+    "ontology": {
+      "name": "virtual_experiment",
+      "iri": "http://synthesis.ipi.ac.ru/virtual_experiment.owl#",
+      "classes": [
+        "Artefact",
+        "Hypothesis",
+        "Model",
+        "VirtualExperiment",
+        "Configuration",
+        "Workflow",
+        "Structure",
+        "FullStructure",
+        "Equation",
+        "Variable",
+        "FullCausalMapping",
+        "DependencySet",
+        "TransitiveClosure",
+        "ResearchLattice",
+        "PhysicsModel",
+        "DataDrivenModel",
+        "HybridModel",
+        "PhysicsHypothesis",
+        "DataDrivenHypothesis",
+        "HybridHypothesis",
+        "DomainOntology",
+        "CompleteExperiment",
+        "PredictionSourceHypothesis",
+        "MaterialBalanceHypothesis",
+        "InvalidHypothesis",
+        "ValidHypothesis",
+        "StaleHypothesis",
+        "UncomputedHypothesis",
+        "OilDomainOntology",
+        "NeuroDomainOntology",
+        "HypothesisVersion",
+        "ExperimentRun",
+        "HypothesisWithStaleAncestor",
+        "StaleRun",
+        "DerivedStaleRun",
+        "ObsoleteVersion",
+        "WorkflowTask",
+        "OrphanHypothesis",
+        "ConflictFreeTask",
+        "ConflictingTask",
+        "LowQuality",
+        "HighQuality",
+        "PrunableSubtree",
+        "PromisingRoute",
+        "Experiment",
+        "SharedHypothesis",
+        "DataFormat",
+        "TimeSeriesFormat",
+        "GraphFormat",
+        "TimeSeriesProducer",
+        "GraphConsumer",
+        "FormatMismatch",
+        "Dataset",
+        "ModelConfig",
+        "ModelWithDatasetNeed",
+        "DatasetNotInConfig",
+        "DraftHypothesis",
+        "ActiveHypothesis",
+        "DeprecatedHypothesis",
+        "ArchivedHypothesis",
+        "BlockingDeprecation",
+        "ConflictingHypothesis",
+        "FreshHypothesis",
+        "ConfirmedHypothesis",
+        "OilFieldOntology",
+        "Well",
+        "Injector",
+        "Producer",
+        "ReservoirParameter",
+        "ConnectivityFraction",
+        "TimeConstant"
+      ],
+      "object_properties": [
+        {
+          "name": "is_implemented_by_model"
+        },
+        {
+          "name": "refers_to_hypothesis"
+        },
+        {
+          "name": "competes"
+        },
+        {
+          "name": "derived_by"
+        },
+        {
+          "name": "impacts"
+        },
+        {
+          "name": "has_for_hypothesis"
+        },
+        {
+          "name": "has_for_model"
+        },
+        {
+          "name": "has_for_workflow"
+        },
+        {
+          "name": "has_for_configuration"
+        },
+        {
+          "name": "has_for_fcm"
+        },
+        {
+          "name": "has_for_structure"
+        },
+        {
+          "name": "has_for_dependecy_set"
+        },
+        {
+          "name": "has_for_lattice_hypothesis"
+        },
+        {
+          "name": "has_for_ontology"
+        },
+        {
+          "name": "has_dependency"
+        },
+        {
+          "name": "uses_hypothesis_version"
+        },
+        {
+          "name": "version_of"
+        },
+        {
+          "name": "uses_hypothesis"
+        },
+        {
+          "name": "run_depends_on_hypothesis"
+        },
+        {
+          "name": "superseded_by"
+        },
+        {
+          "name": "hasHypothesis"
+        },
+        {
+          "name": "hasDescendant"
+        },
+        {
+          "name": "hasAncestor"
+        },
+        {
+          "name": "usesHypothesis"
+        },
+        {
+          "name": "feedsInto"
+        },
+        {
+          "name": "usedInConfig"
+        },
+        {
+          "name": "hasAvailableDataset"
+        },
+        {
+          "name": "hasAccessibleDataset"
+        }
+      ],
+      "data_properties": [
+        {
+          "name": "has_for_id"
+        },
+        {
+          "name": "has_for_name"
+        },
+        {
+          "name": "has_for_description"
+        },
+        {
+          "name": "has_for_authors"
+        },
+        {
+          "name": "has_for_createdate"
+        },
+        {
+          "name": "has_for_lastupdate"
+        },
+        {
+          "name": "has_for_probability"
+        },
+        {
+          "name": "has_for_varname"
+        }
+      ]
+    },
+    "hypotheses": [
+      {
+        "id": "h_CRM",
+        "label": "DualTau CRM — физическая ветвь: доли связности и постоянные времени",
+        "branch": "LPR",
+        "description": "DualTau CRM -- physics branch: connectivity fractions and time constants",
+        "model": "m_phys_8",
+        "model_classes": [
+          "PhysicsModel",
+          "Model",
+          "Artefact",
+          "Thing"
+        ],
+        "hyperparam_axes": [
+          "USE_DUAL_TAU_CRM",
+          "CRM_KNN",
+          "PHYS_GRAD_MODE"
+        ],
+        "equation": {
+          "formula": "q_liq = f_ij * I_inj",
+          "output": "q_liq"
+        },
+        "variables": [
+          "I_inj",
+          "f_ij",
+          "q_liq"
+        ]
+      },
+      {
+        "id": "h_ML",
+        "label": "Transformer+GNN — ML-ветвь: временные и пространственные признаки",
+        "branch": "LPR",
+        "description": "Transformer+GNN -- ML branch: temporal and spatial feature learning",
+        "model": "m_dd_9",
+        "model_classes": [
+          "DataDrivenModel",
+          "Model",
+          "Artefact",
+          "Thing"
+        ],
+        "hyperparam_axes": [
+          "HIDDEN_DIM",
+          "GNN_NUM_LAYERS",
+          "GNN_HEADS",
+          "TRANSFORMER_NUM_LAYERS",
+          "TRANSFORMER_NHEAD",
+          "DIM_FEEDFORWARD_MULT",
+          "BIDIRECTIONAL",
+          "USE_TEMPORAL_EDGE_FEATURES"
+        ],
+        "equation": {
+          "formula": "l_ml = W_ml * x_feat",
+          "output": "l_ml"
+        },
+        "variables": [
+          "W_ml",
+          "l_ml",
+          "x_feat"
+        ]
+      },
+      {
+        "id": "h_LPR",
+        "label": "Fusion gate — слияние физического и ML-прогнозов жидкости",
+        "branch": "LPR",
+        "description": "Fusion gate -- combines physics and ML liquid production predictions",
+        "model": "m_hybrid_10",
+        "model_classes": [
+          "HybridModel",
+          "Model",
+          "Artefact",
+          "Thing"
+        ],
+        "hyperparam_axes": [
+          "USE_FUSION_GATE"
+        ],
+        "equation": {
+          "formula": "l = g * q_liq + (1 - g) * l_ml",
+          "output": "l"
+        },
+        "variables": [
+          "g",
+          "l",
+          "l_ml",
+          "q_liq"
+        ]
+      },
+      {
+        "id": "h_MB",
+        "label": "Материальный баланс — обновление водонасыщенности",
+        "branch": "WCT",
+        "description": "Material balance -- water saturation update from predicted production",
+        "model": "m_phys_mb_11",
+        "model_classes": [
+          "PhysicsModel",
+          "Model",
+          "Artefact",
+          "Thing"
+        ],
+        "hyperparam_axes": [
+          "USE_MATERIAL_BALANCE"
+        ],
+        "equation": {
+          "formula": "Sw = Swp + (W_inj - l) * dt / Vp",
+          "output": "Sw"
+        },
+        "variables": [
+          "Sw",
+          "Swp",
+          "Vp",
+          "W_inj",
+          "dt",
+          "l"
+        ]
+      },
+      {
+        "id": "h_BL",
+        "label": "Buckley–Leverett — доля воды из профиля насыщенности",
+        "branch": "WCT",
+        "description": "Buckley-Leverett -- fractional flow from saturation profile",
+        "model": "m_phys_bl_12",
+        "model_classes": [
+          "PhysicsModel",
+          "Model",
+          "Artefact",
+          "Thing"
+        ],
+        "hyperparam_axes": [
+          "BATCH_SIZE",
+          "BACKPERIOD"
+        ],
+        "equation": {
+          "formula": "fw = ((Sw - Swc) / (1 - Swc - Sor)) ** nw",
+          "output": "fw"
+        },
+        "variables": [
+          "Sor",
+          "Sw",
+          "Swc",
+          "fw",
+          "nw"
+        ]
+      },
+      {
+        "id": "h_WCT",
+        "label": "WCT-anchoring — коррекция обводнённости по физике и ML",
+        "branch": "WCT",
+        "description": "WCT-anchoring -- water cut correction using physics and ML context",
+        "model": "m_hybrid_wct_13",
+        "model_classes": [
+          "HybridModel",
+          "Model",
+          "Artefact",
+          "Thing"
+        ],
+        "hyperparam_axes": [
+          "USE_CRM_PHASE",
+          "CRM_PHASE_RATIO"
+        ],
+        "equation": {
+          "formula": "wct = a_bl * fw + a_ml * l_ml",
+          "output": "wct"
+        },
+        "variables": [
+          "a_bl",
+          "a_ml",
+          "fw",
+          "l_ml",
+          "wct"
+        ]
+      }
+    ],
+    "mapping": [
+      {
+        "hypothesis": "h_CRM",
+        "model": "m_phys_8",
+        "model_classes": [
+          "PhysicsModel",
+          "Model",
+          "Artefact",
+          "Thing"
+        ]
+      },
+      {
+        "hypothesis": "h_ML",
+        "model": "m_dd_9",
+        "model_classes": [
+          "DataDrivenModel",
+          "Model",
+          "Artefact",
+          "Thing"
+        ]
+      },
+      {
+        "hypothesis": "h_LPR",
+        "model": "m_hybrid_10",
+        "model_classes": [
+          "HybridModel",
+          "Model",
+          "Artefact",
+          "Thing"
+        ]
+      },
+      {
+        "hypothesis": "h_MB",
+        "model": "m_phys_mb_11",
+        "model_classes": [
+          "PhysicsModel",
+          "Model",
+          "Artefact",
+          "Thing"
+        ]
+      },
+      {
+        "hypothesis": "h_BL",
+        "model": "m_phys_bl_12",
+        "model_classes": [
+          "PhysicsModel",
+          "Model",
+          "Artefact",
+          "Thing"
+        ]
+      },
+      {
+        "hypothesis": "h_WCT",
+        "model": "m_hybrid_wct_13",
+        "model_classes": [
+          "HybridModel",
+          "Model",
+          "Artefact",
+          "Thing"
+        ]
+      }
+    ],
+    "configuration": [
+      {
+        "name": "HIDDEN_DIM",
+        "section": "MODEL.HYBRID",
+        "levels": [
+          16,
+          32,
+          64,
+          128
+        ]
+      },
+      {
+        "name": "GNN_NUM_LAYERS",
+        "section": "MODEL.HYBRID",
+        "levels": [
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "name": "GNN_HEADS",
+        "section": "MODEL.HYBRID",
+        "levels": [
+          1,
+          2,
+          4
+        ]
+      },
+      {
+        "name": "TRANSFORMER_NUM_LAYERS",
+        "section": "MODEL.HYBRID",
+        "levels": [
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "name": "TRANSFORMER_NHEAD",
+        "section": "MODEL.HYBRID",
+        "levels": [
+          1,
+          2,
+          4
+        ]
+      },
+      {
+        "name": "DIM_FEEDFORWARD_MULT",
+        "section": "MODEL.HYBRID",
+        "levels": [
+          2,
+          4
+        ]
+      },
+      {
+        "name": "BATCH_SIZE",
+        "section": "MODEL.HYBRID",
+        "levels": [
+          2,
+          4,
+          8
+        ]
+      },
+      {
+        "name": "USE_CRM_PHASE",
+        "section": "MODEL.HYBRID",
+        "levels": [
+          true,
+          false
+        ]
+      },
+      {
+        "name": "CRM_PHASE_RATIO",
+        "section": "MODEL.HYBRID",
+        "levels": [
+          0.1,
+          0.2,
+          0.3
+        ]
+      },
+      {
+        "name": "PHYS_GRAD_MODE",
+        "section": "MODEL.HYBRID",
+        "levels": [
+          "detach",
+          "tau_f",
+          "all"
+        ]
+      },
+      {
+        "name": "USE_DUAL_TAU_CRM",
+        "section": "MODEL.HYBRID",
+        "levels": [
+          true,
+          false
+        ]
+      },
+      {
+        "name": "USE_MATERIAL_BALANCE",
+        "section": "MODEL.HYBRID",
+        "levels": [
+          true,
+          false
+        ]
+      },
+      {
+        "name": "USE_FUSION_GATE",
+        "section": "MODEL.HYBRID",
+        "levels": [
+          true,
+          false
+        ]
+      },
+      {
+        "name": "BACKPERIOD",
+        "section": "GENERAL",
+        "levels": [
+          24,
+          36,
+          48
+        ]
+      },
+      {
+        "name": "CRM_KNN",
+        "section": "CRM",
+        "levels": [
+          3,
+          5,
+          8,
+          12
+        ]
+      },
+      {
+        "name": "BIDIRECTIONAL",
+        "section": "PREPROCESSING",
+        "levels": [
+          true,
+          false
+        ]
+      },
+      {
+        "name": "USE_TEMPORAL_EDGE_FEATURES",
+        "section": "PREPROCESSING",
+        "levels": [
+          true,
+          false
+        ]
+      }
+    ],
+    "config_space_size": 13436928
+  },
+  "graph": {
+    "nodes": [
+      "h_CRM",
+      "h_ML",
+      "h_LPR",
+      "h_MB",
+      "h_BL",
+      "h_WCT"
+    ],
+    "edges": [
+      [
+        "h_CRM",
+        "h_LPR"
+      ],
+      [
+        "h_ML",
+        "h_LPR"
+      ],
+      [
+        "h_ML",
+        "h_WCT"
+      ],
+      [
+        "h_LPR",
+        "h_MB"
+      ],
+      [
+        "h_MB",
+        "h_BL"
+      ],
+      [
+        "h_BL",
+        "h_WCT"
+      ]
+    ],
+    "derivation": [
+      {
+        "src": "h_CRM",
+        "dst": "h_LPR",
+        "via": "q_liq",
+        "reason": "выход q_liq гипотезы h_CRM входит в уравнение h_LPR"
+      },
+      {
+        "src": "h_ML",
+        "dst": "h_LPR",
+        "via": "l_ml",
+        "reason": "выход l_ml гипотезы h_ML входит в уравнение h_LPR"
+      },
+      {
+        "src": "h_ML",
+        "dst": "h_WCT",
+        "via": "l_ml",
+        "reason": "выход l_ml гипотезы h_ML входит в уравнение h_WCT"
+      },
+      {
+        "src": "h_LPR",
+        "dst": "h_MB",
+        "via": "l",
+        "reason": "выход l гипотезы h_LPR входит в уравнение h_MB"
+      },
+      {
+        "src": "h_MB",
+        "dst": "h_BL",
+        "via": "Sw",
+        "reason": "выход Sw гипотезы h_MB входит в уравнение h_BL"
+      },
+      {
+        "src": "h_BL",
+        "dst": "h_WCT",
+        "via": "fw",
+        "reason": "выход fw гипотезы h_BL входит в уравнение h_WCT"
+      }
+    ]
+  },
+  "algorithm2_example": {
+    "add": "h_GTM",
+    "label": "ГТМ: перевод скважины",
+    "equation": "dG = treatment(well)",
+    "output": "dG",
+    "new_edges": [
+      [
+        "h_GTM",
+        "h_CRM"
+      ]
+    ],
+    "note": "Инкрементальное добавление O(|H|) вместо полной перестройки O(|H|²)."
+  },
+  "algorithm3_conditions": [
+    {
+      "n": 1,
+      "text": "Все элементы ⟨O,H,M,R,W,C⟩ определены",
+      "ok": true
+    },
+    {
+      "n": 2,
+      "text": "Каждая задача потока содержит гипотезу",
+      "ok": true
+    },
+    {
+      "n": 3,
+      "text": "Каждой гипотезе сопоставлена модель (R)",
+      "ok": true
+    },
+    {
+      "n": 4,
+      "text": "Проекция конфигураций непуста",
+      "ok": true
+    },
+    {
+      "n": 5,
+      "text": "Нет некорректных зависимостей в потоке",
+      "ok": true
+    }
+  ],
+  "algorithm4": {
+    "brugge_change_h_CRM": {
+      "changed": [
+        "h_CRM"
+      ],
+      "p_ne": [
+        "h_BL",
+        "h_CRM",
+        "h_LPR",
+        "h_MB",
+        "h_WCT"
+      ],
+      "p_e": [
+        "h_ML"
+      ],
+      "recompute_frac": 0.833
+    },
+    "change_h_ML": {
+      "changed": [
+        "h_ML"
+      ],
+      "p_ne": [
+        "h_BL",
+        "h_LPR",
+        "h_MB",
+        "h_ML",
+        "h_WCT"
+      ],
+      "p_e": [
+        "h_CRM"
+      ],
+      "recompute_frac": 0.833
+    },
+    "change_h_MB": {
+      "changed": [
+        "h_MB"
+      ],
+      "p_ne": [
+        "h_BL",
+        "h_MB",
+        "h_WCT"
+      ],
+      "p_e": [
+        "h_CRM",
+        "h_ML",
+        "h_LPR"
+      ],
+      "recompute_frac": 0.5
+    }
+  },
+  "fields": {
+    "Brugge": {
+      "producers": 20,
+      "injectors": 10,
+      "months": 133,
+      "train": [
+        24,
+        93
+      ],
+      "r2": {
+        "CRM": 0.975,
+        "Hybrid": 0.861,
+        "WCT": 0.979,
+        "OPR": 0.913
+      },
+      "bayes_factor": 103.03412707330891,
+      "physics_verdict": "inconclusive",
+      "epistemic_status": {
+        "h_CRM": "SUPPORTED",
+        "h_ML": "SUPPORTED",
+        "h_LPR": "CONFIRMED",
+        "h_MB": "SUPPORTED",
+        "h_BL": "SUPPORTED",
+        "h_WCT": "SUPPORTED"
+      }
+    },
+    "Norne": {
+      "producers": 34,
+      "injectors": 9,
+      "months": 247,
+      "train": [
+        0,
+        172
+      ],
+      "r2": {
+        "CRM": -0.259,
+        "Hybrid": 0.708,
+        "WCT": 0.875,
+        "OPR": 0.742
+      },
+      "bayes_factor": 1.7124580051355445e-16,
+      "physics_verdict": "REFUTED",
+      "epistemic_status": {
+        "h_CRM": "REFUTED",
+        "h_ML": "SUPPORTED",
+        "h_LPR": "CONFIRMED",
+        "h_MB": "SUPPORTED",
+        "h_BL": "SUPPORTED",
+        "h_WCT": "SUPPORTED"
+      }
+    }
+  },
+  "theorems": {
+    "lemma1": "Построение графа: O(|H|²·s·v); эмпирически a≈2.12.",
+    "lemma2": "Добавление гипотезы: O(|H|), ускорение до 118× против перестройки.",
+    "theorem1": "Планирование корректно и оптимально: |P_ne| минимально; на HybridCRM экономия 1819× за счёт независимости ветвей.",
+    "prop_hamming": "Пространство конфигураций 𝒞 изоморфно графу Хэмминга H(q₁,…,qₙ)."
+  }
+}
