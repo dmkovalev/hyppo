@@ -27,4 +27,7 @@ def create_app(db_path: str = "hyppo_gui.db") -> FastAPI:
     from hyppo.gui.api import comparison as comparison_api
     app.include_router(comparison_api.router)
 
+    from hyppo.gui import ws as ws_module
+    app.include_router(ws_module.router)
+
     return app
