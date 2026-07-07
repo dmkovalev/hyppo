@@ -136,6 +136,10 @@ def extract_ontology():
         except Exception:
             pass
 
+    # предметная область (Петро-домен) — отдельная группа
+    domain_set = {"DomainOntology", "OilDomainOntology", "OilFieldOntology", "Well",
+                  "Injector", "Producer", "ReservoirParameter", "ConnectivityFraction",
+                  "TimeConstant"}
     all_classes = list(onto.classes())
     names = {c.name for c in all_classes}
     classes = []
@@ -145,7 +149,8 @@ def extract_ontology():
             pn = getattr(p, "name", None)
             if pn in names and pn != c.name:
                 parent = pn; break
-        classes.append({"name": c.name, "parent": parent})
+        classes.append({"name": c.name, "parent": parent,
+                        "group": "domain" if c.name in domain_set else "platform"})
 
     relations = []
     for p in onto.object_properties():
@@ -369,7 +374,7 @@ _CONCEPT_OLD = [
     ("H6",  "q_prim = q_prev*exp(-dt*taup)",       "q_prim",     "Первичная добыча (спад)", "жидкость"),
     ("H7",  "l_ml = MLP(x_hist)",                  "l_ml",       "ML-коррекция (MLP)", "жидкость"),
     ("H8",  "l = g*q_liq_phys + (1-g)*l_ml",       "l",          "LPR Fusion (вентиль g)", "жидкость"),
-    ("H11", "Sw = Sw_prev + (Winj - Wlout)*dt/Vp", "Sw",         "Материальный баланс", "обводнённость"),
+    ("H11", "Sw = Sw_prev + (Winj - l)*dt/Vp",     "Sw",         "Материальный баланс", "обводнённость"),
     ("H12", "krw = ((Sw-Swc)/(1-Swc-Sor))**nw",    "krw",        "Corey krw", "обводнённость"),
     ("H12b", "kro = ((1-Sw-Sor)/(1-Swc-Sor))**no", "kro",        "Corey kro", "обводнённость"),
     ("H13", "fw = 1/(1 + kro*muw/(krw*muo))",      "fw",         "Баклея–Леверетта fw", "обводнённость"),
@@ -402,7 +407,7 @@ _CONCEPT_LATEX = {
     "H6": r"q_{\mathrm{prim}} = q^{-}\, e^{-\Delta t\, \tau_p}",
     "H7": r"\ell_m = \mathrm{MLP}(\mathbf{x}_{\mathrm{hist}})",
     "H8": r"\ell = g\, q_{\mathrm{liq}} + (1 - g)\, \ell_m",
-    "H11": r"S_w = S_w^{-} + \dfrac{(W_{\mathrm{inj}} - W_{\mathrm{out}})\, \Delta t}{V_p}",
+    "H11": r"S_w = S_w^{-} + \dfrac{(W_{\mathrm{inj}} - \ell)\, \Delta t}{V_p}",
     "H12": r"k_{rw} = \left(\dfrac{S_w - S_{wc}}{1 - S_{wc} - S_{or}}\right)^{n_w}",
     "H12b": r"k_{ro} = \left(\dfrac{1 - S_w - S_{or}}{1 - S_{wc} - S_{or}}\right)^{n_o}",
     "H13": r"f_w = \dfrac{1}{1 + k_{ro}\, \mu_w / (k_{rw}\, \mu_o)}",
@@ -411,6 +416,28 @@ _CONCEPT_LATEX = {
     "GRP": r"J = J_0 + \Delta J_{\mathrm{ГРП}}",
     "H19": r"\hat{q}_{\mathrm{oil}} = \ell \cdot o",
 }
+
+# короткое описание гипотезы (ключ — историческое имя)
+_CONCEPT_DESC = {
+    "H1": "Агрегация закачки соседних нагнетательных скважин во входной сигнал.",
+    "H2": "Быстрый канал CRM (трещины, малое время отклика τ_fast).",
+    "H3": "Медленный канал CRM (матрица пласта, большое τ_slow).",
+    "H4": "Взвешенное смешение быстрого и медленного откликов.",
+    "H5": "Физический прогноз дебита жидкости (продуктивность скважины).",
+    "H6": "Первичная добыча с экспоненциальным спадом (без закачки).",
+    "H7": "Нейросетевая коррекция прогноза жидкости (Transformer+GNN).",
+    "H8": "Слияние физического и ML-прогнозов жидкости через обучаемый вентиль g.",
+    "H11": "Обновление водонасыщенности по материальному балансу.",
+    "H12": "Относительная фазовая проницаемость по воде (Corey).",
+    "H12b": "Относительная фазовая проницаемость по нефти (Corey).",
+    "H13": "Доля воды в потоке по Баклею–Леверетту (фракционный поток).",
+    "H14": "Физический прогноз нефтяной доли o_p = 1 − f_w.",
+    "H15": "Слияние прогнозов обводнённости через вентиль g_w.",
+    "GRP": "ГТМ: модуляция продуктивности ΔJ (гидроразрыв пласта).",
+    "H19": "Прогноз дебита нефти: жидкость × нефтяная доля (терминальная гипотеза).",
+}
+# конкурирующие гипотезы (competes), ключ — сплошная нумерация статьи
+_COMPETES = {"H5": ["H7"], "H7": ["H5"]}   # физика vs ML для дебита жидкости
 
 # old name -> continuous article numbering
 _RENUM = {"H1": "H1", "H2": "H2", "H3": "H3", "H4": "H4", "H5": "H5", "H6": "H6",
@@ -506,6 +533,7 @@ def build_conceptual_lattice():
         for m in ms:
             catalog[m["id"]] = m
         nodes.append({"id": cid, "label": lab, "branch": br,
+                      "desc": _CONCEPT_DESC.get(n, ""), "competes": _COMPETES.get(cid, []),
                       "equation": {"formula": f, "output": o, "latex": _CONCEPT_LATEX.get(n, f),
                                     "inputs": inputs_of(n)},
                       "models": [m["id"] for m in ms], "model": ms[0]["id"],
@@ -677,6 +705,35 @@ def build_algorithm_demos():
     return {"alg2": alg2, "alg3": alg3, "alg4_plan": alg4, "rule5": rule5, "complexity": complexity}
 
 
+def architecture():
+    """Программная архитектура комплекса Hyppo (реальные модули + глава 3)."""
+    comps = [
+        ("gui", "GUI (React + FastAPI)", "Интерфейс", "hyppo/gui", "Наш веб-интерфейс: демонстрация всех методов.", ["manager", "metadata_repository"]),
+        ("manager", "Manager", "Оркестрация", "hyppo/manager", "Координирует жизненный цикл ВЭ (4 этапа, разд. 3.1.2).", ["lattice_constructor", "planner", "runner", "metadata_repository"]),
+        ("core", "Ядро (онтология ВЭ)", "Оркестрация", "hyppo/core", "Классы кортежа ⟨O,H,M,R,W,C⟩ на owlready2 (разд. 3.1.1).", []),
+        ("coa", "COAConstructor", "Методы (гл. 2)", "hyppo/coa", "Причинное упорядочение: структуры, транзитивное замыкание (разд. 3.1.4).", ["core"]),
+        ("lattice_constructor", "LatticesConstructor", "Методы (гл. 2)", "hyppo/lattice_constructor", "Алгоритмы 1–2: построение и добавление в граф гипотез (разд. 3.1.5).", ["coa"]),
+        ("planner", "Planner", "Методы (гл. 2)", "hyppo/planner", "Алгоритм 4: планирование, P_ne/P_e, отсечение маршрутов (разд. 3.1.6).", ["metadata_repository", "comparison"]),
+        ("comparison", "Comparison", "Методы (гл. 2)", "hyppo/comparison", "Сравнение гипотез: AIC/BIC, знаковый тест, Уилкоксон (разд. 2.6).", []),
+        ("generator", "HypothesisGenerator", "Методы (гл. 2)", "hyppo/generator", "Порождение гипотез из данных (GLM + GP, разд. 3.1.3).", ["coa"]),
+        ("runner", "VirtualExperimentRunner", "Исполнение", "hyppo/runner", "Исполнение моделей по плану, эпистемический статус (разд. 3.1.7).", ["metadata_repository"]),
+        ("ontology", "Онтологическая подсистема", "Онтология", "hyppo/ontology", "17 правил, HermiT/ELK, маркерный слой, provenance (разд. 3.3).", ["core"]),
+        ("metadata_repository", "MetadataRepository", "Хранение", "hyppo/metadata_repository", "Кэш результатов, поиск ближайшего графа (опр. 12, разд. 3.1.8).", []),
+        ("storage", "Storage", "Хранение", "hyppo/storage", "Слой хранения артефактов.", []),
+        ("adapters", "Доменные адаптеры", "Инфраструктура", "hyppo/adapters", "Подключение предметных онтологий и моделей (pywaterflood).", ["core", "ontology"]),
+        ("actions", "Действия (версии)", "Инфраструктура", "hyppo/actions", "Версионируемые операции над артефактами.", ["core"]),
+        ("mcp", "MCP-интерфейс", "Инфраструктура", "hyppo/mcp", "Model Context Protocol для внешних инструментов.", ["manager"]),
+    ]
+    layers = ["Интерфейс", "Оркестрация", "Методы (гл. 2)", "Исполнение", "Онтология", "Хранение", "Инфраструктура"]
+    return {
+        "layers": layers,
+        "components": [{"id": c, "name": nm, "layer": ly, "module": mod, "desc": ds, "deps": dp}
+                       for c, nm, ly, mod, ds, dp in comps],
+        "note": "Компоненты сгруппированы по слоям; стрелки — доступ одного компонента к интерфейсу другого. "
+                "Основные компоненты реализуют методы глав 2–3; инфраструктурные — вспомогательные.",
+    }
+
+
 def main():
     axes, size = config_axes()
     fields = {name: run_field(name) for name in ("Brugge", "Norne")}
@@ -744,7 +801,7 @@ def main():
     }
 
     data = {
-        "domain": "HybridCRM — прогноз нефтедобычи при заводнении (Norne / Brugge)",
+        "domain": "Гибридная ёмкостно-резистивная модель заводнения (Norne / Brugge)",
         "ve": {
             "ontology": extract_ontology(),
             "models": list(concept["models_catalog"].values()),
@@ -753,6 +810,7 @@ def main():
         "graph_conceptual": concept,
         "algorithm4": concept_alg4,
         "demos": build_algorithm_demos(),
+        "architecture": architecture(),
         "scale": scale,
         "algorithm2_example": {
             "add": "H_ГРП", "label": "ГТМ: гидроразрыв пласта → продуктивность продюсера",

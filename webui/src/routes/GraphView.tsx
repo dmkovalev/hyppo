@@ -21,7 +21,7 @@ export function GraphView({ real, field, setField }: { real: RealData; field: st
     <div>
       <div className="page-head">
         <div className="kicker">Алгоритм 1 · причинное упорядочение из уравнений</div>
-        <h1>Граф гипотез HybridCRM</h1>
+        <h1>Граф гипотез гибридной модели заводнения</h1>
         <p className="lead">
           Единый граф модели (16 гипотез H1–H16), построенный настоящим алгоритмом 1
           (<span className="formula">HypothesisLattice</span>) из уравнений: ребро h→h′ — когда выход

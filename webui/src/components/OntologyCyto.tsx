@@ -21,7 +21,7 @@ export function OntologyCyto({ classes, relations }: { classes: OntoClass[]; rel
 
     const names = new Set(classes.map((c) => c.name));
     const elements: any[] = [];
-    classes.forEach((c) => elements.push({ data: { id: c.name, label: c.name, type: "class" } }));
+    classes.forEach((c) => elements.push({ data: { id: c.name, label: c.name, type: c.group === "domain" ? "domainClass" : "class" } }));
     classes.forEach((c) => {
       if (c.parent && names.has(c.parent))
         elements.push({ data: { id: `sub_${c.name}`, source: c.name, target: c.parent, kind: "subClassOf" } });
@@ -40,6 +40,13 @@ export function OntologyCyto({ classes, relations }: { classes: OntoClass[]; rel
           "background-color": "#e8f0f9", "border-width": 2, "border-color": "#3b6fb0",
           label: "data(label)", "text-valign": "center", "text-halign": "center",
           "text-wrap": "wrap", "text-max-width": 70, "font-size": 10, "font-family": "IBM Plex Sans",
+          color: "#1c1b19",
+        }},
+        { selector: 'node[type="domainClass"]', style: {
+          shape: "round-rectangle", width: 82, height: 60,
+          "background-color": "#f3e6e8", "border-width": 2, "border-color": "#7c1d2b",
+          label: "data(label)", "text-valign": "center", "text-halign": "center",
+          "text-wrap": "wrap", "text-max-width": 74, "font-size": 10, "font-family": "IBM Plex Sans",
           color: "#1c1b19",
         }},
         { selector: 'edge[kind="objectProperty"]', style: {

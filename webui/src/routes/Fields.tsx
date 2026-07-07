@@ -68,7 +68,7 @@ export function Fields({ real, field, setField }: { real: RealData; field: strin
 
       <div className="panel">
         <div className="label">
-          Гипотезы HybridCRM (H1–H16) · модели (R : M→H, ≥1) · статус на {field}
+          Гипотезы модели (H1–H16) · модели (R : M→H, ≥1) · статус на {field}
         </div>
         <table className="data">
           <thead><tr><th>Гипотеза</th><th>Ветвь</th><th>Название</th><th>Модели (R)</th><th>Статус на {field}</th></tr></thead>

@@ -45,7 +45,7 @@ export function Config({ real }: { real: RealData }) {
         <div className="kicker">Элемент 𝒞 · пространство конфигураций ≅ граф Хэмминга</div>
         <h1>Конфигурация 𝒞 = ∏ Qᵢ</h1>
         <p className="lead">
-          Пространство гиперпараметров HybridCRM. По <span className="formula">утверждению об
+          Пространство гиперпараметров гибридной модели заводнения. По <span className="formula">утверждению об
           изоморфизме</span> оно совпадает с обобщённым графом Хэмминга{" "}
           <span className="formula">H(q₁,…,qₙ) = K_q₁ □ … □ K_qₙ</span>: вершины — конфигурации,
           ребро — отличие ровно в одном параметре. Идентично для Brugge и Norne.

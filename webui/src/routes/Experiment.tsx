@@ -8,7 +8,7 @@ export function Experiment({ real, field, onNavigate }:
 
   const els = [
     { sym: "O", name: "Онтология", v: `${ve.ontology.total_classes} классов`, note: "owlready2, VOWL", tab: "onto" },
-    { sym: "H", name: "Гипотезы", v: `${c.nodes.length}`, note: "граф H1–H16 (алг. 1)", tab: "graph" },
+    { sym: "H", name: "Гипотезы", v: `${c.nodes.length}`, note: "H1–H16, описания", tab: "hyp" },
     { sym: "M", name: "Модели", v: `${ve.models.length}`, note: "Physics · ML · Hybrid", tab: "models" },
     { sym: "R", name: "R : M → H", v: "≥1 : 1", note: "is_implemented_by_model", tab: "models" },
     { sym: "W", name: "Поток работ", v: `${c.tasks.length} задач`, note: "hasHypothesis, глубина " + c.depth, tab: "wf" },
@@ -18,7 +18,7 @@ export function Experiment({ real, field, onNavigate }:
   return (
     <div>
       <div className="page-head">
-        <div className="kicker">Определение 1 · реальный ВЭ HybridCRM</div>
+        <div className="kicker">Определение 1 · реальный виртуальный эксперимент</div>
         <h1>{real.domain}</h1>
         <p className="lead">
           Кортеж <span className="formula">⟨O, H, M, R, W, 𝒞⟩</span> из настоящей библиотеки.

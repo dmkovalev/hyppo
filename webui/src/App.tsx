@@ -3,21 +3,25 @@ import { get } from "./api";
 import type { RealData } from "./types";
 import { Experiment } from "./routes/Experiment";
 import { GraphView } from "./routes/GraphView";
+import { Hypotheses } from "./routes/Hypotheses";
 import { Ontology } from "./routes/Ontology";
 import { Models } from "./routes/Models";
 import { Workflow } from "./routes/Workflow";
 import { Config } from "./routes/Config";
 import { Algorithms } from "./routes/Algorithms";
+import { Architecture } from "./routes/Architecture";
 import { Fields } from "./routes/Fields";
 
 const NAV = [
   { key: "ve", glyph: "⟨⟩", label: "Обзор ВЭ" },
   { key: "onto", glyph: "O", label: "Онтология" },
-  { key: "graph", glyph: "H", label: "Гипотезы · граф" },
+  { key: "hyp", glyph: "H", label: "Гипотезы" },
+  { key: "graph", glyph: "⋔", label: "Граф гипотез" },
   { key: "models", glyph: "M", label: "Модели · R" },
   { key: "wf", glyph: "W", label: "Поток работ" },
   { key: "config", glyph: "𝒞", label: "Конфигурация" },
   { key: "algo", glyph: "∑", label: "Алгоритмы и теоремы" },
+  { key: "arch", glyph: "▦", label: "Архитектура комплекса" },
   { key: "fields", glyph: "◉", label: "Данные: Brugge / Norne" },
 ];
 
@@ -39,7 +43,7 @@ export default function App() {
         </div>
 
         <div className="side-label">Проект</div>
-        <div className="proj active"><span className="dot" /><span>HybridCRM · заводнение</span></div>
+        <div className="proj active"><span className="dot" /><span>Гибридная модель · заводнение</span></div>
 
         <div className="side-label">Месторождение</div>
         <div style={{ padding: "4px 24px 8px" }}>
@@ -67,11 +71,13 @@ export default function App() {
         {!real && <div className="empty">Загрузка реальных данных…</div>}
         {real && tab === "ve" && <Experiment real={real} field={field} onNavigate={setTab} />}
         {real && tab === "onto" && <Ontology real={real} />}
+        {real && tab === "hyp" && <Hypotheses real={real} field={field} />}
         {real && tab === "graph" && <GraphView real={real} field={field} setField={setField} />}
         {real && tab === "models" && <Models real={real} />}
         {real && tab === "wf" && <Workflow real={real} />}
         {real && tab === "config" && <Config real={real} />}
         {real && tab === "algo" && <Algorithms real={real} />}
+        {real && tab === "arch" && <Architecture real={real} />}
         {real && tab === "fields" && <Fields real={real} field={field} setField={setField} />}
       </main>
     </div>

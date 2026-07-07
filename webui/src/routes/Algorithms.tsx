@@ -14,7 +14,7 @@ export function Algorithms({ real }: { real: RealData; field?: string }) {
   return (
     <div>
       <div className="page-head">
-        <div className="kicker">Методы главы 2 · на графе HybridCRM (16 гипотез)</div>
+        <div className="kicker">Методы главы 2 · на графе гибридной модели заводнения (16 гипотез)</div>
         <h1>Алгоритмы и теоремы</h1>
         <p className="lead">Четыре алгоритма управления виртуальным экспериментом с доказанными оценками.</p>
       </div>

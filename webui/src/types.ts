@@ -72,7 +72,8 @@ export type RealField = {
   concept_status: Record<string, string>;
   algorithm4: Record<string, Plan>;
 };
-export type OntoClass = { name: string; parent: string | null };
+export type OntoClass = { name: string; parent: string | null; group?: string };
+export type ArchComponent = { id: string; name: string; layer: string; module: string; desc: string; deps: string[] };
 export type OntoRel = { property: string; domain: string; range: string };
 export type RealData = {
   domain: string;
@@ -83,7 +84,7 @@ export type RealData = {
     config_space_size: number;
   };
   graph_conceptual: {
-    nodes: { id: string; label: string; branch: string; status: string; metric?: string;
+    nodes: { id: string; label: string; branch: string; status: string; metric?: string; desc?: string; competes?: string[];
              equation: { formula: string; output: string; latex?: string; inputs?: string[] }; model: string; models: string[] }[];
     edges: string[][]; derivation: Deriv[]; note: string;
     tasks: Task[]; task_edges: string[][]; task_preds?: Record<string, string[]>;
@@ -96,6 +97,7 @@ export type RealData = {
     rule5: { acyclic: boolean; cyclic_witness: number[] };
     complexity: Record<string, { points: { n: number; count: number; law: number | string }[]; law: string; note: string }>;
   };
+  architecture: { layers: string[]; components: ArchComponent[]; note: string };
   scale: { note: string; speedup_10k: string;
     points: { hypotheses: number; ELK_s: number; HermiT_s: number; wells: string }[] };
   algorithm2_example: { add: string; label: string; note: string };

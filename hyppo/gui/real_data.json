@@ -1,292 +1,363 @@
 {
-  "domain": "HybridCRM — прогноз нефтедобычи при заводнении (Norne / Brugge)",
+  "domain": "Гибридная ёмкостно-резистивная модель заводнения (Norne / Brugge)",
   "ve": {
     "ontology": {
       "name": "http://synthesis.ipi.ac.ru/virtual_experiment.owl#",
       "classes": [
         {
           "name": "Artefact",
-          "parent": null
+          "parent": null,
+          "group": "platform"
         },
         {
           "name": "Hypothesis",
-          "parent": "Artefact"
+          "parent": "Artefact",
+          "group": "platform"
         },
         {
           "name": "Model",
-          "parent": "Artefact"
+          "parent": "Artefact",
+          "group": "platform"
         },
         {
           "name": "VirtualExperiment",
-          "parent": "Artefact"
+          "parent": "Artefact",
+          "group": "platform"
         },
         {
           "name": "Configuration",
-          "parent": "Artefact"
+          "parent": "Artefact",
+          "group": "platform"
         },
         {
           "name": "Workflow",
-          "parent": "Artefact"
+          "parent": "Artefact",
+          "group": "platform"
         },
         {
           "name": "Structure",
-          "parent": "Artefact"
+          "parent": "Artefact",
+          "group": "platform"
         },
         {
           "name": "FullStructure",
-          "parent": "Structure"
+          "parent": "Structure",
+          "group": "platform"
         },
         {
           "name": "Equation",
-          "parent": null
+          "parent": null,
+          "group": "platform"
         },
         {
           "name": "Variable",
-          "parent": null
+          "parent": null,
+          "group": "platform"
         },
         {
           "name": "FullCausalMapping",
-          "parent": "Artefact"
+          "parent": "Artefact",
+          "group": "platform"
         },
         {
           "name": "DependencySet",
-          "parent": "Artefact"
+          "parent": "Artefact",
+          "group": "platform"
         },
         {
           "name": "TransitiveClosure",
-          "parent": "DependencySet"
+          "parent": "DependencySet",
+          "group": "platform"
         },
         {
           "name": "ResearchLattice",
-          "parent": "Artefact"
+          "parent": "Artefact",
+          "group": "platform"
         },
         {
           "name": "PhysicsModel",
-          "parent": "Model"
+          "parent": "Model",
+          "group": "platform"
         },
         {
           "name": "DataDrivenModel",
-          "parent": "Model"
+          "parent": "Model",
+          "group": "platform"
         },
         {
           "name": "HybridModel",
-          "parent": "Model"
+          "parent": "Model",
+          "group": "platform"
         },
         {
           "name": "PhysicsHypothesis",
-          "parent": "Hypothesis"
+          "parent": "Hypothesis",
+          "group": "platform"
         },
         {
           "name": "DataDrivenHypothesis",
-          "parent": "Hypothesis"
+          "parent": "Hypothesis",
+          "group": "platform"
         },
         {
           "name": "HybridHypothesis",
-          "parent": "Hypothesis"
+          "parent": "Hypothesis",
+          "group": "platform"
         },
         {
           "name": "DomainOntology",
-          "parent": "Artefact"
+          "parent": "Artefact",
+          "group": "domain"
         },
         {
           "name": "CompleteExperiment",
-          "parent": "VirtualExperiment"
+          "parent": "VirtualExperiment",
+          "group": "platform"
         },
         {
           "name": "PredictionSourceHypothesis",
-          "parent": "Hypothesis"
+          "parent": "Hypothesis",
+          "group": "platform"
         },
         {
           "name": "MaterialBalanceHypothesis",
-          "parent": "Hypothesis"
+          "parent": "Hypothesis",
+          "group": "platform"
         },
         {
           "name": "InvalidHypothesis",
-          "parent": "Hypothesis"
+          "parent": "Hypothesis",
+          "group": "platform"
         },
         {
           "name": "ValidHypothesis",
-          "parent": "Hypothesis"
+          "parent": "Hypothesis",
+          "group": "platform"
         },
         {
           "name": "StaleHypothesis",
-          "parent": "Hypothesis"
+          "parent": "Hypothesis",
+          "group": "platform"
         },
         {
           "name": "UncomputedHypothesis",
-          "parent": "Hypothesis"
+          "parent": "Hypothesis",
+          "group": "platform"
         },
         {
           "name": "OilDomainOntology",
-          "parent": "DomainOntology"
+          "parent": "DomainOntology",
+          "group": "domain"
         },
         {
           "name": "NeuroDomainOntology",
-          "parent": "DomainOntology"
+          "parent": "DomainOntology",
+          "group": "platform"
         },
         {
           "name": "HypothesisVersion",
-          "parent": null
+          "parent": null,
+          "group": "platform"
         },
         {
           "name": "ExperimentRun",
-          "parent": null
+          "parent": null,
+          "group": "platform"
         },
         {
           "name": "HypothesisWithStaleAncestor",
-          "parent": "Hypothesis"
+          "parent": "Hypothesis",
+          "group": "platform"
         },
         {
           "name": "StaleRun",
-          "parent": "ExperimentRun"
+          "parent": "ExperimentRun",
+          "group": "platform"
         },
         {
           "name": "DerivedStaleRun",
-          "parent": "ExperimentRun"
+          "parent": "ExperimentRun",
+          "group": "platform"
         },
         {
           "name": "ObsoleteVersion",
-          "parent": "HypothesisVersion"
+          "parent": "HypothesisVersion",
+          "group": "platform"
         },
         {
           "name": "WorkflowTask",
-          "parent": null
+          "parent": null,
+          "group": "platform"
         },
         {
           "name": "OrphanHypothesis",
-          "parent": "Hypothesis"
+          "parent": "Hypothesis",
+          "group": "platform"
         },
         {
           "name": "ConflictFreeTask",
-          "parent": "WorkflowTask"
+          "parent": "WorkflowTask",
+          "group": "platform"
         },
         {
           "name": "ConflictingTask",
-          "parent": "WorkflowTask"
+          "parent": "WorkflowTask",
+          "group": "platform"
         },
         {
           "name": "LowQuality",
-          "parent": "Hypothesis"
+          "parent": "Hypothesis",
+          "group": "platform"
         },
         {
           "name": "HighQuality",
-          "parent": "Hypothesis"
+          "parent": "Hypothesis",
+          "group": "platform"
         },
         {
           "name": "PrunableSubtree",
-          "parent": "LowQuality"
+          "parent": "LowQuality",
+          "group": "platform"
         },
         {
           "name": "PromisingRoute",
-          "parent": "Hypothesis"
+          "parent": "Hypothesis",
+          "group": "platform"
         },
         {
           "name": "Experiment",
-          "parent": null
+          "parent": null,
+          "group": "platform"
         },
         {
           "name": "SharedHypothesis",
-          "parent": "Hypothesis"
+          "parent": "Hypothesis",
+          "group": "platform"
         },
         {
           "name": "DataFormat",
-          "parent": null
+          "parent": null,
+          "group": "platform"
         },
         {
           "name": "TimeSeriesFormat",
-          "parent": "DataFormat"
+          "parent": "DataFormat",
+          "group": "platform"
         },
         {
           "name": "GraphFormat",
-          "parent": "DataFormat"
+          "parent": "DataFormat",
+          "group": "platform"
         },
         {
           "name": "TimeSeriesProducer",
-          "parent": "Model"
+          "parent": "Model",
+          "group": "platform"
         },
         {
           "name": "GraphConsumer",
-          "parent": "Model"
+          "parent": "Model",
+          "group": "platform"
         },
         {
           "name": "FormatMismatch",
-          "parent": "Model"
+          "parent": "Model",
+          "group": "platform"
         },
         {
           "name": "Dataset",
-          "parent": null
+          "parent": null,
+          "group": "platform"
         },
         {
           "name": "ModelConfig",
-          "parent": null
+          "parent": null,
+          "group": "platform"
         },
         {
           "name": "ModelWithDatasetNeed",
-          "parent": "Model"
+          "parent": "Model",
+          "group": "platform"
         },
         {
           "name": "DatasetNotInConfig",
-          "parent": "Model"
+          "parent": "Model",
+          "group": "platform"
         },
         {
           "name": "DraftHypothesis",
-          "parent": "Hypothesis"
+          "parent": "Hypothesis",
+          "group": "platform"
         },
         {
           "name": "ActiveHypothesis",
-          "parent": "Hypothesis"
+          "parent": "Hypothesis",
+          "group": "platform"
         },
         {
           "name": "DeprecatedHypothesis",
-          "parent": "Hypothesis"
+          "parent": "Hypothesis",
+          "group": "platform"
         },
         {
           "name": "ArchivedHypothesis",
-          "parent": "Hypothesis"
+          "parent": "Hypothesis",
+          "group": "platform"
         },
         {
           "name": "BlockingDeprecation",
-          "parent": "DeprecatedHypothesis"
+          "parent": "DeprecatedHypothesis",
+          "group": "platform"
         },
         {
           "name": "ConflictingHypothesis",
-          "parent": "ActiveHypothesis"
+          "parent": "ActiveHypothesis",
+          "group": "platform"
         },
         {
           "name": "FreshHypothesis",
-          "parent": "Hypothesis"
+          "parent": "Hypothesis",
+          "group": "platform"
         },
         {
           "name": "PreferredHypothesis",
-          "parent": "ActiveHypothesis"
+          "parent": "ActiveHypothesis",
+          "group": "platform"
         },
         {
           "name": "OilFieldOntology",
-          "parent": "OilDomainOntology"
+          "parent": "OilDomainOntology",
+          "group": "domain"
         },
         {
           "name": "Well",
-          "parent": null
+          "parent": null,
+          "group": "domain"
         },
         {
           "name": "Injector",
-          "parent": "Well"
+          "parent": "Well",
+          "group": "domain"
         },
         {
           "name": "Producer",
-          "parent": "Well"
+          "parent": "Well",
+          "group": "domain"
         },
         {
           "name": "ReservoirParameter",
-          "parent": null
+          "parent": null,
+          "group": "domain"
         },
         {
           "name": "ConnectivityFraction",
-          "parent": "ReservoirParameter"
+          "parent": "ReservoirParameter",
+          "group": "domain"
         },
         {
           "name": "TimeConstant",
-          "parent": "ReservoirParameter"
+          "parent": "ReservoirParameter",
+          "group": "domain"
         }
       ],
       "relations": [
@@ -958,6 +1029,8 @@
         "id": "H1",
         "label": "Агрегация закачки",
         "branch": "жидкость",
+        "desc": "Агрегация закачки соседних нагнетательных скважин во входной сигнал.",
+        "competes": [],
         "equation": {
           "formula": "I_agg = w_ij * I_j",
           "output": "I_agg",
@@ -979,6 +1052,8 @@
         "id": "H2",
         "label": "CRM быстрый канал",
         "branch": "жидкость",
+        "desc": "Быстрый канал CRM (трещины, малое время отклика τ_fast).",
+        "competes": [],
         "equation": {
           "formula": "q_f = a_f*q_f_prev + b_f*I_agg",
           "output": "q_f",
@@ -1002,6 +1077,8 @@
         "id": "H3",
         "label": "CRM медленный канал",
         "branch": "жидкость",
+        "desc": "Медленный канал CRM (матрица пласта, большое τ_slow).",
+        "competes": [],
         "equation": {
           "formula": "q_s = a_s*q_s_prev + b_s*I_agg",
           "output": "q_s",
@@ -1025,6 +1102,8 @@
         "id": "H4",
         "label": "Смешение каналов",
         "branch": "жидкость",
+        "desc": "Взвешенное смешение быстрого и медленного откликов.",
+        "competes": [],
         "equation": {
           "formula": "q_c = w_f*q_f + (1-w_f)*q_s",
           "output": "q_c",
@@ -1047,6 +1126,10 @@
         "id": "H5",
         "label": "Продуктивность",
         "branch": "жидкость",
+        "desc": "Физический прогноз дебита жидкости (продуктивность скважины).",
+        "competes": [
+          "H7"
+        ],
         "equation": {
           "formula": "q_liq_phys = J*q_c + q_prim",
           "output": "q_liq_phys",
@@ -1069,6 +1152,8 @@
         "id": "H6",
         "label": "Первичная добыча (спад)",
         "branch": "жидкость",
+        "desc": "Первичная добыча с экспоненциальным спадом (без закачки).",
+        "competes": [],
         "equation": {
           "formula": "q_prim = q_prev*exp(-dt*taup)",
           "output": "q_prim",
@@ -1091,6 +1176,10 @@
         "id": "H7",
         "label": "ML-коррекция (MLP)",
         "branch": "жидкость",
+        "desc": "Нейросетевая коррекция прогноза жидкости (Transformer+GNN).",
+        "competes": [
+          "H5"
+        ],
         "equation": {
           "formula": "l_ml = MLP(x_hist)",
           "output": "l_ml",
@@ -1111,6 +1200,8 @@
         "id": "H8",
         "label": "LPR Fusion (вентиль g)",
         "branch": "жидкость",
+        "desc": "Слияние физического и ML-прогнозов жидкости через обучаемый вентиль g.",
+        "competes": [],
         "equation": {
           "formula": "l = g*q_liq_phys + (1-g)*l_ml",
           "output": "l",
@@ -1132,16 +1223,18 @@
         "id": "H9",
         "label": "Материальный баланс",
         "branch": "обводнённость",
+        "desc": "Обновление водонасыщенности по материальному балансу.",
+        "competes": [],
         "equation": {
-          "formula": "Sw = Sw_prev + (Winj - Wlout)*dt/Vp",
+          "formula": "Sw = Sw_prev + (Winj - l)*dt/Vp",
           "output": "Sw",
-          "latex": "S_w = S_w^{-} + \\dfrac{(W_{\\mathrm{inj}} - W_{\\mathrm{out}})\\, \\Delta t}{V_p}",
+          "latex": "S_w = S_w^{-} + \\dfrac{(W_{\\mathrm{inj}} - \\ell)\\, \\Delta t}{V_p}",
           "inputs": [
             "Sw_prev",
             "Vp",
             "Winj",
-            "Wlout",
-            "dt"
+            "dt",
+            "l"
           ]
         },
         "models": [
@@ -1156,6 +1249,8 @@
         "id": "H10",
         "label": "Corey krw",
         "branch": "обводнённость",
+        "desc": "Относительная фазовая проницаемость по воде (Corey).",
+        "competes": [],
         "equation": {
           "formula": "krw = ((Sw-Swc)/(1-Swc-Sor))**nw",
           "output": "krw",
@@ -1179,6 +1274,8 @@
         "id": "H11",
         "label": "Corey kro",
         "branch": "обводнённость",
+        "desc": "Относительная фазовая проницаемость по нефти (Corey).",
+        "competes": [],
         "equation": {
           "formula": "kro = ((1-Sw-Sor)/(1-Swc-Sor))**no",
           "output": "kro",
@@ -1202,6 +1299,8 @@
         "id": "H12",
         "label": "Баклея–Леверетта fw",
         "branch": "обводнённость",
+        "desc": "Доля воды в потоке по Баклею–Леверетту (фракционный поток).",
+        "competes": [],
         "equation": {
           "formula": "fw = 1/(1 + kro*muw/(krw*muo))",
           "output": "fw",
@@ -1225,6 +1324,8 @@
         "id": "H13",
         "label": "WCT-якорь (физика)",
         "branch": "обводнённость",
+        "desc": "Физический прогноз нефтяной доли o_p = 1 − f_w.",
+        "competes": [],
         "equation": {
           "formula": "o_p = 1 - fw",
           "output": "o_p",
@@ -1245,6 +1346,8 @@
         "id": "H14",
         "label": "WCT Fusion",
         "branch": "обводнённость",
+        "desc": "Слияние прогнозов обводнённости через вентиль g_w.",
+        "competes": [],
         "equation": {
           "formula": "o = gw*o_p + (1-gw)*o_m",
           "output": "o",
@@ -1266,6 +1369,8 @@
         "id": "H15",
         "label": "ГРП (модуляция)",
         "branch": "ГТМ",
+        "desc": "ГТМ: модуляция продуктивности ΔJ (гидроразрыв пласта).",
+        "competes": [],
         "equation": {
           "formula": "J = J0 + dJ_grp",
           "output": "J",
@@ -1287,6 +1392,8 @@
         "id": "H16",
         "label": "OPR — прогноз нефти",
         "branch": "нефть",
+        "desc": "Прогноз дебита нефти: жидкость × нефтяная доля (терминальная гипотеза).",
+        "competes": [],
         "equation": {
           "formula": "q_oil = l * o",
           "output": "q_oil",
@@ -1328,6 +1435,10 @@
       [
         "H5",
         "H8"
+      ],
+      [
+        "H8",
+        "H9"
       ],
       [
         "H8",
@@ -1410,6 +1521,12 @@
         "dst": "H8",
         "via": "q_liq_phys",
         "reason": "выход q_liq_phys (H5) входит в уравнение H8"
+      },
+      {
+        "src": "H8",
+        "dst": "H9",
+        "via": "l",
+        "reason": "выход l (H8) входит в уравнение H9"
       },
       {
         "src": "H8",
@@ -1954,6 +2071,10 @@
         "T11"
       ],
       [
+        "T6",
+        "T7"
+      ],
+      [
         "T7",
         "T8"
       ],
@@ -1983,7 +2104,9 @@
         "T4",
         "T5"
       ],
-      "T7": [],
+      "T7": [
+        "T6"
+      ],
       "T8": [
         "T7"
       ],
@@ -1999,10 +2122,10 @@
       ],
       "T12": []
     },
-    "formal_text": "# HybridCRM workflow — ОАГ задач (CWL-подобный формат)\n# join: AND (все входы обязательны); ветви LPR и WCT параллельны\ncwlVersion: v1.2\nclass: Workflow\nsteps:\n  T1:  # Парсинг закачки\n    in: [source]\n    run: [H1]\n  T2:  # CRM-каналы\n    in: [T1]\n    run: [H2, H3]\n  T3:  # Смешение\n    in: [T2]\n    run: [H4]\n  T4:  # Продуктивность и спад\n    in: [T12, T3]\n    run: [H5, H6]\n  join: all-required  # AND\n  T5:  # ML-коррекция\n    in: [source]\n    run: [H7]\n  T6:  # Слияние жидкости\n    in: [T4, T5]\n    run: [H8]\n  join: all-required  # AND\n  T7:  # Материальный баланс\n    in: [source]\n    run: [H9]\n  T8:  # Фазовые проницаемости\n    in: [T7]\n    run: [H10, H11]\n  T9:  # Фракционный поток\n    in: [T8]\n    run: [H12]\n  T10:  # Обводнённость\n    in: [T9]\n    run: [H13, H14]\n  T11:  # Прогноз нефти\n    in: [T10, T6]\n    run: [H16]\n  join: all-required  # AND\n  T12:  # ГТМ-модуляция\n    in: [source]\n    run: [H15]",
+    "formal_text": "# HybridCRM workflow — ОАГ задач (CWL-подобный формат)\n# join: AND (все входы обязательны); ветви LPR и WCT параллельны\ncwlVersion: v1.2\nclass: Workflow\nsteps:\n  T1:  # Парсинг закачки\n    in: [source]\n    run: [H1]\n  T2:  # CRM-каналы\n    in: [T1]\n    run: [H2, H3]\n  T3:  # Смешение\n    in: [T2]\n    run: [H4]\n  T4:  # Продуктивность и спад\n    in: [T12, T3]\n    run: [H5, H6]\n  join: all-required  # AND\n  T5:  # ML-коррекция\n    in: [source]\n    run: [H7]\n  T6:  # Слияние жидкости\n    in: [T4, T5]\n    run: [H8]\n  join: all-required  # AND\n  T7:  # Материальный баланс\n    in: [T6]\n    run: [H9]\n  T8:  # Фазовые проницаемости\n    in: [T7]\n    run: [H10, H11]\n  T9:  # Фракционный поток\n    in: [T8]\n    run: [H12]\n  T10:  # Обводнённость\n    in: [T9]\n    run: [H13, H14]\n  T11:  # Прогноз нефти\n    in: [T10, T6]\n    run: [H16]\n  join: all-required  # AND\n  T12:  # ГТМ-модуляция\n    in: [source]\n    run: [H15]",
     "is_dag": true,
-    "depth": 5,
-    "note": "16 гипотез (сплошная нумерация статьи H1–H16), 17 рёбер derived_by, DAG глубины 5. Построено настоящим алгоритмом 1 (HypothesisLattice) из уравнений; ветви LPR (H1–H8) и WCT (H9–H14) параллельны, сходятся в H16."
+    "depth": 10,
+    "note": "16 гипотез (сплошная нумерация статьи H1–H16), 18 рёбер derived_by, DAG глубины 10. Построено настоящим алгоритмом 1 (HypothesisLattice) из уравнений; ветви LPR (H1–H8) и WCT (H9–H14) параллельны, сходятся в H16."
   },
   "algorithm4": {
     "change_H1": {
@@ -2011,34 +2134,40 @@
       ],
       "p_ne": [
         "H1",
-        "H16",
-        "H2",
-        "H3",
-        "H4",
-        "H5",
-        "H8"
-      ],
-      "p_e": [
-        "H6",
-        "H7",
-        "H9",
         "H10",
         "H11",
         "H12",
         "H13",
         "H14",
+        "H16",
+        "H2",
+        "H3",
+        "H4",
+        "H5",
+        "H8",
+        "H9"
+      ],
+      "p_e": [
+        "H6",
+        "H7",
         "H15"
       ],
-      "recompute_frac": 0.438
+      "recompute_frac": 0.812
     },
     "change_H5": {
       "changed": [
         "H5"
       ],
       "p_ne": [
+        "H10",
+        "H11",
+        "H12",
+        "H13",
+        "H14",
         "H16",
         "H5",
-        "H8"
+        "H8",
+        "H9"
       ],
       "p_e": [
         "H1",
@@ -2047,15 +2176,9 @@
         "H4",
         "H6",
         "H7",
-        "H9",
-        "H10",
-        "H11",
-        "H12",
-        "H13",
-        "H14",
         "H15"
       ],
-      "recompute_frac": 0.188
+      "recompute_frac": 0.562
     },
     "change_H10": {
       "changed": [
@@ -2138,19 +2261,31 @@
           "H4",
           "H5",
           "H8",
+          "H9",
+          "H10",
+          "H11",
+          "H12",
+          "H13",
+          "H14",
           "H16"
         ],
-        "recompute_frac": 0.438
+        "recompute_frac": 0.812
       },
       "change_H15": {
         "changed": "H15",
         "p_ne": [
           "H5",
           "H8",
+          "H9",
+          "H10",
+          "H11",
+          "H12",
+          "H13",
+          "H14",
           "H15",
           "H16"
         ],
-        "recompute_frac": 0.25
+        "recompute_frac": 0.625
       },
       "change_H10": {
         "changed": "H10",
@@ -2272,6 +2407,168 @@
         "note": "обходов смежности ~V+E; ×2 при ×2"
       }
     }
+  },
+  "architecture": {
+    "layers": [
+      "Интерфейс",
+      "Оркестрация",
+      "Методы (гл. 2)",
+      "Исполнение",
+      "Онтология",
+      "Хранение",
+      "Инфраструктура"
+    ],
+    "components": [
+      {
+        "id": "gui",
+        "name": "GUI (React + FastAPI)",
+        "layer": "Интерфейс",
+        "module": "hyppo/gui",
+        "desc": "Наш веб-интерфейс: демонстрация всех методов.",
+        "deps": [
+          "manager",
+          "metadata_repository"
+        ]
+      },
+      {
+        "id": "manager",
+        "name": "Manager",
+        "layer": "Оркестрация",
+        "module": "hyppo/manager",
+        "desc": "Координирует жизненный цикл ВЭ (4 этапа, разд. 3.1.2).",
+        "deps": [
+          "lattice_constructor",
+          "planner",
+          "runner",
+          "metadata_repository"
+        ]
+      },
+      {
+        "id": "core",
+        "name": "Ядро (онтология ВЭ)",
+        "layer": "Оркестрация",
+        "module": "hyppo/core",
+        "desc": "Классы кортежа ⟨O,H,M,R,W,C⟩ на owlready2 (разд. 3.1.1).",
+        "deps": []
+      },
+      {
+        "id": "coa",
+        "name": "COAConstructor",
+        "layer": "Методы (гл. 2)",
+        "module": "hyppo/coa",
+        "desc": "Причинное упорядочение: структуры, транзитивное замыкание (разд. 3.1.4).",
+        "deps": [
+          "core"
+        ]
+      },
+      {
+        "id": "lattice_constructor",
+        "name": "LatticesConstructor",
+        "layer": "Методы (гл. 2)",
+        "module": "hyppo/lattice_constructor",
+        "desc": "Алгоритмы 1–2: построение и добавление в граф гипотез (разд. 3.1.5).",
+        "deps": [
+          "coa"
+        ]
+      },
+      {
+        "id": "planner",
+        "name": "Planner",
+        "layer": "Методы (гл. 2)",
+        "module": "hyppo/planner",
+        "desc": "Алгоритм 4: планирование, P_ne/P_e, отсечение маршрутов (разд. 3.1.6).",
+        "deps": [
+          "metadata_repository",
+          "comparison"
+        ]
+      },
+      {
+        "id": "comparison",
+        "name": "Comparison",
+        "layer": "Методы (гл. 2)",
+        "module": "hyppo/comparison",
+        "desc": "Сравнение гипотез: AIC/BIC, знаковый тест, Уилкоксон (разд. 2.6).",
+        "deps": []
+      },
+      {
+        "id": "generator",
+        "name": "HypothesisGenerator",
+        "layer": "Методы (гл. 2)",
+        "module": "hyppo/generator",
+        "desc": "Порождение гипотез из данных (GLM + GP, разд. 3.1.3).",
+        "deps": [
+          "coa"
+        ]
+      },
+      {
+        "id": "runner",
+        "name": "VirtualExperimentRunner",
+        "layer": "Исполнение",
+        "module": "hyppo/runner",
+        "desc": "Исполнение моделей по плану, эпистемический статус (разд. 3.1.7).",
+        "deps": [
+          "metadata_repository"
+        ]
+      },
+      {
+        "id": "ontology",
+        "name": "Онтологическая подсистема",
+        "layer": "Онтология",
+        "module": "hyppo/ontology",
+        "desc": "17 правил, HermiT/ELK, маркерный слой, provenance (разд. 3.3).",
+        "deps": [
+          "core"
+        ]
+      },
+      {
+        "id": "metadata_repository",
+        "name": "MetadataRepository",
+        "layer": "Хранение",
+        "module": "hyppo/metadata_repository",
+        "desc": "Кэш результатов, поиск ближайшего графа (опр. 12, разд. 3.1.8).",
+        "deps": []
+      },
+      {
+        "id": "storage",
+        "name": "Storage",
+        "layer": "Хранение",
+        "module": "hyppo/storage",
+        "desc": "Слой хранения артефактов.",
+        "deps": []
+      },
+      {
+        "id": "adapters",
+        "name": "Доменные адаптеры",
+        "layer": "Инфраструктура",
+        "module": "hyppo/adapters",
+        "desc": "Подключение предметных онтологий и моделей (pywaterflood).",
+        "deps": [
+          "core",
+          "ontology"
+        ]
+      },
+      {
+        "id": "actions",
+        "name": "Действия (версии)",
+        "layer": "Инфраструктура",
+        "module": "hyppo/actions",
+        "desc": "Версионируемые операции над артефактами.",
+        "deps": [
+          "core"
+        ]
+      },
+      {
+        "id": "mcp",
+        "name": "MCP-интерфейс",
+        "layer": "Инфраструктура",
+        "module": "hyppo/mcp",
+        "desc": "Model Context Protocol для внешних инструментов.",
+        "deps": [
+          "manager"
+        ]
+      }
+    ],
+    "note": "Компоненты сгруппированы по слоям; стрелки — доступ одного компонента к интерфейсу другого. Основные компоненты реализуют методы глав 2–3; инфраструктурные — вспомогательные."
   },
   "scale": {
     "note": "Один и тот же граф гипотез строится алгоритмом 1 из уравнений при любом масштабе; онтологический вывод в профиле OWL 2 EL (ELK) полиномиален.",
