@@ -40,6 +40,13 @@ class FakeStructure:
         return self._tc
 
 
+class FakeEquation:
+    """Minimal stand-in for a COA Equation exposing its variables."""
+
+    def __init__(self, vars_list):
+        self.vars = list(vars_list)
+
+
 class FakeHypothesis:
     """Minimal hypothesis with a structure attached."""
 
@@ -83,20 +90,24 @@ def test_build_lattice_no_complete_union():
 
 
 def test_build_lattice_with_complete_union():
-    """When a union is complete, build_lattice should add edges based on transitive closure."""
+    """When h1's output variable feeds h2's equation, build_lattice adds edge (h1, h2)."""
     from hyppo.lattice_constructor._base import HypothesisLattice
 
-    tc = {"a": {"b", "c"}, "b": {"c"}}
-    s1 = FakeStructure(vars_set={"a", "b"}, complete=True, tc=tc)
-    s2 = FakeStructure(vars_set={"b", "c"}, complete=True, tc=tc)
+    # h1 produces "a" (from equation over {a, x}); h2 consumes "a" as an input
+    # of its {a, b} equation while producing "b" (a is exogenous in h2).
+    s1 = FakeStructure(equations=[FakeEquation(["a", "x"])],
+                       vars_set={"a", "x"}, complete=True)
+    s2 = FakeStructure(equations=[FakeEquation(["a"]), FakeEquation(["a", "b"])],
+                       vars_set={"a", "b"}, complete=True)
     h1 = FakeHypothesis("h1", s1)
     h2 = FakeHypothesis("h2", s2)
     wf = FakeWorkflow([[h1], [h2]])
 
     hl = HypothesisLattice(hypotheses=[h1, h2], workflow=wf)
     assert isinstance(hl.lattice, nx.DiGraph)
-    # With the tc above, b is a subset of a, so there should be an edge (b, a)
+    # h1's output "a" appears among h2's inputs → derived_by edge (h1, h2)
     assert hl.lattice.number_of_edges() > 0
+    assert (h1, h2) in hl.lattice.edges
 
 
 def test_add_hypothesis_increases_edges():
