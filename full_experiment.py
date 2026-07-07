@@ -142,7 +142,7 @@ def run_dataset(name):
     # E: competes resolution
     with onto: hB.is_a.append(cr.InvalidHypothesis)
     sync_reasoner()
-    r31=has(hA,lc.ConfirmedHypothesis)
+    r31=has(hA,lc.PreferredHypothesis)
     # Report
     print(f"\n[2-3] Graph: {len(ah)} hypotheses; R:M→H: {sum(1 for p in hp if hp[p].is_implemented_by_model)}/{len(hp)}")
     print(f"    Markers: R2={len(rep.rule2_marked)} R9={len(rep.rule9_marked)} R11={len(rep.rule11_marked)} R13={len(rep.rule13_marked)} R15={len(rep.rule15_marked)}")
@@ -150,7 +150,7 @@ def run_dataset(name):
     print(f"\n[4] Integrity: cascade={len(st)}/{len(ah)} Stale; DerivedStaleRun={has(R0,pv.DerivedStaleRun)}")
     print(f"    Rule 17 (ConflictingHypothesis): {has(hA,lc.ConflictingHypothesis)}")
     print(f"\n[5] Lifecycle:")
-    print(f"    Rule 31 (ConfirmedHypothesis): competitor→Invalid→Confirmed = {r31}")
+    print(f"    Rule 31 (PreferredHypothesis): competitor→Invalid→Confirmed = {r31}")
     print(f"    A (refresh): was_stale={was} now_fresh={afr} now_stale={ast}")
     print(f"    BF(CRM-UTO/POS)={bf:.3g} → {'REFUTED' if bf<0.1 else 'inconclusive'}")
     print(f"\n>>> {name}: COMPLETE")
