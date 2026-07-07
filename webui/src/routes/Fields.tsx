@@ -68,19 +68,18 @@ export function Fields({ real, field, setField }: { real: RealData; field: strin
 
       <div className="panel">
         <div className="label">
-          Гипотезы-скважины · модели (R : M→H, ≥1 модель на гипотезу) · статус на {field}
+          Гипотезы HybridCRM (H1–H16) · модели (R : M→H, ≥1) · статус на {field}
         </div>
         <table className="data">
-          <thead><tr><th>Гипотеза</th><th>Тип</th><th>Скважина</th><th>Модели (R)</th><th>Статус</th></tr></thead>
+          <thead><tr><th>Гипотеза</th><th>Ветвь</th><th>Название</th><th>Модели (R)</th><th>Статус на {field}</th></tr></thead>
           <tbody>
-            {fr.graph.nodes.map((n) => {
-              const s = fr.epistemic_status[n.id];
+            {real.graph_conceptual.nodes.map((n) => {
+              const s = fr.concept_status[n.id] ?? n.status;
               const cls = s === "REFUTED" ? "r" : s === "CONFIRMED" ? "a" : s === "SUPERSEDED" ? "b" : "g";
-              const kind = n.kind === "injector" ? "нагнетательная" : n.kind === "producer" ? "добывающая" : "слияние";
               return (
                 <tr key={n.id}>
                   <td className="num">{n.id}</td>
-                  <td className="muted">{kind}</td>
+                  <td className="muted">{n.branch}</td>
                   <td>{n.label}</td>
                   <td>
                     {n.models.map((m) => <span key={m} className="tag">{mlabel[m] ?? m}</span>)}
@@ -93,8 +92,11 @@ export function Fields({ real, field, setField }: { real: RealData; field: strin
           </tbody>
         </table>
         <p className="muted" style={{ fontSize: 12 }}>
-          Свойство <span className="formula">is_implemented_by_model</span> имеет тип «some» (≥1): у добывающей
-          скважины несколько конкурирующих моделей (CRMP, CRMT, Transformer+GNN, Fusion), у слияния — две.
+          Граф модели один для обоих месторождений; на {field} физика жидкости{" "}
+          {fr.r2.CRM >= 0.5 ? "подтверждается" : "опровергается"} (CRM R²={fr.r2.CRM.toFixed(2)}).
+          Свойство <span className="formula">is_implemented_by_model</span> типа «some» (≥1): у физических
+          гипотез несколько конкурирующих моделей (CRMP/CRMT). Связность скважин ({fr.producers}+{fr.injectors})
+          — в разделе связности, не в графе гипотез.
         </p>
       </div>
     </div>

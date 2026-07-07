@@ -67,6 +67,7 @@ export type RealField = {
   bayes_factor: number; physics_verdict: string;
   graph: WellGraph;
   epistemic_status: Record<string, string>;
+  concept_status: Record<string, string>;
   algorithm4: Record<string, Plan>;
 };
 export type OntoClass = { name: string; parent: string | null };
@@ -80,8 +81,8 @@ export type RealData = {
     config_space_size: number;
   };
   graph_conceptual: {
-    nodes: { id: string; label: string; branch: string; status: string;
-             equation: { formula: string; output: string }; model: string }[];
+    nodes: { id: string; label: string; branch: string; status: string; metric?: string;
+             equation: { formula: string; output: string }; model: string; models: string[] }[];
     edges: string[][]; derivation: Deriv[]; note: string;
     tasks: { id: string; label: string; hypotheses: string[] }[];
     task_edges: string[][]; is_dag: boolean; depth: number;
@@ -90,6 +91,7 @@ export type RealData = {
     points: { hypotheses: number; ELK_s: number; HermiT_s: number; wells: string }[] };
   algorithm2_example: { add: string; label: string; note: string };
   algorithm3_conditions: { n: number; text: string; ok: boolean }[];
+  algorithm4: Record<string, Plan>;
   fields: Record<string, RealField>;
   theorems: Record<string, string>;
 };

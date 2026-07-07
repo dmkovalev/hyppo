@@ -345,6 +345,11 @@
           "output": "I_agg"
         },
         "model": "m_crmp",
+        "models": [
+          "m_crmp",
+          "m_crmt"
+        ],
+        "metric": "CRM",
         "status": "SUPPORTED"
       },
       {
@@ -356,6 +361,11 @@
           "output": "q_f"
         },
         "model": "m_crmp",
+        "models": [
+          "m_crmp",
+          "m_crmt"
+        ],
+        "metric": "CRM",
         "status": "SUPPORTED"
       },
       {
@@ -367,6 +377,11 @@
           "output": "q_s"
         },
         "model": "m_crmp",
+        "models": [
+          "m_crmp",
+          "m_crmt"
+        ],
+        "metric": "CRM",
         "status": "SUPPORTED"
       },
       {
@@ -378,6 +393,11 @@
           "output": "q_c"
         },
         "model": "m_crmp",
+        "models": [
+          "m_crmp",
+          "m_crmt"
+        ],
+        "metric": "CRM",
         "status": "SUPPORTED"
       },
       {
@@ -389,6 +409,11 @@
           "output": "q_liq_phys"
         },
         "model": "m_crmp",
+        "models": [
+          "m_crmp",
+          "m_crmt"
+        ],
+        "metric": "CRM",
         "status": "SUPPORTED"
       },
       {
@@ -400,6 +425,11 @@
           "output": "q_prim"
         },
         "model": "m_crmp",
+        "models": [
+          "m_crmp",
+          "m_crmt"
+        ],
+        "metric": "CRM",
         "status": "SUPPORTED"
       },
       {
@@ -411,6 +441,10 @@
           "output": "l_ml"
         },
         "model": "m_nn",
+        "models": [
+          "m_nn"
+        ],
+        "metric": "CRM",
         "status": "SUPPORTED"
       },
       {
@@ -422,6 +456,11 @@
           "output": "l"
         },
         "model": "m_hyb",
+        "models": [
+          "m_hyb",
+          "m_bl"
+        ],
+        "metric": "CRM",
         "status": "SUPPORTED"
       },
       {
@@ -433,6 +472,10 @@
           "output": "Sw"
         },
         "model": "m_bl",
+        "models": [
+          "m_bl"
+        ],
+        "metric": "WCT",
         "status": "SUPPORTED"
       },
       {
@@ -444,6 +487,10 @@
           "output": "krw"
         },
         "model": "m_bl",
+        "models": [
+          "m_bl"
+        ],
+        "metric": "WCT",
         "status": "SUPPORTED"
       },
       {
@@ -455,6 +502,10 @@
           "output": "kro"
         },
         "model": "m_bl",
+        "models": [
+          "m_bl"
+        ],
+        "metric": "WCT",
         "status": "SUPPORTED"
       },
       {
@@ -466,6 +517,10 @@
           "output": "fw"
         },
         "model": "m_bl",
+        "models": [
+          "m_bl"
+        ],
+        "metric": "WCT",
         "status": "SUPPORTED"
       },
       {
@@ -477,6 +532,10 @@
           "output": "o_p"
         },
         "model": "m_bl",
+        "models": [
+          "m_bl"
+        ],
+        "metric": "WCT",
         "status": "SUPPORTED"
       },
       {
@@ -488,6 +547,11 @@
           "output": "o"
         },
         "model": "m_hyb",
+        "models": [
+          "m_hyb",
+          "m_bl"
+        ],
+        "metric": "WCT",
         "status": "SUPPORTED"
       },
       {
@@ -499,6 +563,10 @@
           "output": "J"
         },
         "model": "m_bl",
+        "models": [
+          "m_bl"
+        ],
+        "metric": "CRM",
         "status": "SUPPORTED"
       },
       {
@@ -510,6 +578,11 @@
           "output": "q_oil"
         },
         "model": "m_hyb",
+        "models": [
+          "m_hyb",
+          "m_bl"
+        ],
+        "metric": "OPR",
         "status": "SUPPORTED"
       }
     ],
@@ -826,6 +899,86 @@
     "is_dag": true,
     "depth": 5,
     "note": "16 гипотез (сплошная нумерация статьи H1–H16), 17 рёбер derived_by, DAG глубины 5. Построено настоящим алгоритмом 1 (HypothesisLattice) из уравнений; жидкость H1–H8, обводнённость H9–H14, ГРП H15, нефть H16."
+  },
+  "algorithm4": {
+    "change_H1": {
+      "changed": [
+        "H1"
+      ],
+      "p_ne": [
+        "H1",
+        "H16",
+        "H2",
+        "H3",
+        "H4",
+        "H5",
+        "H8"
+      ],
+      "p_e": [
+        "H6",
+        "H7",
+        "H9",
+        "H10",
+        "H11",
+        "H12",
+        "H13",
+        "H14",
+        "H15"
+      ],
+      "recompute_frac": 0.438
+    },
+    "change_H5": {
+      "changed": [
+        "H5"
+      ],
+      "p_ne": [
+        "H16",
+        "H5",
+        "H8"
+      ],
+      "p_e": [
+        "H1",
+        "H2",
+        "H3",
+        "H4",
+        "H6",
+        "H7",
+        "H9",
+        "H10",
+        "H11",
+        "H12",
+        "H13",
+        "H14",
+        "H15"
+      ],
+      "recompute_frac": 0.188
+    },
+    "change_H10": {
+      "changed": [
+        "H10"
+      ],
+      "p_ne": [
+        "H10",
+        "H12",
+        "H13",
+        "H14",
+        "H16"
+      ],
+      "p_e": [
+        "H1",
+        "H2",
+        "H3",
+        "H4",
+        "H5",
+        "H6",
+        "H7",
+        "H8",
+        "H9",
+        "H11",
+        "H15"
+      ],
+      "recompute_frac": 0.312
+    }
   },
   "scale": {
     "note": "Один и тот же граф гипотез строится алгоритмом 1 из уравнений при любом масштабе; онтологический вывод в профиле OWL 2 EL (ELK) полиномиален.",
@@ -1273,6 +1426,24 @@
           ],
           "recompute_frac": 0.125
         }
+      },
+      "concept_status": {
+        "H1": "SUPPORTED",
+        "H2": "SUPPORTED",
+        "H3": "SUPPORTED",
+        "H4": "SUPPORTED",
+        "H5": "SUPPORTED",
+        "H6": "SUPPORTED",
+        "H7": "SUPPORTED",
+        "H8": "CONFIRMED",
+        "H9": "SUPPORTED",
+        "H10": "SUPPORTED",
+        "H11": "SUPPORTED",
+        "H12": "SUPPORTED",
+        "H13": "SUPPORTED",
+        "H14": "CONFIRMED",
+        "H15": "SUPPORTED",
+        "H16": "CONFIRMED"
       }
     },
     "Norne": {
@@ -1731,6 +1902,24 @@
           ],
           "recompute_frac": 0.133
         }
+      },
+      "concept_status": {
+        "H1": "REFUTED",
+        "H2": "REFUTED",
+        "H3": "REFUTED",
+        "H4": "REFUTED",
+        "H5": "REFUTED",
+        "H6": "REFUTED",
+        "H7": "SUPPORTED",
+        "H8": "CONFIRMED",
+        "H9": "SUPPORTED",
+        "H10": "SUPPORTED",
+        "H11": "SUPPORTED",
+        "H12": "SUPPORTED",
+        "H13": "SUPPORTED",
+        "H14": "CONFIRMED",
+        "H15": "SUPPORTED",
+        "H16": "CONFIRMED"
       }
     }
   },

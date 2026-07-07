@@ -380,6 +380,13 @@ _CMODEL = {**{o: "m_crmp" for o in ["H1", "H2", "H3", "H4", "H5", "H6"]},
            **{o: "m_nn" for o in ["H7"]}, **{o: "m_hyb" for o in ["H8", "H15", "H19"]},
            **{o: "m_bl" for o in ["H11", "H12", "H12b", "H13", "H14"]},
            "GRP": "m_bl"}
+# ≥1 model per hypothesis; physics steps carry competing CRM implementations.
+_CMODELS = {**{o: ["m_crmp", "m_crmt"] for o in ["H1", "H2", "H3", "H4", "H5", "H6"]},
+            "H7": ["m_nn"], **{o: ["m_hyb", "m_bl"] for o in ["H8", "H15", "H19"]},
+            **{o: ["m_bl"] for o in ["H11", "H12", "H12b", "H13", "H14"]},
+            "GRP": ["m_bl"]}
+# branch → which field metric decides the epistemic status of the hypothesis
+_CBRANCH_METRIC = {"жидкость": "CRM", "обводнённость": "WCT", "нефть": "OPR", "ГТМ": "CRM"}
 
 
 def build_conceptual_lattice():
@@ -405,7 +412,9 @@ def build_conceptual_lattice():
 
     R = _RENUM
     nodes = [{"id": R[n], "label": lab, "branch": br,
-              "equation": {"formula": f, "output": o}, "model": _CMODEL[n],
+              "equation": {"formula": f, "output": o},
+              "model": _CMODEL[n], "models": _CMODELS[n],
+              "metric": _CBRANCH_METRIC.get(br, "CRM"),
               "status": "SUPPORTED"} for n, f, o, lab, br in _CONCEPT_OLD]
     edges = [[R[a], R[b]] for a, b in edges_old]
     deriv = [{"src": R[a], "dst": R[b], "via": out[a],
@@ -468,6 +477,29 @@ def main():
     # Conceptual HybridCRM graph via the REAL platform Algorithm 1 (HypothesisLattice).
     concept = build_conceptual_lattice()
 
+    # Per-field epistemic status on the SAME conceptual nodes (only data differs).
+    for name, fr in fields.items():
+        r2 = fr["r2"]; cs = {}
+        for nd in concept["nodes"]:
+            cid = nd["id"]
+            if cid in ("H8", "H14", "H16"):            # fusion / OPR
+                cs[cid] = "CONFIRMED"
+            elif cid in ("H7", "H15"):                 # ML, ГТМ
+                cs[cid] = "SUPPORTED"
+            elif cid in ("H1", "H2", "H3", "H4", "H5", "H6"):   # физика жидкости
+                cs[cid] = "SUPPORTED" if r2["CRM"] >= 0.5 else "REFUTED"
+            else:                                       # H9–H13 физика обводнённости
+                cs[cid] = "SUPPORTED" if r2["WCT"] >= 0.5 else "REFUTED"
+        fr["concept_status"] = cs
+
+    # Algorithm 4 cascade on the conceptual graph (same for both fields).
+    cids = [n["id"] for n in concept["nodes"]]
+    concept_alg4 = {
+        "change_H1": plan_cascade(cids, concept["edges"], ["H1"]),
+        "change_H5": plan_cascade(cids, concept["edges"], ["H5"]),
+        "change_H10": plan_cascade(cids, concept["edges"], ["H10"]),
+    }
+
     data = {
         "domain": "HybridCRM — прогноз нефтедобычи при заводнении (Norne / Brugge)",
         "ve": {
@@ -476,6 +508,7 @@ def main():
             "configuration": axes, "config_space_size": size,
         },
         "graph_conceptual": concept,
+        "algorithm4": concept_alg4,
         "scale": scale,
         "algorithm2_example": {
             "add": "H_ГРП", "label": "ГТМ: гидроразрыв пласта → продуктивность продюсера",

@@ -1,12 +1,12 @@
 import type { RealData } from "../types";
 
-export function Algorithms({ real, field }: { real: RealData; field: string }) {
-  const fr = real.fields[field];
-  const g = fr.graph;
+export function Algorithms({ real }: { real: RealData; field?: string }) {
+  const c = real.graph_conceptual;
   const a2 = real.algorithm2_example;
-  const a4 = fr.algorithm4;
+  const a4 = real.algorithm4;
   const th = real.theorems;
-  const labelOf = Object.fromEntries(g.nodes.map((n) => [n.id, n.label]));
+  const labelOf = Object.fromEntries(c.nodes.map((n) => [n.id, n.label]));
+  const g = { nodes: c.nodes, edges: c.edges };
 
   return (
     <div>
