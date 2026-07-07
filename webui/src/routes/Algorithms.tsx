@@ -11,7 +11,7 @@ export function Algorithms({ real }: { real: RealData; field?: string }) {
   return (
     <div>
       <div className="page-head">
-        <div className="kicker">Методы главы 2 · на реальном графе {field}</div>
+        <div className="kicker">Методы главы 2 · на графе HybridCRM (16 гипотез)</div>
         <h1>Алгоритмы и теоремы</h1>
         <p className="lead">Четыре алгоритма управления виртуальным экспериментом с доказанными оценками.</p>
       </div>
@@ -19,8 +19,9 @@ export function Algorithms({ real }: { real: RealData; field?: string }) {
       <div className="panel">
         <div className="label">Алгоритм 1 — построение графа гипотез</div>
         <p style={{ marginTop: 0 }}>
-          Из матрицы связности CRM выведено <b>{g.edges.length} рёбер</b> derived_by для{" "}
-          <b>{g.nodes.length} гипотез</b>. Пошаговое построение — в разделе «Граф гипотез».
+          Настоящим алгоритмом 1 (<span className="formula">HypothesisLattice</span>) выведено{" "}
+          <b>{g.edges.length} рёбер</b> derived_by для <b>{g.nodes.length} гипотез</b> (DAG глубины {c.depth}).
+          Пошаговое построение — в разделе «Граф гипотез».
         </p>
         <div className="kv"><dt>Лемма 1</dt><dd>{th.lemma1}</dd></div>
       </div>

@@ -81,10 +81,17 @@ export function OntologyCyto({ classes, relations }: { classes: OntoClass[]; rel
   }, [classes, relations]);
 
   function runLayout(cy: any, name: string) {
-    const opts = name === "dagre"
-      ? { name: "dagre", rankDir: "BT", nodeDimensionsIncludeLabels: true, rankSep: 80, nodeSep: 40, fit: true, padding: 30 }
-      : { name: "cose", animate: false, nodeRepulsion: 9000, idealEdgeLength: 120, fit: true, padding: 30 };
-    cy.layout(opts).run();
+    const dagreOk = !!window.cytoscapeDagre;
+    let opts: any;
+    if (name === "dagre" && dagreOk) {
+      opts = { name: "dagre", rankDir: "BT", nodeDimensionsIncludeLabels: true, rankSep: 80, nodeSep: 40, fit: true, padding: 30 };
+    } else if (name === "cose") {
+      opts = { name: "cose", animate: false, nodeRepulsion: 9000, idealEdgeLength: 120, fit: true, padding: 30 };
+    } else {
+      opts = { name: "breadthfirst", directed: true, spacingFactor: 1.3, fit: true, padding: 30 };
+    }
+    try { cy.layout(opts).run(); }
+    catch { cy.layout({ name: "grid", fit: true, padding: 30 }).run(); }
   }
 
   useEffect(() => { if (cyRef.current) runLayout(cyRef.current, layout); }, [layout]);
