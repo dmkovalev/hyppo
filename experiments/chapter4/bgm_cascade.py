@@ -2,11 +2,14 @@
 """Chapter 4 -- Besancon Galaxy Model (BGM) cascade demo (Section 4.2, part4.tex).
 
 Reproduces the *method* claims of the BGM application from the library:
-  * Algorithm 1 (HypothesisGraph.build) constructs the 6-hypothesis ``derived_by``
-    graph of the BGM stellar-birthrate model;
+  * Algorithm 1 (HypothesisGraph.build) constructs the 10-hypothesis ``derived_by``
+    graph of the BGM stellar-birthrate / mass model (4 input parameters and
+    6 derived quantities), 12 edges, depth 4 -- exactly the graph drawn in
+    fig:mass_lattice (BGM_lattice_standalone.tex);
   * Algorithm 4 (HypothesisGraph.plan) recomputes only the hypotheses affected by
-    a change -- 3 of 6 (50%) when the SFR hypothesis changes (gamma 0.12 -> 0.25),
-    and 2 of 6 when only IMF changes;
+    a change -- 4 of 10 (40%) when the SFR hypothesis changes (gamma 0.12 -> 0.25),
+    and likewise 4 of 10 when only IMF changes (cascade IMF -> star birthrate ->
+    local luminosity -> dynamical self-consistency);
   * the three IMF variants are ranked by their published chi^2 on Tycho-2.
 
 The cascade structure is fully reproducible from the library. The astronomical
@@ -27,18 +30,43 @@ from hyppo.coa import HypothesisGraph
 HERE = Path(__file__).resolve().parent
 RESULTS = HERE / "results"
 
-# --- BGM stellar-birthrate hypothesis graph (Section 4.2) -------------------
-# 6 hypotheses (nodes); a derived_by edge u -> v means "v is computed from u".
-# Birthrate b(m,t) ~ f(SFR(i), rho(i, SFR(i))) * IMF(m)  (Eq. in part4.tex).
-NODES = ["age_cells", "density_law", "IMF", "SFR", "rho", "birthrate"]
+# --- BGM stellar-birthrate hypothesis graph (Section 4.2, fig:mass_lattice) ---
+# 10 hypotheses (nodes): 4 input parameters + 6 derived quantities.
+# A derived_by edge u -> v means "v is computed from u".
+# Birthrate b(m,t) ~ f(SFR(i), rho(i, SFR(i))) * IMF(m)  (Eq. in part4.tex);
+# the derived quantities (luminosity, evolutionary tracks, velocity dispersion,
+# dynamical self-consistency) extend the chain up to the galaxy mass model.
+NODES = [
+    # -- inputs (row 0) --
+    "density_law",
+    "age_cells",
+    "SFR",
+    "IMF",
+    # -- derived quantities (rows 1-3) --
+    "local_volume_density",
+    "star_birthrate",
+    "evolutionary_tracks",
+    "local_luminosity",
+    "velocity_dispersion",
+    "dynamical_self_consistency",
+]
 IDX = {n: i for i, n in enumerate(NODES)}
 EDGES = [
-    ("age_cells", "SFR"),    # SFR is defined per age cell
-    ("SFR", "rho"),          # rho(i, SFR(i)) depends on SFR
-    ("density_law", "rho"),  # rho uses the local density law
-    ("SFR", "birthrate"),    # b uses SFR
-    ("rho", "birthrate"),    # b uses rho
-    ("IMF", "birthrate"),    # b = ... * IMF(m)
+    # row 0 -> row 1
+    ("age_cells", "local_volume_density"),
+    ("density_law", "local_volume_density"),
+    ("SFR", "star_birthrate"),               # star birthrate uses the SFR law
+    ("IMF", "star_birthrate"),               # b = ... * IMF(m)
+    ("age_cells", "star_birthrate"),         # SFR(i) is defined per age cell
+    # row 1 -> row 2
+    ("local_volume_density", "evolutionary_tracks"),
+    ("star_birthrate", "local_luminosity"),
+    ("local_volume_density", "local_luminosity"),
+    # row 2 -> row 3
+    ("evolutionary_tracks", "velocity_dispersion"),
+    ("local_luminosity", "dynamical_self_consistency"),
+    ("evolutionary_tracks", "dynamical_self_consistency"),
+    ("velocity_dispersion", "dynamical_self_consistency"),
 ]
 
 # Published chi^2 of IMF variants on Tycho-2 thin-disc (B-V)_T (Czekaj+2014).
@@ -76,15 +104,18 @@ def main() -> None:
     print(f"BGM hypothesis graph: {n} nodes, {len(EDGES)} derived_by edges")
     print(f"change SFR -> recompute {change_sfr}  = {len(change_sfr)}/{n} "
           f"({100 * len(change_sfr) // n}%)")
-    print(f"change IMF -> recompute {change_imf}  = {len(change_imf)}/{n}")
+    print(f"change IMF -> recompute {change_imf}  = {len(change_imf)}/{n} "
+          f"({100 * len(change_imf) // n}%)")
     print("IMF ranking by chi^2 (Tycho-2, Czekaj+2014):")
     for rank, (name, chi2) in enumerate(imf_ranked, 1):
         print(f"  {rank}. {name}: chi^2 = {chi2:.0f}")
 
-    # method claims of Section 4.2
-    assert set(change_sfr) == {"SFR", "rho", "birthrate"}, change_sfr
-    assert len(change_sfr) == 3 and len(change_sfr) / n == 0.5
-    assert set(change_imf) == {"IMF", "birthrate"}, change_imf
+    # method claims of Section 4.2 (10-node graph, fig:mass_lattice)
+    cascade_tail = {"star_birthrate", "local_luminosity", "dynamical_self_consistency"}
+    assert set(change_sfr) == {"SFR"} | cascade_tail, change_sfr
+    assert len(change_sfr) == 4 and len(change_sfr) / n == 0.4
+    assert set(change_imf) == {"IMF"} | cascade_tail, change_imf
+    assert len(change_imf) == 4 and len(change_imf) / n == 0.4
     assert imf_ranked[0][0] == "Kroupa (2001)"
 
     out = {

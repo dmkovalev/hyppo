@@ -1,54 +1,85 @@
 {
   "nodes": [
-    "age_cells",
     "density_law",
-    "IMF",
+    "age_cells",
     "SFR",
-    "rho",
-    "birthrate"
+    "IMF",
+    "local_volume_density",
+    "star_birthrate",
+    "evolutionary_tracks",
+    "local_luminosity",
+    "velocity_dispersion",
+    "dynamical_self_consistency"
   ],
   "edges": [
     [
       "age_cells",
-      "SFR"
-    ],
-    [
-      "SFR",
-      "rho"
+      "local_volume_density"
     ],
     [
       "density_law",
-      "rho"
+      "local_volume_density"
     ],
     [
       "SFR",
-      "birthrate"
-    ],
-    [
-      "rho",
-      "birthrate"
+      "star_birthrate"
     ],
     [
       "IMF",
-      "birthrate"
+      "star_birthrate"
+    ],
+    [
+      "age_cells",
+      "star_birthrate"
+    ],
+    [
+      "local_volume_density",
+      "evolutionary_tracks"
+    ],
+    [
+      "star_birthrate",
+      "local_luminosity"
+    ],
+    [
+      "local_volume_density",
+      "local_luminosity"
+    ],
+    [
+      "evolutionary_tracks",
+      "velocity_dispersion"
+    ],
+    [
+      "local_luminosity",
+      "dynamical_self_consistency"
+    ],
+    [
+      "evolutionary_tracks",
+      "dynamical_self_consistency"
+    ],
+    [
+      "velocity_dispersion",
+      "dynamical_self_consistency"
     ]
   ],
-  "n_hypotheses": 6,
+  "n_hypotheses": 10,
   "cascade": {
     "change_SFR": {
       "recompute": [
         "SFR",
-        "birthrate",
-        "rho"
+        "dynamical_self_consistency",
+        "local_luminosity",
+        "star_birthrate"
       ],
-      "fraction": 0.5
+      "fraction": 0.4
     },
     "change_IMF": {
       "recompute": [
         "IMF",
-        "birthrate"
+        "dynamical_self_consistency",
+        "local_luminosity",
+        "star_birthrate"
       ],
-      "fraction": 0.3333333333333333
+      "fraction": 0.4
     }
   },
   "imf_ranking_chi2": [
