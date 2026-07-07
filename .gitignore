@@ -7,3 +7,40 @@ build/
 *.db
 experiments/iip2026/cache/
 experiments/iip2026/out/
+experiments/iip2026/data/
+
+# webui build artifacts
+webui/node_modules/
+webui/dist/
+webui/test-results/
+webui/playwright-report/
+webui/tsconfig.tsbuildinfo
+
+# промысловые данные и бинарники (не отслеживаем)
+*.SMSPEC
+*.UNSMRY
+*.h5
+*.sch
+*.xlsx
+*.jar
+/_*.csv
+/_*.json
+/full_fit_result.txt
+/brugge_run_rules.txt
+
+# отладочный scratch (остаётся на диске, не часть библиотеки; демо — в examples/)
+/export_341.py
+/export_scale.py
+/norne_crm_vs_mpi.py
+/norne_diag.py
+/norne_killer.py
+/norne_pipeline.py
+/norne_pipeline2.py
+/norne_wct_perwell.py
+/test_c3_cwa.py
+/test_c3_cwa_b.py
+/test_c3_dl.py
+/volve_perwell.py
+/volve_pw2.py
+/fix_lattice_mapping.py
+/run_task11_smoke.sh
