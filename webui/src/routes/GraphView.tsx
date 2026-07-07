@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { RealData } from "../types";
 import { GraphBuild, GEdge, GNode } from "../components/GraphBuild";
 
@@ -12,33 +13,54 @@ function Seg({ field, setField }: { field: string; setField: (s: string) => void
 }
 
 export function GraphView({ real, field, setField }: { real: RealData; field: string; setField: (s: string) => void }) {
+  const [mode, setMode] = useState<"concept" | "wells">("concept");
+
+  const c = real.graph_conceptual;
   const fr = real.fields[field];
   const g = fr.graph;
-  const status = fr.epistemic_status ?? {};
-  const nodes: GNode[] = g.nodes.map((n) => ({ id: n.id, label: n.label, kind: n.kind, status: status[n.id] }));
-  const edges: GEdge[] = g.derivation.map((d) => ({ src: d.src, dst: d.dst, via: d.via, reason: d.reason }));
+
+  let nodes: GNode[]; let edges: GEdge[];
+  if (mode === "concept") {
+    nodes = c.nodes.map((n) => ({ id: n.id, label: n.label, status: n.status }));
+    edges = c.derivation.map((d) => ({ src: d.src, dst: d.dst, via: d.via, reason: d.reason }));
+  } else {
+    const st = fr.epistemic_status ?? {};
+    nodes = g.nodes.map((n) => ({ id: n.id, label: n.label, kind: n.kind, status: st[n.id] }));
+    edges = g.derivation.map((d) => ({ src: d.src, dst: d.dst, via: d.via, reason: d.reason }));
+  }
 
   return (
     <div>
       <div className="page-head">
-        <div className="kicker">Алгоритм 1 · граф из реальной связности CRM</div>
-        <h1>Граф гипотез · {field}</h1>
+        <div className="kicker">Алгоритм 1 · причинное упорядочение из уравнений</div>
+        <h1>Граф гипотез</h1>
         <p className="lead">
-          Каждая скважина — гипотеза. Рёбра <span className="formula">derived_by</span> выведены
-          из матрицы связности CRM (pywaterflood): инжектор→продюсер, если коэффициент{" "}
-          <span className="formula">gain</span> выше 75-го перцентиля; продюсеры сходятся в слиянии OPR.
-          Нажмите «Построить граф» — рёбра проявятся по одному с пояснением.
+          Рёбра <span className="formula">derived_by</span> выводятся алгоритмом 1: ребро h→h′
+          добавляется, когда выходная переменная уравнения h входит в уравнение h′. Нажмите
+          «Построить граф» — вывод по шагам; клик по вершине — каскад (алгоритм 4).
         </p>
       </div>
 
       <div className="panel">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-          <div className="muted" style={{ fontSize: 13 }}>
-            {fr.producers} добывающих + {fr.injectors} нагнетательных · {g.nodes.length} гипотез · {g.edges.length} рёбер · R:M→H {g.r_map}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, flexWrap: "wrap", gap: 10 }}>
+          <div className="seg">
+            <button className={mode === "concept" ? "on" : ""} onClick={() => setMode("concept")}>
+              концептуальный (19, из формул §4.4)
+            </button>
+            <button className={mode === "wells" ? "on" : ""} onClick={() => setMode("wells")}>
+              по скважинам (данные {field})
+            </button>
           </div>
-          <Seg field={field} setField={setField} />
+          {mode === "wells" && <Seg field={field} setField={setField} />}
         </div>
-        <GraphBuild nodes={nodes} edges={edges} />
+
+        <div className="muted" style={{ fontSize: 13, marginBottom: 10 }}>
+          {mode === "concept"
+            ? <>Архитектура HybridCRM как в рис. lattice_crm: {c.nodes.length} гипотез, {c.edges.length} рёбер. Ветвь жидкости H1–H10, обводнённости H11–H18, слияние H19.</>
+            : <>Инстанция на данных {field}: {g.nodes.length} гипотез-скважин, {g.edges.length} рёбер из матрицы связности CRM (gain &gt; перцентиль).</>}
+        </div>
+
+        <GraphBuild key={mode + field} nodes={nodes} edges={edges} />
       </div>
     </div>
   );

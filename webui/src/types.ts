@@ -79,6 +79,11 @@ export type RealData = {
     configuration: { name: string; section: string; levels: (string | number | boolean)[] }[];
     config_space_size: number;
   };
+  graph_conceptual: {
+    nodes: { id: string; label: string; branch: string; status: string;
+             equation: { formula: string; output: string }; model: string }[];
+    edges: string[][]; derivation: Deriv[]; note: string;
+  };
   scale: { note: string; speedup_10k: string;
     points: { hypotheses: number; ELK_s: number; HermiT_s: number; wells: string }[] };
   algorithm2_example: { add: string; label: string; note: string };

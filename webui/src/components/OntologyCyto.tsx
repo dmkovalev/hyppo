@@ -103,11 +103,9 @@ export function OntologyCyto({ classes, relations }: { classes: OntoClass[]; rel
         </div>
         <span className="muted" style={{ fontSize: 12 }}>клик по классу — подсветить связи</span>
       </div>
-      <div className="row split">
-        <div>
-          <div ref={ref} className="cy-frame" />
-        </div>
-        <div className="panel" style={{ minHeight: 0 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 280px", gap: 16, alignItems: "stretch" }}>
+        <div ref={ref} className="cy-frame" />
+        <div className="panel" style={{ minHeight: 0, background: "var(--panel-2)" }}>
           {!sel && <div className="muted">Круги — классы, сплошные бордовые стрелки — объектные свойства (domain→range),
             пунктир ⊑ — подкласс. Кликните класс, чтобы увидеть его связи.</div>}
           {sel && (
@@ -140,3 +138,5 @@ export function OntologyCyto({ classes, relations }: { classes: OntoClass[]; rel
     </div>
   );
 }
+
+export default OntologyCyto;

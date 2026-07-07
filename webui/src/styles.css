@@ -176,7 +176,7 @@ button.btn:disabled { opacity: .5; cursor: default; }
 @media (prefers-reduced-motion: reduce) { .gedge, .gnode { animation: none !important; stroke-dashoffset: 0 !important; opacity: 1 !important; } }
 
 /* ————— cytoscape онтология ————— */
-.cy-frame { height: 520px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); }
+.cy-frame { height: 600px; min-height: 600px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); }
 
 /* ————— переключатель ————— */
 .seg { display: inline-flex; border: 1px solid var(--line-2); border-radius: 8px; overflow: hidden; }

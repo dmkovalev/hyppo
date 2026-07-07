@@ -375,6 +375,19 @@ def main():
         "speedup_10k": "9.4×",
     }
 
+    # Conceptual HybridCRM graph (Figure lattice_crm) built by Algorithm 1 from
+    # the §4.4 equations — the model architecture, independent of field data.
+    c_edges, c_trace, c_vars = build_graph_algorithm1()
+    concept = {
+        "nodes": [{"id": h, "label": label, "branch": branch,
+                   "status": BASE_STATUS.get(h, "SUPPORTED"),
+                   "equation": {"formula": f, "output": o}, "model": MODEL_OF[h]}
+                  for h, f, o, label, branch, task in HYPS],
+        "edges": c_edges, "derivation": c_trace,
+        "note": "19 гипотез (H1–H19), рёбра derived_by выведены алгоритмом 1 из уравнений §4.4. "
+                "Ветвь жидкости H1–H10, обводнённости H11–H18, слияние H19.",
+    }
+
     data = {
         "domain": "HybridCRM — прогноз нефтедобычи при заводнении (Norne / Brugge)",
         "ve": {
@@ -382,6 +395,7 @@ def main():
             "models": MODEL_CATALOG,
             "configuration": axes, "config_space_size": size,
         },
+        "graph_conceptual": concept,
         "scale": scale,
         "algorithm2_example": {
             "add": "H_ГРП", "label": "ГТМ: гидроразрыв пласта → продуктивность продюсера",
