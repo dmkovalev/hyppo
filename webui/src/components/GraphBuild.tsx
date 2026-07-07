@@ -135,10 +135,20 @@ export function GraphBuild({ nodes, edges }: { nodes: GNode[]; edges: GEdge[] })
           {ordered.slice(0, revealed).map((e, i) => {
             const idx = String(edges.indexOf(e));
             const inv = invalid.edges.has(idx);
+            const a = pos[e.src], b = pos[e.dst];
+            const mx = (a.x + NW + b.x) / 2, my = (a.y + b.y) / 2 + NH / 2;
             return (
-              <path key={i} className={"gedge" + (inv ? " invalid" : "")} d={edgePath(e)}
-                    pathLength={1} markerEnd={`url(#${inv ? "arwr" : "arw"})`}
-                    style={{ strokeDasharray: 1, strokeDashoffset: 1, animationDelay: "0ms" }} />
+              <g key={i}>
+                <path className={"gedge" + (inv ? " invalid" : "")} d={edgePath(e)}
+                      pathLength={1} markerEnd={`url(#${inv ? "arwr" : "arw"})`}
+                      style={{ strokeDasharray: 1, strokeDashoffset: 1, animationDelay: "0ms" }} />
+                {e.via && (
+                  <text x={mx} y={my - 3} textAnchor="middle" className="gsub"
+                        style={{ fontSize: 9, fill: inv ? "var(--st-refuted)" : "var(--accent)" }}>
+                    <tspan style={{ paintOrder: "stroke", stroke: "var(--paper)", strokeWidth: 3 }}>{e.via}</tspan>
+                  </text>
+                )}
+              </g>
             );
           })}
           {nodes.map((n) => {

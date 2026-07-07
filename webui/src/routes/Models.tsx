@@ -1,53 +1,75 @@
+import { useState } from "react";
 import type { RealData } from "../types";
 
 export function Models({ real }: { real: RealData }) {
   const models = real.ve.models;
   const nodes = real.graph_conceptual.nodes;
-  // R : which hypotheses each model implements
   const usedBy = (mid: string) => nodes.filter((n) => n.models.includes(mid)).map((n) => n.id);
-  const mlabel = Object.fromEntries(models.map((m) => [m.id, m.label]));
+  const mById = Object.fromEntries(models.map((m) => [m.id, m]));
+  const [sel, setSel] = useState<string>(models[0]?.id ?? "");
+  const m = mById[sel];
+  const implH = usedBy(sel).map((id) => nodes.find((n) => n.id === id)!);
 
   return (
     <div>
       <div className="page-head">
-        <div className="kicker">Элементы M и R · модели и отображение</div>
+        <div className="kicker">Элементы M и R · модели, их Python-реализация и отображение</div>
         <h1>Модели M и отображение R : M → H</h1>
         <p className="lead">
-          Каждая гипотеза реализуется ≥1 моделью (<span className="formula">is_implemented_by_model</span>,
-          тип «some»). Модель может реализовать несколько гипотез; у гипотезы может быть несколько
-          конкурирующих моделей.
+          {models.length} гранулярных моделей — своя реализация на каждую гипотезу (≥1, конкурирующие
+          где осмысленно). У каждой указана реализация в Python-библиотеке, конфигурация и меняемые параметры.
+          Кликните модель — детали и формулы реализуемых гипотез.
         </p>
       </div>
 
-      <div className="panel">
-        <div className="label">M — каталог моделей</div>
-        <table className="data">
-          <thead><tr><th>Модель</th><th>Название</th><th>Класс (онтология)</th><th>Реализует гипотезы (R⁻¹)</th></tr></thead>
-          <tbody>
-            {models.map((m) => (
-              <tr key={m.id}>
-                <td className="num">{m.id}</td>
-                <td>{m.label}</td>
-                <td><span className="chip">{m.class}</span></td>
-                <td>{usedBy(m.id).map((h) => <span key={h} className="tag">{h}</span>)}
-                  {usedBy(m.id).length === 0 && <span className="muted">—</span>}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="row split">
+        <div className="list">
+          {models.map((mo) => (
+            <div key={mo.id} className={"item" + (sel === mo.id ? " active" : "")} onClick={() => setSel(mo.id)}>
+              <span className="t" style={{ fontSize: 13 }}>{mo.label}</span>
+              <span className="chip">{mo.class}</span>
+            </div>
+          ))}
+        </div>
+        <div className="detail">
+          {m && (
+            <>
+              <h3>{m.label}</h3>
+              <div className="sub"><span className="chip">{m.class}</span></div>
+              <dl className="kv">
+                <dt>Реализация (Python)</dt><dd className="formula" style={{ fontSize: 12 }}>{m.python_ref}</dd>
+                <dt>Конфигурация</dt><dd className="muted">{m.config}</dd>
+                <dt>Меняемые параметры</dt>
+                <dd>{(m.params ?? []).length ? m.params!.map((p) => <span key={p} className="tag">{p}</span>) : <span className="muted">—</span>}</dd>
+                <dt>Реализует гипотезы (R⁻¹)</dt>
+                <dd>
+                  {implH.map((h) => (
+                    <div key={h.id} style={{ marginBottom: 6 }}>
+                      <span className="num" style={{ color: "var(--accent)" }}>{h.id}</span> {h.label}
+                      <div className="formula" style={{ fontSize: 12 }}>{h.equation.formula}</div>
+                    </div>
+                  ))}
+                </dd>
+              </dl>
+            </>
+          )}
+        </div>
       </div>
 
       <div className="panel">
-        <div className="label">R : H → M(H) · модели каждой гипотезы (один-ко-многим)</div>
+        <div className="label">R : H → M(h) · модели каждой гипотезы (один-ко-многим) + формула</div>
         <table className="data">
-          <thead><tr><th>Гипотеза</th><th>Ветвь</th><th>Модели R(h)</th><th>Кол-во</th></tr></thead>
+          <thead><tr><th>Гипотеза</th><th>Уравнение</th><th>Модели R(h)</th></tr></thead>
           <tbody>
             {nodes.map((n) => (
               <tr key={n.id}>
-                <td className="num">{n.id}</td>
-                <td className="muted">{n.branch}</td>
-                <td>{n.models.map((m) => <span key={m} className="tag">{mlabel[m] ?? m}</span>)}</td>
-                <td className="num">{n.models.length}</td>
+                <td className="num">{n.id}<div className="muted" style={{ fontSize: 11 }}>{n.label}</div></td>
+                <td className="formula" style={{ fontSize: 12 }}>{n.equation.formula}</td>
+                <td>{n.models.map((mid) => (
+                  <span key={mid} className="tag" style={{ cursor: "pointer" }} onClick={() => setSel(mid)}>
+                    {mById[mid]?.label ?? mid}
+                  </span>
+                ))}</td>
               </tr>
             ))}
           </tbody>

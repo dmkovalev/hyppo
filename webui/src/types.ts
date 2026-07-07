@@ -60,6 +60,8 @@ export type WellGraph = {
   tasks: { id: string; label: string; hypotheses: string[] }[];
   task_edges: string[][];
 };
+export type Model = { id: string; label: string; class: string; python_ref?: string; config?: string; params?: string[] };
+export type Task = { id: string; label: string; hypotheses: string[] };
 export type Plan = { changed: string[]; p_ne: string[]; p_e: string[]; recompute_frac: number };
 export type RealField = {
   producers: number; injectors: number; months: number; fit: string;
@@ -76,7 +78,7 @@ export type RealData = {
   domain: string;
   ve: {
     ontology: { name: string; classes: OntoClass[]; relations: OntoRel[]; total_classes: number };
-    models: { id: string; label: string; class: string }[];
+    models: Model[];
     configuration: { name: string; section: string; levels: (string | number | boolean)[] }[];
     config_space_size: number;
   };
@@ -84,8 +86,15 @@ export type RealData = {
     nodes: { id: string; label: string; branch: string; status: string; metric?: string;
              equation: { formula: string; output: string }; model: string; models: string[] }[];
     edges: string[][]; derivation: Deriv[]; note: string;
-    tasks: { id: string; label: string; hypotheses: string[] }[];
-    task_edges: string[][]; is_dag: boolean; depth: number;
+    tasks: Task[]; task_edges: string[][]; task_preds?: Record<string, string[]>;
+    formal_text?: string; is_dag: boolean; depth: number;
+  };
+  demos?: {
+    alg2: { added: string; new_edges: string[][]; note: string };
+    alg3: { scenarios: { case: string; status: string; ok: boolean; detail: string }[]; owa_note: string };
+    alg4_plan: Record<string, { changed: string; p_ne: string[]; recompute_frac: number }>;
+    rule5: { acyclic: boolean; cyclic_witness: number[] };
+    complexity: Record<string, { points: { n: number; count: number; law: number | string }[]; law: string; note: string }>;
   };
   scale: { note: string; speedup_10k: string;
     points: { hypotheses: number; ELK_s: number; HermiT_s: number; wells: string }[] };

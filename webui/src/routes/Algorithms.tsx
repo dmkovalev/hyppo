@@ -5,6 +5,7 @@ export function Algorithms({ real }: { real: RealData; field?: string }) {
   const a2 = real.algorithm2_example;
   const a4 = real.algorithm4;
   const th = real.theorems;
+  const d = real.demos;
   const labelOf = Object.fromEntries(c.nodes.map((n) => [n.id, n.label]));
   const g = { nodes: c.nodes, edges: c.edges };
 
@@ -27,26 +28,45 @@ export function Algorithms({ real }: { real: RealData; field?: string }) {
       </div>
 
       <div className="panel">
-        <div className="label">Алгоритм 2 — инкрементальное добавление гипотезы</div>
-        <p style={{ marginTop: 0 }}>
-          Добавление <span className="num">{a2.add}</span> ({a2.label}) не требует полной перестройки графа.
-        </p>
-        <div className="kv"><dt>Лемма 2</dt><dd>{th.lemma2}</dd><dt>Смысл</dt><dd>{a2.note}</dd></div>
+        <div className="label">Алгоритм 2 — инкрементальное добавление гипотезы (реальный вызов)</div>
+        {d ? (
+          <p style={{ marginTop: 0 }}>
+            <span className="formula">add_hypothesis({d.alg2.added})</span> даёт тот же граф, что полная
+            перестройка (golden-тест), но за O(|H|) объединений. Появившиеся рёбра:{" "}
+            {d.alg2.new_edges.map((e, i) => <span key={i} className="tag">{e[0]} → {e[1]}</span>)}.
+          </p>
+        ) : <p style={{ marginTop: 0 }}>Добавление {a2.add} ({a2.label}).</p>}
+        <div className="kv"><dt>Лемма 2</dt><dd>{th.lemma2}</dd></div>
       </div>
 
       <div className="panel">
-        <div className="label">Алгоритм 3 — проверка корректной определённости</div>
-        <table className="data">
-          <thead><tr><th>№</th><th>Условие</th><th>Статус</th></tr></thead>
-          <tbody>
-            {real.algorithm3_conditions.map((c) => (
-              <tr key={c.n}>
-                <td className="num">{c.n}</td><td>{c.text}</td>
-                <td><span className={"chip " + (c.ok ? "g" : "r")}>{c.ok ? "✓ выполнено" : "✕ нарушено"}</span></td>
-              </tr>
+        <div className="label">Алгоритм 3 — двухэтапная проверка корректной определённости (реальный check_consistency)</div>
+        {d ? (
+          <>
+            <table className="data">
+              <thead><tr><th>Сценарий</th><th>Статус</th><th>Детали</th></tr></thead>
+              <tbody>
+                {d.alg3.scenarios.map((s, i) => (
+                  <tr key={i}>
+                    <td>{s.case}</td>
+                    <td><span className={"chip " + (s.ok ? "g" : "r")}>{s.status}</span></td>
+                    <td className="muted" style={{ fontSize: 12 }}>{s.detail}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p className="muted" style={{ fontSize: 12, marginTop: 10 }}>
+              <b>OWA:</b> {d.alg3.owa_note}
+            </p>
+          </>
+        ) : (
+          <table className="data"><tbody>
+            {real.algorithm3_conditions.map((cc) => (
+              <tr key={cc.n}><td className="num">{cc.n}</td><td>{cc.text}</td>
+                <td><span className={"chip " + (cc.ok ? "g" : "r")}>{cc.ok ? "✓" : "✕"}</span></td></tr>
             ))}
-          </tbody>
-        </table>
+          </tbody></table>
+        )}
       </div>
 
       <div className="panel">
@@ -95,6 +115,37 @@ export function Algorithms({ real }: { real: RealData; field?: string }) {
           полиномиальная сложность вместо 2-EXPTIME. Граф на любом масштабе строится алгоритмом 1 из уравнений.
         </p>
       </div>
+
+      {d && (
+        <div className="panel">
+          <div className="label">Сложности — операционными счётчиками (детерминированно, не по времени)</div>
+          <table className="data">
+            <thead><tr><th>Алгоритм</th><th>Закон</th><th>Счётчик по n</th><th>Рост</th></tr></thead>
+            <tbody>
+              {Object.entries(d.complexity).map(([k, v]) => (
+                <tr key={k}>
+                  <td className="num">{k}</td>
+                  <td className="formula">{v.law}</td>
+                  <td>{v.points.map((p) => <span key={p.n} className="tag">n={p.n}: {p.count}</span>)}</td>
+                  <td className="muted" style={{ fontSize: 12 }}>{v.note}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {d && (
+        <div className="panel">
+          <div className="label">Правило 5 — процедурная ацикличность (Kahn)</div>
+          <p style={{ marginTop: 0 }}>
+            Ацикличный граф: <span className="chip g">цикла нет</span>. Циклический — обнаружен со свидетелем:{" "}
+            <span className="chip r">цикл {d.rule5.cyclic_witness.join(" → ")}</span>.
+            Транзитивное свойство в OWL нельзя объявить асимметричным (ограничение simplicity) — ацикличность
+            проверяется процедурно при каждом добавлении связи.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

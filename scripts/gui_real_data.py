@@ -123,27 +123,38 @@ CORE_CLASSES = ["Artefact", "Hypothesis", "Model", "VirtualExperiment", "Configu
 
 
 def extract_ontology():
+    """Extract the FULL ontology: all classes (core + all rule-derived: markers,
+    provenance, quality gates, lifecycle, workflow validation, …), subClassOf
+    hierarchy and object properties. Ensures the 17 ontology rules are visible
+    and Equation/Variable are connected."""
     from hyppo.core._base import virtual_experiment_onto as onto
-    cls_by_name = {c.name: c for c in onto.classes()}
+    # make sure every rule module's classes are loaded into the ontology
+    for mod in ["core_rules", "provenance", "quality_gates", "workflow_validation",
+                "multi_experiment", "model_compatibility", "lifecycle", "markers"]:
+        try:
+            __import__(f"hyppo.ontology.{mod}")
+        except Exception:
+            pass
+
+    all_classes = list(onto.classes())
+    names = {c.name for c in all_classes}
     classes = []
-    for name in CORE_CLASSES:
-        c = cls_by_name.get(name)
+    for c in all_classes:
         parent = None
-        if c is not None:
-            for p in c.is_a:
-                pn = getattr(p, "name", None)
-                if pn in CORE_CLASSES and pn != name:
-                    parent = pn; break
-        classes.append({"name": name, "parent": parent})
-    core = set(CORE_CLASSES)
+        for p in c.is_a:
+            pn = getattr(p, "name", None)
+            if pn in names and pn != c.name:
+                parent = pn; break
+        classes.append({"name": c.name, "parent": parent})
+
     relations = []
     for p in onto.object_properties():
-        doms = [d.name for d in (p.domain or []) if getattr(d, "name", None) in core]
-        rngs = [r.name for r in (p.range or []) if getattr(r, "name", None) in core]
+        doms = [d.name for d in (p.domain or []) if getattr(d, "name", None) in names]
+        rngs = [r.name for r in (p.range or []) if getattr(r, "name", None) in names]
         for d in doms:
             for r in rngs:
                 relations.append({"property": p.name, "domain": d, "range": r})
-    # key relations always shown even if domain/range not both core-typed
+    # conceptual links absent from the code ontology
     seen = {(r["property"], r["domain"], r["range"]) for r in relations}
     for prop, d, r in [("derived_by", "Hypothesis", "Hypothesis"),
                        ("competes", "Hypothesis", "Hypothesis"),
@@ -152,11 +163,20 @@ def extract_ontology():
                        ("has_for_model", "VirtualExperiment", "Model"),
                        ("has_for_workflow", "VirtualExperiment", "Workflow"),
                        ("has_for_configuration", "VirtualExperiment", "Configuration"),
-                       ("has_for_structure", "Hypothesis", "Structure")]:
+                       ("has_for_structure", "Hypothesis", "Structure"),
+                       # Определение 2: структура S(E,V) = уравнения E + переменные V.
+                       # В коде онтологии эти рёбра отсутствуют (Equation/Variable висят);
+                       # добавляем концептуальные связи, чтобы граф был полным.
+                       ("has_for_equation", "Structure", "Equation"),
+                       ("has_for_variable", "Equation", "Variable"),
+                       ("has_for_fcm", "FullStructure", "FullCausalMapping"),
+                       ("has_for_dependency_set", "FullStructure", "DependencySet")]:
         if (prop, d, r) not in seen:
             relations.append({"property": prop, "domain": d, "range": r})
+    # only conceptual links whose endpoints exist as classes
+    relations = [x for x in relations if x["domain"] in names and x["range"] in names]
     return {"name": onto.base_iri, "classes": classes, "relations": relations,
-            "total_classes": len(cls_by_name)}
+            "total_classes": len(names)}
 
 
 def config_axes():
@@ -376,17 +396,51 @@ _CONCEPT_TASKS = [
 _RENUM = {"H1": "H1", "H2": "H2", "H3": "H3", "H4": "H4", "H5": "H5", "H6": "H6",
           "H7": "H7", "H8": "H8", "H11": "H9", "H12": "H10", "H12b": "H11",
           "H13": "H12", "H14": "H13", "H15": "H14", "GRP": "H15", "H19": "H16"}
-_CMODEL = {**{o: "m_crmp" for o in ["H1", "H2", "H3", "H4", "H5", "H6"]},
-           **{o: "m_nn" for o in ["H7"]}, **{o: "m_hyb" for o in ["H8", "H15", "H19"]},
-           **{o: "m_bl" for o in ["H11", "H12", "H12b", "H13", "H14"]},
-           "GRP": "m_bl"}
-# ≥1 model per hypothesis; physics steps carry competing CRM implementations.
-_CMODELS = {**{o: ["m_crmp", "m_crmt"] for o in ["H1", "H2", "H3", "H4", "H5", "H6"]},
-            "H7": ["m_nn"], **{o: ["m_hyb", "m_bl"] for o in ["H8", "H15", "H19"]},
-            **{o: ["m_bl"] for o in ["H11", "H12", "H12b", "H13", "H14"]},
-            "GRP": ["m_bl"]}
 # branch → which field metric decides the epistemic status of the hypothesis
 _CBRANCH_METRIC = {"жидкость": "CRM", "обводнённость": "WCT", "нефть": "OPR", "ГТМ": "CRM"}
+
+
+# role → (класс, реализация в Python-библиотеке, конфигурация, меняемые параметры)
+_MODEL_ROLE = {
+    "crmp": ("PhysicsModel", "pywaterflood.CRM(primary=True, tau_selection='per-pair', constraints='up-to one')",
+             "CONFIGURATION_SPACE / MODEL.PHYSICS", ["CRM_constraints", "CRM_KNN", "PHYS_GRAD_MODE"]),
+    "crmt": ("PhysicsModel", "pywaterflood.CRM(primary=True, tau_selection='per-pair', constraints='positive')",
+             "CONFIGURATION_SPACE / MODEL.PHYSICS", ["CRM_constraints", "CRM_KNN"]),
+    "gnn": ("DataDrivenModel", "torch_geometric.nn.GATConv (GNN, spatial attention)",
+            "CONFIGURATION_SPACE / MODEL.HYBRID", ["GNN_NUM_LAYERS", "GNN_HEADS", "HIDDEN_DIM"]),
+    "tr": ("DataDrivenModel", "torch.nn.TransformerEncoder (temporal attention)",
+           "CONFIGURATION_SPACE / MODEL.HYBRID", ["TRANSFORMER_NUM_LAYERS", "TRANSFORMER_NHEAD", "DIM_FEEDFORWARD_MULT"]),
+    "bl": ("PhysicsModel", "pywaterflood Buckley–Leverett (fractional flow f_w)",
+           "CONFIGURATION_SPACE / MODEL.PHYSICS", ["Corey_n_w", "Corey_n_o", "BACKPERIOD"]),
+    "wor": ("PhysicsModel", "sklearn.linear_model.Ridge (log-WOR)",
+            "гребневая регрессия", ["alpha"]),
+    "gate": ("HybridModel", "обучаемый вентиль слияния g: l = g·l_p + (1−g)·l_m",
+             "CONFIGURATION_SPACE / MODEL.HYBRID", ["USE_FUSION_GATE"]),
+    "frac": ("PhysicsModel", "модуляция продуктивности ΔJ (гидроразрыв)",
+             "ГТМ", ["USE_CRM_PHASE", "CRM_PHASE_RATIO"]),
+    "acid": ("PhysicsModel", "модуляция скин-фактора ΔS (кислотная обработка)",
+             "ГТМ", []),
+}
+
+
+def _mk(cid, role, label):
+    cls, ref, cfg, params = _MODEL_ROLE[role]
+    return {"id": f"m_{cid}_{role}", "label": f"{label} ({cid})", "class": cls,
+            "python_ref": ref, "config": cfg, "params": params}
+
+
+def _models_for(cid, branch):
+    """Granular models: a dedicated instance (≥1, competing where meaningful)
+    PER hypothesis — mirrors the real adapter (one Model instance per hypothesis)."""
+    if cid == "H7":
+        return [_mk(cid, "gnn", "GNN"), _mk(cid, "tr", "Transformer")]
+    if cid in ("H8", "H14", "H16"):
+        return [_mk(cid, "gate", "Fusion gate")]
+    if cid == "H15":
+        return [_mk(cid, "frac", "Гидроразрыв"), _mk(cid, "acid", "Кислотная обработка")]
+    if branch == "жидкость":
+        return [_mk(cid, "crmp", "CRMP up-to-one"), _mk(cid, "crmt", "CRMT positive")]
+    return [_mk(cid, "bl", "Buckley–Leverett"), _mk(cid, "wor", "Log-WOR")]
 
 
 def build_conceptual_lattice():
@@ -411,27 +465,182 @@ def build_conceptual_lattice():
     edges_old = [(u.name, v.name) for u, v in G.edges()]
 
     R = _RENUM
-    nodes = [{"id": R[n], "label": lab, "branch": br,
-              "equation": {"formula": f, "output": o},
-              "model": _CMODEL[n], "models": _CMODELS[n],
-              "metric": _CBRANCH_METRIC.get(br, "CRM"),
-              "status": "SUPPORTED"} for n, f, o, lab, br in _CONCEPT_OLD]
+    catalog = {}
+    nodes = []
+    for n, f, o, lab, br in _CONCEPT_OLD:
+        cid = R[n]
+        ms = _models_for(cid, br)
+        for m in ms:
+            catalog[m["id"]] = m
+        nodes.append({"id": cid, "label": lab, "branch": br,
+                      "equation": {"formula": f, "output": o},
+                      "models": [m["id"] for m in ms], "model": ms[0]["id"],
+                      "metric": _CBRANCH_METRIC.get(br, "CRM"), "status": "SUPPORTED"})
     edges = [[R[a], R[b]] for a, b in edges_old]
     deriv = [{"src": R[a], "dst": R[b], "via": out[a],
               "reason": f"выход {out[a]} ({R[a]}) входит в уравнение {R[b]}"} for a, b in edges_old]
-    labelmap = {n: lab for n, f, o, lab, br in _CONCEPT_OLD}
-    tasks = [{"id": t, "label": lab,
-              "hypotheses": [R[h] for h in hs]} for t, lab, hs in _CONCEPT_TASKS]
-    task_edges = [[a, b] for a, b in zip([t[0] for t in _CONCEPT_TASKS][:-1],
-                                         [t[0] for t in _CONCEPT_TASKS][1:])]
+    tasks = [{"id": t, "label": lab, "hypotheses": [R[h] for h in hs]}
+             for t, lab, hs in _CONCEPT_TASKS]
+    # task membership + task edges by PROJECTING hypothesis edges (parallel branches!)
+    task_of = {R[h]: t for t, lab, hs in _CONCEPT_TASKS for h in hs}
+    te = sorted({(task_of[a], task_of[b]) for a, b in edges if task_of[a] != task_of[b]})
+    task_edges = [list(e) for e in te]
+    # predecessors: AND-join, если задача зависит от >1 ветви
+    preds = {t["id"]: [a for a, b in task_edges if b == t["id"]] for t in tasks}
+    # формальное описание потока (CWL-подобный текст)
+    lines = ["# HybridCRM workflow — ОАГ задач (CWL-подобный формат)",
+             "# join: AND (все входы обязательны); ветви LPR и WCT параллельны",
+             "cwlVersion: v1.2", "class: Workflow", "steps:"]
+    for t in tasks:
+        p = preds[t["id"]]
+        join = "  join: all-required  # AND" if len(p) > 1 else ""
+        lines.append(f"  {t['id']}:  # {t['label']}")
+        lines.append(f"    in: [{', '.join(p) if p else 'source'}]")
+        lines.append(f"    run: [{', '.join(t['hypotheses'])}]")
+        if join:
+            lines.append(join)
     depth = nx.dag_longest_path_length(G)
-    return {"nodes": nodes, "edges": edges, "derivation": deriv,
-            "tasks": tasks, "task_edges": task_edges,
+    return {"nodes": nodes, "edges": edges, "derivation": deriv, "models_catalog": catalog,
+            "tasks": tasks, "task_edges": task_edges, "task_preds": preds,
+            "formal_text": "\n".join(lines),
             "is_dag": bool(nx.is_directed_acyclic_graph(G)), "depth": int(depth),
             "note": f"16 гипотез (сплошная нумерация статьи H1–H16), {len(edges)} рёбер "
                     f"derived_by, DAG глубины {depth}. Построено настоящим алгоритмом 1 "
-                    f"(HypothesisLattice) из уравнений; жидкость H1–H8, обводнённость H9–H14, "
-                    f"ГРП H15, нефть H16."}
+                    f"(HypothesisLattice) из уравнений; ветви LPR (H1–H8) и WCT (H9–H14) "
+                    f"параллельны, сходятся в H16."}
+
+
+def build_algorithm_demos():
+    """Live platform calls backing GUI demos 2/3/4/6/7 (docs/gui_demo_spec.md).
+    Everything computed by the real hyppo API; matches tests/test_golden_claims.py."""
+    import networkx as nx
+    from hyppo.coa import causal
+    from hyppo.coa._base import Equation, Structure
+    from hyppo.coa.graph import HypothesisGraph
+    from hyppo.lattice_constructor._base import HypothesisLattice
+    from hyppo.ontology.consistency import Status, check_consistency, _find_cycle_via_kahn
+
+    class Hyp:
+        def __init__(self, name, formula):
+            self.name = name
+            self.structure = Structure([Equation(formula=formula)])
+
+    class WF:
+        def __init__(self, tasks): self._t = tasks
+        def get_tasks(self): return self._t
+
+    R = _RENUM
+
+    # ── Demo 2: Algorithm 2 — incremental add_hypothesis == full rebuild ──
+    hm = {n: Hyp(n, f) for n, f, o, lab, br in _CONCEPT_OLD}
+    order = [n for n, *_ in _CONCEPT_OLD]
+    wf = WF([[hm[n]] for n in order])
+    lat = HypothesisLattice([hm[n] for n in order[:-1]], wf)   # без H19
+    before = {(u.name, v.name) for u, v in lat.lattice.edges()}
+    lat.add_hypothesis(hm[order[-1]])                          # + H19 инкрементально
+    after = {(u.name, v.name) for u, v in lat.lattice.edges()}
+    new_edges = [[R[a], R[b]] for a, b in sorted(after - before)]
+    alg2 = {"added": R[order[-1]], "new_edges": new_edges,
+            "note": "Добавление одной гипотезы даёт тот же граф, что полная перестройка "
+                    "(golden), но за O(|H|) каузальных объединений вместо O(|H|²)."}
+
+    # ── Demo 4: Algorithm 4 — real HypothesisGraph.plan cascade ──
+    cids = [R[n] for n in order]
+    idx = {cid: i for i, cid in enumerate(cids)}
+    edges_int = [(idx[R[a]], idx[R[b]]) for a, b in
+                 [(u.name, v.name) for u, v in HypothesisLattice([hm[n] for n in order], wf).lattice.edges()]]
+    hg = HypothesisGraph.from_edges(len(cids), edges_int)
+
+    def plan_for(changed_cid):
+        cached = set(range(len(cids))) - {idx[changed_cid]}
+        pne = hg.plan(cached)
+        return {"changed": changed_cid,
+                "p_ne": sorted((cids[i] for i in pne), key=lambda x: int(x[1:])),
+                "recompute_frac": round(len(pne) / len(cids), 3)}
+
+    alg4 = {"change_H1": plan_for("H1"), "change_H15": plan_for("H15"),
+            "change_H10": plan_for("H10")}
+
+    # ── Demo 3: Algorithm 3 — two-stage well-formedness (stage B, fast) ──
+    class FiniteQ:
+        finite = True
+        def __init__(self, v): self.values = v
+    class NoFlag: pass
+    good_lat = {0: {1}, 1: {2}, 2: set()}
+    good_art = {0: {"in": {"raw"}, "out": {"a"}}, 1: {"in": {"a"}, "out": {"b"}},
+                2: {"in": {"b"}, "out": {"c"}}}
+    st = lambda r: (getattr(r.status, "name", None) or str(r.status))
+    scenarios = []
+    r_ok = check_consistency(None, None, good_lat, run_hermit=False,
+                             artefacts=good_art, configurations=[FiniteQ([1, 2])])
+    scenarios.append({"case": "Корректный ВЭ", "status": st(r_ok), "ok": r_ok.ok,
+                      "detail": "DAG + согласованные артефакты + конечные домены"})
+    r_c3 = check_consistency(None, None, {0: {1}, 1: {2}, 2: {0}}, run_hermit=False)
+    scenarios.append({"case": "Цикл в потоке", "status": st(r_c3), "ok": r_c3.ok,
+                      "detail": "свидетель цикла: " + str(r_c3.details.get("cycle_witness", ""))})
+    bad_art = {**good_art, 1: {"in": {"a"}, "out": {"zzz"}}}
+    r_c4 = check_consistency(None, None, good_lat, run_hermit=False, artefacts=bad_art)
+    scenarios.append({"case": "Разрыв потока артефактов", "status": st(r_c4), "ok": r_c4.ok,
+                      "detail": "виновное ребро Out(i)∩In(j)=∅: " + str(tuple(r_c4.details.get("c4_edge", ())))})
+    r_c5 = check_consistency(None, None, good_lat, run_hermit=False,
+                             artefacts=good_art, configurations=[FiniteQ([1]), NoFlag()])
+    scenarios.append({"case": "Бесконечный домен", "status": st(r_c5), "ok": r_c5.ok,
+                      "detail": "домен без finite=True"})
+    alg3 = {"scenarios": scenarios,
+            "owa_note": "Стадия A (HermiT, OWA): гипотеза без модели НЕ ловится рассуждателем "
+                        "(«открытый мир»); её ловит маркерный слой (правило 9) — обоснование "
+                        "трёхслойной архитектуры."}
+
+    # ── Demo 7: Rule 5 — procedural acyclicity (Kahn) ──
+    rule5 = {"acyclic": _find_cycle_via_kahn({0: {1}, 1: {2}, 2: set()}) is None,
+             "cyclic_witness": list(_find_cycle_via_kahn({0: {1}, 1: {2}, 2: {0}}) or [])}
+
+    # ── Demo 6: complexity by operation counters (deterministic) ──
+    def chain(n):
+        g = HypothesisGraph()
+        for i in range(n):
+            g.add([{f"x{i}", f"x{i-1}"}] if i else [{f"x{i}"}])
+        for i in range(n - 1):
+            g.connect(i, i + 1)
+        return g
+    orig = causal.is_complete
+    a1 = []
+    for n in (10, 20, 40):
+        calls = [0]
+        def counting(eqs, _c=calls):
+            _c[0] += 1; return orig(eqs)
+        causal.is_complete = counting
+        chain(n).build()
+        causal.is_complete = orig
+        a1.append({"n": n, "count": calls[0], "law": n * (n - 1) // 2})
+    a2c = []
+    for n in (10, 20, 40):
+        g = chain(n); calls = [0]
+        def counting(eqs, _c=calls):
+            _c[0] += 1; return orig(eqs)
+        causal.is_complete = counting
+        g.add_hypothesis([{f"x{n}", f"x{n-1}"}])
+        causal.is_complete = orig
+        a2c.append({"n": n, "count": calls[0], "law": n})
+
+    class CountingSet(set):
+        counter = 0
+        def __iter__(self):
+            type(self).counter += len(self); return super().__iter__()
+    a4c = []
+    for n in (200, 400, 800):
+        g = HypothesisGraph.from_edges(n, [(i, i + 1) for i in range(n - 1)])
+        g._adj = {k: CountingSet(g._adj.get(k, ())) for k in range(n)}
+        CountingSet.counter = 0
+        g.plan(cached=set(range(0, n, 2)))
+        a4c.append({"n": n, "count": CountingSet.counter, "law": "V+E"})
+    complexity = {
+        "alg1": {"points": a1, "law": "O(|H|²·s·v)", "note": "проверок полноты = n(n−1)/2; ×4 при ×2"},
+        "alg2": {"points": a2c, "law": "O(|H|·s·v)", "note": "объединений = n; ×2 при ×2"},
+        "alg4": {"points": a4c, "law": "O(|V|+|E|)", "note": "обходов смежности ~V+E; ×2 при ×2"},
+    }
+
+    return {"alg2": alg2, "alg3": alg3, "alg4_plan": alg4, "rule5": rule5, "complexity": complexity}
 
 
 def main():
@@ -504,11 +713,12 @@ def main():
         "domain": "HybridCRM — прогноз нефтедобычи при заводнении (Norne / Brugge)",
         "ve": {
             "ontology": extract_ontology(),
-            "models": MODEL_CATALOG,
+            "models": list(concept["models_catalog"].values()),
             "configuration": axes, "config_space_size": size,
         },
         "graph_conceptual": concept,
         "algorithm4": concept_alg4,
+        "demos": build_algorithm_demos(),
         "scale": scale,
         "algorithm2_example": {
             "add": "H_ГРП", "label": "ГТМ: гидроразрыв пласта → продуктивность продюсера",

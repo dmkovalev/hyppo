@@ -59,6 +59,234 @@
         {
           "name": "ResearchLattice",
           "parent": "Artefact"
+        },
+        {
+          "name": "PhysicsModel",
+          "parent": "Model"
+        },
+        {
+          "name": "DataDrivenModel",
+          "parent": "Model"
+        },
+        {
+          "name": "HybridModel",
+          "parent": "Model"
+        },
+        {
+          "name": "PhysicsHypothesis",
+          "parent": "Hypothesis"
+        },
+        {
+          "name": "DataDrivenHypothesis",
+          "parent": "Hypothesis"
+        },
+        {
+          "name": "HybridHypothesis",
+          "parent": "Hypothesis"
+        },
+        {
+          "name": "DomainOntology",
+          "parent": "Artefact"
+        },
+        {
+          "name": "CompleteExperiment",
+          "parent": "VirtualExperiment"
+        },
+        {
+          "name": "PredictionSourceHypothesis",
+          "parent": "Hypothesis"
+        },
+        {
+          "name": "MaterialBalanceHypothesis",
+          "parent": "Hypothesis"
+        },
+        {
+          "name": "InvalidHypothesis",
+          "parent": "Hypothesis"
+        },
+        {
+          "name": "ValidHypothesis",
+          "parent": "Hypothesis"
+        },
+        {
+          "name": "StaleHypothesis",
+          "parent": "Hypothesis"
+        },
+        {
+          "name": "UncomputedHypothesis",
+          "parent": "Hypothesis"
+        },
+        {
+          "name": "OilDomainOntology",
+          "parent": "DomainOntology"
+        },
+        {
+          "name": "NeuroDomainOntology",
+          "parent": "DomainOntology"
+        },
+        {
+          "name": "HypothesisVersion",
+          "parent": null
+        },
+        {
+          "name": "ExperimentRun",
+          "parent": null
+        },
+        {
+          "name": "HypothesisWithStaleAncestor",
+          "parent": "Hypothesis"
+        },
+        {
+          "name": "StaleRun",
+          "parent": "ExperimentRun"
+        },
+        {
+          "name": "DerivedStaleRun",
+          "parent": "ExperimentRun"
+        },
+        {
+          "name": "ObsoleteVersion",
+          "parent": "HypothesisVersion"
+        },
+        {
+          "name": "WorkflowTask",
+          "parent": null
+        },
+        {
+          "name": "OrphanHypothesis",
+          "parent": "Hypothesis"
+        },
+        {
+          "name": "ConflictFreeTask",
+          "parent": "WorkflowTask"
+        },
+        {
+          "name": "ConflictingTask",
+          "parent": "WorkflowTask"
+        },
+        {
+          "name": "LowQuality",
+          "parent": "Hypothesis"
+        },
+        {
+          "name": "HighQuality",
+          "parent": "Hypothesis"
+        },
+        {
+          "name": "PrunableSubtree",
+          "parent": "LowQuality"
+        },
+        {
+          "name": "PromisingRoute",
+          "parent": "Hypothesis"
+        },
+        {
+          "name": "Experiment",
+          "parent": null
+        },
+        {
+          "name": "SharedHypothesis",
+          "parent": "Hypothesis"
+        },
+        {
+          "name": "DataFormat",
+          "parent": null
+        },
+        {
+          "name": "TimeSeriesFormat",
+          "parent": "DataFormat"
+        },
+        {
+          "name": "GraphFormat",
+          "parent": "DataFormat"
+        },
+        {
+          "name": "TimeSeriesProducer",
+          "parent": "Model"
+        },
+        {
+          "name": "GraphConsumer",
+          "parent": "Model"
+        },
+        {
+          "name": "FormatMismatch",
+          "parent": "Model"
+        },
+        {
+          "name": "Dataset",
+          "parent": null
+        },
+        {
+          "name": "ModelConfig",
+          "parent": null
+        },
+        {
+          "name": "ModelWithDatasetNeed",
+          "parent": "Model"
+        },
+        {
+          "name": "DatasetNotInConfig",
+          "parent": "Model"
+        },
+        {
+          "name": "DraftHypothesis",
+          "parent": "Hypothesis"
+        },
+        {
+          "name": "ActiveHypothesis",
+          "parent": "Hypothesis"
+        },
+        {
+          "name": "DeprecatedHypothesis",
+          "parent": "Hypothesis"
+        },
+        {
+          "name": "ArchivedHypothesis",
+          "parent": "Hypothesis"
+        },
+        {
+          "name": "BlockingDeprecation",
+          "parent": "DeprecatedHypothesis"
+        },
+        {
+          "name": "ConflictingHypothesis",
+          "parent": "ActiveHypothesis"
+        },
+        {
+          "name": "FreshHypothesis",
+          "parent": "Hypothesis"
+        },
+        {
+          "name": "ConfirmedHypothesis",
+          "parent": "ActiveHypothesis"
+        },
+        {
+          "name": "OilFieldOntology",
+          "parent": "OilDomainOntology"
+        },
+        {
+          "name": "Well",
+          "parent": null
+        },
+        {
+          "name": "Injector",
+          "parent": "Well"
+        },
+        {
+          "name": "Producer",
+          "parent": "Well"
+        },
+        {
+          "name": "ReservoirParameter",
+          "parent": null
+        },
+        {
+          "name": "ConnectivityFraction",
+          "parent": "ReservoirParameter"
+        },
+        {
+          "name": "TimeConstant",
+          "parent": "ReservoirParameter"
         }
       ],
       "relations": [
@@ -128,8 +356,43 @@
           "range": "Hypothesis"
         },
         {
+          "property": "has_for_ontology",
+          "domain": "VirtualExperiment",
+          "range": "DomainOntology"
+        },
+        {
           "property": "has_dependency",
           "domain": "Hypothesis",
+          "range": "Hypothesis"
+        },
+        {
+          "property": "uses_hypothesis_version",
+          "domain": "ExperimentRun",
+          "range": "HypothesisVersion"
+        },
+        {
+          "property": "version_of",
+          "domain": "HypothesisVersion",
+          "range": "Hypothesis"
+        },
+        {
+          "property": "uses_hypothesis",
+          "domain": "ExperimentRun",
+          "range": "Hypothesis"
+        },
+        {
+          "property": "run_depends_on_hypothesis",
+          "domain": "ExperimentRun",
+          "range": "Hypothesis"
+        },
+        {
+          "property": "superseded_by",
+          "domain": "HypothesisVersion",
+          "range": "HypothesisVersion"
+        },
+        {
+          "property": "hasHypothesis",
+          "domain": "WorkflowTask",
           "range": "Hypothesis"
         },
         {
@@ -143,43 +406,369 @@
           "range": "Hypothesis"
         },
         {
+          "property": "usesHypothesis",
+          "domain": "Experiment",
+          "range": "Hypothesis"
+        },
+        {
           "property": "feedsInto",
           "domain": "Model",
           "range": "Model"
+        },
+        {
+          "property": "usedInConfig",
+          "domain": "Model",
+          "range": "ModelConfig"
+        },
+        {
+          "property": "hasAvailableDataset",
+          "domain": "ModelConfig",
+          "range": "Dataset"
+        },
+        {
+          "property": "hasAccessibleDataset",
+          "domain": "Model",
+          "range": "Dataset"
+        },
+        {
+          "property": "has_for_equation",
+          "domain": "Structure",
+          "range": "Equation"
+        },
+        {
+          "property": "has_for_variable",
+          "domain": "Equation",
+          "range": "Variable"
+        },
+        {
+          "property": "has_for_dependency_set",
+          "domain": "FullStructure",
+          "range": "DependencySet"
         }
       ],
       "total_classes": 71
     },
     "models": [
       {
-        "id": "m_inj",
-        "label": "Инжекционный профиль",
-        "class": "PhysicsModel"
+        "id": "m_H1_crmp",
+        "label": "CRMP up-to-one (H1)",
+        "class": "PhysicsModel",
+        "python_ref": "pywaterflood.CRM(primary=True, tau_selection='per-pair', constraints='up-to one')",
+        "config": "CONFIGURATION_SPACE / MODEL.PHYSICS",
+        "params": [
+          "CRM_constraints",
+          "CRM_KNN",
+          "PHYS_GRAD_MODE"
+        ]
       },
       {
-        "id": "m_crmp",
-        "label": "CRMP (up-to-one)",
-        "class": "PhysicsModel"
+        "id": "m_H1_crmt",
+        "label": "CRMT positive (H1)",
+        "class": "PhysicsModel",
+        "python_ref": "pywaterflood.CRM(primary=True, tau_selection='per-pair', constraints='positive')",
+        "config": "CONFIGURATION_SPACE / MODEL.PHYSICS",
+        "params": [
+          "CRM_constraints",
+          "CRM_KNN"
+        ]
       },
       {
-        "id": "m_crmt",
-        "label": "CRMT (positive)",
-        "class": "PhysicsModel"
+        "id": "m_H2_crmp",
+        "label": "CRMP up-to-one (H2)",
+        "class": "PhysicsModel",
+        "python_ref": "pywaterflood.CRM(primary=True, tau_selection='per-pair', constraints='up-to one')",
+        "config": "CONFIGURATION_SPACE / MODEL.PHYSICS",
+        "params": [
+          "CRM_constraints",
+          "CRM_KNN",
+          "PHYS_GRAD_MODE"
+        ]
       },
       {
-        "id": "m_nn",
-        "label": "Transformer+GNN",
-        "class": "DataDrivenModel"
+        "id": "m_H2_crmt",
+        "label": "CRMT positive (H2)",
+        "class": "PhysicsModel",
+        "python_ref": "pywaterflood.CRM(primary=True, tau_selection='per-pair', constraints='positive')",
+        "config": "CONFIGURATION_SPACE / MODEL.PHYSICS",
+        "params": [
+          "CRM_constraints",
+          "CRM_KNN"
+        ]
       },
       {
-        "id": "m_hyb",
-        "label": "Fusion gate",
-        "class": "HybridModel"
+        "id": "m_H3_crmp",
+        "label": "CRMP up-to-one (H3)",
+        "class": "PhysicsModel",
+        "python_ref": "pywaterflood.CRM(primary=True, tau_selection='per-pair', constraints='up-to one')",
+        "config": "CONFIGURATION_SPACE / MODEL.PHYSICS",
+        "params": [
+          "CRM_constraints",
+          "CRM_KNN",
+          "PHYS_GRAD_MODE"
+        ]
       },
       {
-        "id": "m_bl",
-        "label": "Buckley–Leverett",
-        "class": "PhysicsModel"
+        "id": "m_H3_crmt",
+        "label": "CRMT positive (H3)",
+        "class": "PhysicsModel",
+        "python_ref": "pywaterflood.CRM(primary=True, tau_selection='per-pair', constraints='positive')",
+        "config": "CONFIGURATION_SPACE / MODEL.PHYSICS",
+        "params": [
+          "CRM_constraints",
+          "CRM_KNN"
+        ]
+      },
+      {
+        "id": "m_H4_crmp",
+        "label": "CRMP up-to-one (H4)",
+        "class": "PhysicsModel",
+        "python_ref": "pywaterflood.CRM(primary=True, tau_selection='per-pair', constraints='up-to one')",
+        "config": "CONFIGURATION_SPACE / MODEL.PHYSICS",
+        "params": [
+          "CRM_constraints",
+          "CRM_KNN",
+          "PHYS_GRAD_MODE"
+        ]
+      },
+      {
+        "id": "m_H4_crmt",
+        "label": "CRMT positive (H4)",
+        "class": "PhysicsModel",
+        "python_ref": "pywaterflood.CRM(primary=True, tau_selection='per-pair', constraints='positive')",
+        "config": "CONFIGURATION_SPACE / MODEL.PHYSICS",
+        "params": [
+          "CRM_constraints",
+          "CRM_KNN"
+        ]
+      },
+      {
+        "id": "m_H5_crmp",
+        "label": "CRMP up-to-one (H5)",
+        "class": "PhysicsModel",
+        "python_ref": "pywaterflood.CRM(primary=True, tau_selection='per-pair', constraints='up-to one')",
+        "config": "CONFIGURATION_SPACE / MODEL.PHYSICS",
+        "params": [
+          "CRM_constraints",
+          "CRM_KNN",
+          "PHYS_GRAD_MODE"
+        ]
+      },
+      {
+        "id": "m_H5_crmt",
+        "label": "CRMT positive (H5)",
+        "class": "PhysicsModel",
+        "python_ref": "pywaterflood.CRM(primary=True, tau_selection='per-pair', constraints='positive')",
+        "config": "CONFIGURATION_SPACE / MODEL.PHYSICS",
+        "params": [
+          "CRM_constraints",
+          "CRM_KNN"
+        ]
+      },
+      {
+        "id": "m_H6_crmp",
+        "label": "CRMP up-to-one (H6)",
+        "class": "PhysicsModel",
+        "python_ref": "pywaterflood.CRM(primary=True, tau_selection='per-pair', constraints='up-to one')",
+        "config": "CONFIGURATION_SPACE / MODEL.PHYSICS",
+        "params": [
+          "CRM_constraints",
+          "CRM_KNN",
+          "PHYS_GRAD_MODE"
+        ]
+      },
+      {
+        "id": "m_H6_crmt",
+        "label": "CRMT positive (H6)",
+        "class": "PhysicsModel",
+        "python_ref": "pywaterflood.CRM(primary=True, tau_selection='per-pair', constraints='positive')",
+        "config": "CONFIGURATION_SPACE / MODEL.PHYSICS",
+        "params": [
+          "CRM_constraints",
+          "CRM_KNN"
+        ]
+      },
+      {
+        "id": "m_H7_gnn",
+        "label": "GNN (H7)",
+        "class": "DataDrivenModel",
+        "python_ref": "torch_geometric.nn.GATConv (GNN, spatial attention)",
+        "config": "CONFIGURATION_SPACE / MODEL.HYBRID",
+        "params": [
+          "GNN_NUM_LAYERS",
+          "GNN_HEADS",
+          "HIDDEN_DIM"
+        ]
+      },
+      {
+        "id": "m_H7_tr",
+        "label": "Transformer (H7)",
+        "class": "DataDrivenModel",
+        "python_ref": "torch.nn.TransformerEncoder (temporal attention)",
+        "config": "CONFIGURATION_SPACE / MODEL.HYBRID",
+        "params": [
+          "TRANSFORMER_NUM_LAYERS",
+          "TRANSFORMER_NHEAD",
+          "DIM_FEEDFORWARD_MULT"
+        ]
+      },
+      {
+        "id": "m_H8_gate",
+        "label": "Fusion gate (H8)",
+        "class": "HybridModel",
+        "python_ref": "обучаемый вентиль слияния g: l = g·l_p + (1−g)·l_m",
+        "config": "CONFIGURATION_SPACE / MODEL.HYBRID",
+        "params": [
+          "USE_FUSION_GATE"
+        ]
+      },
+      {
+        "id": "m_H9_bl",
+        "label": "Buckley–Leverett (H9)",
+        "class": "PhysicsModel",
+        "python_ref": "pywaterflood Buckley–Leverett (fractional flow f_w)",
+        "config": "CONFIGURATION_SPACE / MODEL.PHYSICS",
+        "params": [
+          "Corey_n_w",
+          "Corey_n_o",
+          "BACKPERIOD"
+        ]
+      },
+      {
+        "id": "m_H9_wor",
+        "label": "Log-WOR (H9)",
+        "class": "PhysicsModel",
+        "python_ref": "sklearn.linear_model.Ridge (log-WOR)",
+        "config": "гребневая регрессия",
+        "params": [
+          "alpha"
+        ]
+      },
+      {
+        "id": "m_H10_bl",
+        "label": "Buckley–Leverett (H10)",
+        "class": "PhysicsModel",
+        "python_ref": "pywaterflood Buckley–Leverett (fractional flow f_w)",
+        "config": "CONFIGURATION_SPACE / MODEL.PHYSICS",
+        "params": [
+          "Corey_n_w",
+          "Corey_n_o",
+          "BACKPERIOD"
+        ]
+      },
+      {
+        "id": "m_H10_wor",
+        "label": "Log-WOR (H10)",
+        "class": "PhysicsModel",
+        "python_ref": "sklearn.linear_model.Ridge (log-WOR)",
+        "config": "гребневая регрессия",
+        "params": [
+          "alpha"
+        ]
+      },
+      {
+        "id": "m_H11_bl",
+        "label": "Buckley–Leverett (H11)",
+        "class": "PhysicsModel",
+        "python_ref": "pywaterflood Buckley–Leverett (fractional flow f_w)",
+        "config": "CONFIGURATION_SPACE / MODEL.PHYSICS",
+        "params": [
+          "Corey_n_w",
+          "Corey_n_o",
+          "BACKPERIOD"
+        ]
+      },
+      {
+        "id": "m_H11_wor",
+        "label": "Log-WOR (H11)",
+        "class": "PhysicsModel",
+        "python_ref": "sklearn.linear_model.Ridge (log-WOR)",
+        "config": "гребневая регрессия",
+        "params": [
+          "alpha"
+        ]
+      },
+      {
+        "id": "m_H12_bl",
+        "label": "Buckley–Leverett (H12)",
+        "class": "PhysicsModel",
+        "python_ref": "pywaterflood Buckley–Leverett (fractional flow f_w)",
+        "config": "CONFIGURATION_SPACE / MODEL.PHYSICS",
+        "params": [
+          "Corey_n_w",
+          "Corey_n_o",
+          "BACKPERIOD"
+        ]
+      },
+      {
+        "id": "m_H12_wor",
+        "label": "Log-WOR (H12)",
+        "class": "PhysicsModel",
+        "python_ref": "sklearn.linear_model.Ridge (log-WOR)",
+        "config": "гребневая регрессия",
+        "params": [
+          "alpha"
+        ]
+      },
+      {
+        "id": "m_H13_bl",
+        "label": "Buckley–Leverett (H13)",
+        "class": "PhysicsModel",
+        "python_ref": "pywaterflood Buckley–Leverett (fractional flow f_w)",
+        "config": "CONFIGURATION_SPACE / MODEL.PHYSICS",
+        "params": [
+          "Corey_n_w",
+          "Corey_n_o",
+          "BACKPERIOD"
+        ]
+      },
+      {
+        "id": "m_H13_wor",
+        "label": "Log-WOR (H13)",
+        "class": "PhysicsModel",
+        "python_ref": "sklearn.linear_model.Ridge (log-WOR)",
+        "config": "гребневая регрессия",
+        "params": [
+          "alpha"
+        ]
+      },
+      {
+        "id": "m_H14_gate",
+        "label": "Fusion gate (H14)",
+        "class": "HybridModel",
+        "python_ref": "обучаемый вентиль слияния g: l = g·l_p + (1−g)·l_m",
+        "config": "CONFIGURATION_SPACE / MODEL.HYBRID",
+        "params": [
+          "USE_FUSION_GATE"
+        ]
+      },
+      {
+        "id": "m_H15_frac",
+        "label": "Гидроразрыв (H15)",
+        "class": "PhysicsModel",
+        "python_ref": "модуляция продуктивности ΔJ (гидроразрыв)",
+        "config": "ГТМ",
+        "params": [
+          "USE_CRM_PHASE",
+          "CRM_PHASE_RATIO"
+        ]
+      },
+      {
+        "id": "m_H15_acid",
+        "label": "Кислотная обработка (H15)",
+        "class": "PhysicsModel",
+        "python_ref": "модуляция скин-фактора ΔS (кислотная обработка)",
+        "config": "ГТМ",
+        "params": []
+      },
+      {
+        "id": "m_H16_gate",
+        "label": "Fusion gate (H16)",
+        "class": "HybridModel",
+        "python_ref": "обучаемый вентиль слияния g: l = g·l_p + (1−g)·l_m",
+        "config": "CONFIGURATION_SPACE / MODEL.HYBRID",
+        "params": [
+          "USE_FUSION_GATE"
+        ]
       }
     ],
     "configuration": [
@@ -344,11 +933,11 @@
           "formula": "I_agg = w_ij * I_j",
           "output": "I_agg"
         },
-        "model": "m_crmp",
         "models": [
-          "m_crmp",
-          "m_crmt"
+          "m_H1_crmp",
+          "m_H1_crmt"
         ],
+        "model": "m_H1_crmp",
         "metric": "CRM",
         "status": "SUPPORTED"
       },
@@ -360,11 +949,11 @@
           "formula": "q_f = a_f*q_f_prev + b_f*I_agg",
           "output": "q_f"
         },
-        "model": "m_crmp",
         "models": [
-          "m_crmp",
-          "m_crmt"
+          "m_H2_crmp",
+          "m_H2_crmt"
         ],
+        "model": "m_H2_crmp",
         "metric": "CRM",
         "status": "SUPPORTED"
       },
@@ -376,11 +965,11 @@
           "formula": "q_s = a_s*q_s_prev + b_s*I_agg",
           "output": "q_s"
         },
-        "model": "m_crmp",
         "models": [
-          "m_crmp",
-          "m_crmt"
+          "m_H3_crmp",
+          "m_H3_crmt"
         ],
+        "model": "m_H3_crmp",
         "metric": "CRM",
         "status": "SUPPORTED"
       },
@@ -392,11 +981,11 @@
           "formula": "q_c = w_f*q_f + (1-w_f)*q_s",
           "output": "q_c"
         },
-        "model": "m_crmp",
         "models": [
-          "m_crmp",
-          "m_crmt"
+          "m_H4_crmp",
+          "m_H4_crmt"
         ],
+        "model": "m_H4_crmp",
         "metric": "CRM",
         "status": "SUPPORTED"
       },
@@ -408,11 +997,11 @@
           "formula": "q_liq_phys = J*q_c + q_prim",
           "output": "q_liq_phys"
         },
-        "model": "m_crmp",
         "models": [
-          "m_crmp",
-          "m_crmt"
+          "m_H5_crmp",
+          "m_H5_crmt"
         ],
+        "model": "m_H5_crmp",
         "metric": "CRM",
         "status": "SUPPORTED"
       },
@@ -424,11 +1013,11 @@
           "formula": "q_prim = q_prev*exp(-dt*taup)",
           "output": "q_prim"
         },
-        "model": "m_crmp",
         "models": [
-          "m_crmp",
-          "m_crmt"
+          "m_H6_crmp",
+          "m_H6_crmt"
         ],
+        "model": "m_H6_crmp",
         "metric": "CRM",
         "status": "SUPPORTED"
       },
@@ -440,10 +1029,11 @@
           "formula": "l_ml = MLP(x_hist)",
           "output": "l_ml"
         },
-        "model": "m_nn",
         "models": [
-          "m_nn"
+          "m_H7_gnn",
+          "m_H7_tr"
         ],
+        "model": "m_H7_gnn",
         "metric": "CRM",
         "status": "SUPPORTED"
       },
@@ -455,11 +1045,10 @@
           "formula": "l = g*q_liq_phys + (1-g)*l_ml",
           "output": "l"
         },
-        "model": "m_hyb",
         "models": [
-          "m_hyb",
-          "m_bl"
+          "m_H8_gate"
         ],
+        "model": "m_H8_gate",
         "metric": "CRM",
         "status": "SUPPORTED"
       },
@@ -471,10 +1060,11 @@
           "formula": "Sw = Sw_prev + (Winj - Wlout)*dt/Vp",
           "output": "Sw"
         },
-        "model": "m_bl",
         "models": [
-          "m_bl"
+          "m_H9_bl",
+          "m_H9_wor"
         ],
+        "model": "m_H9_bl",
         "metric": "WCT",
         "status": "SUPPORTED"
       },
@@ -486,10 +1076,11 @@
           "formula": "krw = ((Sw-Swc)/(1-Swc-Sor))**nw",
           "output": "krw"
         },
-        "model": "m_bl",
         "models": [
-          "m_bl"
+          "m_H10_bl",
+          "m_H10_wor"
         ],
+        "model": "m_H10_bl",
         "metric": "WCT",
         "status": "SUPPORTED"
       },
@@ -501,10 +1092,11 @@
           "formula": "kro = ((1-Sw-Sor)/(1-Swc-Sor))**no",
           "output": "kro"
         },
-        "model": "m_bl",
         "models": [
-          "m_bl"
+          "m_H11_bl",
+          "m_H11_wor"
         ],
+        "model": "m_H11_bl",
         "metric": "WCT",
         "status": "SUPPORTED"
       },
@@ -516,10 +1108,11 @@
           "formula": "fw = 1/(1 + kro*muw/(krw*muo))",
           "output": "fw"
         },
-        "model": "m_bl",
         "models": [
-          "m_bl"
+          "m_H12_bl",
+          "m_H12_wor"
         ],
+        "model": "m_H12_bl",
         "metric": "WCT",
         "status": "SUPPORTED"
       },
@@ -531,10 +1124,11 @@
           "formula": "o_p = 1 - fw",
           "output": "o_p"
         },
-        "model": "m_bl",
         "models": [
-          "m_bl"
+          "m_H13_bl",
+          "m_H13_wor"
         ],
+        "model": "m_H13_bl",
         "metric": "WCT",
         "status": "SUPPORTED"
       },
@@ -546,11 +1140,10 @@
           "formula": "o = gw*o_p + (1-gw)*o_m",
           "output": "o"
         },
-        "model": "m_hyb",
         "models": [
-          "m_hyb",
-          "m_bl"
+          "m_H14_gate"
         ],
+        "model": "m_H14_gate",
         "metric": "WCT",
         "status": "SUPPORTED"
       },
@@ -562,10 +1155,11 @@
           "formula": "J = J0 + dJ_grp",
           "output": "J"
         },
-        "model": "m_bl",
         "models": [
-          "m_bl"
+          "m_H15_frac",
+          "m_H15_acid"
         ],
+        "model": "m_H15_frac",
         "metric": "CRM",
         "status": "SUPPORTED"
       },
@@ -577,11 +1171,10 @@
           "formula": "q_oil = l * o",
           "output": "q_oil"
         },
-        "model": "m_hyb",
         "models": [
-          "m_hyb",
-          "m_bl"
+          "m_H16_gate"
         ],
+        "model": "m_H16_gate",
         "metric": "OPR",
         "status": "SUPPORTED"
       }
@@ -760,6 +1353,329 @@
         "reason": "выход J (H15) входит в уравнение H5"
       }
     ],
+    "models_catalog": {
+      "m_H1_crmp": {
+        "id": "m_H1_crmp",
+        "label": "CRMP up-to-one (H1)",
+        "class": "PhysicsModel",
+        "python_ref": "pywaterflood.CRM(primary=True, tau_selection='per-pair', constraints='up-to one')",
+        "config": "CONFIGURATION_SPACE / MODEL.PHYSICS",
+        "params": [
+          "CRM_constraints",
+          "CRM_KNN",
+          "PHYS_GRAD_MODE"
+        ]
+      },
+      "m_H1_crmt": {
+        "id": "m_H1_crmt",
+        "label": "CRMT positive (H1)",
+        "class": "PhysicsModel",
+        "python_ref": "pywaterflood.CRM(primary=True, tau_selection='per-pair', constraints='positive')",
+        "config": "CONFIGURATION_SPACE / MODEL.PHYSICS",
+        "params": [
+          "CRM_constraints",
+          "CRM_KNN"
+        ]
+      },
+      "m_H2_crmp": {
+        "id": "m_H2_crmp",
+        "label": "CRMP up-to-one (H2)",
+        "class": "PhysicsModel",
+        "python_ref": "pywaterflood.CRM(primary=True, tau_selection='per-pair', constraints='up-to one')",
+        "config": "CONFIGURATION_SPACE / MODEL.PHYSICS",
+        "params": [
+          "CRM_constraints",
+          "CRM_KNN",
+          "PHYS_GRAD_MODE"
+        ]
+      },
+      "m_H2_crmt": {
+        "id": "m_H2_crmt",
+        "label": "CRMT positive (H2)",
+        "class": "PhysicsModel",
+        "python_ref": "pywaterflood.CRM(primary=True, tau_selection='per-pair', constraints='positive')",
+        "config": "CONFIGURATION_SPACE / MODEL.PHYSICS",
+        "params": [
+          "CRM_constraints",
+          "CRM_KNN"
+        ]
+      },
+      "m_H3_crmp": {
+        "id": "m_H3_crmp",
+        "label": "CRMP up-to-one (H3)",
+        "class": "PhysicsModel",
+        "python_ref": "pywaterflood.CRM(primary=True, tau_selection='per-pair', constraints='up-to one')",
+        "config": "CONFIGURATION_SPACE / MODEL.PHYSICS",
+        "params": [
+          "CRM_constraints",
+          "CRM_KNN",
+          "PHYS_GRAD_MODE"
+        ]
+      },
+      "m_H3_crmt": {
+        "id": "m_H3_crmt",
+        "label": "CRMT positive (H3)",
+        "class": "PhysicsModel",
+        "python_ref": "pywaterflood.CRM(primary=True, tau_selection='per-pair', constraints='positive')",
+        "config": "CONFIGURATION_SPACE / MODEL.PHYSICS",
+        "params": [
+          "CRM_constraints",
+          "CRM_KNN"
+        ]
+      },
+      "m_H4_crmp": {
+        "id": "m_H4_crmp",
+        "label": "CRMP up-to-one (H4)",
+        "class": "PhysicsModel",
+        "python_ref": "pywaterflood.CRM(primary=True, tau_selection='per-pair', constraints='up-to one')",
+        "config": "CONFIGURATION_SPACE / MODEL.PHYSICS",
+        "params": [
+          "CRM_constraints",
+          "CRM_KNN",
+          "PHYS_GRAD_MODE"
+        ]
+      },
+      "m_H4_crmt": {
+        "id": "m_H4_crmt",
+        "label": "CRMT positive (H4)",
+        "class": "PhysicsModel",
+        "python_ref": "pywaterflood.CRM(primary=True, tau_selection='per-pair', constraints='positive')",
+        "config": "CONFIGURATION_SPACE / MODEL.PHYSICS",
+        "params": [
+          "CRM_constraints",
+          "CRM_KNN"
+        ]
+      },
+      "m_H5_crmp": {
+        "id": "m_H5_crmp",
+        "label": "CRMP up-to-one (H5)",
+        "class": "PhysicsModel",
+        "python_ref": "pywaterflood.CRM(primary=True, tau_selection='per-pair', constraints='up-to one')",
+        "config": "CONFIGURATION_SPACE / MODEL.PHYSICS",
+        "params": [
+          "CRM_constraints",
+          "CRM_KNN",
+          "PHYS_GRAD_MODE"
+        ]
+      },
+      "m_H5_crmt": {
+        "id": "m_H5_crmt",
+        "label": "CRMT positive (H5)",
+        "class": "PhysicsModel",
+        "python_ref": "pywaterflood.CRM(primary=True, tau_selection='per-pair', constraints='positive')",
+        "config": "CONFIGURATION_SPACE / MODEL.PHYSICS",
+        "params": [
+          "CRM_constraints",
+          "CRM_KNN"
+        ]
+      },
+      "m_H6_crmp": {
+        "id": "m_H6_crmp",
+        "label": "CRMP up-to-one (H6)",
+        "class": "PhysicsModel",
+        "python_ref": "pywaterflood.CRM(primary=True, tau_selection='per-pair', constraints='up-to one')",
+        "config": "CONFIGURATION_SPACE / MODEL.PHYSICS",
+        "params": [
+          "CRM_constraints",
+          "CRM_KNN",
+          "PHYS_GRAD_MODE"
+        ]
+      },
+      "m_H6_crmt": {
+        "id": "m_H6_crmt",
+        "label": "CRMT positive (H6)",
+        "class": "PhysicsModel",
+        "python_ref": "pywaterflood.CRM(primary=True, tau_selection='per-pair', constraints='positive')",
+        "config": "CONFIGURATION_SPACE / MODEL.PHYSICS",
+        "params": [
+          "CRM_constraints",
+          "CRM_KNN"
+        ]
+      },
+      "m_H7_gnn": {
+        "id": "m_H7_gnn",
+        "label": "GNN (H7)",
+        "class": "DataDrivenModel",
+        "python_ref": "torch_geometric.nn.GATConv (GNN, spatial attention)",
+        "config": "CONFIGURATION_SPACE / MODEL.HYBRID",
+        "params": [
+          "GNN_NUM_LAYERS",
+          "GNN_HEADS",
+          "HIDDEN_DIM"
+        ]
+      },
+      "m_H7_tr": {
+        "id": "m_H7_tr",
+        "label": "Transformer (H7)",
+        "class": "DataDrivenModel",
+        "python_ref": "torch.nn.TransformerEncoder (temporal attention)",
+        "config": "CONFIGURATION_SPACE / MODEL.HYBRID",
+        "params": [
+          "TRANSFORMER_NUM_LAYERS",
+          "TRANSFORMER_NHEAD",
+          "DIM_FEEDFORWARD_MULT"
+        ]
+      },
+      "m_H8_gate": {
+        "id": "m_H8_gate",
+        "label": "Fusion gate (H8)",
+        "class": "HybridModel",
+        "python_ref": "обучаемый вентиль слияния g: l = g·l_p + (1−g)·l_m",
+        "config": "CONFIGURATION_SPACE / MODEL.HYBRID",
+        "params": [
+          "USE_FUSION_GATE"
+        ]
+      },
+      "m_H9_bl": {
+        "id": "m_H9_bl",
+        "label": "Buckley–Leverett (H9)",
+        "class": "PhysicsModel",
+        "python_ref": "pywaterflood Buckley–Leverett (fractional flow f_w)",
+        "config": "CONFIGURATION_SPACE / MODEL.PHYSICS",
+        "params": [
+          "Corey_n_w",
+          "Corey_n_o",
+          "BACKPERIOD"
+        ]
+      },
+      "m_H9_wor": {
+        "id": "m_H9_wor",
+        "label": "Log-WOR (H9)",
+        "class": "PhysicsModel",
+        "python_ref": "sklearn.linear_model.Ridge (log-WOR)",
+        "config": "гребневая регрессия",
+        "params": [
+          "alpha"
+        ]
+      },
+      "m_H10_bl": {
+        "id": "m_H10_bl",
+        "label": "Buckley–Leverett (H10)",
+        "class": "PhysicsModel",
+        "python_ref": "pywaterflood Buckley–Leverett (fractional flow f_w)",
+        "config": "CONFIGURATION_SPACE / MODEL.PHYSICS",
+        "params": [
+          "Corey_n_w",
+          "Corey_n_o",
+          "BACKPERIOD"
+        ]
+      },
+      "m_H10_wor": {
+        "id": "m_H10_wor",
+        "label": "Log-WOR (H10)",
+        "class": "PhysicsModel",
+        "python_ref": "sklearn.linear_model.Ridge (log-WOR)",
+        "config": "гребневая регрессия",
+        "params": [
+          "alpha"
+        ]
+      },
+      "m_H11_bl": {
+        "id": "m_H11_bl",
+        "label": "Buckley–Leverett (H11)",
+        "class": "PhysicsModel",
+        "python_ref": "pywaterflood Buckley–Leverett (fractional flow f_w)",
+        "config": "CONFIGURATION_SPACE / MODEL.PHYSICS",
+        "params": [
+          "Corey_n_w",
+          "Corey_n_o",
+          "BACKPERIOD"
+        ]
+      },
+      "m_H11_wor": {
+        "id": "m_H11_wor",
+        "label": "Log-WOR (H11)",
+        "class": "PhysicsModel",
+        "python_ref": "sklearn.linear_model.Ridge (log-WOR)",
+        "config": "гребневая регрессия",
+        "params": [
+          "alpha"
+        ]
+      },
+      "m_H12_bl": {
+        "id": "m_H12_bl",
+        "label": "Buckley–Leverett (H12)",
+        "class": "PhysicsModel",
+        "python_ref": "pywaterflood Buckley–Leverett (fractional flow f_w)",
+        "config": "CONFIGURATION_SPACE / MODEL.PHYSICS",
+        "params": [
+          "Corey_n_w",
+          "Corey_n_o",
+          "BACKPERIOD"
+        ]
+      },
+      "m_H12_wor": {
+        "id": "m_H12_wor",
+        "label": "Log-WOR (H12)",
+        "class": "PhysicsModel",
+        "python_ref": "sklearn.linear_model.Ridge (log-WOR)",
+        "config": "гребневая регрессия",
+        "params": [
+          "alpha"
+        ]
+      },
+      "m_H13_bl": {
+        "id": "m_H13_bl",
+        "label": "Buckley–Leverett (H13)",
+        "class": "PhysicsModel",
+        "python_ref": "pywaterflood Buckley–Leverett (fractional flow f_w)",
+        "config": "CONFIGURATION_SPACE / MODEL.PHYSICS",
+        "params": [
+          "Corey_n_w",
+          "Corey_n_o",
+          "BACKPERIOD"
+        ]
+      },
+      "m_H13_wor": {
+        "id": "m_H13_wor",
+        "label": "Log-WOR (H13)",
+        "class": "PhysicsModel",
+        "python_ref": "sklearn.linear_model.Ridge (log-WOR)",
+        "config": "гребневая регрессия",
+        "params": [
+          "alpha"
+        ]
+      },
+      "m_H14_gate": {
+        "id": "m_H14_gate",
+        "label": "Fusion gate (H14)",
+        "class": "HybridModel",
+        "python_ref": "обучаемый вентиль слияния g: l = g·l_p + (1−g)·l_m",
+        "config": "CONFIGURATION_SPACE / MODEL.HYBRID",
+        "params": [
+          "USE_FUSION_GATE"
+        ]
+      },
+      "m_H15_frac": {
+        "id": "m_H15_frac",
+        "label": "Гидроразрыв (H15)",
+        "class": "PhysicsModel",
+        "python_ref": "модуляция продуктивности ΔJ (гидроразрыв)",
+        "config": "ГТМ",
+        "params": [
+          "USE_CRM_PHASE",
+          "CRM_PHASE_RATIO"
+        ]
+      },
+      "m_H15_acid": {
+        "id": "m_H15_acid",
+        "label": "Кислотная обработка (H15)",
+        "class": "PhysicsModel",
+        "python_ref": "модуляция скин-фактора ΔS (кислотная обработка)",
+        "config": "ГТМ",
+        "params": []
+      },
+      "m_H16_gate": {
+        "id": "m_H16_gate",
+        "label": "Fusion gate (H16)",
+        "class": "HybridModel",
+        "python_ref": "обучаемый вентиль слияния g: l = g·l_p + (1−g)·l_m",
+        "config": "CONFIGURATION_SPACE / MODEL.HYBRID",
+        "params": [
+          "USE_FUSION_GATE"
+        ]
+      }
+    },
     "tasks": [
       {
         "id": "T1",
@@ -856,6 +1772,14 @@
         "T2"
       ],
       [
+        "T10",
+        "T11"
+      ],
+      [
+        "T12",
+        "T4"
+      ],
+      [
         "T2",
         "T3"
       ],
@@ -865,7 +1789,7 @@
       ],
       [
         "T4",
-        "T5"
+        "T6"
       ],
       [
         "T5",
@@ -873,7 +1797,7 @@
       ],
       [
         "T6",
-        "T7"
+        "T11"
       ],
       [
         "T7",
@@ -886,19 +1810,45 @@
       [
         "T9",
         "T10"
-      ],
-      [
-        "T10",
-        "T11"
-      ],
-      [
-        "T11",
-        "T12"
       ]
     ],
+    "task_preds": {
+      "T1": [],
+      "T2": [
+        "T1"
+      ],
+      "T3": [
+        "T2"
+      ],
+      "T4": [
+        "T12",
+        "T3"
+      ],
+      "T5": [],
+      "T6": [
+        "T4",
+        "T5"
+      ],
+      "T7": [],
+      "T8": [
+        "T7"
+      ],
+      "T9": [
+        "T8"
+      ],
+      "T10": [
+        "T9"
+      ],
+      "T11": [
+        "T10",
+        "T6"
+      ],
+      "T12": []
+    },
+    "formal_text": "# HybridCRM workflow — ОАГ задач (CWL-подобный формат)\n# join: AND (все входы обязательны); ветви LPR и WCT параллельны\ncwlVersion: v1.2\nclass: Workflow\nsteps:\n  T1:  # Парсинг закачки\n    in: [source]\n    run: [H1]\n  T2:  # CRM-каналы\n    in: [T1]\n    run: [H2, H3]\n  T3:  # Смешение\n    in: [T2]\n    run: [H4]\n  T4:  # Продуктивность и спад\n    in: [T12, T3]\n    run: [H5, H6]\n  join: all-required  # AND\n  T5:  # ML-коррекция\n    in: [source]\n    run: [H7]\n  T6:  # Слияние жидкости\n    in: [T4, T5]\n    run: [H8]\n  join: all-required  # AND\n  T7:  # Материальный баланс\n    in: [source]\n    run: [H9]\n  T8:  # Фазовые проницаемости\n    in: [T7]\n    run: [H10, H11]\n  T9:  # Фракционный поток\n    in: [T8]\n    run: [H12]\n  T10:  # Обводнённость\n    in: [T9]\n    run: [H13, H14]\n  T11:  # Прогноз нефти\n    in: [T10, T6]\n    run: [H16]\n  join: all-required  # AND\n  T12:  # ГТМ-модуляция\n    in: [source]\n    run: [H15]",
     "is_dag": true,
     "depth": 5,
-    "note": "16 гипотез (сплошная нумерация статьи H1–H16), 17 рёбер derived_by, DAG глубины 5. Построено настоящим алгоритмом 1 (HypothesisLattice) из уравнений; жидкость H1–H8, обводнённость H9–H14, ГРП H15, нефть H16."
+    "note": "16 гипотез (сплошная нумерация статьи H1–H16), 17 рёбер derived_by, DAG глубины 5. Построено настоящим алгоритмом 1 (HypothesisLattice) из уравнений; ветви LPR (H1–H8) и WCT (H9–H14) параллельны, сходятся в H16."
   },
   "algorithm4": {
     "change_H1": {
@@ -978,6 +1928,160 @@
         "H15"
       ],
       "recompute_frac": 0.312
+    }
+  },
+  "demos": {
+    "alg2": {
+      "added": "H16",
+      "new_edges": [
+        [
+          "H14",
+          "H16"
+        ],
+        [
+          "H8",
+          "H16"
+        ]
+      ],
+      "note": "Добавление одной гипотезы даёт тот же граф, что полная перестройка (golden), но за O(|H|) каузальных объединений вместо O(|H|²)."
+    },
+    "alg3": {
+      "scenarios": [
+        {
+          "case": "Корректный ВЭ",
+          "status": "OK",
+          "ok": true,
+          "detail": "DAG + согласованные артефакты + конечные домены"
+        },
+        {
+          "case": "Цикл в потоке",
+          "status": "C3: hypothesis graph has cycle",
+          "ok": false,
+          "detail": "свидетель цикла: [0, 1, 2]"
+        },
+        {
+          "case": "Разрыв потока артефактов",
+          "status": "C4: causal order violation",
+          "ok": false,
+          "detail": "виновное ребро Out(i)∩In(j)=∅: (1, 2)"
+        },
+        {
+          "case": "Бесконечный домен",
+          "status": "C5: configuration space infinite",
+          "ok": false,
+          "detail": "домен без finite=True"
+        }
+      ],
+      "owa_note": "Стадия A (HermiT, OWA): гипотеза без модели НЕ ловится рассуждателем («открытый мир»); её ловит маркерный слой (правило 9) — обоснование трёхслойной архитектуры."
+    },
+    "alg4_plan": {
+      "change_H1": {
+        "changed": "H1",
+        "p_ne": [
+          "H1",
+          "H2",
+          "H3",
+          "H4",
+          "H5",
+          "H8",
+          "H16"
+        ],
+        "recompute_frac": 0.438
+      },
+      "change_H15": {
+        "changed": "H15",
+        "p_ne": [
+          "H5",
+          "H8",
+          "H15",
+          "H16"
+        ],
+        "recompute_frac": 0.25
+      },
+      "change_H10": {
+        "changed": "H10",
+        "p_ne": [
+          "H10",
+          "H12",
+          "H13",
+          "H14",
+          "H16"
+        ],
+        "recompute_frac": 0.312
+      }
+    },
+    "rule5": {
+      "acyclic": true,
+      "cyclic_witness": [
+        0,
+        1,
+        2
+      ]
+    },
+    "complexity": {
+      "alg1": {
+        "points": [
+          {
+            "n": 10,
+            "count": 45,
+            "law": 45
+          },
+          {
+            "n": 20,
+            "count": 190,
+            "law": 190
+          },
+          {
+            "n": 40,
+            "count": 780,
+            "law": 780
+          }
+        ],
+        "law": "O(|H|²·s·v)",
+        "note": "проверок полноты = n(n−1)/2; ×4 при ×2"
+      },
+      "alg2": {
+        "points": [
+          {
+            "n": 10,
+            "count": 10,
+            "law": 10
+          },
+          {
+            "n": 20,
+            "count": 20,
+            "law": 20
+          },
+          {
+            "n": 40,
+            "count": 40,
+            "law": 40
+          }
+        ],
+        "law": "O(|H|·s·v)",
+        "note": "объединений = n; ×2 при ×2"
+      },
+      "alg4": {
+        "points": [
+          {
+            "n": 200,
+            "count": 397,
+            "law": "V+E"
+          },
+          {
+            "n": 400,
+            "count": 797,
+            "law": "V+E"
+          },
+          {
+            "n": 800,
+            "count": 1597,
+            "law": "V+E"
+          }
+        ],
+        "law": "O(|V|+|E|)",
+        "note": "обходов смежности ~V+E; ×2 при ×2"
+      }
     }
   },
   "scale": {
