@@ -293,3 +293,144 @@ def test_rule5_acyclicity_detected_procedurally():
     cyclic = {0: {1}, 1: {2}, 2: {0}}
     assert _find_cycle_via_kahn(acyclic) is None
     assert _find_cycle_via_kahn(cyclic) is not None
+
+
+# ---------------------------------------------------------------------------
+# Algorithm 3 — two-stage consistency check  [IIP alg:consistency; положение 1]
+# ---------------------------------------------------------------------------
+# Claim [положение 1]: «корректная определённость проверяется статически,
+# до запуска моделей, двухэтапным (семантическим и структурным) алгоритмом»;
+# stage B checks C3 (ацикличность), C4 (согласованность артефактов),
+# C5 (конечность доменов конфигурации).
+
+from hyppo.ontology.consistency import Status, check_consistency
+
+
+class _FiniteQ:
+    finite = True
+
+    def __init__(self, values):
+        self.values = values
+
+
+_GOOD_LATTICE = {0: {1}, 1: {2}, 2: set()}
+_GOOD_ARTEFACTS = {
+    0: {"in": {"raw"}, "out": {"a"}},
+    1: {"in": {"a"}, "out": {"b"}},
+    2: {"in": {"b"}, "out": {"c"}},
+}
+
+
+def test_alg3_stage_b_accepts_correct_experiment():
+    res = check_consistency(
+        None, None, _GOOD_LATTICE, run_hermit=False,
+        artefacts=_GOOD_ARTEFACTS, configurations=[_FiniteQ([1, 2])],
+    )
+    assert res.ok and res.status == Status.OK
+
+
+def test_alg3_c3_rejects_cycle_with_witness():
+    res = check_consistency(
+        None, None, {0: {1}, 1: {2}, 2: {0}}, run_hermit=False,
+    )
+    assert not res.ok and res.status == Status.C3_VIOLATED
+    assert res.details["cycle_witness"]
+
+
+def test_alg3_c4_rejects_edge_without_artefact_flow():
+    """[SVD §2.1] ребро согласовано, если Out(m_i) ∩ In(m_j) ≠ ∅."""
+    bad = {**_GOOD_ARTEFACTS, 1: {"in": {"a"}, "out": {"zzz"}}}
+    res = check_consistency(
+        None, None, _GOOD_LATTICE, run_hermit=False, artefacts=bad,
+    )
+    assert not res.ok and res.status == Status.C4_VIOLATED
+    assert tuple(res.details["c4_edge"]) == (1, 2)
+
+
+def test_alg3_c5_rejects_undeclared_infinite_domain():
+    class _NoFlag:
+        pass
+
+    res = check_consistency(
+        None, None, _GOOD_LATTICE, run_hermit=False,
+        artefacts=_GOOD_ARTEFACTS, configurations=[_FiniteQ([1]), _NoFlag()],
+    )
+    assert not res.ok and res.status == Status.C5_VIOLATED
+
+
+def test_alg3_structural_checks_run_in_declared_order():
+    """Two-stage design: with C3 and C4 both violated, C3 is reported first."""
+    res = check_consistency(
+        None, None, {0: {1}, 1: {0}}, run_hermit=False,
+        artefacts={0: {"in": set(), "out": set()}, 1: {"in": set(), "out": set()}},
+    )
+    assert res.status == Status.C3_VIOLATED
+
+
+def _fresh_world():
+    from owlready2 import (
+        AllDifferent, FunctionalProperty, ObjectProperty, Thing, World,
+    )
+
+    w = World()
+    onto = w.get_ontology("http://golden.test/alg3_stage_a.owl")
+    with onto:
+        class GModel(Thing):
+            pass
+
+        class GHypothesis(Thing):
+            pass
+
+        class g_implemented_by(ObjectProperty, FunctionalProperty):
+            domain = [GHypothesis]
+            range = [GModel]
+
+        GHypothesis.is_a.append(g_implemented_by.some(GModel))
+        m1, m2 = GModel("m1"), GModel("m2")
+        AllDifferent([m1, m2])
+    return w, onto, GHypothesis, m1, m2
+
+
+def _hermit_consistent(w, onto) -> bool:
+    import owlready2
+
+    try:
+        with onto:
+            owlready2.sync_reasoner_hermit(w, infer_property_values=False, debug=0)
+        return True
+    except Exception as exc:
+        assert "Inconsistent" in type(exc).__name__, exc
+        return False
+
+
+@pytest.mark.reasoner
+def test_alg3_stage_a_hermit_detects_functional_violation():
+    """Stage A (semantic, C2): a hypothesis implemented by two *different*
+    models violates FunctionalProperty + AllDifferent and must be reported
+    inconsistent by HermiT. Isolated World, shared hyppo ontology untouched."""
+    pytest.importorskip("owlready2")
+    w, onto, GHypothesis, m1, m2 = _fresh_world()
+    with onto:
+        h = GHypothesis("h_two_models")
+        h.g_implemented_by = m1
+        # class-level value restriction forces the *other* model:
+        # functionality + AllDifferent(m1, m2) => inconsistent
+        h.is_a.append(onto.g_implemented_by.value(m2))
+    assert not _hermit_consistent(w, onto), (
+        "HermiT must flag two distinct models on a functional property (C2)"
+    )
+
+
+@pytest.mark.reasoner
+def test_alg3_stage_a_owa_cannot_see_missing_model():
+    """[SVD §2.2] Negative golden claim: under OWA a model-less hypothesis is
+    *consistent* (the existential may be satisfied by an unknown model) — this
+    is exactly why «у гипотезы нет ни одной реализующей модели» is delegated
+    to the marker layer (CWA), not to the reasoner."""
+    pytest.importorskip("owlready2")
+    w, onto, GHypothesis, m1, m2 = _fresh_world()
+    with onto:
+        GHypothesis("h_bad")  # no implementing model asserted
+    assert _hermit_consistent(w, onto), (
+        "OWA must NOT flag a model-less hypothesis — marker layer's job"
+    )

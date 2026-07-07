@@ -46,3 +46,4 @@ hyppo = ["personas/*.md"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+markers = ["reasoner: slow tests that launch the HermiT reasoner (Java)"]
