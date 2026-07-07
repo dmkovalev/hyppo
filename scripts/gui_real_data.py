@@ -184,6 +184,104 @@ def extract_ontology():
             "total_classes": len(names)}
 
 
+def extract_pywaterflood_domain():
+    """Богатая онтология предметной области — извлечена ИЗ pywaterflood:
+    модули → классы/функции → параметры. Всё группы 'domain'."""
+    import importlib, inspect, pkgutil
+    import pywaterflood
+
+    classes, relations = [], []
+    seen = set()
+
+    def add(name, parent, kind):
+        if name in seen:
+            return
+        seen.add(name)
+        classes.append({"name": name, "parent": parent, "group": "domain", "kind": kind})
+
+    def rel(prop, d, r):
+        relations.append({"property": prop, "domain": d, "range": r})
+
+    ROOT = "Петрофизика_заводнения"
+    add(ROOT, None, "area")
+
+    MOD_RU = {"aquifer": "Аквифер", "buckleyleverett": "Баклей–Леверетта",
+              "crm": "CRM (ёмкостно-резистивная)", "multiwellproductivity": "Продуктивность_скважин"}
+
+    for m in pkgutil.iter_modules(pywaterflood.__path__):
+        if m.name.startswith("_"):
+            continue
+        area = MOD_RU.get(m.name, m.name)
+        add(area, ROOT, "module")
+        try:
+            mod = importlib.import_module("pywaterflood." + m.name)
+        except Exception:
+            continue
+        # классы модуля
+        for cn, co in inspect.getmembers(mod, inspect.isclass):
+            if not co.__module__.startswith("pywaterflood"):
+                continue
+            add(cn, area, "class")
+            # параметры __init__ / fit
+            for meth in ("__init__", "fit", "predict"):
+                fn = getattr(co, meth, None)
+                if fn is None:
+                    continue
+                try:
+                    for pn in inspect.signature(fn).parameters:
+                        if pn in ("self", "args", "kwargs"):
+                            continue
+                        add(f"{pn}", cn, "param")
+                        rel("имеет_параметр", cn, pn)
+                except (ValueError, TypeError):
+                    pass
+        # функции модуля как операции предметной области
+        for fnn, fno in inspect.getmembers(mod, inspect.isfunction):
+            if not fno.__module__.startswith("pywaterflood") or fnn.startswith("_"):
+                continue
+            add(fnn, area, "operation")
+
+    # ключевые сущности резервуарной инженерии + связи с операциями
+    entities = [
+        ("Скважина", ROOT), ("Нагнетательная_скважина", "Скважина"),
+        ("Добывающая_скважина", "Скважина"), ("Пласт_коллектор", ROOT),
+        ("Доля_связности_f_ij", "CRM (ёмкостно-резистивная)"),
+        ("Постоянная_времени_tau", "CRM (ёмкостно-резистивная)"),
+        ("Первичная_добыча", "CRM (ёмкостно-резистивная)"),
+        ("Забойное_давление_BHP", "CRM (ёмкостно-резистивная)"),
+        ("Обводнённость_WCT", "Баклей–Леверетта"),
+        ("Фракционный_поток_fw", "Баклей–Леверетта"),
+        ("Водонасыщенность_Sw", "Баклей–Леверетта"),
+        ("Время_прорыва_воды", "Баклей–Леверетта"),
+        ("Скорость_фронта_воды", "Баклей–Леверетта"),
+        ("Матрица_влияния", "Продуктивность_скважин"),
+        ("Приток_из_аквифера", "Аквифер"),
+        ("Эффективный_радиус", "Аквифер"),
+    ]
+    for e, p in entities:
+        if p in seen:
+            add(e, p, "entity")
+    op_computes = {
+        "q_primary": "Первичная_добыча", "q_bhp": "Забойное_давление_BHP",
+        "q_CRM_perpair": "Доля_связности_f_ij", "q_CRM_perproducer": "Добывающая_скважина",
+        "breakthrough_sw": "Время_прорыва_воды", "water_front_velocity": "Скорость_фронта_воды",
+        "aquifer_production": "Приток_из_аквифера", "effective_reservoir_radius": "Эффективный_радиус",
+        "calc_influence_matrix": "Матрица_влияния", "calc_gains_homogeneous": "Доля_связности_f_ij",
+    }
+    for op, ent in op_computes.items():
+        if op in seen and ent in seen:
+            rel("вычисляет", op, ent)
+
+    # МОСТ домен → мета-онтология: каждый доменный концепт, на который ссылается
+    # переменная уравнения, «обозначает» класс Variable платформы. Это делает
+    # доменную онтологию используемой: она грунтирует переменные структур гипотез.
+    for concept in sorted(set(_VAR_DOMAIN.values())):
+        if concept in seen:
+            rel("обозначает_переменную", concept, "Variable")
+
+    return {"classes": classes, "relations": relations, "count": len(classes)}
+
+
 def config_axes():
     from hyppo.adapters.wfopt_adapter import CONFIGURATION_SPACE
     axes = [{"name": n, "section": s["section"], "levels": list(s["levels"])}
@@ -436,8 +534,53 @@ _CONCEPT_DESC = {
     "GRP": "ГТМ: модуляция продуктивности ΔJ (гидроразрыв пласта).",
     "H19": "Прогноз дебита нефти: жидкость × нефтяная доля (терминальная гипотеза).",
 }
-# конкурирующие гипотезы (competes), ключ — сплошная нумерация статьи
-_COMPETES = {"H5": ["H7"], "H7": ["H5"]}   # физика vs ML для дебита жидкости
+# переменная уравнения → доменный концепт (из pywaterflood-онтологии).
+# Это ЗАМЫКАЕТ связку структура→переменная на предметную область: каждая
+# отображённая переменная обязана быть объявленным термином домена (проверяемо
+# SHACL-формой «домен-покрытие»). Ризонер работает над мета-онтологией,
+# а домен привязан через эти обозначения.
+_VAR_DOMAIN = {
+    "w_ij": "Доля_связности_f_ij", "I_j": "Нагнетательная_скважина",
+    "Winj": "Нагнетательная_скважина", "q_prim": "Первичная_добыча",
+    "taup": "Постоянная_времени_tau", "l": "Добывающая_скважина",
+    "l_ml": "Добывающая_скважина",
+    "q_liq_phys": "Добывающая_скважина", "Sw": "Водонасыщенность_Sw",
+    "Swc": "sat_water_c", "Sor": "sat_oil_r", "muw": "viscosity_water",
+    "muo": "viscosity_oil", "fw": "Фракционный_поток_fw",
+    "o_p": "Обводнённость_WCT", "o": "Обводнённость_WCT",
+    "J": "Матрица_влияния",
+}
+
+# ── Правила доменных маркеров (выводятся из output_domain / входов) ──
+# Аналог OWL/SWRL-правила: «гипотеза с таким доменным выходом ⇒ такой маркер».
+# Исполняются детерминированно (замкнутый мир) — как C3–C5 и маркерный слой
+# (правило 9), потому что OWA-рассуждатель отсутствие термина не выводит.
+def _infer_domain_roles(out_dom, in_doms):
+    """out_dom — доменный концепт выхода; in_doms — множество доменов входов.
+    Возвращает список (маркер, текст-правило)."""
+    roles = []
+    ins = set(in_doms or ())
+    if out_dom == "Водонасыщенность_Sw" and "Нагнетательная_скважина" in ins:
+        roles.append(("MaterialBalanceHypothesis",
+                      "выход = Водонасыщенность_Sw ∧ вход ∋ Нагнетательная_скважина"))
+    if out_dom == "Фракционный_поток_fw":
+        roles.append(("FractionalFlowHypothesis", "выход = Фракционный_поток_fw"))
+    if out_dom == "Обводнённость_WCT":
+        roles.append(("WatercutHypothesis", "выход = Обводнённость_WCT"))
+    if out_dom == "Добывающая_скважина":
+        roles.append(("LiquidRateHypothesis", "выход = дебит Добывающей_скважины"))
+    if out_dom == "Первичная_добыча":
+        roles.append(("PrimaryProductionHypothesis", "выход = Первичная_добыча"))
+    if out_dom == "Матрица_влияния":
+        roles.append(("ProductivityHypothesis", "выход = продуктивность (Матрица_влияния)"))
+    return roles
+
+
+# конкурирующие гипотезы (competes): ВЫВОДЯТСЯ из общего выходного домена.
+# Правило: две гипотезы, чей выход отображается в один доменный концепт и между
+# которыми НЕТ пути derived_by (ни одна не порождает другую), — конкурирующие
+# объяснения этого концепта. Захардкоженный список ниже — только для сверки.
+_COMPETES_REF = {"H5": ["H7"], "H7": ["H5"]}   # ожидаемое (физика vs ML жидкости)
 
 # old name -> continuous article numbering
 _RENUM = {"H1": "H1", "H2": "H2", "H3": "H3", "H4": "H4", "H5": "H5", "H6": "H6",
@@ -525,6 +668,28 @@ def build_conceptual_lattice():
     edges_old = [(u.name, v.name) for u, v in G.edges()]
 
     R = _RENUM
+    # ── вывод competes из общего выходного домена (правило: одинаковый доменный
+    #    выход ∧ нет пути derived_by между гипотезами ⇒ конкурирующие) ──
+    out_dom_old = {n: _VAR_DOMAIN.get(o) for n, f, o, lab, br in _CONCEPT_OLD}
+    Gn = nx.DiGraph()                       # граф по ИМЕНАМ (в G — объекты Hyp)
+    Gn.add_nodes_from(out_dom_old.keys())
+    Gn.add_edges_from(edges_old)
+    by_dom = {}
+    for n, dm in out_dom_old.items():
+        if dm:
+            by_dom.setdefault(dm, []).append(n)
+    competes_old = {n: [] for n, *_ in _CONCEPT_OLD}
+    competes_deriv = []
+    for dm, members in by_dom.items():
+        for i in range(len(members)):
+            for j in range(i + 1, len(members)):
+                a, b = members[i], members[j]
+                if not nx.has_path(Gn, a, b) and not nx.has_path(Gn, b, a):
+                    competes_old[a].append(b); competes_old[b].append(a)
+                    competes_deriv.append({"a": R[a], "b": R[b], "concept": dm,
+                                           "reason": f"обе гипотезы вычисляют «{dm.replace('_', ' ')}», "
+                                                     f"прямой связи derived_by между ними нет"})
+
     catalog = {}
     nodes = []
     for n, f, o, lab, br in _CONCEPT_OLD:
@@ -532,10 +697,16 @@ def build_conceptual_lattice():
         ms = _models_for(cid, br)
         for m in ms:
             catalog[m["id"]] = m
+        in_doms = {v: _VAR_DOMAIN[v] for v in inputs_of(n) if v in _VAR_DOMAIN}
+        roles = _infer_domain_roles(_VAR_DOMAIN.get(o), in_doms.values())
         nodes.append({"id": cid, "label": lab, "branch": br,
-                      "desc": _CONCEPT_DESC.get(n, ""), "competes": _COMPETES.get(cid, []),
+                      "desc": _CONCEPT_DESC.get(n, ""),
+                      "competes": sorted(R[x] for x in competes_old[n]),
+                      "domain_roles": [{"marker": mk, "rule": rl} for mk, rl in roles],
                       "equation": {"formula": f, "output": o, "latex": _CONCEPT_LATEX.get(n, f),
-                                    "inputs": inputs_of(n)},
+                                    "inputs": inputs_of(n),
+                                    "output_domain": _VAR_DOMAIN.get(o),
+                                    "input_domains": in_doms},
                       "models": [m["id"] for m in ms], "model": ms[0]["id"],
                       "metric": _CBRANCH_METRIC.get(br, "CRM"), "status": "SUPPORTED"})
     edges = [[R[a], R[b]] for a, b in edges_old]
@@ -562,8 +733,12 @@ def build_conceptual_lattice():
         if join:
             lines.append(join)
     depth = nx.dag_longest_path_length(G)
+    derived_pairs = {frozenset((c["a"], c["b"])) for c in competes_deriv}
+    ref_pairs = {frozenset((R[a], R[b])) for a, bs in _COMPETES_REF.items() for b in bs}
     return {"nodes": nodes, "edges": edges, "derivation": deriv, "models_catalog": catalog,
             "tasks": tasks, "task_edges": task_edges, "task_preds": preds,
+            "competes_derivation": competes_deriv,
+            "competes_matches_ref": derived_pairs == ref_pairs,
             "formal_text": "\n".join(lines),
             "is_dag": bool(nx.is_directed_acyclic_graph(G)), "depth": int(depth),
             "note": f"16 гипотез (сплошная нумерация статьи H1–H16), {len(edges)} рёбер "
@@ -657,6 +832,35 @@ def build_algorithm_demos():
     rule5 = {"acyclic": _find_cycle_via_kahn({0: {1}, 1: {2}, 2: set()}) is None,
              "cyclic_witness": list(_find_cycle_via_kahn({0: {1}, 1: {2}, 2: {0}}) or [])}
 
+    # ── Demo C7: domain grounding — реальный check_consistency с доменным словарём ──
+    dom_terms = set(_VAR_DOMAIN.keys())
+    good_vars = {0: {"Sw", "Winj", "l"}, 1: {"fw", "muw", "muo"}}
+    bad_vars = {0: {"Sw", "Winj", "l"}, 1: {"fw", "phi_unknown", "muw"}}
+    r_c7ok = check_consistency(None, None, good_lat, run_hermit=False,
+                               domain_terms=dom_terms, hypothesis_vars=good_vars)
+    r_c7bad = check_consistency(None, None, good_lat, run_hermit=False,
+                                domain_terms=dom_terms, hypothesis_vars=bad_vars)
+    c7 = {
+        "grounded": {"status": st(r_c7ok), "ok": r_c7ok.ok,
+                     "detail": r_c7ok.details.get("c7", "")},
+        "ungrounded": {"status": st(r_c7bad), "ok": r_c7bad.ok,
+                       "hypothesis": r_c7bad.details.get("c7_hypothesis"),
+                       "vars": r_c7bad.details.get("c7_ungrounded", [])},
+        "vocabulary_size": len(dom_terms),
+        "shacl": (
+            "# C7 как SHACL-форма (домен-покрытие переменных)\n"
+            "ex:HypothesisShape a sh:NodeShape ;\n"
+            "  sh:targetClass ve:Hypothesis ;\n"
+            "  sh:property [\n"
+            "    sh:path (ve:has_for_structure ve:has_for_equation ve:has_for_variable) ;\n"
+            "    sh:class dom:DomainConcept ;   # каждая переменная — объявленный термин\n"
+            "    sh:message \"переменная не грунтирована в предметной онтологии\" ;\n"
+            "  ] ."
+        ),
+        "note": "OWA-рассуждатель (HermiT) отсутствие термина НЕ ловит; C7 замкнут по миру "
+                "(SHACL-семантика). Каждая переменная уравнения обязана быть доменным концептом.",
+    }
+
     # ── Demo 6: complexity by operation counters (deterministic) ──
     def chain(n):
         g = HypothesisGraph()
@@ -702,7 +906,8 @@ def build_algorithm_demos():
         "alg4": {"points": a4c, "law": "O(|V|+|E|)", "note": "обходов смежности ~V+E; ×2 при ×2"},
     }
 
-    return {"alg2": alg2, "alg3": alg3, "alg4_plan": alg4, "rule5": rule5, "complexity": complexity}
+    return {"alg2": alg2, "alg3": alg3, "alg4_plan": alg4, "rule5": rule5,
+            "c7": c7, "complexity": complexity}
 
 
 def architecture():
@@ -713,29 +918,132 @@ def architecture():
         ("core", "Ядро (онтология ВЭ)", "Оркестрация", "hyppo/core", "Классы кортежа ⟨O,H,M,R,W,C⟩ на owlready2 (разд. 3.1.1).", []),
         ("coa", "COAConstructor", "Методы (гл. 2)", "hyppo/coa", "Причинное упорядочение: структуры, транзитивное замыкание (разд. 3.1.4).", ["core"]),
         ("lattice_constructor", "LatticesConstructor", "Методы (гл. 2)", "hyppo/lattice_constructor", "Алгоритмы 1–2: построение и добавление в граф гипотез (разд. 3.1.5).", ["coa"]),
-        ("planner", "Planner", "Методы (гл. 2)", "hyppo/planner", "Алгоритм 4: планирование, P_ne/P_e, отсечение маршрутов (разд. 3.1.6).", ["metadata_repository", "comparison"]),
+        ("planner", "Planner", "Методы (гл. 2)", "hyppo/planner", "Алгоритм 4: планирование, P_ne/P_e, отсечение маршрутов (разд. 3.1.6).", ["storage", "comparison"]),
         ("comparison", "Comparison", "Методы (гл. 2)", "hyppo/comparison", "Сравнение гипотез: AIC/BIC, знаковый тест, Уилкоксон (разд. 2.6).", []),
         ("generator", "HypothesisGenerator", "Методы (гл. 2)", "hyppo/generator", "Порождение гипотез из данных (GLM + GP, разд. 3.1.3).", ["coa"]),
         ("runner", "VirtualExperimentRunner", "Исполнение", "hyppo/runner", "Исполнение моделей по плану, эпистемический статус (разд. 3.1.7).", ["metadata_repository"]),
         ("ontology", "Онтологическая подсистема", "Онтология", "hyppo/ontology", "17 правил, HermiT/ELK, маркерный слой, provenance (разд. 3.3).", ["core"]),
-        ("metadata_repository", "MetadataRepository", "Хранение", "hyppo/metadata_repository", "Кэш результатов, поиск ближайшего графа (опр. 12, разд. 3.1.8).", []),
-        ("storage", "Storage", "Хранение", "hyppo/storage", "Слой хранения артефактов.", []),
+        ("metadata_repository", "MetadataRepository", "Хранение", "hyppo/metadata_repository", "Кэш результатов, поиск ближайшего графа (опр. 12, разд. 3.1.8). Конкретная реализация интерфейса Storage.", []),
+        ("storage", "Storage (интерфейс Database)", "Хранение", "hyppo/storage", "Абстрактный интерфейс хранилища (Database): planner типизирован на него (db: Database). Конкретная реализация — MetadataRepository (SQLite).", []),
         ("adapters", "Доменные адаптеры", "Инфраструктура", "hyppo/adapters", "Подключение предметных онтологий и моделей (pywaterflood).", ["core", "ontology"]),
         ("actions", "Действия (версии)", "Инфраструктура", "hyppo/actions", "Версионируемые операции над артефактами.", ["core"]),
         ("mcp", "MCP-интерфейс", "Инфраструктура", "hyppo/mcp", "Model Context Protocol для внешних инструментов.", ["manager"]),
     ]
     layers = ["Интерфейс", "Оркестрация", "Методы (гл. 2)", "Исполнение", "Онтология", "Хранение", "Инфраструктура"]
+    # «реализует» — конкретная реализация абстрактного интерфейса (UML realize, пунктир)
+    realizes = [{"src": "metadata_repository", "dst": "storage"}]
     return {
         "layers": layers,
         "components": [{"id": c, "name": nm, "layer": ly, "module": mod, "desc": ds, "deps": dp}
                        for c, nm, ly, mod, ds, dp in comps],
-        "note": "Компоненты сгруппированы по слоям; стрелки — доступ одного компонента к интерфейсу другого. "
-                "Основные компоненты реализуют методы глав 2–3; инфраструктурные — вспомогательные.",
+        "realizes": realizes,
+        "note": "Сплошная стрелка A → B — доступ A к интерфейсу B; пунктир A ⇢ B — A реализует "
+                "абстрактный интерфейс B. Основные компоненты реализуют методы глав 2–3.",
     }
+
+
+def build_cache_demo():
+    """Демо кэша на гибридной модели: холодный/тёплый прогон через ОБЩИЙ SQLite
+    (SharedCache) — планировщик видит записи раннера; инвалидация одной гипотезы
+    (Алг.4 — пересчёт только замыкания вниз). Всё на настоящих классах hyppo."""
+    import networkx as nx
+    from hyppo.coa._base import Equation, Structure
+    from hyppo.lattice_constructor._base import HypothesisLattice
+    from hyppo.metadata_repository import SharedCache
+    from hyppo.planner._base import _cfg_dict, build_optimal_plan
+
+    class Hyp:
+        def __init__(s, n, f): s.name = n; s.structure = Structure([Equation(formula=f)])
+    class WF:
+        def __init__(s, t): s._t = t
+        def get_tasks(s): return s._t
+    class Cfg:
+        parameters = ["base"]
+
+    R = _RENUM
+    hyps = [Hyp(R[n], f) for n, f, o, lab, br in _CONCEPT_OLD]   # имена = сплошные id статьи
+    lat = HypothesisLattice(hyps, WF([[h] for h in hyps]))
+    cfg = Cfg()
+    N = len(hyps)
+
+    cache = SharedCache(":memory:")
+    # 1) холодный: кэш пуст → всё в needs_execution
+    p_cold = build_optimal_plan(cfg, lat, cache)
+    # 2) runner «вычислил» и записал результаты в ТОТ ЖЕ SQLite
+    for h in hyps:
+        cache.save_result(h.name, _cfg_dict(cfg), {"r2": 0.97})
+    # 3) тёплый: планировщик видит записи раннера как кэш
+    p_warm = build_optimal_plan(cfg, lat, cache)
+
+    # 4) инвалидация одной гипотезы (H9) — ОДНИМ build_optimal_plan с
+    #    по-гипотезными конфигурациями: у H9 другой config_hash → промах только
+    #    по ней, планировщик сам пересчитывает её замыкание вниз.
+    per = {h.name: _cfg_dict(cfg) for h in hyps}          # все закэшированы
+    per["H9"] = {"parameters": ["changed"]}               # смена конфигурации H9
+    p_inv = build_optimal_plan(cfg, lat, cache, per_hypothesis_configs=per)
+    recompute = sorted((getattr(h, "name", str(h)) for h in p_inv.needs_execution),
+                       key=lambda x: int(x[1:]))
+    ids = [h.name for h in hyps]
+    edges = [(u.name, v.name) for u, v in lat.lattice.edges()]
+    Gn = nx.DiGraph(); Gn.add_nodes_from(ids); Gn.add_edges_from(edges)
+    desc = nx.descendants(Gn, "H9") | {"H9"}
+
+    return {
+        "cold": {"computed": len(p_cold.needs_execution), "cached": len(p_cold.cached)},
+        "warm": {"computed": len(p_warm.needs_execution), "cached": len(p_warm.cached)},
+        "invalidate": {"changed": "H9", "recompute": recompute,
+                       "reused": N - len(recompute),
+                       "matches_descendants": set(recompute) == desc},
+        "planner_sees_runner": len(p_warm.needs_execution) == 0 and len(p_warm.cached) == N,
+        "total": N,
+        "backend": "SharedCache — один SQLite для planner и runner",
+        "key": "составной ключ (hypothesis_id, config_hash); config_hash = sha256(json(config))[:16]",
+        "note": "Смена конфигурации одной гипотезы инвалидирует только её замыкание вниз "
+                "(H9 + потомки) — ⊆-минимальность плана (Теорема 1). Ветвь жидкости "
+                "H1–H8 и ГТМ H15 переиспользуются из кэша.",
+    }
+
+
+def load_battery():
+    """Демо 8 (docs/gui_demo_spec.md): готовые результаты 80 испытаний HermiT
+    из norne_battery_results.json (не запускаем живьём — 247 с). rule4 —
+    правило 4 (каскад устаревания), rule7 — правило 7 (детекция stale), summary.
+    Имена гипотез переводятся в сплошную нумерацию статьи H1–H16 (_RENUM)."""
+    b = None
+    for p in ("norne_battery_results.json",
+              os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                           "norne_battery_results.json")):
+        if os.path.exists(p):
+            with open(p, encoding="utf-8") as f:
+                b = json.load(f)
+            break
+    if b is None:
+        return None
+    R = lambda n: _RENUM.get(n, n)   # историческое имя → сплошное H1–H16
+    for r in b.get("rule4", []):
+        r["source"] = R(r["source"])
+        r["stale"] = sorted((R(x) for x in r.get("stale", [])), key=lambda x: int(x[1:]))
+    for r in b.get("rule7", []):
+        r["run_uses"] = R(r["run_uses"])
+        r["invalid"] = R(r["invalid"])
+    b["edges"] = [[R(a), R(c)] for a, c in b.get("edges", [])]
+    return b
 
 
 def main():
     axes, size = config_axes()
+    # онтология: платформенная (owlready2) + богатая предметная (из pywaterflood)
+    onto_data = extract_ontology()
+    try:
+        dom = extract_pywaterflood_domain()
+        existing = {c["name"] for c in onto_data["classes"]}
+        onto_data["classes"] += [c for c in dom["classes"] if c["name"] not in existing]
+        onto_data["relations"] += dom["relations"]
+    except Exception as e:
+        print("pywaterflood domain skip:", e)
+    onto_data["total_classes"] = len(onto_data["classes"])
+    onto_data["domain_count"] = sum(1 for c in onto_data["classes"] if c.get("group") == "domain")
+
     fields = {name: run_field(name) for name in ("Brugge", "Norne")}
 
     # per-field epistemic status on the REAL well-graph
@@ -803,13 +1111,14 @@ def main():
     data = {
         "domain": "Гибридная ёмкостно-резистивная модель заводнения (Norne / Brugge)",
         "ve": {
-            "ontology": extract_ontology(),
+            "ontology": onto_data,
             "models": list(concept["models_catalog"].values()),
             "configuration": axes, "config_space_size": size,
         },
         "graph_conceptual": concept,
         "algorithm4": concept_alg4,
-        "demos": build_algorithm_demos(),
+        "demos": {**build_algorithm_demos(), "cache": build_cache_demo()},
+        "battery": load_battery(),
         "architecture": architecture(),
         "scale": scale,
         "algorithm2_example": {

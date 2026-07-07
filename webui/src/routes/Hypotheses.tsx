@@ -46,9 +46,25 @@ export function Hypotheses({ real, field }: { real: RealData; field: string }) {
             <dt>Ветвь</dt><dd>{h.branch}</dd>
             <dt>Статус ({field})</dt><dd>{chip(status[h.id])}</dd>
             <dt>Вход → Выход</dt>
-            <dd>{(h.equation.inputs ?? []).map((v) => <span key={v} className="tag">{v}</span>)}
+            <dd>{(h.equation.inputs ?? []).map((v) => {
+              const dom = h.equation.input_domains?.[v];
+              return <span key={v} className="tag" title={dom ? `домен: ${dom}` : undefined}>{v}{dom && <span className="muted" style={{ fontSize: 10 }}> ·{dom.replace(/_/g, " ")}</span>}</span>;
+            })}
               <span className="formula"> → </span>
-              <span className="tag" style={{ borderColor: "var(--accent)", color: "var(--accent)" }}>{h.equation.output}</span></dd>
+              <span className="tag" title={h.equation.output_domain ? `домен: ${h.equation.output_domain}` : undefined}
+                    style={{ borderColor: "var(--accent)", color: "var(--accent)" }}>{h.equation.output}
+                {h.equation.output_domain && <span className="muted" style={{ fontSize: 10 }}> ·{h.equation.output_domain.replace(/_/g, " ")}</span>}</span></dd>
+            {(() => {
+              const dm = { ...(h.equation.input_domains ?? {}) };
+              if (h.equation.output_domain) dm[h.equation.output] = h.equation.output_domain;
+              const ks = Object.keys(dm);
+              return ks.length ? (<>
+                <dt>Предметная область (переменная → домен)</dt>
+                <dd>{ks.map((v) => (
+                  <span key={v} className="tag">{v} → {dm[v].replace(/_/g, " ")}</span>
+                ))}</dd>
+              </>) : null;
+            })()}
             <dt>Порождается из (derived_by)</dt>
             <dd>{derivedFrom.length ? derivedFrom.map((id) => (
               <span key={id} className="tag" style={{ cursor: "pointer" }} onClick={() => setSel(id)}>{id} · {labelOf[id]}</span>
@@ -57,10 +73,19 @@ export function Hypotheses({ real, field }: { real: RealData; field: string }) {
             <dd>{impacts.length ? impacts.map((id) => (
               <span key={id} className="tag" style={{ cursor: "pointer" }} onClick={() => setSel(id)}>{id} · {labelOf[id]}</span>
             )) : <span className="muted">— терминальная</span>}</dd>
-            <dt>Конкурирующие (competes)</dt>
+            <dt>Конкурирующие (competes) <span className="muted" style={{ fontWeight: 400, fontSize: 11 }}>· выведено из общего домена</span></dt>
             <dd>{(h.competes ?? []).length ? h.competes!.map((id) => (
               <span key={id} className="tag" style={{ cursor: "pointer" }} onClick={() => setSel(id)}>{id} · {labelOf[id]}</span>
             )) : <span className="muted">—</span>}</dd>
+            {(h.domain_roles ?? []).length > 0 && <>
+              <dt>Доменная роль <span className="muted" style={{ fontWeight: 400, fontSize: 11 }}>· выведено правилом</span></dt>
+              <dd>{h.domain_roles!.map((r) => (
+                <span key={r.marker} className="tag" title={r.rule}
+                      style={{ borderColor: "var(--accent)", color: "var(--accent)" }}>{r.marker}</span>
+              ))}
+                <div className="muted" style={{ fontSize: 11, marginTop: 4 }}>{h.domain_roles![0].rule}</div>
+              </dd>
+            </>}
             <dt>Реализующие модели (R)</dt>
             <dd>{h.models.map((mid) => <span key={mid} className="tag">{mById[mid]?.label ?? mid}</span>)}</dd>
           </dl>

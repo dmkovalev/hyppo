@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from "react";
+import { usePanZoom } from "./usePanZoom";
 
 export type GNode = { id: string; label: string; status?: string; kind?: string };
 export type GEdge = { src: string; dst: string; via?: string; reason?: string };
@@ -56,6 +57,8 @@ export function GraphBuild({ nodes, edges, onNodeClick, statusOverride }:
     const ordered = [...edges].sort((a, b) => (dc[a.src] - dc[b.src]) || (dc[a.dst] - dc[b.dst]));
     return { pos, ordered, viewW: 40 + maxD * COLW + NW + 40, viewH: mid * 2 + 20 };
   }, [nodes, edges]);
+
+  const pz = usePanZoom(viewW, viewH);
 
   function clearTimers() { timers.current.forEach(clearTimeout); timers.current = []; }
 
@@ -122,9 +125,14 @@ export function GraphBuild({ nodes, edges, onNodeClick, statusOverride }:
         <button className="btn" onClick={build}>▶ Построить граф (алг. 1)</button>
         <button className="btn ghost" onClick={reset}>Сброс</button>
         <span className="muted" style={{ fontSize: 12 }}>клик по вершине — каскад (алг. 4)</span>
+        <span className="muted" style={{ fontSize: 12, marginLeft: "auto" }}>колесо — масштаб · тянуть фон — сдвиг</span>
+        {pz.zoomed && <button className="btn ghost" onClick={pz.reset}>⟲ масштаб</button>}
       </div>
       <div className="graph-frame">
-        <svg className="gb-svg" viewBox={`0 0 ${viewW} ${viewH}`} preserveAspectRatio="xMidYMid meet">
+        <svg ref={pz.svgRef} className="gb-svg" viewBox={pz.viewBox} preserveAspectRatio="xMidYMid meet"
+             style={{ touchAction: "none", cursor: pz.zoomed ? "grab" : "default" }}
+             onPointerDown={pz.onPointerDown} onPointerMove={pz.onPointerMove}
+             onPointerUp={pz.onPointerUp} onPointerLeave={pz.onPointerUp}>
           <defs>
             <marker id="arw" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
               <path d="M0,0 L7,3 L0,6 Z" fill="var(--accent-dim)" />

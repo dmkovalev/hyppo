@@ -50,6 +50,7 @@ class Status:
     C4_VIOLATED = "C4: causal order violation"
     C5_VIOLATED = "C5: configuration space infinite"
     C6_VIOLATED = "C6: parameter type incompatibility"
+    C7_VIOLATED = "C7: domain grounding violation"
 
 
 @dataclass
@@ -67,6 +68,8 @@ def check_consistency(
     run_hermit: bool = True,
     artefacts: Mapping[int, dict] | None = None,
     configurations: Iterable[Iterable] | None = None,
+    domain_terms: set | None = None,
+    hypothesis_vars: Mapping[int, Iterable[str]] | None = None,
 ) -> ConsistencyResult:
     """Two-stage consistency check matching Algorithm 1 of the paper.
 
@@ -153,6 +156,22 @@ def check_consistency(
     else:
         details["c5"] = "skipped"
 
+    if domain_terms is not None and hypothesis_vars is not None:
+        # C7: доменное грунтирование. Каждая свободная переменная уравнения
+        # гипотезы обязана быть объявленным термином предметной онтологии.
+        # Выражается SHACL-формой (sh:in по словарю домена); здесь — в замкнутом
+        # мире (как C3–C5), поскольку OWA-рассуждатель отсутствие термина не ловит.
+        offending = _find_c7_violation(hypothesis_vars, set(domain_terms))
+        if offending is not None:
+            h_id, ungrounded = offending
+            return ConsistencyResult(
+                False, Status.C7_VIOLATED,
+                {**details, "c7_hypothesis": h_id, "c7_ungrounded": sorted(ungrounded)},
+            )
+        details["c7"] = "passed (все переменные грунтированы в домене)"
+    else:
+        details["c7"] = "skipped"
+
     return ConsistencyResult(True, Status.OK, details)
 
 
@@ -187,6 +206,19 @@ def _find_cycle_via_kahn(lattice: Mapping[int, Iterable[int]]) -> list | None:
     if visited == len(in_deg):
         return None
     return [v for v, d in in_deg.items() if d > 0]
+
+
+def _find_c7_violation(
+    hypothesis_vars: Mapping[int, Iterable[str]],
+    domain_terms: set,
+) -> tuple[int, set] | None:
+    """C7: вернуть первую гипотезу, у которой есть переменные, не объявленные
+    в словаре предметной онтологии (негрунтированные), иначе None."""
+    for h_id, variables in hypothesis_vars.items():
+        ungrounded = {v for v in variables if v not in domain_terms}
+        if ungrounded:
+            return (h_id, ungrounded)
+    return None
 
 
 def _find_c4_violation(

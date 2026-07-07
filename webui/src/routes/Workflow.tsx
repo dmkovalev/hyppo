@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import type { RealData } from "../types";
+import { usePanZoom } from "../components/usePanZoom";
 
 const BW = 168, BH = 64, COL = 220, ROW = 92;
 
@@ -33,6 +34,8 @@ export function Workflow({ real }: { real: RealData }) {
     return { pos, viewW: 40 + maxD * COL + BW, viewH: 40 + maxRows * ROW };
   }, [tasks, edges]);
 
+  const pz = usePanZoom(viewW, viewH);
+
   function path(a: string, b: string) {
     const p = pos[a], q = pos[b];
     const x1 = p.x + BW, y1 = p.y + BH / 2, x2 = q.x, y2 = q.y + BH / 2, mx = (x1 + x2) / 2;
@@ -52,8 +55,15 @@ export function Workflow({ real }: { real: RealData }) {
       </div>
 
       <div className="panel">
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 6 }}>
+          <span className="muted" style={{ fontSize: 12, marginLeft: "auto" }}>колесо — масштаб · тянуть фон — сдвиг</span>
+          {pz.zoomed && <button className="btn ghost" onClick={pz.reset}>⟲ масштаб</button>}
+        </div>
         <div className="graph-frame" style={{ height: viewH + 40 }}>
-          <svg viewBox={`0 0 ${viewW} ${viewH}`} width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
+          <svg ref={pz.svgRef} viewBox={pz.viewBox} width="100%" height="100%" preserveAspectRatio="xMidYMid meet"
+               style={{ touchAction: "none", cursor: pz.zoomed ? "grab" : "default" }}
+               onPointerDown={pz.onPointerDown} onPointerMove={pz.onPointerMove}
+               onPointerUp={pz.onPointerUp} onPointerLeave={pz.onPointerUp}>
             <defs>
               <marker id="tarw" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
                 <path d="M0,0 L7,3 L0,6 Z" fill="var(--accent-dim)" />

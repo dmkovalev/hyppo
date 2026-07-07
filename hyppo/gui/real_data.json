@@ -358,6 +358,378 @@
           "name": "TimeConstant",
           "parent": "ReservoirParameter",
           "group": "domain"
+        },
+        {
+          "name": "Петрофизика_заводнения",
+          "parent": null,
+          "group": "domain",
+          "kind": "area"
+        },
+        {
+          "name": "Аквифер",
+          "parent": "Петрофизика_заводнения",
+          "group": "domain",
+          "kind": "module"
+        },
+        {
+          "name": "aquifer_production",
+          "parent": "Аквифер",
+          "group": "domain",
+          "kind": "operation"
+        },
+        {
+          "name": "effective_reservoir_radius",
+          "parent": "Аквифер",
+          "group": "domain",
+          "kind": "operation"
+        },
+        {
+          "name": "get_bessel_roots",
+          "parent": "Аквифер",
+          "group": "domain",
+          "kind": "operation"
+        },
+        {
+          "name": "klins_pressure_dimensionless",
+          "parent": "Аквифер",
+          "group": "domain",
+          "kind": "operation"
+        },
+        {
+          "name": "klins_water_dimensionless_finite",
+          "parent": "Аквифер",
+          "group": "domain",
+          "kind": "operation"
+        },
+        {
+          "name": "water_dimensionless",
+          "parent": "Аквифер",
+          "group": "domain",
+          "kind": "operation"
+        },
+        {
+          "name": "water_dimensionless_infinite",
+          "parent": "Аквифер",
+          "group": "domain",
+          "kind": "operation"
+        },
+        {
+          "name": "Баклей–Леверетта",
+          "parent": "Петрофизика_заводнения",
+          "group": "domain",
+          "kind": "module"
+        },
+        {
+          "name": "Reservoir",
+          "parent": "Баклей–Леверетта",
+          "group": "domain",
+          "kind": "class"
+        },
+        {
+          "name": "phi",
+          "parent": "Reservoir",
+          "group": "domain",
+          "kind": "param"
+        },
+        {
+          "name": "viscosity_oil",
+          "parent": "Reservoir",
+          "group": "domain",
+          "kind": "param"
+        },
+        {
+          "name": "viscosity_water",
+          "parent": "Reservoir",
+          "group": "domain",
+          "kind": "param"
+        },
+        {
+          "name": "sat_oil_r",
+          "parent": "Reservoir",
+          "group": "domain",
+          "kind": "param"
+        },
+        {
+          "name": "sat_water_c",
+          "parent": "Reservoir",
+          "group": "domain",
+          "kind": "param"
+        },
+        {
+          "name": "sat_gas_c",
+          "parent": "Reservoir",
+          "group": "domain",
+          "kind": "param"
+        },
+        {
+          "name": "n_oil",
+          "parent": "Reservoir",
+          "group": "domain",
+          "kind": "param"
+        },
+        {
+          "name": "n_water",
+          "parent": "Reservoir",
+          "group": "domain",
+          "kind": "param"
+        },
+        {
+          "name": "flow_cross_section",
+          "parent": "Reservoir",
+          "group": "domain",
+          "kind": "param"
+        },
+        {
+          "name": "breakthrough_sw",
+          "parent": "Баклей–Леверетта",
+          "group": "domain",
+          "kind": "operation"
+        },
+        {
+          "name": "water_front_velocity",
+          "parent": "Баклей–Леверетта",
+          "group": "domain",
+          "kind": "operation"
+        },
+        {
+          "name": "CRM (ёмкостно-резистивная)",
+          "parent": "Петрофизика_заводнения",
+          "group": "domain",
+          "kind": "module"
+        },
+        {
+          "name": "CRM",
+          "parent": "CRM (ёмкостно-резистивная)",
+          "group": "domain",
+          "kind": "class"
+        },
+        {
+          "name": "primary",
+          "parent": "CRM",
+          "group": "domain",
+          "kind": "param"
+        },
+        {
+          "name": "tau_selection",
+          "parent": "CRM",
+          "group": "domain",
+          "kind": "param"
+        },
+        {
+          "name": "constraints",
+          "parent": "CRM",
+          "group": "domain",
+          "kind": "param"
+        },
+        {
+          "name": "production",
+          "parent": "CRM",
+          "group": "domain",
+          "kind": "param"
+        },
+        {
+          "name": "injection",
+          "parent": "CRM",
+          "group": "domain",
+          "kind": "param"
+        },
+        {
+          "name": "time",
+          "parent": "CRM",
+          "group": "domain",
+          "kind": "param"
+        },
+        {
+          "name": "initial_guess",
+          "parent": "CRM",
+          "group": "domain",
+          "kind": "param"
+        },
+        {
+          "name": "num_cores",
+          "parent": "CRM",
+          "group": "domain",
+          "kind": "param"
+        },
+        {
+          "name": "random",
+          "parent": "CRM",
+          "group": "domain",
+          "kind": "param"
+        },
+        {
+          "name": "connections",
+          "parent": "CRM",
+          "group": "domain",
+          "kind": "param"
+        },
+        {
+          "name": "CrmCompensated",
+          "parent": "CRM (ёмкостно-резистивная)",
+          "group": "domain",
+          "kind": "class"
+        },
+        {
+          "name": "pressure",
+          "parent": "CrmCompensated",
+          "group": "domain",
+          "kind": "param"
+        },
+        {
+          "name": "q_CRM_perpair",
+          "parent": "CRM (ёмкостно-резистивная)",
+          "group": "domain",
+          "kind": "operation"
+        },
+        {
+          "name": "q_CRM_perproducer",
+          "parent": "CRM (ёмкостно-резистивная)",
+          "group": "domain",
+          "kind": "operation"
+        },
+        {
+          "name": "q_bhp",
+          "parent": "CRM (ёмкостно-резистивная)",
+          "group": "domain",
+          "kind": "operation"
+        },
+        {
+          "name": "q_primary",
+          "parent": "CRM (ёмкостно-резистивная)",
+          "group": "domain",
+          "kind": "operation"
+        },
+        {
+          "name": "random_weights",
+          "parent": "CRM (ёмкостно-резистивная)",
+          "group": "domain",
+          "kind": "operation"
+        },
+        {
+          "name": "Продуктивность_скважин",
+          "parent": "Петрофизика_заводнения",
+          "group": "domain",
+          "kind": "module"
+        },
+        {
+          "name": "calc_A_ij",
+          "parent": "Продуктивность_скважин",
+          "group": "domain",
+          "kind": "operation"
+        },
+        {
+          "name": "calc_gains_homogeneous",
+          "parent": "Продуктивность_скважин",
+          "group": "domain",
+          "kind": "operation"
+        },
+        {
+          "name": "calc_influence_matrix",
+          "parent": "Продуктивность_скважин",
+          "group": "domain",
+          "kind": "operation"
+        },
+        {
+          "name": "translate_locations",
+          "parent": "Продуктивность_скважин",
+          "group": "domain",
+          "kind": "operation"
+        },
+        {
+          "name": "Скважина",
+          "parent": "Петрофизика_заводнения",
+          "group": "domain",
+          "kind": "entity"
+        },
+        {
+          "name": "Нагнетательная_скважина",
+          "parent": "Скважина",
+          "group": "domain",
+          "kind": "entity"
+        },
+        {
+          "name": "Добывающая_скважина",
+          "parent": "Скважина",
+          "group": "domain",
+          "kind": "entity"
+        },
+        {
+          "name": "Пласт_коллектор",
+          "parent": "Петрофизика_заводнения",
+          "group": "domain",
+          "kind": "entity"
+        },
+        {
+          "name": "Доля_связности_f_ij",
+          "parent": "CRM (ёмкостно-резистивная)",
+          "group": "domain",
+          "kind": "entity"
+        },
+        {
+          "name": "Постоянная_времени_tau",
+          "parent": "CRM (ёмкостно-резистивная)",
+          "group": "domain",
+          "kind": "entity"
+        },
+        {
+          "name": "Первичная_добыча",
+          "parent": "CRM (ёмкостно-резистивная)",
+          "group": "domain",
+          "kind": "entity"
+        },
+        {
+          "name": "Забойное_давление_BHP",
+          "parent": "CRM (ёмкостно-резистивная)",
+          "group": "domain",
+          "kind": "entity"
+        },
+        {
+          "name": "Обводнённость_WCT",
+          "parent": "Баклей–Леверетта",
+          "group": "domain",
+          "kind": "entity"
+        },
+        {
+          "name": "Фракционный_поток_fw",
+          "parent": "Баклей–Леверетта",
+          "group": "domain",
+          "kind": "entity"
+        },
+        {
+          "name": "Водонасыщенность_Sw",
+          "parent": "Баклей–Леверетта",
+          "group": "domain",
+          "kind": "entity"
+        },
+        {
+          "name": "Время_прорыва_воды",
+          "parent": "Баклей–Леверетта",
+          "group": "domain",
+          "kind": "entity"
+        },
+        {
+          "name": "Скорость_фронта_воды",
+          "parent": "Баклей–Леверетта",
+          "group": "domain",
+          "kind": "entity"
+        },
+        {
+          "name": "Матрица_влияния",
+          "parent": "Продуктивность_скважин",
+          "group": "domain",
+          "kind": "entity"
+        },
+        {
+          "name": "Приток_из_аквифера",
+          "parent": "Аквифер",
+          "group": "domain",
+          "kind": "entity"
+        },
+        {
+          "name": "Эффективный_радиус",
+          "parent": "Аквифер",
+          "group": "domain",
+          "kind": "entity"
         }
       ],
       "relations": [
@@ -515,9 +887,310 @@
           "property": "has_for_dependency_set",
           "domain": "FullStructure",
           "range": "DependencySet"
+        },
+        {
+          "property": "имеет_параметр",
+          "domain": "Reservoir",
+          "range": "phi"
+        },
+        {
+          "property": "имеет_параметр",
+          "domain": "Reservoir",
+          "range": "viscosity_oil"
+        },
+        {
+          "property": "имеет_параметр",
+          "domain": "Reservoir",
+          "range": "viscosity_water"
+        },
+        {
+          "property": "имеет_параметр",
+          "domain": "Reservoir",
+          "range": "sat_oil_r"
+        },
+        {
+          "property": "имеет_параметр",
+          "domain": "Reservoir",
+          "range": "sat_water_c"
+        },
+        {
+          "property": "имеет_параметр",
+          "domain": "Reservoir",
+          "range": "sat_gas_c"
+        },
+        {
+          "property": "имеет_параметр",
+          "domain": "Reservoir",
+          "range": "n_oil"
+        },
+        {
+          "property": "имеет_параметр",
+          "domain": "Reservoir",
+          "range": "n_water"
+        },
+        {
+          "property": "имеет_параметр",
+          "domain": "Reservoir",
+          "range": "flow_cross_section"
+        },
+        {
+          "property": "имеет_параметр",
+          "domain": "CRM",
+          "range": "primary"
+        },
+        {
+          "property": "имеет_параметр",
+          "domain": "CRM",
+          "range": "tau_selection"
+        },
+        {
+          "property": "имеет_параметр",
+          "domain": "CRM",
+          "range": "constraints"
+        },
+        {
+          "property": "имеет_параметр",
+          "domain": "CRM",
+          "range": "production"
+        },
+        {
+          "property": "имеет_параметр",
+          "domain": "CRM",
+          "range": "injection"
+        },
+        {
+          "property": "имеет_параметр",
+          "domain": "CRM",
+          "range": "time"
+        },
+        {
+          "property": "имеет_параметр",
+          "domain": "CRM",
+          "range": "initial_guess"
+        },
+        {
+          "property": "имеет_параметр",
+          "domain": "CRM",
+          "range": "num_cores"
+        },
+        {
+          "property": "имеет_параметр",
+          "domain": "CRM",
+          "range": "random"
+        },
+        {
+          "property": "имеет_параметр",
+          "domain": "CRM",
+          "range": "injection"
+        },
+        {
+          "property": "имеет_параметр",
+          "domain": "CRM",
+          "range": "time"
+        },
+        {
+          "property": "имеет_параметр",
+          "domain": "CRM",
+          "range": "connections"
+        },
+        {
+          "property": "имеет_параметр",
+          "domain": "CRM",
+          "range": "production"
+        },
+        {
+          "property": "имеет_параметр",
+          "domain": "CrmCompensated",
+          "range": "primary"
+        },
+        {
+          "property": "имеет_параметр",
+          "domain": "CrmCompensated",
+          "range": "tau_selection"
+        },
+        {
+          "property": "имеет_параметр",
+          "domain": "CrmCompensated",
+          "range": "constraints"
+        },
+        {
+          "property": "имеет_параметр",
+          "domain": "CrmCompensated",
+          "range": "production"
+        },
+        {
+          "property": "имеет_параметр",
+          "domain": "CrmCompensated",
+          "range": "pressure"
+        },
+        {
+          "property": "имеет_параметр",
+          "domain": "CrmCompensated",
+          "range": "injection"
+        },
+        {
+          "property": "имеет_параметр",
+          "domain": "CrmCompensated",
+          "range": "time"
+        },
+        {
+          "property": "имеет_параметр",
+          "domain": "CrmCompensated",
+          "range": "initial_guess"
+        },
+        {
+          "property": "имеет_параметр",
+          "domain": "CrmCompensated",
+          "range": "num_cores"
+        },
+        {
+          "property": "имеет_параметр",
+          "domain": "CrmCompensated",
+          "range": "random"
+        },
+        {
+          "property": "имеет_параметр",
+          "domain": "CrmCompensated",
+          "range": "injection"
+        },
+        {
+          "property": "имеет_параметр",
+          "domain": "CrmCompensated",
+          "range": "time"
+        },
+        {
+          "property": "имеет_параметр",
+          "domain": "CrmCompensated",
+          "range": "connections"
+        },
+        {
+          "property": "имеет_параметр",
+          "domain": "CrmCompensated",
+          "range": "production"
+        },
+        {
+          "property": "имеет_параметр",
+          "domain": "CrmCompensated",
+          "range": "pressure"
+        },
+        {
+          "property": "вычисляет",
+          "domain": "q_primary",
+          "range": "Первичная_добыча"
+        },
+        {
+          "property": "вычисляет",
+          "domain": "q_bhp",
+          "range": "Забойное_давление_BHP"
+        },
+        {
+          "property": "вычисляет",
+          "domain": "q_CRM_perpair",
+          "range": "Доля_связности_f_ij"
+        },
+        {
+          "property": "вычисляет",
+          "domain": "q_CRM_perproducer",
+          "range": "Добывающая_скважина"
+        },
+        {
+          "property": "вычисляет",
+          "domain": "breakthrough_sw",
+          "range": "Время_прорыва_воды"
+        },
+        {
+          "property": "вычисляет",
+          "domain": "water_front_velocity",
+          "range": "Скорость_фронта_воды"
+        },
+        {
+          "property": "вычисляет",
+          "domain": "aquifer_production",
+          "range": "Приток_из_аквифера"
+        },
+        {
+          "property": "вычисляет",
+          "domain": "effective_reservoir_radius",
+          "range": "Эффективный_радиус"
+        },
+        {
+          "property": "вычисляет",
+          "domain": "calc_influence_matrix",
+          "range": "Матрица_влияния"
+        },
+        {
+          "property": "вычисляет",
+          "domain": "calc_gains_homogeneous",
+          "range": "Доля_связности_f_ij"
+        },
+        {
+          "property": "обозначает_переменную",
+          "domain": "sat_oil_r",
+          "range": "Variable"
+        },
+        {
+          "property": "обозначает_переменную",
+          "domain": "sat_water_c",
+          "range": "Variable"
+        },
+        {
+          "property": "обозначает_переменную",
+          "domain": "viscosity_oil",
+          "range": "Variable"
+        },
+        {
+          "property": "обозначает_переменную",
+          "domain": "viscosity_water",
+          "range": "Variable"
+        },
+        {
+          "property": "обозначает_переменную",
+          "domain": "Водонасыщенность_Sw",
+          "range": "Variable"
+        },
+        {
+          "property": "обозначает_переменную",
+          "domain": "Добывающая_скважина",
+          "range": "Variable"
+        },
+        {
+          "property": "обозначает_переменную",
+          "domain": "Доля_связности_f_ij",
+          "range": "Variable"
+        },
+        {
+          "property": "обозначает_переменную",
+          "domain": "Матрица_влияния",
+          "range": "Variable"
+        },
+        {
+          "property": "обозначает_переменную",
+          "domain": "Нагнетательная_скважина",
+          "range": "Variable"
+        },
+        {
+          "property": "обозначает_переменную",
+          "domain": "Обводнённость_WCT",
+          "range": "Variable"
+        },
+        {
+          "property": "обозначает_переменную",
+          "domain": "Первичная_добыча",
+          "range": "Variable"
+        },
+        {
+          "property": "обозначает_переменную",
+          "domain": "Постоянная_времени_tau",
+          "range": "Variable"
+        },
+        {
+          "property": "обозначает_переменную",
+          "domain": "Фракционный_поток_fw",
+          "range": "Variable"
         }
       ],
-      "total_classes": 71
+      "total_classes": 133,
+      "domain_count": 71
     },
     "models": [
       {
@@ -1031,6 +1704,7 @@
         "branch": "жидкость",
         "desc": "Агрегация закачки соседних нагнетательных скважин во входной сигнал.",
         "competes": [],
+        "domain_roles": [],
         "equation": {
           "formula": "I_agg = w_ij * I_j",
           "output": "I_agg",
@@ -1038,7 +1712,12 @@
           "inputs": [
             "I_j",
             "w_ij"
-          ]
+          ],
+          "output_domain": null,
+          "input_domains": {
+            "I_j": "Нагнетательная_скважина",
+            "w_ij": "Доля_связности_f_ij"
+          }
         },
         "models": [
           "m_H1_crmp",
@@ -1054,6 +1733,7 @@
         "branch": "жидкость",
         "desc": "Быстрый канал CRM (трещины, малое время отклика τ_fast).",
         "competes": [],
+        "domain_roles": [],
         "equation": {
           "formula": "q_f = a_f*q_f_prev + b_f*I_agg",
           "output": "q_f",
@@ -1063,7 +1743,9 @@
             "a_f",
             "b_f",
             "q_f_prev"
-          ]
+          ],
+          "output_domain": null,
+          "input_domains": {}
         },
         "models": [
           "m_H2_crmp",
@@ -1079,6 +1761,7 @@
         "branch": "жидкость",
         "desc": "Медленный канал CRM (матрица пласта, большое τ_slow).",
         "competes": [],
+        "domain_roles": [],
         "equation": {
           "formula": "q_s = a_s*q_s_prev + b_s*I_agg",
           "output": "q_s",
@@ -1088,7 +1771,9 @@
             "a_s",
             "b_s",
             "q_s_prev"
-          ]
+          ],
+          "output_domain": null,
+          "input_domains": {}
         },
         "models": [
           "m_H3_crmp",
@@ -1104,6 +1789,7 @@
         "branch": "жидкость",
         "desc": "Взвешенное смешение быстрого и медленного откликов.",
         "competes": [],
+        "domain_roles": [],
         "equation": {
           "formula": "q_c = w_f*q_f + (1-w_f)*q_s",
           "output": "q_c",
@@ -1112,7 +1798,9 @@
             "q_f",
             "q_s",
             "w_f"
-          ]
+          ],
+          "output_domain": null,
+          "input_domains": {}
         },
         "models": [
           "m_H4_crmp",
@@ -1130,6 +1818,12 @@
         "competes": [
           "H7"
         ],
+        "domain_roles": [
+          {
+            "marker": "LiquidRateHypothesis",
+            "rule": "выход = дебит Добывающей_скважины"
+          }
+        ],
         "equation": {
           "formula": "q_liq_phys = J*q_c + q_prim",
           "output": "q_liq_phys",
@@ -1138,7 +1832,12 @@
             "J",
             "q_c",
             "q_prim"
-          ]
+          ],
+          "output_domain": "Добывающая_скважина",
+          "input_domains": {
+            "J": "Матрица_влияния",
+            "q_prim": "Первичная_добыча"
+          }
         },
         "models": [
           "m_H5_crmp",
@@ -1154,6 +1853,12 @@
         "branch": "жидкость",
         "desc": "Первичная добыча с экспоненциальным спадом (без закачки).",
         "competes": [],
+        "domain_roles": [
+          {
+            "marker": "PrimaryProductionHypothesis",
+            "rule": "выход = Первичная_добыча"
+          }
+        ],
         "equation": {
           "formula": "q_prim = q_prev*exp(-dt*taup)",
           "output": "q_prim",
@@ -1162,7 +1867,11 @@
             "dt",
             "q_prev",
             "taup"
-          ]
+          ],
+          "output_domain": "Первичная_добыча",
+          "input_domains": {
+            "taup": "Постоянная_времени_tau"
+          }
         },
         "models": [
           "m_H6_crmp",
@@ -1180,13 +1889,21 @@
         "competes": [
           "H5"
         ],
+        "domain_roles": [
+          {
+            "marker": "LiquidRateHypothesis",
+            "rule": "выход = дебит Добывающей_скважины"
+          }
+        ],
         "equation": {
           "formula": "l_ml = MLP(x_hist)",
           "output": "l_ml",
           "latex": "\\ell_m = \\mathrm{MLP}(\\mathbf{x}_{\\mathrm{hist}})",
           "inputs": [
             "x_hist"
-          ]
+          ],
+          "output_domain": "Добывающая_скважина",
+          "input_domains": {}
         },
         "models": [
           "m_H7_gnn",
@@ -1202,6 +1919,12 @@
         "branch": "жидкость",
         "desc": "Слияние физического и ML-прогнозов жидкости через обучаемый вентиль g.",
         "competes": [],
+        "domain_roles": [
+          {
+            "marker": "LiquidRateHypothesis",
+            "rule": "выход = дебит Добывающей_скважины"
+          }
+        ],
         "equation": {
           "formula": "l = g*q_liq_phys + (1-g)*l_ml",
           "output": "l",
@@ -1210,7 +1933,12 @@
             "g",
             "l_ml",
             "q_liq_phys"
-          ]
+          ],
+          "output_domain": "Добывающая_скважина",
+          "input_domains": {
+            "l_ml": "Добывающая_скважина",
+            "q_liq_phys": "Добывающая_скважина"
+          }
         },
         "models": [
           "m_H8_gate"
@@ -1225,6 +1953,12 @@
         "branch": "обводнённость",
         "desc": "Обновление водонасыщенности по материальному балансу.",
         "competes": [],
+        "domain_roles": [
+          {
+            "marker": "MaterialBalanceHypothesis",
+            "rule": "выход = Водонасыщенность_Sw ∧ вход ∋ Нагнетательная_скважина"
+          }
+        ],
         "equation": {
           "formula": "Sw = Sw_prev + (Winj - l)*dt/Vp",
           "output": "Sw",
@@ -1235,7 +1969,12 @@
             "Winj",
             "dt",
             "l"
-          ]
+          ],
+          "output_domain": "Водонасыщенность_Sw",
+          "input_domains": {
+            "Winj": "Нагнетательная_скважина",
+            "l": "Добывающая_скважина"
+          }
         },
         "models": [
           "m_H9_bl",
@@ -1251,6 +1990,7 @@
         "branch": "обводнённость",
         "desc": "Относительная фазовая проницаемость по воде (Corey).",
         "competes": [],
+        "domain_roles": [],
         "equation": {
           "formula": "krw = ((Sw-Swc)/(1-Swc-Sor))**nw",
           "output": "krw",
@@ -1260,7 +2000,13 @@
             "Sw",
             "Swc",
             "nw"
-          ]
+          ],
+          "output_domain": null,
+          "input_domains": {
+            "Sor": "sat_oil_r",
+            "Sw": "Водонасыщенность_Sw",
+            "Swc": "sat_water_c"
+          }
         },
         "models": [
           "m_H10_bl",
@@ -1276,6 +2022,7 @@
         "branch": "обводнённость",
         "desc": "Относительная фазовая проницаемость по нефти (Corey).",
         "competes": [],
+        "domain_roles": [],
         "equation": {
           "formula": "kro = ((1-Sw-Sor)/(1-Swc-Sor))**no",
           "output": "kro",
@@ -1285,7 +2032,13 @@
             "Sw",
             "Swc",
             "no"
-          ]
+          ],
+          "output_domain": null,
+          "input_domains": {
+            "Sor": "sat_oil_r",
+            "Sw": "Водонасыщенность_Sw",
+            "Swc": "sat_water_c"
+          }
         },
         "models": [
           "m_H11_bl",
@@ -1301,6 +2054,12 @@
         "branch": "обводнённость",
         "desc": "Доля воды в потоке по Баклею–Леверетту (фракционный поток).",
         "competes": [],
+        "domain_roles": [
+          {
+            "marker": "FractionalFlowHypothesis",
+            "rule": "выход = Фракционный_поток_fw"
+          }
+        ],
         "equation": {
           "formula": "fw = 1/(1 + kro*muw/(krw*muo))",
           "output": "fw",
@@ -1310,7 +2069,12 @@
             "krw",
             "muo",
             "muw"
-          ]
+          ],
+          "output_domain": "Фракционный_поток_fw",
+          "input_domains": {
+            "muo": "viscosity_oil",
+            "muw": "viscosity_water"
+          }
         },
         "models": [
           "m_H12_bl",
@@ -1326,13 +2090,23 @@
         "branch": "обводнённость",
         "desc": "Физический прогноз нефтяной доли o_p = 1 − f_w.",
         "competes": [],
+        "domain_roles": [
+          {
+            "marker": "WatercutHypothesis",
+            "rule": "выход = Обводнённость_WCT"
+          }
+        ],
         "equation": {
           "formula": "o_p = 1 - fw",
           "output": "o_p",
           "latex": "o_p = 1 - f_w",
           "inputs": [
             "fw"
-          ]
+          ],
+          "output_domain": "Обводнённость_WCT",
+          "input_domains": {
+            "fw": "Фракционный_поток_fw"
+          }
         },
         "models": [
           "m_H13_bl",
@@ -1348,6 +2122,12 @@
         "branch": "обводнённость",
         "desc": "Слияние прогнозов обводнённости через вентиль g_w.",
         "competes": [],
+        "domain_roles": [
+          {
+            "marker": "WatercutHypothesis",
+            "rule": "выход = Обводнённость_WCT"
+          }
+        ],
         "equation": {
           "formula": "o = gw*o_p + (1-gw)*o_m",
           "output": "o",
@@ -1356,7 +2136,11 @@
             "gw",
             "o_m",
             "o_p"
-          ]
+          ],
+          "output_domain": "Обводнённость_WCT",
+          "input_domains": {
+            "o_p": "Обводнённость_WCT"
+          }
         },
         "models": [
           "m_H14_gate"
@@ -1371,6 +2155,12 @@
         "branch": "ГТМ",
         "desc": "ГТМ: модуляция продуктивности ΔJ (гидроразрыв пласта).",
         "competes": [],
+        "domain_roles": [
+          {
+            "marker": "ProductivityHypothesis",
+            "rule": "выход = продуктивность (Матрица_влияния)"
+          }
+        ],
         "equation": {
           "formula": "J = J0 + dJ_grp",
           "output": "J",
@@ -1378,7 +2168,9 @@
           "inputs": [
             "J0",
             "dJ_grp"
-          ]
+          ],
+          "output_domain": "Матрица_влияния",
+          "input_domains": {}
         },
         "models": [
           "m_H15_frac",
@@ -1394,6 +2186,7 @@
         "branch": "нефть",
         "desc": "Прогноз дебита нефти: жидкость × нефтяная доля (терминальная гипотеза).",
         "competes": [],
+        "domain_roles": [],
         "equation": {
           "formula": "q_oil = l * o",
           "output": "q_oil",
@@ -1401,7 +2194,12 @@
           "inputs": [
             "l",
             "o"
-          ]
+          ],
+          "output_domain": null,
+          "input_domains": {
+            "l": "Добывающая_скважина",
+            "o": "Обводнённость_WCT"
+          }
         },
         "models": [
           "m_H16_gate"
@@ -2122,6 +2920,15 @@
       ],
       "T12": []
     },
+    "competes_derivation": [
+      {
+        "a": "H5",
+        "b": "H7",
+        "concept": "Добывающая_скважина",
+        "reason": "обе гипотезы вычисляют «Добывающая скважина», прямой связи derived_by между ними нет"
+      }
+    ],
+    "competes_matches_ref": true,
     "formal_text": "# HybridCRM workflow — ОАГ задач (CWL-подобный формат)\n# join: AND (все входы обязательны); ветви LPR и WCT параллельны\ncwlVersion: v1.2\nclass: Workflow\nsteps:\n  T1:  # Парсинг закачки\n    in: [source]\n    run: [H1]\n  T2:  # CRM-каналы\n    in: [T1]\n    run: [H2, H3]\n  T3:  # Смешение\n    in: [T2]\n    run: [H4]\n  T4:  # Продуктивность и спад\n    in: [T12, T3]\n    run: [H5, H6]\n  join: all-required  # AND\n  T5:  # ML-коррекция\n    in: [source]\n    run: [H7]\n  T6:  # Слияние жидкости\n    in: [T4, T5]\n    run: [H8]\n  join: all-required  # AND\n  T7:  # Материальный баланс\n    in: [T6]\n    run: [H9]\n  T8:  # Фазовые проницаемости\n    in: [T7]\n    run: [H10, H11]\n  T9:  # Фракционный поток\n    in: [T8]\n    run: [H12]\n  T10:  # Обводнённость\n    in: [T9]\n    run: [H13, H14]\n  T11:  # Прогноз нефти\n    in: [T10, T6]\n    run: [H16]\n  join: all-required  # AND\n  T12:  # ГТМ-модуляция\n    in: [source]\n    run: [H15]",
     "is_dag": true,
     "depth": 10,
@@ -2307,6 +3114,24 @@
         2
       ]
     },
+    "c7": {
+      "grounded": {
+        "status": "OK",
+        "ok": true,
+        "detail": "passed (все переменные грунтированы в домене)"
+      },
+      "ungrounded": {
+        "status": "C7: domain grounding violation",
+        "ok": false,
+        "hypothesis": 1,
+        "vars": [
+          "phi_unknown"
+        ]
+      },
+      "vocabulary_size": 17,
+      "shacl": "# C7 как SHACL-форма (домен-покрытие переменных)\nex:HypothesisShape a sh:NodeShape ;\n  sh:targetClass ve:Hypothesis ;\n  sh:property [\n    sh:path (ve:has_for_structure ve:has_for_equation ve:has_for_variable) ;\n    sh:class dom:DomainConcept ;   # каждая переменная — объявленный термин\n    sh:message \"переменная не грунтирована в предметной онтологии\" ;\n  ] .",
+      "note": "OWA-рассуждатель (HermiT) отсутствие термина НЕ ловит; C7 замкнут по миру (SHACL-семантика). Каждая переменная уравнения обязана быть доменным концептом."
+    },
     "complexity": {
       "alg1": {
         "points": [
@@ -2406,6 +3231,769 @@
         "law": "O(|V|+|E|)",
         "note": "обходов смежности ~V+E; ×2 при ×2"
       }
+    },
+    "cache": {
+      "cold": {
+        "computed": 16,
+        "cached": 0
+      },
+      "warm": {
+        "computed": 0,
+        "cached": 16
+      },
+      "invalidate": {
+        "changed": "H9",
+        "recompute": [
+          "H9",
+          "H10",
+          "H11",
+          "H12",
+          "H13",
+          "H14",
+          "H16"
+        ],
+        "reused": 9,
+        "matches_descendants": true
+      },
+      "planner_sees_runner": true,
+      "total": 16,
+      "backend": "SharedCache — один SQLite для planner и runner",
+      "key": "составной ключ (hypothesis_id, config_hash); config_hash = sha256(json(config))[:16]",
+      "note": "Смена конфигурации одной гипотезы инвалидирует только её замыкание вниз (H9 + потомки) — ⊆-минимальность плана (Теорема 1). Ветвь жидкости H1–H8 и ГТМ H15 переиспользуются из кэша."
+    }
+  },
+  "battery": {
+    "rule4": [
+      {
+        "source": "H1",
+        "stale": [
+          "H2",
+          "H3",
+          "H4",
+          "H5",
+          "H8",
+          "H9",
+          "H10",
+          "H11",
+          "H12",
+          "H13",
+          "H14",
+          "H16"
+        ],
+        "match": true
+      },
+      {
+        "source": "H2",
+        "stale": [
+          "H4",
+          "H5",
+          "H8",
+          "H9",
+          "H10",
+          "H11",
+          "H12",
+          "H13",
+          "H14",
+          "H16"
+        ],
+        "match": true
+      },
+      {
+        "source": "H3",
+        "stale": [
+          "H4",
+          "H5",
+          "H8",
+          "H9",
+          "H10",
+          "H11",
+          "H12",
+          "H13",
+          "H14",
+          "H16"
+        ],
+        "match": true
+      },
+      {
+        "source": "H4",
+        "stale": [
+          "H5",
+          "H8",
+          "H9",
+          "H10",
+          "H11",
+          "H12",
+          "H13",
+          "H14",
+          "H16"
+        ],
+        "match": true
+      },
+      {
+        "source": "H5",
+        "stale": [
+          "H8",
+          "H9",
+          "H10",
+          "H11",
+          "H12",
+          "H13",
+          "H14",
+          "H16"
+        ],
+        "match": true
+      },
+      {
+        "source": "H6",
+        "stale": [
+          "H5",
+          "H8",
+          "H9",
+          "H10",
+          "H11",
+          "H12",
+          "H13",
+          "H14",
+          "H16"
+        ],
+        "match": true
+      },
+      {
+        "source": "H7",
+        "stale": [
+          "H8",
+          "H9",
+          "H10",
+          "H11",
+          "H12",
+          "H13",
+          "H14",
+          "H16"
+        ],
+        "match": true
+      },
+      {
+        "source": "H8",
+        "stale": [
+          "H9",
+          "H10",
+          "H11",
+          "H12",
+          "H13",
+          "H14",
+          "H16"
+        ],
+        "match": true
+      },
+      {
+        "source": "H9",
+        "stale": [
+          "H10",
+          "H11",
+          "H12",
+          "H13",
+          "H14",
+          "H16"
+        ],
+        "match": true
+      },
+      {
+        "source": "H10",
+        "stale": [
+          "H12",
+          "H13",
+          "H14",
+          "H16"
+        ],
+        "match": true
+      },
+      {
+        "source": "H11",
+        "stale": [
+          "H12",
+          "H13",
+          "H14",
+          "H16"
+        ],
+        "match": true
+      },
+      {
+        "source": "H12",
+        "stale": [
+          "H13",
+          "H14",
+          "H16"
+        ],
+        "match": true
+      },
+      {
+        "source": "H13",
+        "stale": [
+          "H14",
+          "H16"
+        ],
+        "match": true
+      },
+      {
+        "source": "H14",
+        "stale": [
+          "H16"
+        ],
+        "match": true
+      },
+      {
+        "source": "H15",
+        "stale": [
+          "H5",
+          "H8",
+          "H9",
+          "H10",
+          "H11",
+          "H12",
+          "H13",
+          "H14",
+          "H16"
+        ],
+        "match": true
+      },
+      {
+        "source": "H16",
+        "stale": [],
+        "match": true
+      }
+    ],
+    "rule7": [
+      {
+        "run_uses": "H5",
+        "invalid": "H1",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H5",
+        "invalid": "H2",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H5",
+        "invalid": "H3",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H5",
+        "invalid": "H4",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H5",
+        "invalid": "H5",
+        "derived_stale": false,
+        "expected": false,
+        "verdict": "TN"
+      },
+      {
+        "run_uses": "H5",
+        "invalid": "H6",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H5",
+        "invalid": "H7",
+        "derived_stale": false,
+        "expected": false,
+        "verdict": "TN"
+      },
+      {
+        "run_uses": "H5",
+        "invalid": "H8",
+        "derived_stale": false,
+        "expected": false,
+        "verdict": "TN"
+      },
+      {
+        "run_uses": "H5",
+        "invalid": "H9",
+        "derived_stale": false,
+        "expected": false,
+        "verdict": "TN"
+      },
+      {
+        "run_uses": "H5",
+        "invalid": "H10",
+        "derived_stale": false,
+        "expected": false,
+        "verdict": "TN"
+      },
+      {
+        "run_uses": "H5",
+        "invalid": "H11",
+        "derived_stale": false,
+        "expected": false,
+        "verdict": "TN"
+      },
+      {
+        "run_uses": "H5",
+        "invalid": "H12",
+        "derived_stale": false,
+        "expected": false,
+        "verdict": "TN"
+      },
+      {
+        "run_uses": "H5",
+        "invalid": "H13",
+        "derived_stale": false,
+        "expected": false,
+        "verdict": "TN"
+      },
+      {
+        "run_uses": "H5",
+        "invalid": "H14",
+        "derived_stale": false,
+        "expected": false,
+        "verdict": "TN"
+      },
+      {
+        "run_uses": "H5",
+        "invalid": "H15",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H5",
+        "invalid": "H16",
+        "derived_stale": false,
+        "expected": false,
+        "verdict": "TN"
+      },
+      {
+        "run_uses": "H8",
+        "invalid": "H1",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H8",
+        "invalid": "H2",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H8",
+        "invalid": "H3",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H8",
+        "invalid": "H4",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H8",
+        "invalid": "H5",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H8",
+        "invalid": "H6",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H8",
+        "invalid": "H7",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H8",
+        "invalid": "H8",
+        "derived_stale": false,
+        "expected": false,
+        "verdict": "TN"
+      },
+      {
+        "run_uses": "H8",
+        "invalid": "H9",
+        "derived_stale": false,
+        "expected": false,
+        "verdict": "TN"
+      },
+      {
+        "run_uses": "H8",
+        "invalid": "H10",
+        "derived_stale": false,
+        "expected": false,
+        "verdict": "TN"
+      },
+      {
+        "run_uses": "H8",
+        "invalid": "H11",
+        "derived_stale": false,
+        "expected": false,
+        "verdict": "TN"
+      },
+      {
+        "run_uses": "H8",
+        "invalid": "H12",
+        "derived_stale": false,
+        "expected": false,
+        "verdict": "TN"
+      },
+      {
+        "run_uses": "H8",
+        "invalid": "H13",
+        "derived_stale": false,
+        "expected": false,
+        "verdict": "TN"
+      },
+      {
+        "run_uses": "H8",
+        "invalid": "H14",
+        "derived_stale": false,
+        "expected": false,
+        "verdict": "TN"
+      },
+      {
+        "run_uses": "H8",
+        "invalid": "H15",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H8",
+        "invalid": "H16",
+        "derived_stale": false,
+        "expected": false,
+        "verdict": "TN"
+      },
+      {
+        "run_uses": "H14",
+        "invalid": "H1",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H14",
+        "invalid": "H2",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H14",
+        "invalid": "H3",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H14",
+        "invalid": "H4",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H14",
+        "invalid": "H5",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H14",
+        "invalid": "H6",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H14",
+        "invalid": "H7",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H14",
+        "invalid": "H8",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H14",
+        "invalid": "H9",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H14",
+        "invalid": "H10",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H14",
+        "invalid": "H11",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H14",
+        "invalid": "H12",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H14",
+        "invalid": "H13",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H14",
+        "invalid": "H14",
+        "derived_stale": false,
+        "expected": false,
+        "verdict": "TN"
+      },
+      {
+        "run_uses": "H14",
+        "invalid": "H15",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H14",
+        "invalid": "H16",
+        "derived_stale": false,
+        "expected": false,
+        "verdict": "TN"
+      },
+      {
+        "run_uses": "H16",
+        "invalid": "H1",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H16",
+        "invalid": "H2",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H16",
+        "invalid": "H3",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H16",
+        "invalid": "H4",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H16",
+        "invalid": "H5",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H16",
+        "invalid": "H6",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H16",
+        "invalid": "H7",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H16",
+        "invalid": "H8",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H16",
+        "invalid": "H9",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H16",
+        "invalid": "H10",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H16",
+        "invalid": "H11",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H16",
+        "invalid": "H12",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H16",
+        "invalid": "H13",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H16",
+        "invalid": "H14",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H16",
+        "invalid": "H15",
+        "derived_stale": true,
+        "expected": true,
+        "verdict": "TP"
+      },
+      {
+        "run_uses": "H16",
+        "invalid": "H16",
+        "derived_stale": false,
+        "expected": false,
+        "verdict": "TN"
+      }
+    ],
+    "edges": [
+      [
+        "H15",
+        "H5"
+      ],
+      [
+        "H1",
+        "H2"
+      ],
+      [
+        "H1",
+        "H3"
+      ],
+      [
+        "H9",
+        "H10"
+      ],
+      [
+        "H9",
+        "H11"
+      ],
+      [
+        "H10",
+        "H12"
+      ],
+      [
+        "H11",
+        "H12"
+      ],
+      [
+        "H12",
+        "H13"
+      ],
+      [
+        "H13",
+        "H14"
+      ],
+      [
+        "H14",
+        "H16"
+      ],
+      [
+        "H2",
+        "H4"
+      ],
+      [
+        "H3",
+        "H4"
+      ],
+      [
+        "H4",
+        "H5"
+      ],
+      [
+        "H5",
+        "H8"
+      ],
+      [
+        "H6",
+        "H5"
+      ],
+      [
+        "H7",
+        "H8"
+      ],
+      [
+        "H8",
+        "H9"
+      ],
+      [
+        "H8",
+        "H16"
+      ]
+    ],
+    "summary": {
+      "rule4_classifications": 102,
+      "rule4_mismatches": 0,
+      "rule7_tp": 43,
+      "rule7_tn": 21,
+      "rule7_errors": 0,
+      "trials": 80,
+      "wall_seconds": 247.0
     }
   },
   "architecture": {
@@ -2478,7 +4066,7 @@
         "module": "hyppo/planner",
         "desc": "Алгоритм 4: планирование, P_ne/P_e, отсечение маршрутов (разд. 3.1.6).",
         "deps": [
-          "metadata_repository",
+          "storage",
           "comparison"
         ]
       },
@@ -2525,15 +4113,15 @@
         "name": "MetadataRepository",
         "layer": "Хранение",
         "module": "hyppo/metadata_repository",
-        "desc": "Кэш результатов, поиск ближайшего графа (опр. 12, разд. 3.1.8).",
+        "desc": "Кэш результатов, поиск ближайшего графа (опр. 12, разд. 3.1.8). Конкретная реализация интерфейса Storage.",
         "deps": []
       },
       {
         "id": "storage",
-        "name": "Storage",
+        "name": "Storage (интерфейс Database)",
         "layer": "Хранение",
         "module": "hyppo/storage",
-        "desc": "Слой хранения артефактов.",
+        "desc": "Абстрактный интерфейс хранилища (Database): planner типизирован на него (db: Database). Конкретная реализация — MetadataRepository (SQLite).",
         "deps": []
       },
       {
@@ -2568,7 +4156,13 @@
         ]
       }
     ],
-    "note": "Компоненты сгруппированы по слоям; стрелки — доступ одного компонента к интерфейсу другого. Основные компоненты реализуют методы глав 2–3; инфраструктурные — вспомогательные."
+    "realizes": [
+      {
+        "src": "metadata_repository",
+        "dst": "storage"
+      }
+    ],
+    "note": "Сплошная стрелка A → B — доступ A к интерфейсу B; пунктир A ⇢ B — A реализует абстрактный интерфейс B. Основные компоненты реализуют методы глав 2–3."
   },
   "scale": {
     "note": "Один и тот же граф гипотез строится алгоритмом 1 из уравнений при любом масштабе; онтологический вывод в профиле OWL 2 EL (ELK) полиномиален.",

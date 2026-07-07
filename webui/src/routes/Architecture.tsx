@@ -26,6 +26,10 @@ export function Architecture({ real }: { real: RealData }) {
     a.components.forEach((c) => c.deps.forEach((dep) => {
       if (byId[dep]) elements.push({ data: { id: `${c.id}_${dep}`, source: c.id, target: dep } });
     }));
+    (a.realizes ?? []).forEach((r) => {
+      if (byId[r.src] && byId[r.dst])
+        elements.push({ data: { id: `${r.src}_rz_${r.dst}`, source: r.src, target: r.dst, rz: 1 } });
+    });
 
     const styles: any[] = [
       { selector: "node", style: {
@@ -37,6 +41,10 @@ export function Architecture({ real }: { real: RealData }) {
       { selector: "edge", style: {
         "curve-style": "bezier", width: 1.7, "line-color": "#b9742a",
         "target-arrow-shape": "triangle", "target-arrow-color": "#b9742a", "arrow-scale": 0.9,
+      }},
+      { selector: "edge[rz]", style: {
+        "line-style": "dashed", "line-color": "#5f5c55", width: 1.4,
+        "target-arrow-shape": "triangle-tee", "target-arrow-color": "#5f5c55", "arrow-scale": 0.9,
       }},
       { selector: ".faded", style: { opacity: 0.14 } },
       { selector: "node.hl", style: { "border-width": 4, "border-color": "#7c1d2b" } },
@@ -68,7 +76,8 @@ export function Architecture({ real }: { real: RealData }) {
         <div className="kicker">Программный комплекс · глава 3</div>
         <h1>Архитектура комплекса Hyppo</h1>
         <p className="lead">
-          Схема компонентов и зависимостей: <b>стрелка A → B</b> означает «A обращается к интерфейсу B».
+          Схема компонентов и зависимостей: <b>сплошная A → B</b> — «A обращается к интерфейсу B»,
+          <b>пунктир A ⇢ B</b> — «A реализует абстрактный интерфейс B» (напр. MetadataRepository ⇢ Storage).
           Цвет рамки — слой. Кликните компонент — подсветятся связи и откроются детали.
         </p>
       </div>

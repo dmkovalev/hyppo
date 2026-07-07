@@ -36,7 +36,9 @@ NORNE_HYPS = [
     ("H6", "q_prim = q_prev*exp(-dt*taup)"),
     ("H7", "l_ml = MLP(x_hist)"),
     ("H8", "l = g*q_liq_phys + (1-g)*l_ml"),
-    ("H11", "Sw = Sw_prev + (Winj - Wlout)*dt/Vp"),
+    # Материальный баланс связан с прогнозом жидкости H8 (выход l), а не с сырым
+    # замером Wlout: закачка минус спрогнозированный отбор жидкости [SVD §3.9].
+    ("H11", "Sw = Sw_prev + (Winj - l)*dt/Vp"),
     ("H12", "krw = ((Sw-Swc)/(1-Swc-Sor))**nw"),
     ("H12b", "kro = ((1-Sw-Sor)/(1-Swc-Sor))**no"),
     ("H13", "fw = 1/(1 + kro*muw/(krw*muo))"),
@@ -46,11 +48,13 @@ NORNE_HYPS = [
     ("H19", "q_oil = l * o"),
 ]
 
-# The 17 derived_by edges of Figure 3 in [SVD] (hand-derivable from the LHS/RHS
+# The 18 derived_by edges of Figure 3 in [SVD] (hand-derivable from the LHS/RHS
 # variable flow of the equations above, independently of the implementation).
+# H8->H11 links the liquid-prediction branch to the material balance (H11 uses l).
 NORNE_GOLDEN_EDGES = {
     ("H1", "H2"), ("H1", "H3"), ("H2", "H4"), ("H3", "H4"), ("H4", "H5"),
     ("H6", "H5"), ("GRP", "H5"), ("H5", "H8"), ("H7", "H8"), ("H8", "H19"),
+    ("H8", "H11"),
     ("H11", "H12"), ("H11", "H12b"), ("H12", "H13"), ("H12b", "H13"),
     ("H13", "H14"), ("H14", "H15"), ("H15", "H19"),
 }
@@ -87,15 +91,15 @@ def _named_edges(g: nx.DiGraph) -> set[tuple[str, str]]:
 # ---------------------------------------------------------------------------
 
 def test_alg1_norne_graph_matches_figure():
-    """[SVD] «16 гипотез и 17 рёбер зависимостей (глубина графа 5)»,
+    """[SVD] «16 гипотез и 18 рёбер зависимостей (глубина графа 10)»,
     «рёбра выведены автоматически из потока переменных уравнений»."""
     hyps = [_Hyp(n, f) for n, f in NORNE_HYPS]
     g = _build_lattice(hyps)
     assert _named_edges(g) == NORNE_GOLDEN_EDGES
     assert g.number_of_nodes() == 16
-    assert g.number_of_edges() == 17
+    assert g.number_of_edges() == 18
     assert nx.is_directed_acyclic_graph(g)
-    assert nx.dag_longest_path_length(g) == 5
+    assert nx.dag_longest_path_length(g) == 10
 
 
 # ---------------------------------------------------------------------------
@@ -356,6 +360,30 @@ def test_alg3_c5_rejects_undeclared_infinite_domain():
         artefacts=_GOOD_ARTEFACTS, configurations=[_FiniteQ([1]), _NoFlag()],
     )
     assert not res.ok and res.status == Status.C5_VIOLATED
+
+
+def test_c7_accepts_grounded_and_rejects_ungrounded_variable():
+    """C7: каждая переменная уравнения гипотезы обязана быть объявленным
+    доменным термином (SHACL-семантика, замкнутый мир). Опциональная проверка —
+    без domain_terms/hypothesis_vars она skipped и не влияет на C1–C5."""
+    vocab = {"Sw", "Winj", "l", "fw", "muw", "muo"}
+    ok = check_consistency(
+        None, None, _GOOD_LATTICE, run_hermit=False,
+        domain_terms=vocab, hypothesis_vars={0: {"Sw", "Winj", "l"}, 1: {"fw", "muw"}},
+    )
+    assert ok.ok and ok.status == Status.OK and ok.details["c7"].startswith("passed")
+
+    bad = check_consistency(
+        None, None, _GOOD_LATTICE, run_hermit=False,
+        domain_terms=vocab, hypothesis_vars={0: {"Sw"}, 1: {"fw", "phi_unknown"}},
+    )
+    assert not bad.ok and bad.status == Status.C7_VIOLATED
+    assert bad.details["c7_hypothesis"] == 1
+    assert bad.details["c7_ungrounded"] == ["phi_unknown"]
+
+    # без словаря C7 не выполняется (обратная совместимость)
+    skip = check_consistency(None, None, _GOOD_LATTICE, run_hermit=False)
+    assert skip.details["c7"] == "skipped"
 
 
 def test_alg3_structural_checks_run_in_declared_order():

@@ -1,6 +1,7 @@
 import type { RealData } from "../types";
 import { PlanDemo } from "../components/PlanDemo";
 import { ComplexityBars } from "../components/ComplexityBars";
+import { Battery } from "../components/Battery";
 
 export function Algorithms({ real }: { real: RealData; field?: string }) {
   const c = real.graph_conceptual;
@@ -71,6 +72,65 @@ export function Algorithms({ real }: { real: RealData; field?: string }) {
         )}
       </div>
 
+      {d?.c7 && (
+        <div className="panel">
+          <div className="label">Условие C7 — доменное грунтирование переменных (новое правило · SHACL-семантика)</div>
+          <p className="muted" style={{ fontSize: 12, marginTop: 0 }}>
+            Каждая свободная переменная уравнения гипотезы обязана быть объявленным термином
+            предметной онтологии (словарь из {d.c7.vocabulary_size} терминов, извлечён из pywaterflood).
+            Реальный вызов <span className="formula">check_consistency(…, domain_terms, hypothesis_vars)</span>:
+          </p>
+          <table className="data">
+            <thead><tr><th>Сценарий</th><th>Статус</th><th>Детали</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>Все переменные грунтированы</td>
+                <td><span className="chip g">{d.c7.grounded.status}</span></td>
+                <td className="muted" style={{ fontSize: 12 }}>{d.c7.grounded.detail}</td>
+              </tr>
+              <tr>
+                <td>Есть негрунтированная переменная</td>
+                <td><span className="chip r">{d.c7.ungrounded.status}</span></td>
+                <td className="muted" style={{ fontSize: 12 }}>
+                  гипотеза h{d.c7.ungrounded.hypothesis}: переменные вне домена{" "}
+                  {d.c7.ungrounded.vars.map((v) => <span key={v} className="tag">{v}</span>)}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p className="muted" style={{ fontSize: 12, marginTop: 10 }}>{d.c7.note}</p>
+          <pre style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--text)",
+                        background: "var(--panel-2)", padding: "12px 14px", borderRadius: 6,
+                        overflowX: "auto", margin: "8px 0 0" }}>{d.c7.shacl}</pre>
+        </div>
+      )}
+
+      {real.graph_conceptual.competes_derivation && real.graph_conceptual.competes_derivation.length > 0 && (
+        <div className="panel">
+          <div className="label">
+            Вывод отношения competes из предметной области{" "}
+            {real.graph_conceptual.competes_matches_ref &&
+              <span className="chip g" style={{ fontSize: 11 }}>совпало с эталоном</span>}
+          </div>
+          <p className="muted" style={{ fontSize: 12, marginTop: 0 }}>
+            Правило: две гипотезы с одинаковым выходным доменным концептом и без пути derived_by
+            между ними — конкурирующие объяснения. Отношение не задаётся вручную, а выводится.
+          </p>
+          <table className="data">
+            <thead><tr><th>Гипотезы</th><th>Общий концепт</th><th>Обоснование</th></tr></thead>
+            <tbody>
+              {real.graph_conceptual.competes_derivation.map((c, i) => (
+                <tr key={i}>
+                  <td className="num">{c.a} ↔ {c.b}</td>
+                  <td>{c.concept.replace(/_/g, " ")}</td>
+                  <td className="muted" style={{ fontSize: 12 }}>{c.reason}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
       <div className="panel">
         <div className="label">Алгоритм 4 — планирование с каскадным переиспользованием</div>
         <p style={{ marginTop: 0 }}>
@@ -95,6 +155,49 @@ export function Algorithms({ real }: { real: RealData; field?: string }) {
         </div>
         <p className="muted" style={{ fontSize: 12 }}>Интерактивный каскад по клику на вершину — в разделе «Граф гипотез».</p>
       </div>
+
+      {d?.cache && (
+        <div className="panel">
+          <div className="label">
+            Кэш результатов — реальный прогон на гибридной модели{" "}
+            {d.cache.planner_sees_runner &&
+              <span className="chip g" style={{ fontSize: 11 }}>planner ↔ runner: общий SQLite</span>}
+          </div>
+          <p style={{ marginTop: 0 }}>
+            {d.cache.backend}. Ключ: <span className="formula">{d.cache.key}</span>.
+            Планировщик и раннер пишут/читают один <span className="formula">SharedCache</span>:
+            результат, вычисленный раннером, планировщик видит как кэш.
+          </p>
+          <div className="tiles" style={{ marginBottom: 12 }}>
+            <div className="tile bad">
+              <div className="k">Холодный прогон</div>
+              <div className="v">{d.cache.cold.computed}/{d.cache.total}</div>
+              <div className="muted" style={{ fontSize: 11 }}>вычислено · кэш пуст</div>
+            </div>
+            <div className="tile good">
+              <div className="k">Тёплый прогон</div>
+              <div className="v">{d.cache.warm.cached}/{d.cache.total}</div>
+              <div className="muted" style={{ fontSize: 11 }}>из кэша · пересчёт {d.cache.warm.computed}</div>
+            </div>
+            <div className="tile">
+              <div className="k">Инвалидация {d.cache.invalidate.changed}</div>
+              <div className="v">{d.cache.invalidate.recompute.length}/{d.cache.total}</div>
+              <div className="muted" style={{ fontSize: 11 }}>пересчёт · из кэша {d.cache.invalidate.reused}</div>
+            </div>
+          </div>
+          <div className="kv">
+            <dt>Смена конфигурации {d.cache.invalidate.changed}</dt>
+            <dd>
+              пересчитываются только{" "}
+              {d.cache.invalidate.recompute.map((h) => <span key={h} className="tag">{h}</span>)}{" "}
+              (гипотеза и её замыкание вниз); остальные {d.cache.invalidate.reused} — из кэша.{" "}
+              {d.cache.invalidate.matches_descendants &&
+                <span className="chip g" style={{ fontSize: 11 }}>= потомки {d.cache.invalidate.changed} ✓</span>}
+            </dd>
+          </div>
+          <p className="muted" style={{ fontSize: 12 }}>{d.cache.note}</p>
+        </div>
+      )}
 
       <div className="panel">
         <div className="label">Демо 5 — минимальность плана (Теорема 1, интерактивно)</div>
@@ -149,6 +252,8 @@ export function Algorithms({ real }: { real: RealData; field?: string }) {
           </p>
         </div>
       )}
+
+      <Battery real={real} />
     </div>
   );
 }

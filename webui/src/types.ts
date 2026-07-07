@@ -78,16 +78,20 @@ export type OntoRel = { property: string; domain: string; range: string };
 export type RealData = {
   domain: string;
   ve: {
-    ontology: { name: string; classes: OntoClass[]; relations: OntoRel[]; total_classes: number };
+    ontology: { name: string; classes: OntoClass[]; relations: OntoRel[]; total_classes: number; domain_count?: number };
     models: Model[];
     configuration: { name: string; section: string; levels: (string | number | boolean)[] }[];
     config_space_size: number;
   };
   graph_conceptual: {
     nodes: { id: string; label: string; branch: string; status: string; metric?: string; desc?: string; competes?: string[];
-             equation: { formula: string; output: string; latex?: string; inputs?: string[] }; model: string; models: string[] }[];
+             domain_roles?: { marker: string; rule: string }[];
+             equation: { formula: string; output: string; latex?: string; inputs?: string[];
+                         output_domain?: string | null; input_domains?: Record<string, string> }; model: string; models: string[] }[];
     edges: string[][]; derivation: Deriv[]; note: string;
     tasks: Task[]; task_edges: string[][]; task_preds?: Record<string, string[]>;
+    competes_derivation?: { a: string; b: string; concept: string; reason: string }[];
+    competes_matches_ref?: boolean;
     formal_text?: string; is_dag: boolean; depth: number;
   };
   demos?: {
@@ -95,9 +99,29 @@ export type RealData = {
     alg3: { scenarios: { case: string; status: string; ok: boolean; detail: string }[]; owa_note: string };
     alg4_plan: Record<string, { changed: string; p_ne: string[]; recompute_frac: number }>;
     rule5: { acyclic: boolean; cyclic_witness: number[] };
+    c7?: {
+      grounded: { status: string; ok: boolean; detail: string };
+      ungrounded: { status: string; ok: boolean; hypothesis?: number; vars: string[] };
+      vocabulary_size: number; shacl: string; note: string;
+    };
+    cache?: {
+      cold: { computed: number; cached: number };
+      warm: { computed: number; cached: number };
+      invalidate: { changed: string; recompute: string[]; reused: number; matches_descendants: boolean };
+      planner_sees_runner: boolean; total: number; backend: string; key: string; note: string;
+    };
     complexity: Record<string, { points: { n: number; count: number; law: number | string }[]; law: string; note: string }>;
   };
-  architecture: { layers: string[]; components: ArchComponent[]; note: string };
+  architecture: { layers: string[]; components: ArchComponent[]; note: string;
+                  realizes?: { src: string; dst: string }[] };
+  battery?: {
+    rule4: { source: string; stale: string[]; match: boolean }[];
+    rule7: { run_uses: string; invalid: string; derived_stale: boolean; expected: boolean; verdict: string }[];
+    edges?: string[][];
+    summary: { rule4_classifications: number; rule4_mismatches: number;
+               rule7_tp: number; rule7_tn: number; rule7_errors: number;
+               trials: number; wall_seconds: number };
+  };
   scale: { note: string; speedup_10k: string;
     points: { hypotheses: number; ELK_s: number; HermiT_s: number; wells: string }[] };
   algorithm2_example: { add: string; label: string; note: string };
