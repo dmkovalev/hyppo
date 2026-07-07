@@ -12,25 +12,30 @@ function Seg({ field, setField }: { field: string; setField: (s: string) => void
 }
 
 export function GraphView({ real, field, setField }: { real: RealData; field: string; setField: (s: string) => void }) {
-  const status = real.fields[field]?.epistemic_status ?? {};
-  const nodes: GNode[] = real.ve.hypotheses.map((h) => ({ id: h.id, label: h.label, status: status[h.id] }));
-  const edges: GEdge[] = real.graph.derivation.map((d) => ({ src: d.src, dst: d.dst, via: d.via, reason: d.reason }));
+  const fr = real.fields[field];
+  const g = fr.graph;
+  const status = fr.epistemic_status ?? {};
+  const nodes: GNode[] = g.nodes.map((n) => ({ id: n.id, label: n.label, kind: n.kind, status: status[n.id] }));
+  const edges: GEdge[] = g.derivation.map((d) => ({ src: d.src, dst: d.dst, via: d.via, reason: d.reason }));
 
   return (
     <div>
       <div className="page-head">
-        <div className="kicker">Алгоритм 1 · причинное упорядочение</div>
-        <h1>Граф гипотез строится из уравнений</h1>
+        <div className="kicker">Алгоритм 1 · граф из реальной связности CRM</div>
+        <h1>Граф гипотез · {field}</h1>
         <p className="lead">
-          Рёбра <span className="formula">derived_by</span> выводятся алгоритмом 1: ребро
-          h→h′ добавляется, когда выходная переменная уравнения h входит в уравнение h′.
-          Нажмите «Построить граф», чтобы увидеть вывод по шагам.
+          Каждая скважина — гипотеза. Рёбра <span className="formula">derived_by</span> выведены
+          из матрицы связности CRM (pywaterflood): инжектор→продюсер, если коэффициент{" "}
+          <span className="formula">gain</span> выше 75-го перцентиля; продюсеры сходятся в слиянии OPR.
+          Нажмите «Построить граф» — рёбра проявятся по одному с пояснением.
         </p>
       </div>
 
       <div className="panel">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-          <div className="label" style={{ margin: 0 }}>Месторождение (влияет на статусы вершин)</div>
+          <div className="muted" style={{ fontSize: 13 }}>
+            {fr.producers} добывающих + {fr.injectors} нагнетательных · {g.nodes.length} гипотез · {g.edges.length} рёбер · R:M→H {g.r_map}
+          </div>
           <Seg field={field} setField={setField} />
         </div>
         <GraphBuild nodes={nodes} edges={edges} />

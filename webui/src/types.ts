@@ -53,31 +53,34 @@ export type Iteration = {
 export type CompareRow = { hypothesis: string; status: string; r2: number | null };
 
 // ————— реальные данные (/api/real) —————
-export type RealHyp = {
-  id: string; label: string; branch: string; description: string;
-  model: string | null; model_classes: string[]; hyperparam_axes: string[];
-  equation?: { formula: string; output: string }; variables?: string[];
+export type WellNode = { id: string; kind: "injector" | "producer" | "fusion"; label: string; task: string };
+export type Deriv = { src: string; dst: string; via: string; reason: string };
+export type WellGraph = {
+  nodes: WellNode[]; edges: string[][]; derivation: Deriv[]; r_map: string;
+  tasks: { id: string; label: string; hypotheses: string[] }[];
+  task_edges: string[][];
 };
+export type Plan = { changed: string[]; p_ne: string[]; p_e: string[]; recompute_frac: number };
 export type RealField = {
-  producers: number; injectors: number; months: number; train: number[];
+  producers: number; injectors: number; months: number; fit: string;
   r2: { CRM: number; Hybrid: number; WCT: number; OPR: number };
   bayes_factor: number; physics_verdict: string;
+  graph: WellGraph;
   epistemic_status: Record<string, string>;
+  algorithm4: Record<string, Plan>;
 };
+export type OntoClass = { name: string; parent: string | null };
+export type OntoRel = { property: string; domain: string; range: string };
 export type RealData = {
   domain: string;
   ve: {
-    ontology: { name: string; iri: string; classes: string[];
-                object_properties: { name: string }[]; data_properties: { name: string }[] };
-    hypotheses: RealHyp[];
-    mapping: { hypothesis: string; model: string | null; model_classes: string[] }[];
+    ontology: { name: string; classes: OntoClass[]; relations: OntoRel[]; total_classes: number };
+    models: { id: string; label: string; class: string }[];
     configuration: { name: string; section: string; levels: (string | number | boolean)[] }[];
     config_space_size: number;
   };
-  graph: { nodes: string[]; edges: string[][]; derivation: { src: string; dst: string; via: string; reason: string }[] };
-  algorithm2_example: { add: string; label: string; equation: string; output: string; new_edges: string[][]; note: string };
+  algorithm2_example: { add: string; label: string; note: string };
   algorithm3_conditions: { n: number; text: string; ok: boolean }[];
-  algorithm4: Record<string, { changed: string[]; p_ne: string[]; p_e: string[]; recompute_frac: number }>;
   fields: Record<string, RealField>;
   theorems: Record<string, string>;
 };

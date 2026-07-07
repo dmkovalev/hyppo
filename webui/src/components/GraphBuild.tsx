@@ -1,7 +1,9 @@
 import { useMemo, useRef, useState } from "react";
 
-export type GNode = { id: string; label: string; status?: string };
+export type GNode = { id: string; label: string; status?: string; kind?: string };
 export type GEdge = { src: string; dst: string; via?: string; reason?: string };
+
+const KIND_ICON: Record<string, string> = { injector: "▼ нагн.", producer: "▲ доб.", fusion: "◆ OPR" };
 
 const STATUS_STROKE: Record<string, string> = {
   SUPPORTED: "var(--st-supported)", CONFIRMED: "var(--st-confirmed)",
@@ -14,7 +16,7 @@ const STATUS_FILL: Record<string, string> = {
   PROPOSED: "var(--st-proposed-bg)",
 };
 
-const NW = 156, NH = 48, COLW = 230, ROWH = 108;
+const NW = 156, NH = 48, COLW = 230, ROWH = 74;
 
 export function GraphBuild({ nodes, edges }: { nodes: GNode[]; edges: GEdge[] }) {
   const [revealed, setRevealed] = useState(edges.length); // built by default
@@ -148,9 +150,12 @@ export function GraphBuild({ nodes, edges }: { nodes: GNode[]; edges: GEdge[] })
                  style={{ cursor: "pointer" }} onClick={() => cascade(n.id)}>
                 <rect x={p.x} y={p.y} width={NW} height={NH} rx={9}
                       fill={STATUS_FILL[st]} stroke={STATUS_STROKE[st]} strokeWidth={1.6} />
-                <text className="glabel" x={p.x + NW / 2} y={p.y + 20} textAnchor="middle">{n.id}</text>
-                <text className="gsub" x={p.x + NW / 2} y={p.y + 34} textAnchor="middle">
-                  {n.label.length > 26 ? n.label.slice(0, 25) + "…" : n.label}
+                <text className="gsub" x={p.x + 10} y={p.y + 14} textAnchor="start">
+                  {KIND_ICON[n.kind ?? ""] ?? ""}
+                </text>
+                <text className="glabel" x={p.x + NW / 2} y={p.y + 28} textAnchor="middle">{n.id}</text>
+                <text className="gsub" x={p.x + NW / 2} y={p.y + 41} textAnchor="middle">
+                  {n.label.length > 24 ? n.label.slice(0, 23) + "…" : n.label}
                 </text>
               </g>
             );
