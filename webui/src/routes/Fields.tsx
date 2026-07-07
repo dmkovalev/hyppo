@@ -13,6 +13,7 @@ function Seg({ field, setField }: { field: string; setField: (s: string) => void
 export function Fields({ real, field, setField }: { real: RealData; field: string; setField: (s: string) => void }) {
   const fr = real.fields[field];
   const refuted = fr.physics_verdict === "REFUTED";
+  const mlabel = Object.fromEntries(real.ve.models.map((m) => [m.id, m.label]));
   const tiles = [
     { k: "CRM (физика)", v: fr.r2.CRM, good: fr.r2.CRM > 0.5 },
     { k: "Hybrid", v: fr.r2.Hybrid, good: fr.r2.Hybrid > 0.5 },
@@ -66,9 +67,11 @@ export function Fields({ real, field, setField }: { real: RealData; field: strin
       </div>
 
       <div className="panel">
-        <div className="label">Эпистемический статус гипотез-скважин на {field}</div>
+        <div className="label">
+          Гипотезы-скважины · модели (R : M→H, ≥1 модель на гипотезу) · статус на {field}
+        </div>
         <table className="data">
-          <thead><tr><th>Гипотеза</th><th>Тип</th><th>Скважина</th><th>Статус</th></tr></thead>
+          <thead><tr><th>Гипотеза</th><th>Тип</th><th>Скважина</th><th>Модели (R)</th><th>Статус</th></tr></thead>
           <tbody>
             {fr.graph.nodes.map((n) => {
               const s = fr.epistemic_status[n.id];
@@ -79,12 +82,20 @@ export function Fields({ real, field, setField }: { real: RealData; field: strin
                   <td className="num">{n.id}</td>
                   <td className="muted">{kind}</td>
                   <td>{n.label}</td>
+                  <td>
+                    {n.models.map((m) => <span key={m} className="tag">{mlabel[m] ?? m}</span>)}
+                    <span className="muted" style={{ fontSize: 11 }}> · {n.models.length}</span>
+                  </td>
                   <td><span className={"chip " + cls}>{s}</span></td>
                 </tr>
               );
             })}
           </tbody>
         </table>
+        <p className="muted" style={{ fontSize: 12 }}>
+          Свойство <span className="formula">is_implemented_by_model</span> имеет тип «some» (≥1): у добывающей
+          скважины несколько конкурирующих моделей (CRMP, CRMT, Transformer+GNN, Fusion), у слияния — две.
+        </p>
       </div>
     </div>
   );

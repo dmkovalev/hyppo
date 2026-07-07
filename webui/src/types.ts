@@ -53,7 +53,7 @@ export type Iteration = {
 export type CompareRow = { hypothesis: string; status: string; r2: number | null };
 
 // ————— реальные данные (/api/real) —————
-export type WellNode = { id: string; kind: "injector" | "producer" | "fusion"; label: string; task: string };
+export type WellNode = { id: string; kind: "injector" | "producer" | "fusion"; label: string; task: string; models: string[] };
 export type Deriv = { src: string; dst: string; via: string; reason: string };
 export type WellGraph = {
   nodes: WellNode[]; edges: string[][]; derivation: Deriv[]; r_map: string;
@@ -79,6 +79,8 @@ export type RealData = {
     configuration: { name: string; section: string; levels: (string | number | boolean)[] }[];
     config_space_size: number;
   };
+  scale: { note: string; speedup_10k: string;
+    points: { hypotheses: number; ELK_s: number; HermiT_s: number; wells: string }[] };
   algorithm2_example: { add: string; label: string; note: string };
   algorithm3_conditions: { n: number; text: string; ok: boolean }[];
   fields: Record<string, RealField>;

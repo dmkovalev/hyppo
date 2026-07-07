@@ -72,6 +72,28 @@ export function Algorithms({ real, field }: { real: RealData; field: string }) {
         </div>
         <p className="muted" style={{ fontSize: 12 }}>Интерактивный каскад по клику на вершину — в разделе «Граф гипотез».</p>
       </div>
+
+      <div className="panel">
+        <div className="label">Масштабируемость — алгоритм 1 и онтологический вывод до 10 000 гипотез</div>
+        <p style={{ marginTop: 0 }}>{real.scale.note}</p>
+        <table className="data">
+          <thead><tr><th>Гипотез</th><th>Масштаб</th><th>ELK (OWL 2 EL), с</th><th>HermiT (OWL 2 DL), с</th></tr></thead>
+          <tbody>
+            {real.scale.points.map((p) => (
+              <tr key={p.hypotheses}>
+                <td className="num">{p.hypotheses.toLocaleString("ru")}</td>
+                <td className="muted">{p.wells}</td>
+                <td className="num">{p.ELK_s.toFixed(2)}</td>
+                <td className="num">{p.HermiT_s.toFixed(2)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p className="muted" style={{ fontSize: 12 }}>
+          На <b>10 166</b> гипотез профиль OWL 2 EL (ELK) быстрее HermiT в <b>{real.scale.speedup_10k}</b> —
+          полиномиальная сложность вместо 2-EXPTIME. Граф на любом масштабе строится алгоритмом 1 из уравнений.
+        </p>
+      </div>
     </div>
   );
 }

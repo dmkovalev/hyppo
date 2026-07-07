@@ -185,15 +185,39 @@ def fw_curve(no, nw, Swc=0.25, Sor=0.20):
     return Sw, f
 
 
+# Model catalog. is_implemented_by_model is a "some" property (≥1 model per
+# hypothesis, possibly several competing models) — not functional.
+MODEL_CATALOG = [
+    {"id": "m_inj", "label": "Инжекционный профиль", "class": "PhysicsModel"},
+    {"id": "m_crmp", "label": "CRMP (up-to-one)", "class": "PhysicsModel"},
+    {"id": "m_crmt", "label": "CRMT (positive)", "class": "PhysicsModel"},
+    {"id": "m_nn", "label": "Transformer+GNN", "class": "DataDrivenModel"},
+    {"id": "m_hyb", "label": "Fusion gate", "class": "HybridModel"},
+    {"id": "m_bl", "label": "Buckley–Leverett", "class": "PhysicsModel"},
+]
+
+
+def models_for(kind):
+    """Each hypothesis has ≥1 model; producers carry several competing models."""
+    if kind == "injector":
+        return ["m_inj"]
+    if kind == "producer":
+        return ["m_crmp", "m_crmt", "m_nn", "m_hyb"]   # 4 competing implementations
+    return ["m_hyb", "m_bl"]                            # fusion: 2 models
+
+
 def build_wellgraph(gains, pn, in_):
     """Real hypothesis graph from CRM connectivity — exactly as full_experiment.py:
     5 producer-hypotheses + all injector-hypotheses + 1 fusion; edge injector→producer
     where gain exceeds the 75th percentile; fusion derived_by the first 3 producers."""
     nP = min(5, len(pn)); nI = len(in_)
     thr = float(np.percentile(gains, 75))
-    nodes = ([{"id": f"P{j}", "kind": "producer", "label": pn[j], "task": "T2"} for j in range(nP)]
-             + [{"id": f"I{b}", "kind": "injector", "label": in_[b], "task": "T1"} for b in range(nI)]
-             + [{"id": "FC", "kind": "fusion", "label": "Fusion → OPR", "task": "T3"}])
+    nodes = ([{"id": f"P{j}", "kind": "producer", "label": pn[j], "task": "T2",
+               "models": models_for("producer")} for j in range(nP)]
+             + [{"id": f"I{b}", "kind": "injector", "label": in_[b], "task": "T1",
+                 "models": models_for("injector")} for b in range(nI)]
+             + [{"id": "FC", "kind": "fusion", "label": "Fusion → OPR", "task": "T3",
+                 "models": models_for("fusion")}])
     edges, deriv = [], []
     for j in range(nP):
         for b in range(nI):
@@ -337,13 +361,28 @@ def main():
             "change_producer": plan_cascade(nodes_f, g["edges"], [prod[0]] if prod else []),
         }
 
+    # scalability: per-pair/per-well graph N = NI*NP + 7*NP + 1, built by
+    # Algorithm 1 (COA) from equations; real HermiT vs ELK reasoning times
+    # (thesis/papers/brugge_run/plot_elk_hermit.py).
+    scale = {
+        "note": "Один и тот же граф гипотез строится алгоритмом 1 из уравнений при любом "
+                "масштабе; онтологический вывод в профиле OWL 2 EL (ELK) полиномиален.",
+        "points": [
+            {"hypotheses": 341, "ELK_s": 1.47, "HermiT_s": 1.55, "wells": "10 нагн. × 20 доб."},
+            {"hypotheses": 1051, "ELK_s": 2.00, "HermiT_s": 2.41, "wells": "средний масштаб"},
+            {"hypotheses": 10166, "ELK_s": 4.40, "HermiT_s": 41.45, "wells": "≈10 тыс. гипотез"},
+        ],
+        "speedup_10k": "9.4×",
+    }
+
     data = {
         "domain": "HybridCRM — прогноз нефтедобычи при заводнении (Norne / Brugge)",
         "ve": {
             "ontology": extract_ontology(),
-            "models": MODELS,
+            "models": MODEL_CATALOG,
             "configuration": axes, "config_space_size": size,
         },
+        "scale": scale,
         "algorithm2_example": {
             "add": "H_ГРП", "label": "ГТМ: гидроразрыв пласта → продуктивность продюсера",
             "note": "Инкрементальное добавление O(|H|) вместо полной перестройки O(|H|²).",

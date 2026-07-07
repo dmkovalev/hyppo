@@ -152,19 +152,34 @@
     },
     "models": [
       {
-        "id": "m_phys",
-        "label": "CRM / Buckley–Leverett (pywaterflood)",
+        "id": "m_inj",
+        "label": "Инжекционный профиль",
         "class": "PhysicsModel"
       },
       {
-        "id": "m_ml",
-        "label": "Transformer+GNN+MLP",
+        "id": "m_crmp",
+        "label": "CRMP (up-to-one)",
+        "class": "PhysicsModel"
+      },
+      {
+        "id": "m_crmt",
+        "label": "CRMT (positive)",
+        "class": "PhysicsModel"
+      },
+      {
+        "id": "m_nn",
+        "label": "Transformer+GNN",
         "class": "DataDrivenModel"
       },
       {
         "id": "m_hyb",
-        "label": "Fusion (гибрид физика+ML)",
+        "label": "Fusion gate",
         "class": "HybridModel"
+      },
+      {
+        "id": "m_bl",
+        "label": "Buckley–Leverett",
+        "class": "PhysicsModel"
       }
     ],
     "configuration": [
@@ -319,6 +334,30 @@
     ],
     "config_space_size": 13436928
   },
+  "scale": {
+    "note": "Один и тот же граф гипотез строится алгоритмом 1 из уравнений при любом масштабе; онтологический вывод в профиле OWL 2 EL (ELK) полиномиален.",
+    "points": [
+      {
+        "hypotheses": 341,
+        "ELK_s": 1.47,
+        "HermiT_s": 1.55,
+        "wells": "10 нагн. × 20 доб."
+      },
+      {
+        "hypotheses": 1051,
+        "ELK_s": 2.0,
+        "HermiT_s": 2.41,
+        "wells": "средний масштаб"
+      },
+      {
+        "hypotheses": 10166,
+        "ELK_s": 4.4,
+        "HermiT_s": 41.45,
+        "wells": "≈10 тыс. гипотез"
+      }
+    ],
+    "speedup_10k": "9.4×"
+  },
   "algorithm2_example": {
     "add": "H_ГРП",
     "label": "ГТМ: гидроразрыв пласта → продуктивность продюсера",
@@ -371,97 +410,161 @@
             "id": "P0",
             "kind": "producer",
             "label": "BR-P-1",
-            "task": "T2"
+            "task": "T2",
+            "models": [
+              "m_crmp",
+              "m_crmt",
+              "m_nn",
+              "m_hyb"
+            ]
           },
           {
             "id": "P1",
             "kind": "producer",
             "label": "BR-P-2",
-            "task": "T2"
+            "task": "T2",
+            "models": [
+              "m_crmp",
+              "m_crmt",
+              "m_nn",
+              "m_hyb"
+            ]
           },
           {
             "id": "P2",
             "kind": "producer",
             "label": "BR-P-3",
-            "task": "T2"
+            "task": "T2",
+            "models": [
+              "m_crmp",
+              "m_crmt",
+              "m_nn",
+              "m_hyb"
+            ]
           },
           {
             "id": "P3",
             "kind": "producer",
             "label": "BR-P-4",
-            "task": "T2"
+            "task": "T2",
+            "models": [
+              "m_crmp",
+              "m_crmt",
+              "m_nn",
+              "m_hyb"
+            ]
           },
           {
             "id": "P4",
             "kind": "producer",
             "label": "BR-P-5",
-            "task": "T2"
+            "task": "T2",
+            "models": [
+              "m_crmp",
+              "m_crmt",
+              "m_nn",
+              "m_hyb"
+            ]
           },
           {
             "id": "I0",
             "kind": "injector",
             "label": "BR-I-1",
-            "task": "T1"
+            "task": "T1",
+            "models": [
+              "m_inj"
+            ]
           },
           {
             "id": "I1",
             "kind": "injector",
             "label": "BR-I-2",
-            "task": "T1"
+            "task": "T1",
+            "models": [
+              "m_inj"
+            ]
           },
           {
             "id": "I2",
             "kind": "injector",
             "label": "BR-I-3",
-            "task": "T1"
+            "task": "T1",
+            "models": [
+              "m_inj"
+            ]
           },
           {
             "id": "I3",
             "kind": "injector",
             "label": "BR-I-4",
-            "task": "T1"
+            "task": "T1",
+            "models": [
+              "m_inj"
+            ]
           },
           {
             "id": "I4",
             "kind": "injector",
             "label": "BR-I-5",
-            "task": "T1"
+            "task": "T1",
+            "models": [
+              "m_inj"
+            ]
           },
           {
             "id": "I5",
             "kind": "injector",
             "label": "BR-I-6",
-            "task": "T1"
+            "task": "T1",
+            "models": [
+              "m_inj"
+            ]
           },
           {
             "id": "I6",
             "kind": "injector",
             "label": "BR-I-7",
-            "task": "T1"
+            "task": "T1",
+            "models": [
+              "m_inj"
+            ]
           },
           {
             "id": "I7",
             "kind": "injector",
             "label": "BR-I-8",
-            "task": "T1"
+            "task": "T1",
+            "models": [
+              "m_inj"
+            ]
           },
           {
             "id": "I8",
             "kind": "injector",
             "label": "BR-I-9",
-            "task": "T1"
+            "task": "T1",
+            "models": [
+              "m_inj"
+            ]
           },
           {
             "id": "I9",
             "kind": "injector",
             "label": "BR-I-10",
-            "task": "T1"
+            "task": "T1",
+            "models": [
+              "m_inj"
+            ]
           },
           {
             "id": "FC",
             "kind": "fusion",
             "label": "Fusion → OPR",
-            "task": "T3"
+            "task": "T3",
+            "models": [
+              "m_hyb",
+              "m_bl"
+            ]
           }
         ],
         "edges": [
@@ -698,91 +801,152 @@
             "id": "P0",
             "kind": "producer",
             "label": "B-1AH",
-            "task": "T2"
+            "task": "T2",
+            "models": [
+              "m_crmp",
+              "m_crmt",
+              "m_nn",
+              "m_hyb"
+            ]
           },
           {
             "id": "P1",
             "kind": "producer",
             "label": "B-1BH",
-            "task": "T2"
+            "task": "T2",
+            "models": [
+              "m_crmp",
+              "m_crmt",
+              "m_nn",
+              "m_hyb"
+            ]
           },
           {
             "id": "P2",
             "kind": "producer",
             "label": "B-1H",
-            "task": "T2"
+            "task": "T2",
+            "models": [
+              "m_crmp",
+              "m_crmt",
+              "m_nn",
+              "m_hyb"
+            ]
           },
           {
             "id": "P3",
             "kind": "producer",
             "label": "B-2H",
-            "task": "T2"
+            "task": "T2",
+            "models": [
+              "m_crmp",
+              "m_crmt",
+              "m_nn",
+              "m_hyb"
+            ]
           },
           {
             "id": "P4",
             "kind": "producer",
             "label": "B-3H",
-            "task": "T2"
+            "task": "T2",
+            "models": [
+              "m_crmp",
+              "m_crmt",
+              "m_nn",
+              "m_hyb"
+            ]
           },
           {
             "id": "I0",
             "kind": "injector",
             "label": "C-1H",
-            "task": "T1"
+            "task": "T1",
+            "models": [
+              "m_inj"
+            ]
           },
           {
             "id": "I1",
             "kind": "injector",
             "label": "C-2H",
-            "task": "T1"
+            "task": "T1",
+            "models": [
+              "m_inj"
+            ]
           },
           {
             "id": "I2",
             "kind": "injector",
             "label": "C-3H",
-            "task": "T1"
+            "task": "T1",
+            "models": [
+              "m_inj"
+            ]
           },
           {
             "id": "I3",
             "kind": "injector",
             "label": "C-4AH",
-            "task": "T1"
+            "task": "T1",
+            "models": [
+              "m_inj"
+            ]
           },
           {
             "id": "I4",
             "kind": "injector",
             "label": "C-4H",
-            "task": "T1"
+            "task": "T1",
+            "models": [
+              "m_inj"
+            ]
           },
           {
             "id": "I5",
             "kind": "injector",
             "label": "F-1H",
-            "task": "T1"
+            "task": "T1",
+            "models": [
+              "m_inj"
+            ]
           },
           {
             "id": "I6",
             "kind": "injector",
             "label": "F-2H",
-            "task": "T1"
+            "task": "T1",
+            "models": [
+              "m_inj"
+            ]
           },
           {
             "id": "I7",
             "kind": "injector",
             "label": "F-3H",
-            "task": "T1"
+            "task": "T1",
+            "models": [
+              "m_inj"
+            ]
           },
           {
             "id": "I8",
             "kind": "injector",
             "label": "F-4H",
-            "task": "T1"
+            "task": "T1",
+            "models": [
+              "m_inj"
+            ]
           },
           {
             "id": "FC",
             "kind": "fusion",
             "label": "Fusion → OPR",
-            "task": "T3"
+            "task": "T3",
+            "models": [
+              "m_hyb",
+              "m_bl"
+            ]
           }
         ],
         "edges": [
