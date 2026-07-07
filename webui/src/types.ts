@@ -84,7 +84,7 @@ export type RealData = {
   };
   graph_conceptual: {
     nodes: { id: string; label: string; branch: string; status: string; metric?: string;
-             equation: { formula: string; output: string }; model: string; models: string[] }[];
+             equation: { formula: string; output: string; latex?: string }; model: string; models: string[] }[];
     edges: string[][]; derivation: Deriv[]; note: string;
     tasks: Task[]; task_edges: string[][]; task_preds?: Record<string, string[]>;
     formal_text?: string; is_dag: boolean; depth: number;

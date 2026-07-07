@@ -931,7 +931,8 @@
         "branch": "жидкость",
         "equation": {
           "formula": "I_agg = w_ij * I_j",
-          "output": "I_agg"
+          "output": "I_agg",
+          "latex": "I_{\\mathrm{agg}} = \\sum_j w_{ij}\\, I_j"
         },
         "models": [
           "m_H1_crmp",
@@ -947,7 +948,8 @@
         "branch": "жидкость",
         "equation": {
           "formula": "q_f = a_f*q_f_prev + b_f*I_agg",
-          "output": "q_f"
+          "output": "q_f",
+          "latex": "q_f = \\alpha_f\\, q_f^{-} + \\beta_f\\, I_{\\mathrm{agg}}"
         },
         "models": [
           "m_H2_crmp",
@@ -963,7 +965,8 @@
         "branch": "жидкость",
         "equation": {
           "formula": "q_s = a_s*q_s_prev + b_s*I_agg",
-          "output": "q_s"
+          "output": "q_s",
+          "latex": "q_s = \\alpha_s\\, q_s^{-} + \\beta_s\\, I_{\\mathrm{agg}}"
         },
         "models": [
           "m_H3_crmp",
@@ -979,7 +982,8 @@
         "branch": "жидкость",
         "equation": {
           "formula": "q_c = w_f*q_f + (1-w_f)*q_s",
-          "output": "q_c"
+          "output": "q_c",
+          "latex": "q_c = w_f\\, q_f + (1 - w_f)\\, q_s"
         },
         "models": [
           "m_H4_crmp",
@@ -995,7 +999,8 @@
         "branch": "жидкость",
         "equation": {
           "formula": "q_liq_phys = J*q_c + q_prim",
-          "output": "q_liq_phys"
+          "output": "q_liq_phys",
+          "latex": "q_{\\mathrm{liq}} = J\\, q_c + q_{\\mathrm{prim}}"
         },
         "models": [
           "m_H5_crmp",
@@ -1011,7 +1016,8 @@
         "branch": "жидкость",
         "equation": {
           "formula": "q_prim = q_prev*exp(-dt*taup)",
-          "output": "q_prim"
+          "output": "q_prim",
+          "latex": "q_{\\mathrm{prim}} = q^{-}\\, e^{-\\Delta t\\, \\tau_p}"
         },
         "models": [
           "m_H6_crmp",
@@ -1027,7 +1033,8 @@
         "branch": "жидкость",
         "equation": {
           "formula": "l_ml = MLP(x_hist)",
-          "output": "l_ml"
+          "output": "l_ml",
+          "latex": "\\ell_m = \\mathrm{MLP}(\\mathbf{x}_{\\mathrm{hist}})"
         },
         "models": [
           "m_H7_gnn",
@@ -1043,7 +1050,8 @@
         "branch": "жидкость",
         "equation": {
           "formula": "l = g*q_liq_phys + (1-g)*l_ml",
-          "output": "l"
+          "output": "l",
+          "latex": "\\ell = g\\, q_{\\mathrm{liq}} + (1 - g)\\, \\ell_m"
         },
         "models": [
           "m_H8_gate"
@@ -1058,7 +1066,8 @@
         "branch": "обводнённость",
         "equation": {
           "formula": "Sw = Sw_prev + (Winj - Wlout)*dt/Vp",
-          "output": "Sw"
+          "output": "Sw",
+          "latex": "S_w = S_w^{-} + \\dfrac{(W_{\\mathrm{inj}} - W_{\\mathrm{out}})\\, \\Delta t}{V_p}"
         },
         "models": [
           "m_H9_bl",
@@ -1074,7 +1083,8 @@
         "branch": "обводнённость",
         "equation": {
           "formula": "krw = ((Sw-Swc)/(1-Swc-Sor))**nw",
-          "output": "krw"
+          "output": "krw",
+          "latex": "k_{rw} = \\left(\\dfrac{S_w - S_{wc}}{1 - S_{wc} - S_{or}}\\right)^{n_w}"
         },
         "models": [
           "m_H10_bl",
@@ -1090,7 +1100,8 @@
         "branch": "обводнённость",
         "equation": {
           "formula": "kro = ((1-Sw-Sor)/(1-Swc-Sor))**no",
-          "output": "kro"
+          "output": "kro",
+          "latex": "k_{ro} = \\left(\\dfrac{1 - S_w - S_{or}}{1 - S_{wc} - S_{or}}\\right)^{n_o}"
         },
         "models": [
           "m_H11_bl",
@@ -1106,7 +1117,8 @@
         "branch": "обводнённость",
         "equation": {
           "formula": "fw = 1/(1 + kro*muw/(krw*muo))",
-          "output": "fw"
+          "output": "fw",
+          "latex": "f_w = \\dfrac{1}{1 + k_{ro}\\, \\mu_w / (k_{rw}\\, \\mu_o)}"
         },
         "models": [
           "m_H12_bl",
@@ -1122,7 +1134,8 @@
         "branch": "обводнённость",
         "equation": {
           "formula": "o_p = 1 - fw",
-          "output": "o_p"
+          "output": "o_p",
+          "latex": "o_p = 1 - f_w"
         },
         "models": [
           "m_H13_bl",
@@ -1138,7 +1151,8 @@
         "branch": "обводнённость",
         "equation": {
           "formula": "o = gw*o_p + (1-gw)*o_m",
-          "output": "o"
+          "output": "o",
+          "latex": "o = g_w\\, o_p + (1 - g_w)\\, o_m"
         },
         "models": [
           "m_H14_gate"
@@ -1153,7 +1167,8 @@
         "branch": "ГТМ",
         "equation": {
           "formula": "J = J0 + dJ_grp",
-          "output": "J"
+          "output": "J",
+          "latex": "J = J_0 + \\Delta J_{\\mathrm{ГРП}}"
         },
         "models": [
           "m_H15_frac",
@@ -1169,7 +1184,8 @@
         "branch": "нефть",
         "equation": {
           "formula": "q_oil = l * o",
-          "output": "q_oil"
+          "output": "q_oil",
+          "latex": "\\hat{q}_{\\mathrm{oil}} = \\ell \\cdot o"
         },
         "models": [
           "m_H16_gate"
@@ -2066,17 +2082,17 @@
           {
             "n": 200,
             "count": 397,
-            "law": "V+E"
+            "law": 399
           },
           {
             "n": 400,
             "count": 797,
-            "law": "V+E"
+            "law": 799
           },
           {
             "n": 800,
             "count": 1597,
-            "law": "V+E"
+            "law": 1599
           }
         ],
         "law": "O(|V|+|E|)",

@@ -87,6 +87,7 @@ body {
 .panel + .panel, .row + .row { margin-top: 18px; }
 .row { display: grid; gap: 18px; }
 .row.c2 { grid-template-columns: 1fr 1fr; }
+.row.c3 { grid-template-columns: repeat(3, 1fr); }
 .row.split { grid-template-columns: 320px 1fr; }
 .label { font-family: var(--mono); font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
   color: var(--faint); margin-bottom: 12px; }

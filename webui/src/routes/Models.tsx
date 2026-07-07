@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { RealData } from "../types";
+import { Katex } from "../components/Katex";
 
 export function Models({ real }: { real: RealData }) {
   const models = real.ve.models;
@@ -44,9 +45,9 @@ export function Models({ real }: { real: RealData }) {
                 <dt>Реализует гипотезы (R⁻¹)</dt>
                 <dd>
                   {implH.map((h) => (
-                    <div key={h.id} style={{ marginBottom: 6 }}>
+                    <div key={h.id} style={{ marginBottom: 8 }}>
                       <span className="num" style={{ color: "var(--accent)" }}>{h.id}</span> {h.label}
-                      <div className="formula" style={{ fontSize: 12 }}>{h.equation.formula}</div>
+                      <div style={{ marginTop: 4 }}><Katex tex={h.equation.latex ?? h.equation.formula} /></div>
                     </div>
                   ))}
                 </dd>
@@ -64,7 +65,7 @@ export function Models({ real }: { real: RealData }) {
             {nodes.map((n) => (
               <tr key={n.id}>
                 <td className="num">{n.id}<div className="muted" style={{ fontSize: 11 }}>{n.label}</div></td>
-                <td className="formula" style={{ fontSize: 12 }}>{n.equation.formula}</td>
+                <td><Katex tex={n.equation.latex ?? n.equation.formula} /></td>
                 <td>{n.models.map((mid) => (
                   <span key={mid} className="tag" style={{ cursor: "pointer" }} onClick={() => setSel(mid)}>
                     {mById[mid]?.label ?? mid}

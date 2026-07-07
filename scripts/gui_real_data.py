@@ -392,6 +392,26 @@ _CONCEPT_TASKS = [
     ("T11", "Прогноз нефти", ["H19"]),
     ("T12", "ГТМ-модуляция", ["GRP"]),
 ]
+# красивые LaTeX-формулы (по §4.4 диссертации), ключ — историческое имя
+_CONCEPT_LATEX = {
+    "H1": r"I_{\mathrm{agg}} = \sum_j w_{ij}\, I_j",
+    "H2": r"q_f = \alpha_f\, q_f^{-} + \beta_f\, I_{\mathrm{agg}}",
+    "H3": r"q_s = \alpha_s\, q_s^{-} + \beta_s\, I_{\mathrm{agg}}",
+    "H4": r"q_c = w_f\, q_f + (1 - w_f)\, q_s",
+    "H5": r"q_{\mathrm{liq}} = J\, q_c + q_{\mathrm{prim}}",
+    "H6": r"q_{\mathrm{prim}} = q^{-}\, e^{-\Delta t\, \tau_p}",
+    "H7": r"\ell_m = \mathrm{MLP}(\mathbf{x}_{\mathrm{hist}})",
+    "H8": r"\ell = g\, q_{\mathrm{liq}} + (1 - g)\, \ell_m",
+    "H11": r"S_w = S_w^{-} + \dfrac{(W_{\mathrm{inj}} - W_{\mathrm{out}})\, \Delta t}{V_p}",
+    "H12": r"k_{rw} = \left(\dfrac{S_w - S_{wc}}{1 - S_{wc} - S_{or}}\right)^{n_w}",
+    "H12b": r"k_{ro} = \left(\dfrac{1 - S_w - S_{or}}{1 - S_{wc} - S_{or}}\right)^{n_o}",
+    "H13": r"f_w = \dfrac{1}{1 + k_{ro}\, \mu_w / (k_{rw}\, \mu_o)}",
+    "H14": r"o_p = 1 - f_w",
+    "H15": r"o = g_w\, o_p + (1 - g_w)\, o_m",
+    "GRP": r"J = J_0 + \Delta J_{\mathrm{ГРП}}",
+    "H19": r"\hat{q}_{\mathrm{oil}} = \ell \cdot o",
+}
+
 # old name -> continuous article numbering
 _RENUM = {"H1": "H1", "H2": "H2", "H3": "H3", "H4": "H4", "H5": "H5", "H6": "H6",
           "H7": "H7", "H8": "H8", "H11": "H9", "H12": "H10", "H12b": "H11",
@@ -473,7 +493,7 @@ def build_conceptual_lattice():
         for m in ms:
             catalog[m["id"]] = m
         nodes.append({"id": cid, "label": lab, "branch": br,
-                      "equation": {"formula": f, "output": o},
+                      "equation": {"formula": f, "output": o, "latex": _CONCEPT_LATEX.get(n, f)},
                       "models": [m["id"] for m in ms], "model": ms[0]["id"],
                       "metric": _CBRANCH_METRIC.get(br, "CRM"), "status": "SUPPORTED"})
     edges = [[R[a], R[b]] for a, b in edges_old]
@@ -633,7 +653,7 @@ def build_algorithm_demos():
         g._adj = {k: CountingSet(g._adj.get(k, ())) for k in range(n)}
         CountingSet.counter = 0
         g.plan(cached=set(range(0, n, 2)))
-        a4c.append({"n": n, "count": CountingSet.counter, "law": "V+E"})
+        a4c.append({"n": n, "count": CountingSet.counter, "law": 2 * n - 1})
     complexity = {
         "alg1": {"points": a1, "law": "O(|H|²·s·v)", "note": "проверок полноты = n(n−1)/2; ×4 при ×2"},
         "alg2": {"points": a2c, "law": "O(|H|·s·v)", "note": "объединений = n; ×2 при ×2"},

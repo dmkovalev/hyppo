@@ -1,4 +1,6 @@
 import type { RealData } from "../types";
+import { PlanDemo } from "../components/PlanDemo";
+import { ComplexityBars } from "../components/ComplexityBars";
 
 export function Algorithms({ real }: { real: RealData; field?: string }) {
   const c = real.graph_conceptual;
@@ -95,6 +97,15 @@ export function Algorithms({ real }: { real: RealData; field?: string }) {
       </div>
 
       <div className="panel">
+        <div className="label">Демо 5 — минимальность плана (Теорема 1, интерактивно)</div>
+        <p style={{ marginTop: 0 }}>
+          Отметьте кэшированные гипотезы — GUI покажет минимальный план пересчёта <span className="formula">P_ne</span>.
+          Или предложите свой план P — проверим корректность (полнота + каскадность) и что P_ne ⊆ P.
+        </p>
+        <PlanDemo real={real} />
+      </div>
+
+      <div className="panel">
         <div className="label">Масштабируемость — алгоритм 1 и онтологический вывод до 10 000 гипотез</div>
         <p style={{ marginTop: 0 }}>{real.scale.note}</p>
         <table className="data">
@@ -118,20 +129,12 @@ export function Algorithms({ real }: { real: RealData; field?: string }) {
 
       {d && (
         <div className="panel">
-          <div className="label">Сложности — операционными счётчиками (детерминированно, не по времени)</div>
-          <table className="data">
-            <thead><tr><th>Алгоритм</th><th>Закон</th><th>Счётчик по n</th><th>Рост</th></tr></thead>
-            <tbody>
-              {Object.entries(d.complexity).map(([k, v]) => (
-                <tr key={k}>
-                  <td className="num">{k}</td>
-                  <td className="formula">{v.law}</td>
-                  <td>{v.points.map((p) => <span key={p.n} className="tag">n={p.n}: {p.count}</span>)}</td>
-                  <td className="muted" style={{ fontSize: 12 }}>{v.note}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="label">Сложности — операционными счётчиками (янтарь = счётчик, серый = теоретический закон)</div>
+          <ComplexityBars real={real} />
+          <p className="muted" style={{ fontSize: 12, marginTop: 10 }}>
+            Детерминированно, не по времени: алг. 1 — n(n−1)/2 проверок полноты (×4 при ×2), алг. 2 — n
+            объединений (×2), алг. 4 — ~V+E обходов (×2). Счётчик совпадает с законом.
+          </p>
         </div>
       )}
 
