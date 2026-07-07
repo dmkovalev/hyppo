@@ -33,10 +33,23 @@ export function Models({ real }: { real: RealData }) {
           ))}
         </div>
         <div className="detail">
-          {m && (
+          {m && (() => {
+            const h0 = implH[0];
+            return (
             <>
               <h3>{m.label}</h3>
               <div className="sub"><span className="chip">{m.class}</span></div>
+              {m.desc && <p style={{ marginTop: 0, fontSize: 14 }}>{m.desc}</p>}
+              {h0 && (
+                <div className="tile" style={{ marginBottom: 14, background: "var(--panel-2)" }}>
+                  <div className="k">Вход → Выход</div>
+                  <div style={{ marginTop: 6 }}>
+                    {(h0.equation.inputs ?? []).map((v) => <span key={v} className="tag">{v}</span>)}
+                    <span className="formula"> → </span>
+                    <span className="tag" style={{ borderColor: "var(--accent)", color: "var(--accent)" }}>{h0.equation.output}</span>
+                  </div>
+                </div>
+              )}
               <dl className="kv">
                 <dt>Реализация (Python)</dt><dd className="formula" style={{ fontSize: 12 }}>{m.python_ref}</dd>
                 <dt>Конфигурация</dt><dd className="muted">{m.config}</dd>
@@ -53,7 +66,8 @@ export function Models({ real }: { real: RealData }) {
                 </dd>
               </dl>
             </>
-          )}
+            );
+          })()}
         </div>
       </div>
 

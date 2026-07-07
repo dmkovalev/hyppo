@@ -18,7 +18,8 @@ const STATUS_FILL: Record<string, string> = {
 
 const NW = 156, NH = 48, COLW = 230, ROWH = 74;
 
-export function GraphBuild({ nodes, edges }: { nodes: GNode[]; edges: GEdge[] }) {
+export function GraphBuild({ nodes, edges, onNodeClick, statusOverride }:
+  { nodes: GNode[]; edges: GEdge[]; onNodeClick?: (id: string) => void; statusOverride?: Record<string, string> }) {
   const [revealed, setRevealed] = useState(edges.length); // built by default
   const [annot, setAnnot] = useState("");
   const [invalid, setInvalid] = useState<{ nodes: Set<string>; edges: Set<string> }>(
@@ -154,10 +155,10 @@ export function GraphBuild({ nodes, edges }: { nodes: GNode[]; edges: GEdge[] })
           {nodes.map((n) => {
             const p = pos[n.id];
             const inv = invalid.nodes.has(n.id);
-            const st = inv ? "REFUTED" : (n.status ?? "PROPOSED");
+            const st = statusOverride?.[n.id] ?? (inv ? "REFUTED" : (n.status ?? "PROPOSED"));
             return (
               <g key={n.id} className={"gnode" + (inv ? " wave" : "")}
-                 style={{ cursor: "pointer" }} onClick={() => cascade(n.id)}>
+                 style={{ cursor: "pointer" }} onClick={() => onNodeClick ? onNodeClick(n.id) : cascade(n.id)}>
                 <rect x={p.x} y={p.y} width={NW} height={NH} rx={9}
                       fill={STATUS_FILL[st]} stroke={STATUS_STROKE[st]} strokeWidth={1.6} />
                 <text className="gsub" x={p.x + 10} y={p.y + 14} textAnchor="start">

@@ -1,4 +1,5 @@
 import type { RealData } from "../types";
+import { LifecycleCycle } from "../components/LifecycleCycle";
 
 export function Experiment({ real, field, onNavigate }:
   { real: RealData; field: string; onNavigate: (tab: string) => void }) {
@@ -23,6 +24,10 @@ export function Experiment({ real, field, onNavigate }:
           Кортеж <span className="formula">⟨O, H, M, R, W, 𝒞⟩</span> из настоящей библиотеки.
           Кликните любой элемент — откроется его вкладка со всем содержимым.
         </p>
+      </div>
+
+      <div className="panel">
+        <LifecycleCycle real={real} />
       </div>
 
       <div className="panel">

@@ -60,7 +60,7 @@ export type WellGraph = {
   tasks: { id: string; label: string; hypotheses: string[] }[];
   task_edges: string[][];
 };
-export type Model = { id: string; label: string; class: string; python_ref?: string; config?: string; params?: string[] };
+export type Model = { id: string; label: string; class: string; python_ref?: string; config?: string; params?: string[]; desc?: string };
 export type Task = { id: string; label: string; hypotheses: string[] };
 export type Plan = { changed: string[]; p_ne: string[]; p_e: string[]; recompute_frac: number };
 export type RealField = {
@@ -84,7 +84,7 @@ export type RealData = {
   };
   graph_conceptual: {
     nodes: { id: string; label: string; branch: string; status: string; metric?: string;
-             equation: { formula: string; output: string; latex?: string }; model: string; models: string[] }[];
+             equation: { formula: string; output: string; latex?: string; inputs?: string[] }; model: string; models: string[] }[];
     edges: string[][]; derivation: Deriv[]; note: string;
     tasks: Task[]; task_edges: string[][]; task_preds?: Record<string, string[]>;
     formal_text?: string; is_dag: boolean; depth: number;

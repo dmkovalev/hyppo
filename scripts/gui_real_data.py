@@ -420,33 +420,42 @@ _RENUM = {"H1": "H1", "H2": "H2", "H3": "H3", "H4": "H4", "H5": "H5", "H6": "H6"
 _CBRANCH_METRIC = {"жидкость": "CRM", "обводнённость": "WCT", "нефть": "OPR", "ГТМ": "CRM"}
 
 
-# role → (класс, реализация в Python-библиотеке, конфигурация, меняемые параметры)
+# role → (класс, реализация в Python-библиотеке, конфигурация, параметры, пояснение)
 _MODEL_ROLE = {
     "crmp": ("PhysicsModel", "pywaterflood.CRM(primary=True, tau_selection='per-pair', constraints='up-to one')",
-             "CONFIGURATION_SPACE / MODEL.PHYSICS", ["CRM_constraints", "CRM_KNN", "PHYS_GRAD_MODE"]),
+             "CONFIGURATION_SPACE / MODEL.PHYSICS", ["CRM_constraints", "CRM_KNN", "PHYS_GRAD_MODE"],
+             "Оценивает долю закачки, доходящую от нагнетательной скважины к добывающей, с задержкой (переток в пласте)."),
     "crmt": ("PhysicsModel", "pywaterflood.CRM(primary=True, tau_selection='per-pair', constraints='positive')",
-             "CONFIGURATION_SPACE / MODEL.PHYSICS", ["CRM_constraints", "CRM_KNN"]),
+             "CONFIGURATION_SPACE / MODEL.PHYSICS", ["CRM_constraints", "CRM_KNN"],
+             "Альтернативная калибровка перетоков CRM (положительное ограничение) — конкурирующая физическая гипотеза."),
     "gnn": ("DataDrivenModel", "torch_geometric.nn.GATConv (GNN, spatial attention)",
-            "CONFIGURATION_SPACE / MODEL.HYBRID", ["GNN_NUM_LAYERS", "GNN_HEADS", "HIDDEN_DIM"]),
+            "CONFIGURATION_SPACE / MODEL.HYBRID", ["GNN_NUM_LAYERS", "GNN_HEADS", "HIDDEN_DIM"],
+            "Графовая нейросеть: учит пространственные зависимости по графу связности скважин."),
     "tr": ("DataDrivenModel", "torch.nn.TransformerEncoder (temporal attention)",
-           "CONFIGURATION_SPACE / MODEL.HYBRID", ["TRANSFORMER_NUM_LAYERS", "TRANSFORMER_NHEAD", "DIM_FEEDFORWARD_MULT"]),
+           "CONFIGURATION_SPACE / MODEL.HYBRID", ["TRANSFORMER_NUM_LAYERS", "TRANSFORMER_NHEAD", "DIM_FEEDFORWARD_MULT"],
+           "Transformer: учит временные зависимости по истории добычи/закачки."),
     "bl": ("PhysicsModel", "pywaterflood Buckley–Leverett (fractional flow f_w)",
-           "CONFIGURATION_SPACE / MODEL.PHYSICS", ["Corey_n_w", "Corey_n_o", "BACKPERIOD"]),
+           "CONFIGURATION_SPACE / MODEL.PHYSICS", ["Corey_n_w", "Corey_n_o", "BACKPERIOD"],
+           "Баклей–Леверетта: доля воды в потоке по профилю водонасыщенности (физика вытеснения)."),
     "wor": ("PhysicsModel", "sklearn.linear_model.Ridge (log-WOR)",
-            "гребневая регрессия", ["alpha"]),
+            "гребневая регрессия", ["alpha"],
+            "Логарифмическая эмпирика водонефтяного фактора — быстрый прокси обводнённости."),
     "gate": ("HybridModel", "обучаемый вентиль слияния g: l = g·l_p + (1−g)·l_m",
-             "CONFIGURATION_SPACE / MODEL.HYBRID", ["USE_FUSION_GATE"]),
+             "CONFIGURATION_SPACE / MODEL.HYBRID", ["USE_FUSION_GATE"],
+             "Обучаемый вентиль: взвешенно объединяет физический и ML-прогноз (гибрид)."),
     "frac": ("PhysicsModel", "модуляция продуктивности ΔJ (гидроразрыв)",
-             "ГТМ", ["USE_CRM_PHASE", "CRM_PHASE_RATIO"]),
+             "ГТМ", ["USE_CRM_PHASE", "CRM_PHASE_RATIO"],
+             "Модуляция продуктивности ΔJ после гидроразрыва пласта (ГТМ)."),
     "acid": ("PhysicsModel", "модуляция скин-фактора ΔS (кислотная обработка)",
-             "ГТМ", []),
+             "ГТМ", [],
+             "Модуляция скин-фактора ΔS после кислотной обработки (ГТМ)."),
 }
 
 
 def _mk(cid, role, label):
-    cls, ref, cfg, params = _MODEL_ROLE[role]
+    cls, ref, cfg, params, desc = _MODEL_ROLE[role]
     return {"id": f"m_{cid}_{role}", "label": f"{label} ({cid})", "class": cls,
-            "python_ref": ref, "config": cfg, "params": params}
+            "python_ref": ref, "config": cfg, "params": params, "desc": desc}
 
 
 def _models_for(cid, branch):
@@ -476,6 +485,10 @@ def build_conceptual_lattice():
 
     hm = {n: Hyp(n, f) for n, f, o, lab, br in _CONCEPT_OLD}
     out = {n: o for n, f, o, lab, br in _CONCEPT_OLD}
+    eqs_c = {n: Equation(formula=f) for n, f, o, lab, br in _CONCEPT_OLD}
+
+    def inputs_of(n):
+        return sorted({v.name for v in eqs_c[n].get_vars()} - {out[n]})
 
     class WF:
         def __init__(self, tasks): self._t = [[hm[h] for h in hs] for _, _, hs in tasks]
@@ -493,7 +506,8 @@ def build_conceptual_lattice():
         for m in ms:
             catalog[m["id"]] = m
         nodes.append({"id": cid, "label": lab, "branch": br,
-                      "equation": {"formula": f, "output": o, "latex": _CONCEPT_LATEX.get(n, f)},
+                      "equation": {"formula": f, "output": o, "latex": _CONCEPT_LATEX.get(n, f),
+                                    "inputs": inputs_of(n)},
                       "models": [m["id"] for m in ms], "model": ms[0]["id"],
                       "metric": _CBRANCH_METRIC.get(br, "CRM"), "status": "SUPPORTED"})
     edges = [[R[a], R[b]] for a, b in edges_old]
@@ -625,7 +639,7 @@ def build_algorithm_demos():
         return g
     orig = causal.is_complete
     a1 = []
-    for n in (10, 20, 40):
+    for n in (10, 20, 30, 50, 70, 100):
         calls = [0]
         def counting(eqs, _c=calls):
             _c[0] += 1; return orig(eqs)
@@ -634,7 +648,7 @@ def build_algorithm_demos():
         causal.is_complete = orig
         a1.append({"n": n, "count": calls[0], "law": n * (n - 1) // 2})
     a2c = []
-    for n in (10, 20, 40):
+    for n in (10, 20, 30, 50, 70, 100):
         g = chain(n); calls = [0]
         def counting(eqs, _c=calls):
             _c[0] += 1; return orig(eqs)
@@ -648,7 +662,7 @@ def build_algorithm_demos():
         def __iter__(self):
             type(self).counter += len(self); return super().__iter__()
     a4c = []
-    for n in (200, 400, 800):
+    for n in (100, 200, 400, 800):
         g = HypothesisGraph.from_edges(n, [(i, i + 1) for i in range(n - 1)])
         g._adj = {k: CountingSet(g._adj.get(k, ())) for k in range(n)}
         CountingSet.counter = 0

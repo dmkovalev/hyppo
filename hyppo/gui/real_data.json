@@ -257,7 +257,7 @@
           "parent": "Hypothesis"
         },
         {
-          "name": "ConfirmedHypothesis",
+          "name": "PreferredHypothesis",
           "parent": "ActiveHypothesis"
         },
         {
@@ -459,7 +459,8 @@
           "CRM_constraints",
           "CRM_KNN",
           "PHYS_GRAD_MODE"
-        ]
+        ],
+        "desc": "Оценивает долю закачки, доходящую от нагнетательной скважины к добывающей, с задержкой (переток в пласте)."
       },
       {
         "id": "m_H1_crmt",
@@ -470,7 +471,8 @@
         "params": [
           "CRM_constraints",
           "CRM_KNN"
-        ]
+        ],
+        "desc": "Альтернативная калибровка перетоков CRM (положительное ограничение) — конкурирующая физическая гипотеза."
       },
       {
         "id": "m_H2_crmp",
@@ -482,7 +484,8 @@
           "CRM_constraints",
           "CRM_KNN",
           "PHYS_GRAD_MODE"
-        ]
+        ],
+        "desc": "Оценивает долю закачки, доходящую от нагнетательной скважины к добывающей, с задержкой (переток в пласте)."
       },
       {
         "id": "m_H2_crmt",
@@ -493,7 +496,8 @@
         "params": [
           "CRM_constraints",
           "CRM_KNN"
-        ]
+        ],
+        "desc": "Альтернативная калибровка перетоков CRM (положительное ограничение) — конкурирующая физическая гипотеза."
       },
       {
         "id": "m_H3_crmp",
@@ -505,7 +509,8 @@
           "CRM_constraints",
           "CRM_KNN",
           "PHYS_GRAD_MODE"
-        ]
+        ],
+        "desc": "Оценивает долю закачки, доходящую от нагнетательной скважины к добывающей, с задержкой (переток в пласте)."
       },
       {
         "id": "m_H3_crmt",
@@ -516,7 +521,8 @@
         "params": [
           "CRM_constraints",
           "CRM_KNN"
-        ]
+        ],
+        "desc": "Альтернативная калибровка перетоков CRM (положительное ограничение) — конкурирующая физическая гипотеза."
       },
       {
         "id": "m_H4_crmp",
@@ -528,7 +534,8 @@
           "CRM_constraints",
           "CRM_KNN",
           "PHYS_GRAD_MODE"
-        ]
+        ],
+        "desc": "Оценивает долю закачки, доходящую от нагнетательной скважины к добывающей, с задержкой (переток в пласте)."
       },
       {
         "id": "m_H4_crmt",
@@ -539,7 +546,8 @@
         "params": [
           "CRM_constraints",
           "CRM_KNN"
-        ]
+        ],
+        "desc": "Альтернативная калибровка перетоков CRM (положительное ограничение) — конкурирующая физическая гипотеза."
       },
       {
         "id": "m_H5_crmp",
@@ -551,7 +559,8 @@
           "CRM_constraints",
           "CRM_KNN",
           "PHYS_GRAD_MODE"
-        ]
+        ],
+        "desc": "Оценивает долю закачки, доходящую от нагнетательной скважины к добывающей, с задержкой (переток в пласте)."
       },
       {
         "id": "m_H5_crmt",
@@ -562,7 +571,8 @@
         "params": [
           "CRM_constraints",
           "CRM_KNN"
-        ]
+        ],
+        "desc": "Альтернативная калибровка перетоков CRM (положительное ограничение) — конкурирующая физическая гипотеза."
       },
       {
         "id": "m_H6_crmp",
@@ -574,7 +584,8 @@
           "CRM_constraints",
           "CRM_KNN",
           "PHYS_GRAD_MODE"
-        ]
+        ],
+        "desc": "Оценивает долю закачки, доходящую от нагнетательной скважины к добывающей, с задержкой (переток в пласте)."
       },
       {
         "id": "m_H6_crmt",
@@ -585,7 +596,8 @@
         "params": [
           "CRM_constraints",
           "CRM_KNN"
-        ]
+        ],
+        "desc": "Альтернативная калибровка перетоков CRM (положительное ограничение) — конкурирующая физическая гипотеза."
       },
       {
         "id": "m_H7_gnn",
@@ -597,7 +609,8 @@
           "GNN_NUM_LAYERS",
           "GNN_HEADS",
           "HIDDEN_DIM"
-        ]
+        ],
+        "desc": "Графовая нейросеть: учит пространственные зависимости по графу связности скважин."
       },
       {
         "id": "m_H7_tr",
@@ -609,7 +622,8 @@
           "TRANSFORMER_NUM_LAYERS",
           "TRANSFORMER_NHEAD",
           "DIM_FEEDFORWARD_MULT"
-        ]
+        ],
+        "desc": "Transformer: учит временные зависимости по истории добычи/закачки."
       },
       {
         "id": "m_H8_gate",
@@ -619,7 +633,8 @@
         "config": "CONFIGURATION_SPACE / MODEL.HYBRID",
         "params": [
           "USE_FUSION_GATE"
-        ]
+        ],
+        "desc": "Обучаемый вентиль: взвешенно объединяет физический и ML-прогноз (гибрид)."
       },
       {
         "id": "m_H9_bl",
@@ -631,7 +646,8 @@
           "Corey_n_w",
           "Corey_n_o",
           "BACKPERIOD"
-        ]
+        ],
+        "desc": "Баклей–Леверетта: доля воды в потоке по профилю водонасыщенности (физика вытеснения)."
       },
       {
         "id": "m_H9_wor",
@@ -641,7 +657,8 @@
         "config": "гребневая регрессия",
         "params": [
           "alpha"
-        ]
+        ],
+        "desc": "Логарифмическая эмпирика водонефтяного фактора — быстрый прокси обводнённости."
       },
       {
         "id": "m_H10_bl",
@@ -653,7 +670,8 @@
           "Corey_n_w",
           "Corey_n_o",
           "BACKPERIOD"
-        ]
+        ],
+        "desc": "Баклей–Леверетта: доля воды в потоке по профилю водонасыщенности (физика вытеснения)."
       },
       {
         "id": "m_H10_wor",
@@ -663,7 +681,8 @@
         "config": "гребневая регрессия",
         "params": [
           "alpha"
-        ]
+        ],
+        "desc": "Логарифмическая эмпирика водонефтяного фактора — быстрый прокси обводнённости."
       },
       {
         "id": "m_H11_bl",
@@ -675,7 +694,8 @@
           "Corey_n_w",
           "Corey_n_o",
           "BACKPERIOD"
-        ]
+        ],
+        "desc": "Баклей–Леверетта: доля воды в потоке по профилю водонасыщенности (физика вытеснения)."
       },
       {
         "id": "m_H11_wor",
@@ -685,7 +705,8 @@
         "config": "гребневая регрессия",
         "params": [
           "alpha"
-        ]
+        ],
+        "desc": "Логарифмическая эмпирика водонефтяного фактора — быстрый прокси обводнённости."
       },
       {
         "id": "m_H12_bl",
@@ -697,7 +718,8 @@
           "Corey_n_w",
           "Corey_n_o",
           "BACKPERIOD"
-        ]
+        ],
+        "desc": "Баклей–Леверетта: доля воды в потоке по профилю водонасыщенности (физика вытеснения)."
       },
       {
         "id": "m_H12_wor",
@@ -707,7 +729,8 @@
         "config": "гребневая регрессия",
         "params": [
           "alpha"
-        ]
+        ],
+        "desc": "Логарифмическая эмпирика водонефтяного фактора — быстрый прокси обводнённости."
       },
       {
         "id": "m_H13_bl",
@@ -719,7 +742,8 @@
           "Corey_n_w",
           "Corey_n_o",
           "BACKPERIOD"
-        ]
+        ],
+        "desc": "Баклей–Леверетта: доля воды в потоке по профилю водонасыщенности (физика вытеснения)."
       },
       {
         "id": "m_H13_wor",
@@ -729,7 +753,8 @@
         "config": "гребневая регрессия",
         "params": [
           "alpha"
-        ]
+        ],
+        "desc": "Логарифмическая эмпирика водонефтяного фактора — быстрый прокси обводнённости."
       },
       {
         "id": "m_H14_gate",
@@ -739,7 +764,8 @@
         "config": "CONFIGURATION_SPACE / MODEL.HYBRID",
         "params": [
           "USE_FUSION_GATE"
-        ]
+        ],
+        "desc": "Обучаемый вентиль: взвешенно объединяет физический и ML-прогноз (гибрид)."
       },
       {
         "id": "m_H15_frac",
@@ -750,7 +776,8 @@
         "params": [
           "USE_CRM_PHASE",
           "CRM_PHASE_RATIO"
-        ]
+        ],
+        "desc": "Модуляция продуктивности ΔJ после гидроразрыва пласта (ГТМ)."
       },
       {
         "id": "m_H15_acid",
@@ -758,7 +785,8 @@
         "class": "PhysicsModel",
         "python_ref": "модуляция скин-фактора ΔS (кислотная обработка)",
         "config": "ГТМ",
-        "params": []
+        "params": [],
+        "desc": "Модуляция скин-фактора ΔS после кислотной обработки (ГТМ)."
       },
       {
         "id": "m_H16_gate",
@@ -768,7 +796,8 @@
         "config": "CONFIGURATION_SPACE / MODEL.HYBRID",
         "params": [
           "USE_FUSION_GATE"
-        ]
+        ],
+        "desc": "Обучаемый вентиль: взвешенно объединяет физический и ML-прогноз (гибрид)."
       }
     ],
     "configuration": [
@@ -932,7 +961,11 @@
         "equation": {
           "formula": "I_agg = w_ij * I_j",
           "output": "I_agg",
-          "latex": "I_{\\mathrm{agg}} = \\sum_j w_{ij}\\, I_j"
+          "latex": "I_{\\mathrm{agg}} = \\sum_j w_{ij}\\, I_j",
+          "inputs": [
+            "I_j",
+            "w_ij"
+          ]
         },
         "models": [
           "m_H1_crmp",
@@ -949,7 +982,13 @@
         "equation": {
           "formula": "q_f = a_f*q_f_prev + b_f*I_agg",
           "output": "q_f",
-          "latex": "q_f = \\alpha_f\\, q_f^{-} + \\beta_f\\, I_{\\mathrm{agg}}"
+          "latex": "q_f = \\alpha_f\\, q_f^{-} + \\beta_f\\, I_{\\mathrm{agg}}",
+          "inputs": [
+            "I_agg",
+            "a_f",
+            "b_f",
+            "q_f_prev"
+          ]
         },
         "models": [
           "m_H2_crmp",
@@ -966,7 +1005,13 @@
         "equation": {
           "formula": "q_s = a_s*q_s_prev + b_s*I_agg",
           "output": "q_s",
-          "latex": "q_s = \\alpha_s\\, q_s^{-} + \\beta_s\\, I_{\\mathrm{agg}}"
+          "latex": "q_s = \\alpha_s\\, q_s^{-} + \\beta_s\\, I_{\\mathrm{agg}}",
+          "inputs": [
+            "I_agg",
+            "a_s",
+            "b_s",
+            "q_s_prev"
+          ]
         },
         "models": [
           "m_H3_crmp",
@@ -983,7 +1028,12 @@
         "equation": {
           "formula": "q_c = w_f*q_f + (1-w_f)*q_s",
           "output": "q_c",
-          "latex": "q_c = w_f\\, q_f + (1 - w_f)\\, q_s"
+          "latex": "q_c = w_f\\, q_f + (1 - w_f)\\, q_s",
+          "inputs": [
+            "q_f",
+            "q_s",
+            "w_f"
+          ]
         },
         "models": [
           "m_H4_crmp",
@@ -1000,7 +1050,12 @@
         "equation": {
           "formula": "q_liq_phys = J*q_c + q_prim",
           "output": "q_liq_phys",
-          "latex": "q_{\\mathrm{liq}} = J\\, q_c + q_{\\mathrm{prim}}"
+          "latex": "q_{\\mathrm{liq}} = J\\, q_c + q_{\\mathrm{prim}}",
+          "inputs": [
+            "J",
+            "q_c",
+            "q_prim"
+          ]
         },
         "models": [
           "m_H5_crmp",
@@ -1017,7 +1072,12 @@
         "equation": {
           "formula": "q_prim = q_prev*exp(-dt*taup)",
           "output": "q_prim",
-          "latex": "q_{\\mathrm{prim}} = q^{-}\\, e^{-\\Delta t\\, \\tau_p}"
+          "latex": "q_{\\mathrm{prim}} = q^{-}\\, e^{-\\Delta t\\, \\tau_p}",
+          "inputs": [
+            "dt",
+            "q_prev",
+            "taup"
+          ]
         },
         "models": [
           "m_H6_crmp",
@@ -1034,7 +1094,10 @@
         "equation": {
           "formula": "l_ml = MLP(x_hist)",
           "output": "l_ml",
-          "latex": "\\ell_m = \\mathrm{MLP}(\\mathbf{x}_{\\mathrm{hist}})"
+          "latex": "\\ell_m = \\mathrm{MLP}(\\mathbf{x}_{\\mathrm{hist}})",
+          "inputs": [
+            "x_hist"
+          ]
         },
         "models": [
           "m_H7_gnn",
@@ -1051,7 +1114,12 @@
         "equation": {
           "formula": "l = g*q_liq_phys + (1-g)*l_ml",
           "output": "l",
-          "latex": "\\ell = g\\, q_{\\mathrm{liq}} + (1 - g)\\, \\ell_m"
+          "latex": "\\ell = g\\, q_{\\mathrm{liq}} + (1 - g)\\, \\ell_m",
+          "inputs": [
+            "g",
+            "l_ml",
+            "q_liq_phys"
+          ]
         },
         "models": [
           "m_H8_gate"
@@ -1067,7 +1135,14 @@
         "equation": {
           "formula": "Sw = Sw_prev + (Winj - Wlout)*dt/Vp",
           "output": "Sw",
-          "latex": "S_w = S_w^{-} + \\dfrac{(W_{\\mathrm{inj}} - W_{\\mathrm{out}})\\, \\Delta t}{V_p}"
+          "latex": "S_w = S_w^{-} + \\dfrac{(W_{\\mathrm{inj}} - W_{\\mathrm{out}})\\, \\Delta t}{V_p}",
+          "inputs": [
+            "Sw_prev",
+            "Vp",
+            "Winj",
+            "Wlout",
+            "dt"
+          ]
         },
         "models": [
           "m_H9_bl",
@@ -1084,7 +1159,13 @@
         "equation": {
           "formula": "krw = ((Sw-Swc)/(1-Swc-Sor))**nw",
           "output": "krw",
-          "latex": "k_{rw} = \\left(\\dfrac{S_w - S_{wc}}{1 - S_{wc} - S_{or}}\\right)^{n_w}"
+          "latex": "k_{rw} = \\left(\\dfrac{S_w - S_{wc}}{1 - S_{wc} - S_{or}}\\right)^{n_w}",
+          "inputs": [
+            "Sor",
+            "Sw",
+            "Swc",
+            "nw"
+          ]
         },
         "models": [
           "m_H10_bl",
@@ -1101,7 +1182,13 @@
         "equation": {
           "formula": "kro = ((1-Sw-Sor)/(1-Swc-Sor))**no",
           "output": "kro",
-          "latex": "k_{ro} = \\left(\\dfrac{1 - S_w - S_{or}}{1 - S_{wc} - S_{or}}\\right)^{n_o}"
+          "latex": "k_{ro} = \\left(\\dfrac{1 - S_w - S_{or}}{1 - S_{wc} - S_{or}}\\right)^{n_o}",
+          "inputs": [
+            "Sor",
+            "Sw",
+            "Swc",
+            "no"
+          ]
         },
         "models": [
           "m_H11_bl",
@@ -1118,7 +1205,13 @@
         "equation": {
           "formula": "fw = 1/(1 + kro*muw/(krw*muo))",
           "output": "fw",
-          "latex": "f_w = \\dfrac{1}{1 + k_{ro}\\, \\mu_w / (k_{rw}\\, \\mu_o)}"
+          "latex": "f_w = \\dfrac{1}{1 + k_{ro}\\, \\mu_w / (k_{rw}\\, \\mu_o)}",
+          "inputs": [
+            "kro",
+            "krw",
+            "muo",
+            "muw"
+          ]
         },
         "models": [
           "m_H12_bl",
@@ -1135,7 +1228,10 @@
         "equation": {
           "formula": "o_p = 1 - fw",
           "output": "o_p",
-          "latex": "o_p = 1 - f_w"
+          "latex": "o_p = 1 - f_w",
+          "inputs": [
+            "fw"
+          ]
         },
         "models": [
           "m_H13_bl",
@@ -1152,7 +1248,12 @@
         "equation": {
           "formula": "o = gw*o_p + (1-gw)*o_m",
           "output": "o",
-          "latex": "o = g_w\\, o_p + (1 - g_w)\\, o_m"
+          "latex": "o = g_w\\, o_p + (1 - g_w)\\, o_m",
+          "inputs": [
+            "gw",
+            "o_m",
+            "o_p"
+          ]
         },
         "models": [
           "m_H14_gate"
@@ -1168,7 +1269,11 @@
         "equation": {
           "formula": "J = J0 + dJ_grp",
           "output": "J",
-          "latex": "J = J_0 + \\Delta J_{\\mathrm{ГРП}}"
+          "latex": "J = J_0 + \\Delta J_{\\mathrm{ГРП}}",
+          "inputs": [
+            "J0",
+            "dJ_grp"
+          ]
         },
         "models": [
           "m_H15_frac",
@@ -1185,7 +1290,11 @@
         "equation": {
           "formula": "q_oil = l * o",
           "output": "q_oil",
-          "latex": "\\hat{q}_{\\mathrm{oil}} = \\ell \\cdot o"
+          "latex": "\\hat{q}_{\\mathrm{oil}} = \\ell \\cdot o",
+          "inputs": [
+            "l",
+            "o"
+          ]
         },
         "models": [
           "m_H16_gate"
@@ -1380,7 +1489,8 @@
           "CRM_constraints",
           "CRM_KNN",
           "PHYS_GRAD_MODE"
-        ]
+        ],
+        "desc": "Оценивает долю закачки, доходящую от нагнетательной скважины к добывающей, с задержкой (переток в пласте)."
       },
       "m_H1_crmt": {
         "id": "m_H1_crmt",
@@ -1391,7 +1501,8 @@
         "params": [
           "CRM_constraints",
           "CRM_KNN"
-        ]
+        ],
+        "desc": "Альтернативная калибровка перетоков CRM (положительное ограничение) — конкурирующая физическая гипотеза."
       },
       "m_H2_crmp": {
         "id": "m_H2_crmp",
@@ -1403,7 +1514,8 @@
           "CRM_constraints",
           "CRM_KNN",
           "PHYS_GRAD_MODE"
-        ]
+        ],
+        "desc": "Оценивает долю закачки, доходящую от нагнетательной скважины к добывающей, с задержкой (переток в пласте)."
       },
       "m_H2_crmt": {
         "id": "m_H2_crmt",
@@ -1414,7 +1526,8 @@
         "params": [
           "CRM_constraints",
           "CRM_KNN"
-        ]
+        ],
+        "desc": "Альтернативная калибровка перетоков CRM (положительное ограничение) — конкурирующая физическая гипотеза."
       },
       "m_H3_crmp": {
         "id": "m_H3_crmp",
@@ -1426,7 +1539,8 @@
           "CRM_constraints",
           "CRM_KNN",
           "PHYS_GRAD_MODE"
-        ]
+        ],
+        "desc": "Оценивает долю закачки, доходящую от нагнетательной скважины к добывающей, с задержкой (переток в пласте)."
       },
       "m_H3_crmt": {
         "id": "m_H3_crmt",
@@ -1437,7 +1551,8 @@
         "params": [
           "CRM_constraints",
           "CRM_KNN"
-        ]
+        ],
+        "desc": "Альтернативная калибровка перетоков CRM (положительное ограничение) — конкурирующая физическая гипотеза."
       },
       "m_H4_crmp": {
         "id": "m_H4_crmp",
@@ -1449,7 +1564,8 @@
           "CRM_constraints",
           "CRM_KNN",
           "PHYS_GRAD_MODE"
-        ]
+        ],
+        "desc": "Оценивает долю закачки, доходящую от нагнетательной скважины к добывающей, с задержкой (переток в пласте)."
       },
       "m_H4_crmt": {
         "id": "m_H4_crmt",
@@ -1460,7 +1576,8 @@
         "params": [
           "CRM_constraints",
           "CRM_KNN"
-        ]
+        ],
+        "desc": "Альтернативная калибровка перетоков CRM (положительное ограничение) — конкурирующая физическая гипотеза."
       },
       "m_H5_crmp": {
         "id": "m_H5_crmp",
@@ -1472,7 +1589,8 @@
           "CRM_constraints",
           "CRM_KNN",
           "PHYS_GRAD_MODE"
-        ]
+        ],
+        "desc": "Оценивает долю закачки, доходящую от нагнетательной скважины к добывающей, с задержкой (переток в пласте)."
       },
       "m_H5_crmt": {
         "id": "m_H5_crmt",
@@ -1483,7 +1601,8 @@
         "params": [
           "CRM_constraints",
           "CRM_KNN"
-        ]
+        ],
+        "desc": "Альтернативная калибровка перетоков CRM (положительное ограничение) — конкурирующая физическая гипотеза."
       },
       "m_H6_crmp": {
         "id": "m_H6_crmp",
@@ -1495,7 +1614,8 @@
           "CRM_constraints",
           "CRM_KNN",
           "PHYS_GRAD_MODE"
-        ]
+        ],
+        "desc": "Оценивает долю закачки, доходящую от нагнетательной скважины к добывающей, с задержкой (переток в пласте)."
       },
       "m_H6_crmt": {
         "id": "m_H6_crmt",
@@ -1506,7 +1626,8 @@
         "params": [
           "CRM_constraints",
           "CRM_KNN"
-        ]
+        ],
+        "desc": "Альтернативная калибровка перетоков CRM (положительное ограничение) — конкурирующая физическая гипотеза."
       },
       "m_H7_gnn": {
         "id": "m_H7_gnn",
@@ -1518,7 +1639,8 @@
           "GNN_NUM_LAYERS",
           "GNN_HEADS",
           "HIDDEN_DIM"
-        ]
+        ],
+        "desc": "Графовая нейросеть: учит пространственные зависимости по графу связности скважин."
       },
       "m_H7_tr": {
         "id": "m_H7_tr",
@@ -1530,7 +1652,8 @@
           "TRANSFORMER_NUM_LAYERS",
           "TRANSFORMER_NHEAD",
           "DIM_FEEDFORWARD_MULT"
-        ]
+        ],
+        "desc": "Transformer: учит временные зависимости по истории добычи/закачки."
       },
       "m_H8_gate": {
         "id": "m_H8_gate",
@@ -1540,7 +1663,8 @@
         "config": "CONFIGURATION_SPACE / MODEL.HYBRID",
         "params": [
           "USE_FUSION_GATE"
-        ]
+        ],
+        "desc": "Обучаемый вентиль: взвешенно объединяет физический и ML-прогноз (гибрид)."
       },
       "m_H9_bl": {
         "id": "m_H9_bl",
@@ -1552,7 +1676,8 @@
           "Corey_n_w",
           "Corey_n_o",
           "BACKPERIOD"
-        ]
+        ],
+        "desc": "Баклей–Леверетта: доля воды в потоке по профилю водонасыщенности (физика вытеснения)."
       },
       "m_H9_wor": {
         "id": "m_H9_wor",
@@ -1562,7 +1687,8 @@
         "config": "гребневая регрессия",
         "params": [
           "alpha"
-        ]
+        ],
+        "desc": "Логарифмическая эмпирика водонефтяного фактора — быстрый прокси обводнённости."
       },
       "m_H10_bl": {
         "id": "m_H10_bl",
@@ -1574,7 +1700,8 @@
           "Corey_n_w",
           "Corey_n_o",
           "BACKPERIOD"
-        ]
+        ],
+        "desc": "Баклей–Леверетта: доля воды в потоке по профилю водонасыщенности (физика вытеснения)."
       },
       "m_H10_wor": {
         "id": "m_H10_wor",
@@ -1584,7 +1711,8 @@
         "config": "гребневая регрессия",
         "params": [
           "alpha"
-        ]
+        ],
+        "desc": "Логарифмическая эмпирика водонефтяного фактора — быстрый прокси обводнённости."
       },
       "m_H11_bl": {
         "id": "m_H11_bl",
@@ -1596,7 +1724,8 @@
           "Corey_n_w",
           "Corey_n_o",
           "BACKPERIOD"
-        ]
+        ],
+        "desc": "Баклей–Леверетта: доля воды в потоке по профилю водонасыщенности (физика вытеснения)."
       },
       "m_H11_wor": {
         "id": "m_H11_wor",
@@ -1606,7 +1735,8 @@
         "config": "гребневая регрессия",
         "params": [
           "alpha"
-        ]
+        ],
+        "desc": "Логарифмическая эмпирика водонефтяного фактора — быстрый прокси обводнённости."
       },
       "m_H12_bl": {
         "id": "m_H12_bl",
@@ -1618,7 +1748,8 @@
           "Corey_n_w",
           "Corey_n_o",
           "BACKPERIOD"
-        ]
+        ],
+        "desc": "Баклей–Леверетта: доля воды в потоке по профилю водонасыщенности (физика вытеснения)."
       },
       "m_H12_wor": {
         "id": "m_H12_wor",
@@ -1628,7 +1759,8 @@
         "config": "гребневая регрессия",
         "params": [
           "alpha"
-        ]
+        ],
+        "desc": "Логарифмическая эмпирика водонефтяного фактора — быстрый прокси обводнённости."
       },
       "m_H13_bl": {
         "id": "m_H13_bl",
@@ -1640,7 +1772,8 @@
           "Corey_n_w",
           "Corey_n_o",
           "BACKPERIOD"
-        ]
+        ],
+        "desc": "Баклей–Леверетта: доля воды в потоке по профилю водонасыщенности (физика вытеснения)."
       },
       "m_H13_wor": {
         "id": "m_H13_wor",
@@ -1650,7 +1783,8 @@
         "config": "гребневая регрессия",
         "params": [
           "alpha"
-        ]
+        ],
+        "desc": "Логарифмическая эмпирика водонефтяного фактора — быстрый прокси обводнённости."
       },
       "m_H14_gate": {
         "id": "m_H14_gate",
@@ -1660,7 +1794,8 @@
         "config": "CONFIGURATION_SPACE / MODEL.HYBRID",
         "params": [
           "USE_FUSION_GATE"
-        ]
+        ],
+        "desc": "Обучаемый вентиль: взвешенно объединяет физический и ML-прогноз (гибрид)."
       },
       "m_H15_frac": {
         "id": "m_H15_frac",
@@ -1671,7 +1806,8 @@
         "params": [
           "USE_CRM_PHASE",
           "CRM_PHASE_RATIO"
-        ]
+        ],
+        "desc": "Модуляция продуктивности ΔJ после гидроразрыва пласта (ГТМ)."
       },
       "m_H15_acid": {
         "id": "m_H15_acid",
@@ -1679,7 +1815,8 @@
         "class": "PhysicsModel",
         "python_ref": "модуляция скин-фактора ΔS (кислотная обработка)",
         "config": "ГТМ",
-        "params": []
+        "params": [],
+        "desc": "Модуляция скин-фактора ΔS после кислотной обработки (ГТМ)."
       },
       "m_H16_gate": {
         "id": "m_H16_gate",
@@ -1689,7 +1826,8 @@
         "config": "CONFIGURATION_SPACE / MODEL.HYBRID",
         "params": [
           "USE_FUSION_GATE"
-        ]
+        ],
+        "desc": "Обучаемый вентиль: взвешенно объединяет физический и ML-прогноз (гибрид)."
       }
     },
     "tasks": [
@@ -2048,9 +2186,24 @@
             "law": 190
           },
           {
-            "n": 40,
-            "count": 780,
-            "law": 780
+            "n": 30,
+            "count": 435,
+            "law": 435
+          },
+          {
+            "n": 50,
+            "count": 1225,
+            "law": 1225
+          },
+          {
+            "n": 70,
+            "count": 2415,
+            "law": 2415
+          },
+          {
+            "n": 100,
+            "count": 4950,
+            "law": 4950
           }
         ],
         "law": "O(|H|²·s·v)",
@@ -2069,9 +2222,24 @@
             "law": 20
           },
           {
-            "n": 40,
-            "count": 40,
-            "law": 40
+            "n": 30,
+            "count": 30,
+            "law": 30
+          },
+          {
+            "n": 50,
+            "count": 50,
+            "law": 50
+          },
+          {
+            "n": 70,
+            "count": 70,
+            "law": 70
+          },
+          {
+            "n": 100,
+            "count": 100,
+            "law": 100
           }
         ],
         "law": "O(|H|·s·v)",
@@ -2079,6 +2247,11 @@
       },
       "alg4": {
         "points": [
+          {
+            "n": 100,
+            "count": 197,
+            "law": 199
+          },
           {
             "n": 200,
             "count": 397,
