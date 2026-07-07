@@ -45,7 +45,7 @@ export function GraphView({ real, field, setField }: { real: RealData; field: st
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, flexWrap: "wrap", gap: 10 }}>
           <div className="seg">
             <button className={mode === "concept" ? "on" : ""} onClick={() => setMode("concept")}>
-              концептуальный (19, из формул §4.4)
+              концептуальный (16, алгоритм 1)
             </button>
             <button className={mode === "wells" ? "on" : ""} onClick={() => setMode("wells")}>
               по скважинам (данные {field})
@@ -56,7 +56,7 @@ export function GraphView({ real, field, setField }: { real: RealData; field: st
 
         <div className="muted" style={{ fontSize: 13, marginBottom: 10 }}>
           {mode === "concept"
-            ? <>Архитектура HybridCRM как в рис. lattice_crm: {c.nodes.length} гипотез, {c.edges.length} рёбер. Ветвь жидкости H1–H10, обводнённости H11–H18, слияние H19.</>
+            ? <>Построено настоящим алгоритмом 1 (<span className="formula">HypothesisLattice</span>): {c.nodes.length} гипотез, {c.edges.length} рёбер, DAG глубины {c.depth}. Сплошная нумерация статьи: жидкость H1–H8, обводнённость H9–H14, ГРП H15, нефть H16.</>
             : <>Инстанция на данных {field}: {g.nodes.length} гипотез-скважин, {g.edges.length} рёбер из матрицы связности CRM (gain &gt; перцентиль).</>}
         </div>
 

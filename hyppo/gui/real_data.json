@@ -339,211 +339,178 @@
       {
         "id": "H1",
         "label": "Агрегация закачки",
-        "branch": "LPR",
-        "status": "SUPPORTED",
+        "branch": "жидкость",
         "equation": {
           "formula": "I_agg = w_ij * I_j",
           "output": "I_agg"
         },
-        "model": "m_phys"
+        "model": "m_crmp",
+        "status": "SUPPORTED"
       },
       {
         "id": "H2",
-        "label": "CRM быстрый канал (τ_fast)",
-        "branch": "LPR",
-        "status": "SUPPORTED",
+        "label": "CRM быстрый канал",
+        "branch": "жидкость",
         "equation": {
-          "formula": "q_f = a_f * q_f_prev + b_f * I_agg",
+          "formula": "q_f = a_f*q_f_prev + b_f*I_agg",
           "output": "q_f"
         },
-        "model": "m_phys"
+        "model": "m_crmp",
+        "status": "SUPPORTED"
       },
       {
         "id": "H3",
-        "label": "CRM медленный канал (τ_slow)",
-        "branch": "LPR",
-        "status": "SUPPORTED",
+        "label": "CRM медленный канал",
+        "branch": "жидкость",
         "equation": {
-          "formula": "q_s = a_s * q_s_prev + b_s * I_agg",
+          "formula": "q_s = a_s*q_s_prev + b_s*I_agg",
           "output": "q_s"
         },
-        "model": "m_phys"
+        "model": "m_crmp",
+        "status": "SUPPORTED"
       },
       {
         "id": "H4",
         "label": "Смешение каналов",
-        "branch": "LPR",
-        "status": "SUPPORTED",
+        "branch": "жидкость",
         "equation": {
-          "formula": "q_c = w_f * q_f + (1 - w_f) * q_s",
+          "formula": "q_c = w_f*q_f + (1-w_f)*q_s",
           "output": "q_c"
         },
-        "model": "m_phys"
+        "model": "m_crmp",
+        "status": "SUPPORTED"
       },
       {
         "id": "H5",
         "label": "Продуктивность",
-        "branch": "LPR",
-        "status": "SUPPORTED",
+        "branch": "жидкость",
         "equation": {
-          "formula": "q = J * q_c * (1 - d) ** t + q_b",
-          "output": "q"
+          "formula": "q_liq_phys = J*q_c + q_prim",
+          "output": "q_liq_phys"
         },
-        "model": "m_phys"
+        "model": "m_crmp",
+        "status": "SUPPORTED"
       },
       {
         "id": "H6",
-        "label": "Transformer (временное внимание)",
-        "branch": "LPR",
-        "status": "SUPPORTED",
+        "label": "Первичная добыча (спад)",
+        "branch": "жидкость",
         "equation": {
-          "formula": "h_t = Attn(q, x_t)",
-          "output": "h_t"
+          "formula": "q_prim = q_prev*exp(-dt*taup)",
+          "output": "q_prim"
         },
-        "model": "m_ml"
+        "model": "m_crmp",
+        "status": "SUPPORTED"
       },
       {
         "id": "H7",
-        "label": "GNN (пространственное внимание)",
-        "branch": "LPR",
-        "status": "SUPPORTED",
+        "label": "ML-коррекция (MLP)",
+        "branch": "жидкость",
         "equation": {
-          "formula": "h_s = GNN(q, Gconn)",
-          "output": "h_s"
+          "formula": "l_ml = MLP(x_hist)",
+          "output": "l_ml"
         },
-        "model": "m_ml"
+        "model": "m_nn",
+        "status": "SUPPORTED"
       },
       {
         "id": "H8",
-        "label": "LPR-якорь (физика)",
-        "branch": "LPR",
-        "status": "SUPPORTED",
+        "label": "LPR Fusion (вентиль g)",
+        "branch": "жидкость",
         "equation": {
-          "formula": "l_p = q + delta",
-          "output": "l_p"
+          "formula": "l = g*q_liq_phys + (1-g)*l_ml",
+          "output": "l"
         },
-        "model": "m_hyb"
+        "model": "m_hyb",
+        "status": "SUPPORTED"
       },
       {
         "id": "H9",
-        "label": "ML-коррекция жидкости",
-        "branch": "LPR",
-        "status": "SUPPORTED",
+        "label": "Материальный баланс",
+        "branch": "обводнённость",
         "equation": {
-          "formula": "l_m = MLP(h_t, h_s)",
-          "output": "l_m"
+          "formula": "Sw = Sw_prev + (Winj - Wlout)*dt/Vp",
+          "output": "Sw"
         },
-        "model": "m_ml"
+        "model": "m_bl",
+        "status": "SUPPORTED"
       },
       {
         "id": "H10",
-        "label": "LPR Fusion (вентиль g)",
-        "branch": "LPR",
-        "status": "SUPPORTED",
+        "label": "Corey krw",
+        "branch": "обводнённость",
         "equation": {
-          "formula": "l = g * l_p + (1 - g) * l_m",
-          "output": "l"
+          "formula": "krw = ((Sw-Swc)/(1-Swc-Sor))**nw",
+          "output": "krw"
         },
-        "model": "m_hyb"
+        "model": "m_bl",
+        "status": "SUPPORTED"
       },
       {
         "id": "H11",
-        "label": "Corey (фазовые проницаемости)",
-        "branch": "WCT",
-        "status": "SUPPORTED",
+        "label": "Corey kro",
+        "branch": "обводнённость",
         "equation": {
-          "formula": "krw = Sw ** n",
-          "output": "krw"
+          "formula": "kro = ((1-Sw-Sor)/(1-Swc-Sor))**no",
+          "output": "kro"
         },
-        "model": "m_phys"
+        "model": "m_bl",
+        "status": "SUPPORTED"
       },
       {
         "id": "H12",
-        "label": "Баклея–Леверетта",
-        "branch": "WCT",
-        "status": "SUPPORTED",
+        "label": "Баклея–Леверетта fw",
+        "branch": "обводнённость",
         "equation": {
-          "formula": "fw_bl = 1 / (1 + k_o / (M * krw))",
-          "output": "fw_bl"
+          "formula": "fw = 1/(1 + kro*muw/(krw*muo))",
+          "output": "fw"
         },
-        "model": "m_phys"
+        "model": "m_bl",
+        "status": "SUPPORTED"
       },
       {
         "id": "H13",
-        "label": "Нефтяная доля",
-        "branch": "WCT",
-        "status": "SUPERSEDED",
+        "label": "WCT-якорь (физика)",
+        "branch": "обводнённость",
         "equation": {
-          "formula": "fo = f_0 * exp(-Q_cum / tau)",
-          "output": "fo"
+          "formula": "o_p = 1 - fw",
+          "output": "o_p"
         },
-        "model": "m_phys"
+        "model": "m_bl",
+        "status": "SUPPORTED"
       },
       {
         "id": "H14",
-        "label": "Материальный баланс",
-        "branch": "WCT",
-        "status": "SUPPORTED",
+        "label": "WCT Fusion",
+        "branch": "обводнённость",
         "equation": {
-          "formula": "dSw = dt * (W_in - W_out) / V_p + fw_bl",
-          "output": "dSw"
+          "formula": "o = gw*o_p + (1-gw)*o_m",
+          "output": "o"
         },
-        "model": "m_phys"
+        "model": "m_hyb",
+        "status": "SUPPORTED"
       },
       {
         "id": "H15",
-        "label": "Log-WOR",
-        "branch": "WCT",
-        "status": "SUPERSEDED",
+        "label": "ГРП (модуляция)",
+        "branch": "ГТМ",
         "equation": {
-          "formula": "wor = a + b * sum_I",
-          "output": "wor"
+          "formula": "J = J0 + dJ_grp",
+          "output": "J"
         },
-        "model": "m_phys"
+        "model": "m_bl",
+        "status": "SUPPORTED"
       },
       {
         "id": "H16",
-        "label": "BL/WOR смешение",
-        "branch": "WCT",
-        "status": "SUPPORTED",
-        "equation": {
-          "formula": "fw = c1 * fo + c2 * dSw + c3 * wor",
-          "output": "fw"
-        },
-        "model": "m_hyb"
-      },
-      {
-        "id": "H17",
-        "label": "WCT-якорь (физика)",
-        "branch": "WCT",
-        "status": "SUPPORTED",
-        "equation": {
-          "formula": "o_p = (1 - fw) + delta",
-          "output": "o_p"
-        },
-        "model": "m_phys"
-      },
-      {
-        "id": "H18",
-        "label": "WCT Fusion",
-        "branch": "WCT",
-        "status": "SUPPORTED",
-        "equation": {
-          "formula": "o = g_w * o_p + (1 - g_w) * o_m",
-          "output": "o"
-        },
-        "model": "m_hyb"
-      },
-      {
-        "id": "H19",
         "label": "OPR — прогноз нефти",
-        "branch": "OPR",
-        "status": "SUPPORTED",
+        "branch": "нефть",
         "equation": {
           "formula": "q_oil = l * o",
           "output": "q_oil"
         },
-        "model": "m_hyb"
+        "model": "m_hyb",
+        "status": "SUPPORTED"
       }
     ],
     "edges": [
@@ -569,35 +536,31 @@
       ],
       [
         "H5",
-        "H6"
-      ],
-      [
-        "H5",
-        "H7"
-      ],
-      [
-        "H5",
         "H8"
       ],
       [
+        "H8",
+        "H16"
+      ],
+      [
         "H6",
-        "H9"
+        "H5"
       ],
       [
         "H7",
-        "H9"
-      ],
-      [
-        "H8",
-        "H10"
+        "H8"
       ],
       [
         "H9",
         "H10"
       ],
       [
+        "H9",
+        "H11"
+      ],
+      [
         "H10",
-        "H19"
+        "H12"
       ],
       [
         "H11",
@@ -605,11 +568,11 @@
       ],
       [
         "H12",
-        "H14"
+        "H13"
       ],
       [
         "H13",
-        "H16"
+        "H14"
       ],
       [
         "H14",
@@ -617,19 +580,7 @@
       ],
       [
         "H15",
-        "H16"
-      ],
-      [
-        "H16",
-        "H17"
-      ],
-      [
-        "H17",
-        "H18"
-      ],
-      [
-        "H18",
-        "H19"
+        "H5"
       ]
     ],
     "derivation": [
@@ -665,102 +616,216 @@
       },
       {
         "src": "H5",
-        "dst": "H6",
-        "via": "q",
-        "reason": "выход q (H5) входит в уравнение H6"
-      },
-      {
-        "src": "H5",
-        "dst": "H7",
-        "via": "q",
-        "reason": "выход q (H5) входит в уравнение H7"
-      },
-      {
-        "src": "H5",
         "dst": "H8",
-        "via": "q",
-        "reason": "выход q (H5) входит в уравнение H8"
-      },
-      {
-        "src": "H6",
-        "dst": "H9",
-        "via": "h_t",
-        "reason": "выход h_t (H6) входит в уравнение H9"
-      },
-      {
-        "src": "H7",
-        "dst": "H9",
-        "via": "h_s",
-        "reason": "выход h_s (H7) входит в уравнение H9"
+        "via": "q_liq_phys",
+        "reason": "выход q_liq_phys (H5) входит в уравнение H8"
       },
       {
         "src": "H8",
-        "dst": "H10",
-        "via": "l_p",
-        "reason": "выход l_p (H8) входит в уравнение H10"
+        "dst": "H16",
+        "via": "l",
+        "reason": "выход l (H8) входит в уравнение H16"
+      },
+      {
+        "src": "H6",
+        "dst": "H5",
+        "via": "q_prim",
+        "reason": "выход q_prim (H6) входит в уравнение H5"
+      },
+      {
+        "src": "H7",
+        "dst": "H8",
+        "via": "l_ml",
+        "reason": "выход l_ml (H7) входит в уравнение H8"
       },
       {
         "src": "H9",
         "dst": "H10",
-        "via": "l_m",
-        "reason": "выход l_m (H9) входит в уравнение H10"
+        "via": "Sw",
+        "reason": "выход Sw (H9) входит в уравнение H10"
+      },
+      {
+        "src": "H9",
+        "dst": "H11",
+        "via": "Sw",
+        "reason": "выход Sw (H9) входит в уравнение H11"
       },
       {
         "src": "H10",
-        "dst": "H19",
-        "via": "l",
-        "reason": "выход l (H10) входит в уравнение H19"
+        "dst": "H12",
+        "via": "krw",
+        "reason": "выход krw (H10) входит в уравнение H12"
       },
       {
         "src": "H11",
         "dst": "H12",
-        "via": "krw",
-        "reason": "выход krw (H11) входит в уравнение H12"
+        "via": "kro",
+        "reason": "выход kro (H11) входит в уравнение H12"
       },
       {
         "src": "H12",
-        "dst": "H14",
-        "via": "fw_bl",
-        "reason": "выход fw_bl (H12) входит в уравнение H14"
+        "dst": "H13",
+        "via": "fw",
+        "reason": "выход fw (H12) входит в уравнение H13"
       },
       {
         "src": "H13",
-        "dst": "H16",
-        "via": "fo",
-        "reason": "выход fo (H13) входит в уравнение H16"
+        "dst": "H14",
+        "via": "o_p",
+        "reason": "выход o_p (H13) входит в уравнение H14"
       },
       {
         "src": "H14",
         "dst": "H16",
-        "via": "dSw",
-        "reason": "выход dSw (H14) входит в уравнение H16"
+        "via": "o",
+        "reason": "выход o (H14) входит в уравнение H16"
       },
       {
         "src": "H15",
-        "dst": "H16",
-        "via": "wor",
-        "reason": "выход wor (H15) входит в уравнение H16"
-      },
-      {
-        "src": "H16",
-        "dst": "H17",
-        "via": "fw",
-        "reason": "выход fw (H16) входит в уравнение H17"
-      },
-      {
-        "src": "H17",
-        "dst": "H18",
-        "via": "o_p",
-        "reason": "выход o_p (H17) входит в уравнение H18"
-      },
-      {
-        "src": "H18",
-        "dst": "H19",
-        "via": "o",
-        "reason": "выход o (H18) входит в уравнение H19"
+        "dst": "H5",
+        "via": "J",
+        "reason": "выход J (H15) входит в уравнение H5"
       }
     ],
-    "note": "19 гипотез (H1–H19), рёбра derived_by выведены алгоритмом 1 из уравнений §4.4. Ветвь жидкости H1–H10, обводнённости H11–H18, слияние H19."
+    "tasks": [
+      {
+        "id": "T1",
+        "label": "Парсинг закачки",
+        "hypotheses": [
+          "H1"
+        ]
+      },
+      {
+        "id": "T2",
+        "label": "CRM-каналы",
+        "hypotheses": [
+          "H2",
+          "H3"
+        ]
+      },
+      {
+        "id": "T3",
+        "label": "Смешение",
+        "hypotheses": [
+          "H4"
+        ]
+      },
+      {
+        "id": "T4",
+        "label": "Продуктивность и спад",
+        "hypotheses": [
+          "H5",
+          "H6"
+        ]
+      },
+      {
+        "id": "T5",
+        "label": "ML-коррекция",
+        "hypotheses": [
+          "H7"
+        ]
+      },
+      {
+        "id": "T6",
+        "label": "Слияние жидкости",
+        "hypotheses": [
+          "H8"
+        ]
+      },
+      {
+        "id": "T7",
+        "label": "Материальный баланс",
+        "hypotheses": [
+          "H9"
+        ]
+      },
+      {
+        "id": "T8",
+        "label": "Фазовые проницаемости",
+        "hypotheses": [
+          "H10",
+          "H11"
+        ]
+      },
+      {
+        "id": "T9",
+        "label": "Фракционный поток",
+        "hypotheses": [
+          "H12"
+        ]
+      },
+      {
+        "id": "T10",
+        "label": "Обводнённость",
+        "hypotheses": [
+          "H13",
+          "H14"
+        ]
+      },
+      {
+        "id": "T11",
+        "label": "Прогноз нефти",
+        "hypotheses": [
+          "H16"
+        ]
+      },
+      {
+        "id": "T12",
+        "label": "ГТМ-модуляция",
+        "hypotheses": [
+          "H15"
+        ]
+      }
+    ],
+    "task_edges": [
+      [
+        "T1",
+        "T2"
+      ],
+      [
+        "T2",
+        "T3"
+      ],
+      [
+        "T3",
+        "T4"
+      ],
+      [
+        "T4",
+        "T5"
+      ],
+      [
+        "T5",
+        "T6"
+      ],
+      [
+        "T6",
+        "T7"
+      ],
+      [
+        "T7",
+        "T8"
+      ],
+      [
+        "T8",
+        "T9"
+      ],
+      [
+        "T9",
+        "T10"
+      ],
+      [
+        "T10",
+        "T11"
+      ],
+      [
+        "T11",
+        "T12"
+      ]
+    ],
+    "is_dag": true,
+    "depth": 5,
+    "note": "16 гипотез (сплошная нумерация статьи H1–H16), 17 рёбер derived_by, DAG глубины 5. Построено настоящим алгоритмом 1 (HypothesisLattice) из уравнений; жидкость H1–H8, обводнённость H9–H14, ГРП H15, нефть H16."
   },
   "scale": {
     "note": "Один и тот же граф гипотез строится алгоритмом 1 из уравнений при любом масштабе; онтологический вывод в профиле OWL 2 EL (ELK) полиномиален.",

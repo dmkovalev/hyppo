@@ -83,6 +83,8 @@ export type RealData = {
     nodes: { id: string; label: string; branch: string; status: string;
              equation: { formula: string; output: string }; model: string }[];
     edges: string[][]; derivation: Deriv[]; note: string;
+    tasks: { id: string; label: string; hypotheses: string[] }[];
+    task_edges: string[][]; is_dag: boolean; depth: number;
   };
   scale: { note: string; speedup_10k: string;
     points: { hypotheses: number; ELK_s: number; HermiT_s: number; wells: string }[] };

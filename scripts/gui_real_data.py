@@ -335,6 +335,96 @@ def run_field(name):
     }
 
 
+# ───────── conceptual HybridCRM graph via the REAL Algorithm 1 ───────────────
+# Per CLAUDE.md: the derived_by graph is built ONLY by HypothesisLattice
+# (platform Algorithm 1), not a local reimplementation. 16 hypotheses,
+# article continuous numbering H1–H16 (liquid H1–H8, watercut H9–H14,
+# ГРП=H15, oil=H16). Correctness: 16 nodes, 17 edges, DAG depth 5.
+_CONCEPT_OLD = [
+    ("H1",  "I_agg = w_ij * I_j",                 "I_agg",      "Агрегация закачки", "жидкость"),
+    ("H2",  "q_f = a_f*q_f_prev + b_f*I_agg",      "q_f",        "CRM быстрый канал", "жидкость"),
+    ("H3",  "q_s = a_s*q_s_prev + b_s*I_agg",      "q_s",        "CRM медленный канал", "жидкость"),
+    ("H4",  "q_c = w_f*q_f + (1-w_f)*q_s",         "q_c",        "Смешение каналов", "жидкость"),
+    ("H5",  "q_liq_phys = J*q_c + q_prim",         "q_liq_phys", "Продуктивность", "жидкость"),
+    ("H6",  "q_prim = q_prev*exp(-dt*taup)",       "q_prim",     "Первичная добыча (спад)", "жидкость"),
+    ("H7",  "l_ml = MLP(x_hist)",                  "l_ml",       "ML-коррекция (MLP)", "жидкость"),
+    ("H8",  "l = g*q_liq_phys + (1-g)*l_ml",       "l",          "LPR Fusion (вентиль g)", "жидкость"),
+    ("H11", "Sw = Sw_prev + (Winj - Wlout)*dt/Vp", "Sw",         "Материальный баланс", "обводнённость"),
+    ("H12", "krw = ((Sw-Swc)/(1-Swc-Sor))**nw",    "krw",        "Corey krw", "обводнённость"),
+    ("H12b", "kro = ((1-Sw-Sor)/(1-Swc-Sor))**no", "kro",        "Corey kro", "обводнённость"),
+    ("H13", "fw = 1/(1 + kro*muw/(krw*muo))",      "fw",         "Баклея–Леверетта fw", "обводнённость"),
+    ("H14", "o_p = 1 - fw",                        "o_p",        "WCT-якорь (физика)", "обводнённость"),
+    ("H15", "o = gw*o_p + (1-gw)*o_m",             "o",          "WCT Fusion", "обводнённость"),
+    ("GRP", "J = J0 + dJ_grp",                     "J",          "ГРП (модуляция)", "ГТМ"),
+    ("H19", "q_oil = l * o",                       "q_oil",      "OPR — прогноз нефти", "нефть"),
+]
+_CONCEPT_TASKS = [
+    ("T1", "Парсинг закачки", ["H1"]),
+    ("T2", "CRM-каналы", ["H2", "H3"]),
+    ("T3", "Смешение", ["H4"]),
+    ("T4", "Продуктивность и спад", ["H5", "H6"]),
+    ("T5", "ML-коррекция", ["H7"]),
+    ("T6", "Слияние жидкости", ["H8"]),
+    ("T7", "Материальный баланс", ["H11"]),
+    ("T8", "Фазовые проницаемости", ["H12", "H12b"]),
+    ("T9", "Фракционный поток", ["H13"]),
+    ("T10", "Обводнённость", ["H14", "H15"]),
+    ("T11", "Прогноз нефти", ["H19"]),
+    ("T12", "ГТМ-модуляция", ["GRP"]),
+]
+# old name -> continuous article numbering
+_RENUM = {"H1": "H1", "H2": "H2", "H3": "H3", "H4": "H4", "H5": "H5", "H6": "H6",
+          "H7": "H7", "H8": "H8", "H11": "H9", "H12": "H10", "H12b": "H11",
+          "H13": "H12", "H14": "H13", "H15": "H14", "GRP": "H15", "H19": "H16"}
+_CMODEL = {**{o: "m_crmp" for o in ["H1", "H2", "H3", "H4", "H5", "H6"]},
+           **{o: "m_nn" for o in ["H7"]}, **{o: "m_hyb" for o in ["H8", "H15", "H19"]},
+           **{o: "m_bl" for o in ["H11", "H12", "H12b", "H13", "H14"]},
+           "GRP": "m_bl"}
+
+
+def build_conceptual_lattice():
+    """Build the conceptual HybridCRM graph with the REAL platform Algorithm 1."""
+    import networkx as nx
+    from hyppo.coa._base import Equation, Structure
+    from hyppo.lattice_constructor._base import HypothesisLattice
+
+    class Hyp:
+        def __init__(self, name, formula):
+            self.name = name
+            self.structure = Structure([Equation(formula=formula)])
+
+    hm = {n: Hyp(n, f) for n, f, o, lab, br in _CONCEPT_OLD}
+    out = {n: o for n, f, o, lab, br in _CONCEPT_OLD}
+
+    class WF:
+        def __init__(self, tasks): self._t = [[hm[h] for h in hs] for _, _, hs in tasks]
+        def get_tasks(self): return self._t
+
+    G = HypothesisLattice([hm[n] for n, *_ in _CONCEPT_OLD], WF(_CONCEPT_TASKS)).lattice
+    edges_old = [(u.name, v.name) for u, v in G.edges()]
+
+    R = _RENUM
+    nodes = [{"id": R[n], "label": lab, "branch": br,
+              "equation": {"formula": f, "output": o}, "model": _CMODEL[n],
+              "status": "SUPPORTED"} for n, f, o, lab, br in _CONCEPT_OLD]
+    edges = [[R[a], R[b]] for a, b in edges_old]
+    deriv = [{"src": R[a], "dst": R[b], "via": out[a],
+              "reason": f"выход {out[a]} ({R[a]}) входит в уравнение {R[b]}"} for a, b in edges_old]
+    labelmap = {n: lab for n, f, o, lab, br in _CONCEPT_OLD}
+    tasks = [{"id": t, "label": lab,
+              "hypotheses": [R[h] for h in hs]} for t, lab, hs in _CONCEPT_TASKS]
+    task_edges = [[a, b] for a, b in zip([t[0] for t in _CONCEPT_TASKS][:-1],
+                                         [t[0] for t in _CONCEPT_TASKS][1:])]
+    depth = nx.dag_longest_path_length(G)
+    return {"nodes": nodes, "edges": edges, "derivation": deriv,
+            "tasks": tasks, "task_edges": task_edges,
+            "is_dag": bool(nx.is_directed_acyclic_graph(G)), "depth": int(depth),
+            "note": f"16 гипотез (сплошная нумерация статьи H1–H16), {len(edges)} рёбер "
+                    f"derived_by, DAG глубины {depth}. Построено настоящим алгоритмом 1 "
+                    f"(HypothesisLattice) из уравнений; жидкость H1–H8, обводнённость H9–H14, "
+                    f"ГРП H15, нефть H16."}
+
+
 def main():
     axes, size = config_axes()
     fields = {name: run_field(name) for name in ("Brugge", "Norne")}
@@ -375,18 +465,8 @@ def main():
         "speedup_10k": "9.4×",
     }
 
-    # Conceptual HybridCRM graph (Figure lattice_crm) built by Algorithm 1 from
-    # the §4.4 equations — the model architecture, independent of field data.
-    c_edges, c_trace, c_vars = build_graph_algorithm1()
-    concept = {
-        "nodes": [{"id": h, "label": label, "branch": branch,
-                   "status": BASE_STATUS.get(h, "SUPPORTED"),
-                   "equation": {"formula": f, "output": o}, "model": MODEL_OF[h]}
-                  for h, f, o, label, branch, task in HYPS],
-        "edges": c_edges, "derivation": c_trace,
-        "note": "19 гипотез (H1–H19), рёбра derived_by выведены алгоритмом 1 из уравнений §4.4. "
-                "Ветвь жидкости H1–H10, обводнённости H11–H18, слияние H19.",
-    }
+    # Conceptual HybridCRM graph via the REAL platform Algorithm 1 (HypothesisLattice).
+    concept = build_conceptual_lattice()
 
     data = {
         "domain": "HybridCRM — прогноз нефтедобычи при заводнении (Norne / Brugge)",
