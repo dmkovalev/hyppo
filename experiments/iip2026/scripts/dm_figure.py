@@ -14,6 +14,20 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
+# --- стиль под деком (Metropolis: sans + палитра frccBlue/frccAccent) ---
+plt.rcParams.update({
+    "font.family": "sans-serif",
+    "font.sans-serif": ["Segoe UI", "Arial", "DejaVu Sans"],
+    "axes.prop_cycle": plt.cycler(
+        color=["#19375F", "#0078B4", "#2E8B57", "#C0392B", "#7D3C98", "#B7950B"]
+    ),
+    "axes.edgecolor": "#19375F",
+    "axes.labelcolor": "#19375F",
+    "text.color": "#19375F",
+    "xtick.color": "#444444",
+    "ytick.color": "#444444",
+})
+
 HERE = Path(__file__).resolve()
 DATA = HERE.parent.parent / "data" / "asymptotic_results_dm.json"
 WORST = HERE.parent.parent / "data" / "worstcase_dm.json"
