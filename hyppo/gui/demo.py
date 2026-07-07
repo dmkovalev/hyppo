@@ -2,64 +2,71 @@ import json
 
 DEMO_NAME = "norne-brugge"
 
-# ————— Полный граф HybridCRM (19 гипотез), part4.tex §4.4 —————
-# Ветвь A (жидкость, LPR): H1–H10. Ветвь B (обводнённость, WCT): H11–H18.
-# H19 (OPR) объединяет обе ветви. Топология идентична synthetic_honest.py.
+# ————— Канонический граф гибридной модели (16 гипотез H1–H16) —————
+# Совпадает с real_data.json / golden-тестом / статьёй: ветвь жидкости H1–H8,
+# ветвь обводнённости H9–H14, ГТМ H15 (модуляция), H16 (OPR — прогноз нефти).
+# 18 рёбер derived_by, DAG глубины 10 (после связки H8→H9). Рёбра выведены из
+# потока переменных уравнений Алгоритмом 1 (причинное упорядочение).
 _EDGES = [
     ["H1", "H2"], ["H1", "H3"], ["H2", "H4"], ["H3", "H4"], ["H4", "H5"],
-    ["H5", "H6"], ["H5", "H7"], ["H5", "H8"], ["H6", "H9"], ["H7", "H9"],
-    ["H8", "H10"], ["H9", "H10"],                        # ветвь A (LPR)
-    ["H11", "H12"], ["H12", "H14"], ["H13", "H16"], ["H14", "H16"],
-    ["H15", "H16"], ["H16", "H17"], ["H17", "H18"],      # ветвь B (WCT)
-    ["H10", "H19"], ["H18", "H19"],                      # слияние → OPR
+    ["H6", "H5"], ["H7", "H8"], ["H5", "H8"],            # ветвь жидкости
+    ["H15", "H5"],                                        # ГТМ: модуляция продуктивности
+    ["H8", "H9"],                                         # межветвевое: прогноз жидкости → мат. баланс
+    ["H9", "H10"], ["H9", "H11"], ["H10", "H12"], ["H11", "H12"],
+    ["H12", "H13"], ["H13", "H14"],                       # ветвь обводнённости
+    ["H8", "H16"], ["H14", "H16"],                        # слияние → OPR
 ]
 
 _LABELS = {
-    "H1": "Агрегация закачки", "H2": "CRM-переток", "H3": "Первичная добыча",
-    "H4": "CRM-жидкость", "H5": "Признаки ML", "H6": "ML-регрессия",
-    "H7": "ML-прогноз жидкости", "H8": "LPR-якорь (физика)", "H9": "ML-ветвь жидкости",
-    "H10": "LPR Fusion (вентиль)", "H11": "Насыщенность", "H12": "Прорыв воды (Buckley–Leverett)",
-    "H13": "WOR-эмпирика", "H14": "BL-обводнённость", "H15": "Признаки WCT",
-    "H16": "BL/WOR смешение", "H17": "WCT-регрессия", "H18": "WCT Fusion",
-    "H19": "OPR — прогноз нефти",
+    "H1": "Агрегация закачки", "H2": "CRM быстрый канал", "H3": "CRM медленный канал",
+    "H4": "Смешение каналов", "H5": "Продуктивность", "H6": "Первичная добыча (спад)",
+    "H7": "ML-коррекция (MLP)", "H8": "LPR Fusion (вентиль g)", "H9": "Материальный баланс",
+    "H10": "Corey krw", "H11": "Corey kro", "H12": "Баклея–Леверетта fw",
+    "H13": "WCT-якорь (физика)", "H14": "WCT Fusion", "H15": "ГРП (модуляция)",
+    "H16": "OPR — прогноз нефти",
 }
-_BRANCH = {**{f"H{i}": "LPR (жидкость)" for i in range(1, 11)},
-           **{f"H{i}": "WCT (обводнённость)" for i in range(11, 19)},
-           "H19": "OPR (слияние)"}
+_BRANCH = {**{f"H{i}": "LPR (жидкость)" for i in range(1, 9)},
+           **{f"H{i}": "WCT (обводнённость)" for i in range(9, 15)},
+           "H15": "ГТМ (модуляция)", "H16": "OPR (слияние)"}
 
-# 15 гиперпараметров (part4.tex, табл. C-пространства): 9 бинарных, 5 троичных,
-# 1 четверичный → |C| = 2^9·3^5·4 = 497664 (до ограничения C1).
+# конкурирующие гипотезы: физика (H5) против ML (H7) для дебита жидкости
+_COMPETES = {"H5": ["H7"], "H7": ["H5"]}
+
+# Гиперпараметры C-пространства (16 осей): 13 бинарных + 3 троичных
+# → |C| = 2^13 · 3^3 = 221184 (до ограничения C1 на совместимость моделей ветвей).
 _PARAMS = {
     "H1": {"crm_constraint": ["bounded", "free"]},
-    "H2": {"transmissibility": ["static", "dynamic"]},
-    "H4": {"primary_regime": ["decline", "constant"]},
-    "H5": {"features": ["base", "extended", "full"]},
-    "H6": {"regressor": ["ridge", "gbm", "mlp"]},
-    "H8": {"anchor": ["physical", "corrected"]},
-    "H10": {"gate": ["learned", "fixed"]},
-    "H11": {"saturation": ["corey", "loglinear", "spline"]},
+    "H2": {"tau_fast": ["static", "dynamic"]},
+    "H3": {"tau_slow": ["static", "dynamic"]},
+    "H4": {"channel_mix": ["linear", "weighted"]},
+    "H5": {"productivity": ["physical", "corrected"]},
+    "H6": {"decline": ["exp", "harmonic"]},
+    "H7": {"ml_model": ["gnn", "transformer", "mlp"]},
+    "H8": {"lpr_gate": ["learned", "fixed"]},
+    "H9": {"saturation": ["corey", "spline"]},
+    "H10": {"corey_nw": ["2", "3", "4"]},
+    "H11": {"corey_no": ["2", "3", "4"]},
     "H12": {"bl_form": ["classic", "extended"]},
-    "H13": {"wor_fit": ["linear", "power", "log"]},
-    "H16": {"blend": ["bl", "wor", "mixed", "adaptive"]},
-    "H17": {"wct_reg": ["ridge", "gbm"]},
-    "H18": {"wct_gate": ["learned", "fixed"]},
-    "H19": {"combine": ["product", "weighted"]},
-    "H7": {"ml_horizon": ["short", "long"]},
+    "H13": {"wct_anchor": ["physical", "empirical"]},
+    "H14": {"wct_gate": ["learned", "fixed"]},
+    "H15": {"gtm_type": ["frac", "acid"]},
+    "H16": {"combine": ["product", "weighted"]},
 }
 
 # Немного статусного разнообразия для наглядной раскраски графа.
-_STATUS = {"H9": "SUPERSEDED", "H13": "SUPERSEDED"}
+_STATUS = {"H15": "PROPOSED"}
 
 
 def _hypotheses():
     hs = []
-    for i in range(1, 20):
+    for i in range(1, 17):
         hid = f"H{i}"
         hs.append({
             "id": hid,
             "label": _LABELS[hid],
             "params": _PARAMS.get(hid, {}),
             "epistemic_status": _STATUS.get(hid, "SUPPORTED"),
+            "competes": _COMPETES.get(hid, []),
             "description": f"Ветвь: {_BRANCH[hid]}.",
         })
     return hs
@@ -67,20 +74,18 @@ def _hypotheses():
 
 # Модели M и отображение R: M → H (каждая гипотеза реализована моделью).
 _MODEL_OF = {
-    **{f"H{i}": "m_crm" for i in [1, 2, 3, 4]},
-    **{f"H{i}": "m_ml" for i in [5, 6, 7, 9]},
-    **{f"H{i}": "m_hyb" for i in [8, 10]},
-    **{f"H{i}": "m_bl" for i in [11, 12, 13, 14, 16]},
-    **{f"H{i}": "m_wctml" for i in [15, 17]},
-    "H18": "m_fusion", "H19": "m_opr",
+    **{f"H{i}": "m_crm" for i in [1, 2, 3, 4, 5, 6]},
+    "H7": "m_ml",
+    **{f"H{i}": "m_hyb" for i in [8, 14]},
+    **{f"H{i}": "m_bl" for i in [9, 10, 11, 12, 13]},
+    "H15": "m_gtm", "H16": "m_opr",
 }
 _MODELS = [
     {"id": "m_crm", "label": "CRM (pywaterflood)", "kind": "аналитическая"},
-    {"id": "m_ml", "label": "Gradient Boosting", "kind": "ML"},
-    {"id": "m_hyb", "label": "Hybrid gate", "kind": "гибрид"},
+    {"id": "m_ml", "label": "Transformer + GNN", "kind": "ML"},
     {"id": "m_bl", "label": "Buckley–Leverett", "kind": "аналитическая"},
-    {"id": "m_wctml", "label": "Ridge WCT", "kind": "ML"},
-    {"id": "m_fusion", "label": "Fusion gate", "kind": "гибрид"},
+    {"id": "m_hyb", "label": "Fusion gate (вентиль)", "kind": "гибрид"},
+    {"id": "m_gtm", "label": "ГТМ-модуляция", "kind": "аналитическая"},
     {"id": "m_opr", "label": "OPR combiner", "kind": "композиция"},
 ]
 
@@ -95,7 +100,7 @@ def _build_ve():
         for hid, pmap in _PARAMS.items() for ax, lv in pmap.items()
     ]
     return {
-        "domain": "HybridCRM — прогноз нефтедобычи при заводнении (Norne / Brugge)",
+        "domain": "Гибридная ёмкостно-резистивная модель — прогноз нефтедобычи при заводнении (Norne / Brugge)",
         "ontology": {
             "name": "PetroReservoirOntology",
             "iri": "http://synthesis.ipi.ac.ru/petro.owl",
@@ -126,27 +131,33 @@ def _build_ve():
         "mapping": mapping,
         "workflow_edges": _EDGES,
         "configuration": configuration,
-        "constraint_note": "Ограничение C1 (делимость скрытого слоя на число голов) "
-                           "сокращает |C| с 497664 до 359424.",
+        "constraint_note": "Пространство конфигураций |C| = произведение уровней осей "
+                           "(16 осей: 13 бинарных + 3 троичных = 221184); ограничение C1 "
+                           "(совместимость моделей ветвей) сокращает число допустимых сочетаний.",
     }
 
 
 _DEMO_VE = _build_ve()
 
-# Две предзапущенные итерации (Обзор не пустой). Каскад по H12 (прорыв воды).
+# Две предзапущенные итерации (Обзор не пустой). Каскад по H9 (материальный баланс):
+# меняется H9 → пересчитываются H9 и его потомки вниз (7 из 16), остальные из кэша.
+_ALL = [f"H{i}" for i in range(1, 17)]
+_CASCADE_H9 = ["H9", "H10", "H11", "H12", "H13", "H14", "H16"]  # H9 + потомки
 _DEMO_ITERATIONS = [
     {
         "results": {h: {"status": "SUCCESS", "metrics": {"r2": 0.71},
-                        "epistemic_status": "SUPPORTED"} for h in [f"H{i}" for i in range(1, 20)]},
-        "reused": 0, "best": {"hypothesis": "H19", "r2": 0.71},
-        "note": "Базовая линия — полный расчёт всех 19 гипотез.",
+                        "epistemic_status": "SUPPORTED"} for h in _ALL},
+        "reused": 0, "best": {"hypothesis": "H16", "r2": 0.71},
+        "note": "Базовая линия — полный расчёт всех 16 гипотез.",
     },
     {
-        "results": {h: {"status": "SUCCESS", "metrics": {"r2": 0.86 if h == "H19" else 0.74},
-                        "epistemic_status": "SUPPORTED"} for h in [f"H{i}" for i in range(1, 20)]},
-        "reused": 14,
-        "best": {"hypothesis": "H19", "r2": 0.86},
-        "note": "Изменён прорыв воды (H12): пересчитаны 5 из 19, остальные из кэша.",
+        "results": {h: {"status": "SUCCESS",
+                        "metrics": {"r2": 0.86 if h == "H16" else 0.74},
+                        "epistemic_status": "SUPPORTED"} for h in _ALL},
+        "reused": len(_ALL) - len(_CASCADE_H9),   # 9 из кэша
+        "best": {"hypothesis": "H16", "r2": 0.86},
+        "note": "Изменён материальный баланс (H9): пересчитаны 7 из 16 "
+                "(H9 и потомки), остальные 9 — из кэша.",
     },
 ]
 
@@ -155,7 +166,7 @@ def seed_demo(store) -> None:
     if any(p["name"] == DEMO_NAME for p in store.list()):
         return
     pid = store.create(name=DEMO_NAME,
-                       description="HybridCRM · 19 гипотез · Norne/Brugge")
+                       description="Гибридная модель заводнения · 16 гипотез · Norne/Brugge")
     store.save_ve(pid, json.dumps(_DEMO_VE))
     for it in _DEMO_ITERATIONS:
         store.add_iteration(pid, json.dumps(it))
