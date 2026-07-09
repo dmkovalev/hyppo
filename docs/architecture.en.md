@@ -89,6 +89,10 @@ posterior, Benjamini-Yekutieli correction, combined ranking.
 ontology from `hyppo.core._base`: consistency checks, workflow validation,
 quality gates, multi-experiment rules, model compatibility, lifecycle
 rules. Procedural acyclicity (rule 5) is one of the golden-test claims.
+Algorithm 3's Stage A uses HermiT by default (requires Java) but degrades
+gracefully to a Java-free limited mode on owlrl (OWL 2 RL profile: covers the
+recognising rules behind C1/C2/C6, but not existential-in-superclass nor
+cardinality reasoning) when no Java runtime is present.
 
 ### `hyppo.actions`
 
