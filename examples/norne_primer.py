@@ -144,16 +144,20 @@ def act_1_tuple() -> None:
     _pause()
 
 
-def act_2_algorithm1() -> tuple[HypothesisLattice, "nx.DiGraph"]:
+def act_2_algorithm1() -> tuple[HypothesisLattice, nx.DiGraph]:
     """Algorithm 1: build the hypothesis lattice from equations + workflow."""
     _act(2, "Algorithm 1 — automatic hypothesis-graph construction")
     lattice = HypothesisLattice(ALL_HYPS, WF)
     g = lattice.lattice
     print("\nDerived_by edges (h_i -> h_j means h_j consumes the output of h_i):")
-    for u, v in sorted(g.edges(), key=lambda e: (PAPER[str(e[0])], PAPER[str(e[1])])):
+    edges = sorted(
+        g.edges(),
+        key=lambda e: (int(PAPER[str(e[0])][1:]), int(PAPER[str(e[1])][1:])),
+    )
+    for u, v in edges:
         print(
             f"  {PAPER[str(u)]:<4} -> {PAPER[str(v)]:<4}   "
-            f"(output of {u} appears in the equation of {v})"
+            f"(output of {PAPER[str(u)]} appears in the equation of {PAPER[str(v)]})"
         )
     depth = nx.dag_longest_path_length(g)
     print(
