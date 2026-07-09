@@ -20,6 +20,7 @@ import argparse
 import networkx as nx
 
 from hyppo.coa._base import Equation, Structure
+from hyppo.coa.graph import HypothesisGraph
 from hyppo.lattice_constructor._base import HypothesisLattice
 
 # --- Norne HybridCRM data (paper [SVD], fig. 3; same case as the GUI demo) ---
@@ -195,6 +196,45 @@ def act_3_algorithm2(g_full: nx.DiGraph) -> None:
     _pause()
 
 
+def act_4_plan_theorem1(g: nx.DiGraph) -> set[str]:
+    """Algorithm 4: cascade recompute plan; Theorem 1: correct + minimal."""
+    _act(4, "Algorithm 4 — recompute plan; Theorem 1 — correctness/minimality")
+    codes = [code for code, _, _, _ in HYPS]
+    idx = {c: i for i, c in enumerate(codes)}
+    edges = [(idx[str(u)], idx[str(v)]) for u, v in g.edges()]
+    hg = HypothesisGraph.from_edges(len(codes), edges)
+
+    changed = "H8"  # scenario: the LPR fusion was re-fit
+    cached = set(range(len(codes))) - {idx[changed]}
+    plan = hg.plan(cached)
+    plan_names = sorted(PAPER[codes[i]] for i in plan)
+    print(f"\nScenario: {PAPER[changed]} changed -> plan P_ne = {plan_names}")
+    print("Cascade: the whole liquid-fusion downstream (material balance,")
+    print("watercut chain, oil forecast) is invalidated; upstream is not.")
+
+    # Theorem 1, part 1 — correctness (independent reachability oracle).
+    succ: dict[int, set[int]] = {i: set() for i in range(len(codes))}
+    for u, v in edges:
+        succ[u].add(v)
+
+    def is_valid(p: set[int]) -> bool:
+        if not set(range(len(codes))).difference(cached) <= p:
+            return False
+        return all(succ[x] <= p for x in p)
+
+    correct = is_valid(plan)
+    # Theorem 1, part 2 — subset-minimality: dropping ANY element breaks it.
+    minimal = all(not is_valid(plan - {x}) for x in plan)
+    print(
+        f"\nTheorem 1: plan is correct: {correct};  "
+        f"subset-minimal (dropping any element breaks correctness): {minimal}"
+    )
+    if not (correct and minimal):
+        raise SystemExit("THEOREM 1 CHECK FAILED")
+    _pause()
+    return {codes[i] for i in plan}
+
+
 def main() -> None:
     global PAUSE
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
@@ -205,6 +245,8 @@ def main() -> None:
     act_1_tuple()
     _lattice, g = act_2_algorithm1()
     act_3_algorithm2(g)
+    p_ne = act_4_plan_theorem1(g)
+    print(f"\n(P_ne carried into Act 5 execution: {sorted(p_ne)})")
 
 
 if __name__ == "__main__":
