@@ -1,6 +1,21 @@
 """Shared test fixtures for Hyppo test suite."""
+
 import pytest
 import pytest_asyncio
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _close_owlready2_default_world():
+    """Close owlready2's global SQLite world at session end.
+
+    Under `pytest --cov`, this connection otherwise surfaces as an
+    "unclosed database" ResourceWarning (owlready2 keeps one process-wide
+    sqlite3 connection open by design; it is unrelated to hyppo/coa/causal.py).
+    """
+    yield
+    import owlready2
+
+    owlready2.default_world.close()
 
 
 # ── owlready2 world isolation via test ordering ─────────────────────────────
@@ -12,7 +27,7 @@ import pytest_asyncio
 # On Unix: pytest-forked would give true process isolation.
 # On Windows: we reorder so OWL-heavy files run first in a clean world.
 
-_OWL_FIRST_FILES = ("test_owl_reasoning.py", "test_oil_adapter.py")
+_OWL_FIRST_FILES = ("test_owl_reasoning.py", "test_oil_adapter.py", "test_markers.py")
 
 
 def pytest_collection_modifyitems(items):
@@ -27,13 +42,15 @@ def pytest_collection_modifyitems(items):
     items[:] = owl_items + other_items
 
 
-# ── wfdb aiosqlite fixture ──────────────────────────────────────────────────
+# ── version-store aiosqlite fixture ──────────────────────────────────────────────────
+
 
 @pytest_asyncio.fixture
-async def wfdb_session(monkeypatch, tmp_path):
+async def version_db_session(monkeypatch, tmp_path):
     """Per-test aiosqlite database with all ORM tables provisioned."""
     from sqlalchemy.ext.asyncio import create_async_engine
-    from wfdb.base import Base
+
+    from hyppo.versioning._db import Base
 
     db_path = tmp_path / "hyppo_test.sqlite"
     db_url = f"sqlite+aiosqlite:///{db_path}"

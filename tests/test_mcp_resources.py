@@ -1,8 +1,9 @@
 """Unit tests for hyppo.mcp.resources list/read."""
+
 import pytest
 
-from hyppo.mcp.server import create_server
 from hyppo.mcp.resources import register_resources
+from hyppo.mcp.server import create_server
 
 
 @pytest.fixture

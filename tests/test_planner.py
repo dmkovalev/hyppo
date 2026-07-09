@@ -3,12 +3,12 @@
 import networkx as nx
 import pytest
 
-from hyppo.planner._base import ExecutionPlan, Planner, build_optimal_plan
-
+from hyppo.planner._base import Planner, build_optimal_plan
 
 # ---------------------------------------------------------------------------
 # Helpers: lightweight fakes for lattice, configuration, and Database
 # ---------------------------------------------------------------------------
+
 
 class FakeModel:
     def __init__(self, name: str):
@@ -63,9 +63,11 @@ class FakeDatabase:
         return self._lattices
 
     # --- convenience for tests ---
-    def put_result(self, hypothesis: FakeHypothesis, config: FakeConfiguration, obj: dict) -> None:
+    def put_result(
+        self, hypothesis: FakeHypothesis, config: FakeConfiguration, obj: dict
+    ) -> None:
         """Store a fake cached result for the given hypothesis + config."""
-        for cm in (config.parameters or [config]):
+        for cm in config.parameters or [config]:
             for model in hypothesis.is_implemented_by_model:
                 key = f"{hypothesis.name}__{model.name}__{str(cm)}"
                 self._results[f"results/{key}"] = _FakePickled(obj)
@@ -74,6 +76,7 @@ class FakeDatabase:
 # ---------------------------------------------------------------------------
 # Tests
 # ---------------------------------------------------------------------------
+
 
 def test_plan_all_new():
     """All hypotheses without cache -> all in needs_execution (P_ne)."""
@@ -177,3 +180,81 @@ def test_plan_empty_lattice():
 
     assert len(plan.needs_execution) == 0
     assert len(plan.cached) == 0
+
+
+def test_shared_cache_planner_sees_runner_saves():
+    """SharedCache: результат, записанный API раннера (save_result), планировщик
+    видит как кэш (P_e) — planner и runner делят ОДИН SQLite-кэш."""
+    from hyppo.metadata_repository import SharedCache
+
+    h1, h2 = FakeHypothesis("h1"), FakeHypothesis("h2")
+    g = nx.DiGraph()
+    g.add_edge(h1, h2)
+    lattice = FakeLattice(g)
+    config = FakeConfiguration()
+    cache = SharedCache(":memory:")
+
+    # холодный план: кэш пуст → обе в needs_execution
+    p0 = build_optimal_plan(config, lattice, cache)
+    assert h1 in p0.needs_execution and h2 in p0.needs_execution and not p0.cached
+
+    # runner «вычислил» и записал результаты (тот же config, что видит planner)
+    cfg_key = {"parameters": ["default"]}
+    cache.save_result("h1", cfg_key, {"r2": 0.9})
+    cache.save_result("h2", cfg_key, {"r2": 0.88})
+
+    # тёплый план: планировщик видит записи раннера как кэш
+    p1 = build_optimal_plan(config, lattice, cache)
+    assert h1 in p1.cached and h2 in p1.cached and not p1.needs_execution
+
+    # низкий R² из кэша раннера → отсечение ветви планировщиком
+    cache.save_result("h2", cfg_key, {"r2": 0.4})
+    p2 = build_optimal_plan(config, lattice, cache, r2_threshold=0.7)
+    assert h1 in p2.cached and h2 not in p2.cached and h2 not in p2.needs_execution
+
+
+def test_per_hypothesis_config_invalidates_single_branch():
+    """По-гипотезные конфигурации: смена конфигурации ОДНОЙ гипотезы даёт промах
+    только по ней и пересчёт её замыкания вниз — одним вызовом build_optimal_plan."""
+    from hyppo.metadata_repository import SharedCache
+
+    h1, h2, h3 = FakeHypothesis("h1"), FakeHypothesis("h2"), FakeHypothesis("h3")
+    g = nx.DiGraph()
+    g.add_edge(h1, h2)
+    g.add_edge(h2, h3)
+    lattice = FakeLattice(g)
+    cache = SharedCache(":memory:")
+
+    base = {"v": 1}
+    per = {"h1": base, "h2": base, "h3": base}
+    for name in ("h1", "h2", "h3"):
+        cache.save_result(name, per[name], {"r2": 0.9})
+
+    # всё в кэше → пусто на пересчёт
+    p0 = build_optimal_plan(None, lattice, cache, per_hypothesis_configs=per)
+    assert {h1, h2, h3} == p0.cached and not p0.needs_execution
+
+    # меняем конфигурацию ТОЛЬКО h2 → промах по h2, пересчёт h2 и потомка h3
+    per2 = {"h1": base, "h2": {"v": 2}, "h3": base}
+    p1 = build_optimal_plan(None, lattice, cache, per_hypothesis_configs=per2)
+    assert p1.needs_execution == {h2, h3}
+    assert p1.cached == {h1}
+
+
+def test_plan_rejects_cyclic_graph():
+    """Cyclic hypothesis graph must raise ValueError (Algorithm 4 precondition)."""
+    h1 = FakeHypothesis("h1")
+    h2 = FakeHypothesis("h2")
+    h3 = FakeHypothesis("h3")
+    g = nx.DiGraph()
+    g.add_nodes_from([h1, h2, h3])
+    g.add_edge(h1, h2)
+    g.add_edge(h2, h3)
+    g.add_edge(h3, h1)  # cycle: h1 -> h2 -> h3 -> h1
+
+    lattice = FakeLattice(g)
+    db = FakeDatabase()
+    config = FakeConfiguration()
+
+    with pytest.raises(ValueError, match="cycle"):
+        build_optimal_plan(config, lattice, db)

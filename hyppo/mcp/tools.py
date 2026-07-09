@@ -1,4 +1,5 @@
 """Bridge hyppo.actions.ACTION_REGISTRY to MCP tool primitives."""
+
 from __future__ import annotations
 
 import inspect
@@ -38,7 +39,8 @@ def register_tools(server: Server) -> dict:
         if spec.requires_audit:
             audit_log.info(
                 "mcp_tool_call kind=%s trust=%s args=%s",
-                name, spec.trust.value,
+                name,
+                spec.trust.value,
                 str(payload.model_dump())[:200],
             )
         try:
@@ -46,14 +48,18 @@ def register_tools(server: Server) -> dict:
             if inspect.isawaitable(result):
                 result = await result
         except NotImplementedError as exc:
-            return [TextContent(
-                type="text",
-                text=json.dumps({
-                    "error": "not_implemented",
-                    "kind": name,
-                    "detail": str(exc),
-                }),
-            )]
+            return [
+                TextContent(
+                    type="text",
+                    text=json.dumps(
+                        {
+                            "error": "not_implemented",
+                            "kind": name,
+                            "detail": str(exc),
+                        }
+                    ),
+                )
+            ]
         return [TextContent(type="text", text=result.model_dump_json(indent=2))]
 
     return {"tools/list": _list, "tools/call": _call}

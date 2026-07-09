@@ -21,31 +21,21 @@ from hyppo.core._base import (
     Configuration,
     Hypothesis,
     Model,
-    Workflow,
     VirtualExperiment,
-    competes,
-    derived_by,
-    is_implemented_by_model,
+    Workflow,
     virtual_experiment_onto,
 )
 from hyppo.ontology.core_rules import (
     DataDrivenModel,
-    DomainOntology,
     HybridModel,
     InvalidHypothesis,
     OilDomainOntology,
     PhysicsModel,
     StaleHypothesis,
-    has_for_ontology,
 )
 from hyppo.ontology.provenance import (
     ExperimentRun,
     HypothesisVersion,
-    ObsoleteVersion,
-    StaleRun,
-    superseded_by,
-    uses_hypothesis_version,
-    version_of,
 )
 
 __all__ = [
@@ -154,6 +144,7 @@ def _stamp() -> datetime.datetime:
 # Factory helpers
 # ---------------------------------------------------------------------------
 
+
 def _make_artefact(cls: type, name: str, desc: str) -> Any:
     """Create an OWL individual with mandatory Artefact fields populated."""
     ind = cls(_uid(name))
@@ -169,27 +160,33 @@ def _make_artefact(cls: type, name: str, desc: str) -> Any:
 def _build_hypotheses() -> dict[str, Hypothesis]:
     """Create the six HybridCRM hypotheses as OWL individuals."""
     h_CRM = _make_artefact(
-        Hypothesis, "h_CRM",
+        Hypothesis,
+        "h_CRM",
         "DualTau CRM -- physics branch: connectivity fractions and time constants",
     )
     h_ML = _make_artefact(
-        Hypothesis, "h_ML",
+        Hypothesis,
+        "h_ML",
         "Transformer+GNN -- ML branch: temporal and spatial feature learning",
     )
     h_LPR = _make_artefact(
-        Hypothesis, "h_LPR",
+        Hypothesis,
+        "h_LPR",
         "Fusion gate -- combines physics and ML liquid production predictions",
     )
     h_MB = _make_artefact(
-        Hypothesis, "h_MB",
+        Hypothesis,
+        "h_MB",
         "Material balance -- water saturation update from predicted production",
     )
     h_BL = _make_artefact(
-        Hypothesis, "h_BL",
+        Hypothesis,
+        "h_BL",
         "Buckley-Leverett -- fractional flow from saturation profile",
     )
     h_WCT = _make_artefact(
-        Hypothesis, "h_WCT",
+        Hypothesis,
+        "h_WCT",
         "WCT-anchoring -- water cut correction using physics and ML context",
     )
 
@@ -284,7 +281,8 @@ def build_oil_virtual_experiment() -> dict[str, Any]:
         return _VE_CACHE
 
     ontology = _make_artefact(
-        OilFieldOntology, "oil_waterflood",
+        OilFieldOntology,
+        "oil_waterflood",
         "HybridCRM waterflood domain ontology",
     )
     hyps = _build_hypotheses()
@@ -298,18 +296,21 @@ def build_oil_virtual_experiment() -> dict[str, Any]:
             models.append(m)
 
     workflow = _make_artefact(
-        Workflow, "hybridcrm_workflow",
+        Workflow,
+        "hybridcrm_workflow",
         "Training -> Optimization pipeline for HybridCRM",
     )
 
     configuration = _make_artefact(
-        Configuration, "default_hp_space",
+        Configuration,
+        "default_hp_space",
         "17-axis discrete hyperparameter space from default_space.yaml",
     )
 
     # Build the VirtualExperiment OWL individual
     ve = _make_artefact(
-        VirtualExperiment, "oil_ve",
+        VirtualExperiment,
+        "oil_ve",
         "HybridCRM waterflood optimization virtual experiment",
     )
     ve.has_for_ontology = [ontology]
@@ -357,8 +358,9 @@ def run_oil_experiment_demo() -> dict[str, Any]:
     # -- Step 2: structural classification --
     classifications: dict[str, list[str]] = {}
     for name, h in hyps.items():
-        classifications[name] = [cls.__name__ for cls in type(h).mro()
-                                 if cls.__name__ != "object"]
+        classifications[name] = [
+            cls.__name__ for cls in type(h).mro() if cls.__name__ != "object"
+        ]
     results["classifications"] = classifications
 
     # -- Step 3: cascade invalidation (structural) --

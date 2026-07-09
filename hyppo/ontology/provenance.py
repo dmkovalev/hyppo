@@ -35,7 +35,6 @@ __all__ = [
 ]
 
 with virtual_experiment_onto:
-
     # ── Supporting classes ─────────────────────────────────────────────────
     class HypothesisVersion(Thing):
         """A concrete versioned snapshot of a Hypothesis."""
@@ -75,10 +74,9 @@ with virtual_experiment_onto:
     # ── Rule 7: DerivedStaleRun ────────────────────────────────────────────
     class HypothesisWithStaleAncestor(Hypothesis):
         """Hypothesis with at least one stale ancestor via derived_by."""
+
         equivalent_to = [
-            Hypothesis & derived_by.some(
-                virtual_experiment_onto.InvalidHypothesis
-            )
+            Hypothesis & derived_by.some(virtual_experiment_onto.InvalidHypothesis)
         ]
 
     class StaleRun(ExperimentRun):
@@ -94,13 +92,15 @@ with virtual_experiment_onto:
         DerivedStaleRun from explicitly-flagged StaleRun is delegated
         to Python validation.
         """
+
         equivalent_to = [
-            ExperimentRun
-            & uses_hypothesis.some(HypothesisWithStaleAncestor)
+            ExperimentRun & uses_hypothesis.some(HypothesisWithStaleAncestor)
         ]
 
     # ── Rule 8: ObsoleteVersion ────────────────────────────────────────────
-    class superseded_by(HypothesisVersion >> HypothesisVersion, ObjectProperty, TransitiveProperty):
+    class superseded_by(
+        HypothesisVersion >> HypothesisVersion, ObjectProperty, TransitiveProperty
+    ):
         """Links an older version to its successor.
 
         TransitiveProperty ensures that if v1 superseded_by v2 and
@@ -110,6 +110,5 @@ with virtual_experiment_onto:
 
     class ObsoleteVersion(HypothesisVersion):
         """A hypothesis version that has been superseded."""
-        equivalent_to = [
-            HypothesisVersion & superseded_by.some(HypothesisVersion)
-        ]
+
+        equivalent_to = [HypothesisVersion & superseded_by.some(HypothesisVersion)]

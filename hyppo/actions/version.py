@@ -1,14 +1,15 @@
 """Hypothesis-version actions: register, get, list, mark, resolve.
 
 T5 implements `register_hypothesis_version`. T6-T8 append more actions
-to this same file. All DB I/O goes through hyppo.mcp.wfdb_client.
+to this same file. All DB I/O goes through hyppo.versioning.version_store.
 """
+
 from __future__ import annotations
 
 import hashlib
 import json
 import logging
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any, Literal
 from uuid import uuid4
 
@@ -18,7 +19,7 @@ from sqlalchemy.exc import IntegrityError
 from hyppo.actions.registry import action
 from hyppo.actions.types import AgentRole, TrustLevel
 from hyppo.actions.virtual_experiment import ALL_HYPOTHESIS_KINDS
-from hyppo.mcp import wfdb_client
+from hyppo.versioning import version_store
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +39,8 @@ class RegisterHypothesisVersionInput(BaseModel):
         description="Must be one of h_CRM, h_ML, h_LPR, h_MB, h_BL, h_WCT.",
     )
     snapshot_json: dict[str, Any] = Field(
-        description="Hyperparam dict for this hypothesis (subset of default_space axes).",
+        description="Hyperparam dict for this hypothesis (subset of default_space "
+        "axes)."
     )
     model_id: str | None = Field(
         default=None,
@@ -73,18 +75,17 @@ async def register_hypothesis_version(
     """Insert a new hypothesis_version row; auto-link supersedes."""
     if payload.hypothesis_kind not in ALL_HYPOTHESIS_KINDS:
         raise ValueError(
-            f"hypothesis_kind={payload.hypothesis_kind!r} not in "
-            f"{ALL_HYPOTHESIS_KINDS}"
+            f"hypothesis_kind={payload.hypothesis_kind!r} not in {ALL_HYPOTHESIS_KINDS}"
         )
 
     content_sha256 = _canonical_sha256(payload.snapshot_json)
-    supersedes = await wfdb_client.find_latest_active(payload.hypothesis_kind)
+    supersedes = await version_store.find_latest_active(payload.hypothesis_kind)
     version_id = str(uuid4())
-    created_at = datetime.utcnow()
+    created_at = datetime.now(UTC)
     created_by = "hyppo-mcp"
 
     try:
-        await wfdb_client.insert_hypothesis_version(
+        await version_store.insert_hypothesis_version(
             version_id=version_id,
             hypothesis_kind=payload.hypothesis_kind,
             content_sha256=content_sha256,
@@ -122,15 +123,20 @@ class GetHypothesisVersionInput(BaseModel):
     trust=TrustLevel.SAFE,
     inputs=GetHypothesisVersionInput,
     outputs=HypothesisVersionRecord,
-    allowed_roles={AgentRole.Coordinator, AgentRole.ReservoirEngineer,
-                   AgentRole.Auditor, AgentRole.Geologist,
-                   AgentRole.ProductionEngineer, AgentRole.Economist},
+    allowed_roles={
+        AgentRole.Coordinator,
+        AgentRole.ReservoirEngineer,
+        AgentRole.Auditor,
+        AgentRole.Geologist,
+        AgentRole.ProductionEngineer,
+        AgentRole.Economist,
+    },
 )
 async def get_hypothesis_version(
     payload: GetHypothesisVersionInput,
 ) -> HypothesisVersionRecord:
     """Read one hypothesis_version row by version_id."""
-    row = await wfdb_client.select_version_by_id(payload.version_id)
+    row = await version_store.select_version_by_id(payload.version_id)
     if row is None:
         raise RuntimeError(f"version not found: {payload.version_id!r}")
     return HypothesisVersionRecord(**row)
@@ -153,9 +159,14 @@ class HypothesisVersionList(BaseModel):
     trust=TrustLevel.SAFE,
     inputs=ListVersionsForHypothesisInput,
     outputs=HypothesisVersionList,
-    allowed_roles={AgentRole.Coordinator, AgentRole.ReservoirEngineer,
-                   AgentRole.Auditor, AgentRole.Geologist,
-                   AgentRole.ProductionEngineer, AgentRole.Economist},
+    allowed_roles={
+        AgentRole.Coordinator,
+        AgentRole.ReservoirEngineer,
+        AgentRole.Auditor,
+        AgentRole.Geologist,
+        AgentRole.ProductionEngineer,
+        AgentRole.Economist,
+    },
 )
 async def list_versions_for_hypothesis(
     payload: ListVersionsForHypothesisInput,
@@ -165,7 +176,7 @@ async def list_versions_for_hypothesis(
         raise ValueError(
             f"hypothesis_kind={payload.hypothesis_kind!r} not in {ALL_HYPOTHESIS_KINDS}"
         )
-    rows = await wfdb_client.select_versions_by_kind(payload.hypothesis_kind)
+    rows = await version_store.select_versions_by_kind(payload.hypothesis_kind)
     return HypothesisVersionList(records=[HypothesisVersionRecord(**r) for r in rows])
 
 
@@ -205,7 +216,7 @@ async def mark_run_with_version(
 
     n_written = 0
     for kind, version_id in payload.version_ids.items():
-        inserted = await wfdb_client.upsert_run_link(
+        inserted = await version_store.upsert_run_link(
             run_id=payload.run_id,
             hypothesis_kind=kind,
             version_id=version_id,
@@ -244,22 +255,27 @@ class ResolveStaleRunsOutput(BaseModel):
     trust=TrustLevel.SAFE,
     inputs=ResolveStaleRunsInput,
     outputs=ResolveStaleRunsOutput,
-    allowed_roles={AgentRole.Coordinator, AgentRole.ReservoirEngineer,
-                   AgentRole.Auditor, AgentRole.Geologist,
-                   AgentRole.ProductionEngineer, AgentRole.Economist},
+    allowed_roles={
+        AgentRole.Coordinator,
+        AgentRole.ReservoirEngineer,
+        AgentRole.Auditor,
+        AgentRole.Geologist,
+        AgentRole.ProductionEngineer,
+        AgentRole.Economist,
+    },
 )
 async def resolve_stale_runs(payload: ResolveStaleRunsInput) -> ResolveStaleRunsOutput:
     """Find runs pinned to `version_id` after a newer version of the same
     hypothesis_kind has been registered."""
-    version_row = await wfdb_client.select_version_by_id(payload.version_id)
+    version_row = await version_store.select_version_by_id(payload.version_id)
     if version_row is None:
         raise RuntimeError(f"version not found: {payload.version_id!r}")
 
-    superseding = await wfdb_client.select_superseding_versions(payload.version_id)
+    superseding = await version_store.select_superseding_versions(payload.version_id)
     if not superseding:
         return ResolveStaleRunsOutput(runs=[])
 
-    rows = await wfdb_client.select_runs_for_version(payload.version_id)
+    rows = await version_store.select_runs_for_version(payload.version_id)
     return ResolveStaleRunsOutput(
         runs=[RunRef(**r) for r in rows],
     )

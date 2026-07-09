@@ -1,7 +1,7 @@
 """Tests for VirtualExperimentRunner."""
 
-from hyppo.runner import Runner, Status
 from hyppo.metadata_repository import MetadataRepository
+from hyppo.runner import Runner
 
 
 def test_runner_success(tmp_path):

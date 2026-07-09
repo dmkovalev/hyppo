@@ -1,0 +1,905 @@
+{
+  "experiment": "chapter4_synthetic_honest",
+  "timestamp": "2026-06-01T08:25:59.352916+00:00",
+  "n_scenarios": 72,
+  "design": {
+    "wells": [
+      "P-03",
+      "P-05",
+      "P-08",
+      "P-11"
+    ],
+    "mags": [
+      0.2,
+      0.3,
+      0.4
+    ],
+    "seeds": 6
+  },
+  "graph": {
+    "nodes": 19,
+    "edges": 21,
+    "longest_path": 7
+  },
+  "arms": {
+    "no_mgmt": {
+      "median_mape": 21.66,
+      "ci95": [
+        19.55,
+        23.83
+      ]
+    },
+    "full_retrain": {
+      "median_mape": 4.97,
+      "ci95": [
+        4.75,
+        5.21
+      ],
+      "refits": 19
+    },
+    "hyppo_selective": {
+      "median_mape": 4.97,
+      "ci95": [
+        4.75,
+        5.21
+      ]
+    }
+  },
+  "cascades": {
+    "water_breakthrough": {
+      "seed_hypothesis": "H12",
+      "refits": 6,
+      "saving_factor": 3.2
+    },
+    "connectivity_change": {
+      "seed_hypothesis": "H1",
+      "refits": 11,
+      "saving_factor": 1.7
+    }
+  },
+  "ci_method": "block bootstrap over independent scenario fields (B=5000)",
+  "per_well_representative": {
+    "P-01": {
+      "nomgmt": 20.78,
+      "refit": 2.77
+    },
+    "P-02": {
+      "nomgmt": 5.59,
+      "refit": 1.97
+    },
+    "P-03": {
+      "nomgmt": 7.09,
+      "refit": 8.53
+    },
+    "P-04": {
+      "nomgmt": 9.26,
+      "refit": 3.08
+    },
+    "P-05": {
+      "nomgmt": 381.71,
+      "refit": 15.25
+    },
+    "P-06": {
+      "nomgmt": 10.66,
+      "refit": 5.64
+    },
+    "P-07": {
+      "nomgmt": 13.6,
+      "refit": 5.64
+    },
+    "P-08": {
+      "nomgmt": 15.76,
+      "refit": 10.02
+    },
+    "P-09": {
+      "nomgmt": 7.42,
+      "refit": 5.56
+    },
+    "P-10": {
+      "nomgmt": 8.1,
+      "refit": 3.48
+    },
+    "P-11": {
+      "nomgmt": 8.3,
+      "refit": 2.21
+    },
+    "P-12": {
+      "nomgmt": 10.51,
+      "refit": 3.11
+    }
+  },
+  "raw": [
+    {
+      "seed": 42,
+      "well": "P-03",
+      "mag": 0.2,
+      "mape_nomgmt": 14.89,
+      "mape_full": 4.98,
+      "mape_hyppo": 4.98,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 43,
+      "well": "P-03",
+      "mag": 0.2,
+      "mape_nomgmt": 14.1,
+      "mape_full": 5.33,
+      "mape_hyppo": 5.33,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 44,
+      "well": "P-03",
+      "mag": 0.2,
+      "mape_nomgmt": 12.64,
+      "mape_full": 5.03,
+      "mape_hyppo": 5.03,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 45,
+      "well": "P-03",
+      "mag": 0.2,
+      "mape_nomgmt": 13.91,
+      "mape_full": 3.87,
+      "mape_hyppo": 3.87,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 46,
+      "well": "P-03",
+      "mag": 0.2,
+      "mape_nomgmt": 13.71,
+      "mape_full": 4.38,
+      "mape_hyppo": 4.38,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 47,
+      "well": "P-03",
+      "mag": 0.2,
+      "mape_nomgmt": 12.24,
+      "mape_full": 3.88,
+      "mape_hyppo": 3.88,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 42,
+      "well": "P-03",
+      "mag": 0.3,
+      "mape_nomgmt": 25.89,
+      "mape_full": 5.63,
+      "mape_hyppo": 5.63,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 43,
+      "well": "P-03",
+      "mag": 0.3,
+      "mape_nomgmt": 22.25,
+      "mape_full": 5.39,
+      "mape_hyppo": 5.39,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 44,
+      "well": "P-03",
+      "mag": 0.3,
+      "mape_nomgmt": 19.61,
+      "mape_full": 5.3,
+      "mape_hyppo": 5.3,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 45,
+      "well": "P-03",
+      "mag": 0.3,
+      "mape_nomgmt": 23.47,
+      "mape_full": 3.96,
+      "mape_hyppo": 3.96,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 46,
+      "well": "P-03",
+      "mag": 0.3,
+      "mape_nomgmt": 22.94,
+      "mape_full": 4.81,
+      "mape_hyppo": 4.81,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 47,
+      "well": "P-03",
+      "mag": 0.3,
+      "mape_nomgmt": 20.91,
+      "mape_full": 4.09,
+      "mape_hyppo": 4.09,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 42,
+      "well": "P-03",
+      "mag": 0.4,
+      "mape_nomgmt": 27.75,
+      "mape_full": 5.42,
+      "mape_hyppo": 5.42,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 43,
+      "well": "P-03",
+      "mag": 0.4,
+      "mape_nomgmt": 42.64,
+      "mape_full": 5.55,
+      "mape_hyppo": 5.55,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 44,
+      "well": "P-03",
+      "mag": 0.4,
+      "mape_nomgmt": 31.45,
+      "mape_full": 5.73,
+      "mape_hyppo": 5.73,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 45,
+      "well": "P-03",
+      "mag": 0.4,
+      "mape_nomgmt": 41.85,
+      "mape_full": 4.11,
+      "mape_hyppo": 4.11,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 46,
+      "well": "P-03",
+      "mag": 0.4,
+      "mape_nomgmt": 19.65,
+      "mape_full": 4.32,
+      "mape_hyppo": 4.32,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 47,
+      "well": "P-03",
+      "mag": 0.4,
+      "mape_nomgmt": 45.86,
+      "mape_full": 4.67,
+      "mape_hyppo": 4.67,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 42,
+      "well": "P-05",
+      "mag": 0.2,
+      "mape_nomgmt": 14.57,
+      "mape_full": 4.83,
+      "mape_hyppo": 4.83,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 43,
+      "well": "P-05",
+      "mag": 0.2,
+      "mape_nomgmt": 14.0,
+      "mape_full": 5.42,
+      "mape_hyppo": 5.42,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 44,
+      "well": "P-05",
+      "mag": 0.2,
+      "mape_nomgmt": 12.71,
+      "mape_full": 4.97,
+      "mape_hyppo": 4.97,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 45,
+      "well": "P-05",
+      "mag": 0.2,
+      "mape_nomgmt": 14.8,
+      "mape_full": 4.32,
+      "mape_hyppo": 4.32,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 46,
+      "well": "P-05",
+      "mag": 0.2,
+      "mape_nomgmt": 13.56,
+      "mape_full": 4.26,
+      "mape_hyppo": 4.26,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 47,
+      "well": "P-05",
+      "mag": 0.2,
+      "mape_nomgmt": 12.63,
+      "mape_full": 3.91,
+      "mape_hyppo": 3.91,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 42,
+      "well": "P-05",
+      "mag": 0.3,
+      "mape_nomgmt": 22.87,
+      "mape_full": 5.07,
+      "mape_hyppo": 5.07,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 43,
+      "well": "P-05",
+      "mag": 0.3,
+      "mape_nomgmt": 21.78,
+      "mape_full": 5.65,
+      "mape_hyppo": 5.65,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 44,
+      "well": "P-05",
+      "mag": 0.3,
+      "mape_nomgmt": 20.05,
+      "mape_full": 5.14,
+      "mape_hyppo": 5.14,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 45,
+      "well": "P-05",
+      "mag": 0.3,
+      "mape_nomgmt": 28.08,
+      "mape_full": 5.53,
+      "mape_hyppo": 5.53,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 46,
+      "well": "P-05",
+      "mag": 0.3,
+      "mape_nomgmt": 22.1,
+      "mape_full": 4.45,
+      "mape_hyppo": 4.45,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 47,
+      "well": "P-05",
+      "mag": 0.3,
+      "mape_nomgmt": 21.53,
+      "mape_full": 4.17,
+      "mape_hyppo": 4.17,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 42,
+      "well": "P-05",
+      "mag": 0.4,
+      "mape_nomgmt": 41.56,
+      "mape_full": 5.61,
+      "mape_hyppo": 5.61,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 43,
+      "well": "P-05",
+      "mag": 0.4,
+      "mape_nomgmt": 42.52,
+      "mape_full": 6.31,
+      "mape_hyppo": 6.31,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 44,
+      "well": "P-05",
+      "mag": 0.4,
+      "mape_nomgmt": 37.08,
+      "mape_full": 5.55,
+      "mape_hyppo": 5.55,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 45,
+      "well": "P-05",
+      "mag": 0.4,
+      "mape_nomgmt": 50.44,
+      "mape_full": 6.81,
+      "mape_hyppo": 6.81,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 46,
+      "well": "P-05",
+      "mag": 0.4,
+      "mape_nomgmt": 40.82,
+      "mape_full": 4.87,
+      "mape_hyppo": 4.87,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 47,
+      "well": "P-05",
+      "mag": 0.4,
+      "mape_nomgmt": 44.24,
+      "mape_full": 4.8,
+      "mape_hyppo": 4.8,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 42,
+      "well": "P-08",
+      "mag": 0.2,
+      "mape_nomgmt": 16.0,
+      "mape_full": 5.37,
+      "mape_hyppo": 5.37,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 43,
+      "well": "P-08",
+      "mag": 0.2,
+      "mape_nomgmt": 14.81,
+      "mape_full": 5.46,
+      "mape_hyppo": 5.46,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 44,
+      "well": "P-08",
+      "mag": 0.2,
+      "mape_nomgmt": 12.61,
+      "mape_full": 5.12,
+      "mape_hyppo": 5.12,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 45,
+      "well": "P-08",
+      "mag": 0.2,
+      "mape_nomgmt": 13.78,
+      "mape_full": 4.01,
+      "mape_hyppo": 4.01,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 46,
+      "well": "P-08",
+      "mag": 0.2,
+      "mape_nomgmt": 13.86,
+      "mape_full": 4.38,
+      "mape_hyppo": 4.38,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 47,
+      "well": "P-08",
+      "mag": 0.2,
+      "mape_nomgmt": 12.34,
+      "mape_full": 3.83,
+      "mape_hyppo": 3.83,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 42,
+      "well": "P-08",
+      "mag": 0.3,
+      "mape_nomgmt": 17.08,
+      "mape_full": 4.75,
+      "mape_hyppo": 4.75,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 43,
+      "well": "P-08",
+      "mag": 0.3,
+      "mape_nomgmt": 26.19,
+      "mape_full": 5.9,
+      "mape_hyppo": 5.9,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 44,
+      "well": "P-08",
+      "mag": 0.3,
+      "mape_nomgmt": 19.5,
+      "mape_full": 5.54,
+      "mape_hyppo": 5.54,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 45,
+      "well": "P-08",
+      "mag": 0.3,
+      "mape_nomgmt": 22.99,
+      "mape_full": 4.43,
+      "mape_hyppo": 4.43,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 46,
+      "well": "P-08",
+      "mag": 0.3,
+      "mape_nomgmt": 23.83,
+      "mape_full": 4.9,
+      "mape_hyppo": 4.9,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 47,
+      "well": "P-08",
+      "mag": 0.3,
+      "mape_nomgmt": 20.43,
+      "mape_full": 3.94,
+      "mape_hyppo": 3.94,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 42,
+      "well": "P-08",
+      "mag": 0.4,
+      "mape_nomgmt": 26.93,
+      "mape_full": 5.2,
+      "mape_hyppo": 5.2,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 43,
+      "well": "P-08",
+      "mag": 0.4,
+      "mape_nomgmt": 61.23,
+      "mape_full": 7.77,
+      "mape_hyppo": 7.77,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 44,
+      "well": "P-08",
+      "mag": 0.4,
+      "mape_nomgmt": 42.22,
+      "mape_full": 7.0,
+      "mape_hyppo": 7.0,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 45,
+      "well": "P-08",
+      "mag": 0.4,
+      "mape_nomgmt": 53.08,
+      "mape_full": 5.97,
+      "mape_hyppo": 5.97,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 46,
+      "well": "P-08",
+      "mag": 0.4,
+      "mape_nomgmt": 30.02,
+      "mape_full": 4.28,
+      "mape_hyppo": 4.28,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 47,
+      "well": "P-08",
+      "mag": 0.4,
+      "mape_nomgmt": 40.13,
+      "mape_full": 4.2,
+      "mape_hyppo": 4.2,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 42,
+      "well": "P-11",
+      "mag": 0.2,
+      "mape_nomgmt": 15.12,
+      "mape_full": 4.78,
+      "mape_hyppo": 4.78,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 43,
+      "well": "P-11",
+      "mag": 0.2,
+      "mape_nomgmt": 13.57,
+      "mape_full": 5.36,
+      "mape_hyppo": 5.36,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 44,
+      "well": "P-11",
+      "mag": 0.2,
+      "mape_nomgmt": 12.16,
+      "mape_full": 5.0,
+      "mape_hyppo": 5.0,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 45,
+      "well": "P-11",
+      "mag": 0.2,
+      "mape_nomgmt": 12.23,
+      "mape_full": 4.03,
+      "mape_hyppo": 4.03,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 46,
+      "well": "P-11",
+      "mag": 0.2,
+      "mape_nomgmt": 13.35,
+      "mape_full": 4.25,
+      "mape_hyppo": 4.25,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 47,
+      "well": "P-11",
+      "mag": 0.2,
+      "mape_nomgmt": 12.0,
+      "mape_full": 3.86,
+      "mape_hyppo": 3.86,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 42,
+      "well": "P-11",
+      "mag": 0.3,
+      "mape_nomgmt": 25.16,
+      "mape_full": 4.9,
+      "mape_hyppo": 4.9,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 43,
+      "well": "P-11",
+      "mag": 0.3,
+      "mape_nomgmt": 19.77,
+      "mape_full": 5.45,
+      "mape_hyppo": 5.45,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 44,
+      "well": "P-11",
+      "mag": 0.3,
+      "mape_nomgmt": 19.69,
+      "mape_full": 5.26,
+      "mape_hyppo": 5.26,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 45,
+      "well": "P-11",
+      "mag": 0.3,
+      "mape_nomgmt": 19.5,
+      "mape_full": 4.34,
+      "mape_hyppo": 4.34,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 46,
+      "well": "P-11",
+      "mag": 0.3,
+      "mape_nomgmt": 21.85,
+      "mape_full": 4.43,
+      "mape_hyppo": 4.43,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 47,
+      "well": "P-11",
+      "mag": 0.3,
+      "mape_nomgmt": 18.32,
+      "mape_full": 4.0,
+      "mape_hyppo": 4.0,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 42,
+      "well": "P-11",
+      "mag": 0.4,
+      "mape_nomgmt": 49.48,
+      "mape_full": 5.22,
+      "mape_hyppo": 5.22,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 43,
+      "well": "P-11",
+      "mag": 0.4,
+      "mape_nomgmt": 42.98,
+      "mape_full": 5.76,
+      "mape_hyppo": 5.76,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 44,
+      "well": "P-11",
+      "mag": 0.4,
+      "mape_nomgmt": 41.98,
+      "mape_full": 5.93,
+      "mape_hyppo": 5.93,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 45,
+      "well": "P-11",
+      "mag": 0.4,
+      "mape_nomgmt": 29.8,
+      "mape_full": 4.98,
+      "mape_hyppo": 4.98,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 46,
+      "well": "P-11",
+      "mag": 0.4,
+      "mape_nomgmt": 60.72,
+      "mape_full": 5.29,
+      "mape_hyppo": 5.29,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    },
+    {
+      "seed": 47,
+      "well": "P-11",
+      "mag": 0.4,
+      "mape_nomgmt": 39.56,
+      "mape_full": 4.46,
+      "mape_hyppo": 4.46,
+      "refits_full": 19,
+      "refits_wbt": 6,
+      "refits_conn": 11
+    }
+  ]
+}

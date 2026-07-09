@@ -8,6 +8,7 @@ stays untouched. Two actions:
 Both are SAFE: no DB I/O, deterministic, side-effect free except for
 the owlready2 individuals created inside `wfopt_adapter`.
 """
+
 from __future__ import annotations
 
 from typing import Literal
@@ -38,7 +39,7 @@ class HypothesisRef(BaseModel):
     description: str
     model_classes: tuple[str, ...] = Field(
         description="MRO of the OWL model class implementing this hypothesis "
-                    "(e.g. ('HybridModel', 'Model', 'Thing')).",
+        "(e.g. ('HybridModel', 'Model', 'Thing')).",
     )
     hyperparam_axes: tuple[str, ...] = Field(
         description="default_space.yaml axes that toggle inside this hypothesis.",
@@ -47,7 +48,11 @@ class HypothesisRef(BaseModel):
 
 class LatticeEdge(BaseModel):
     # serialize_by_alias=True ensures wire format uses "from"/"to", not "from_"/"to".
-    model_config = {"populate_by_name": True, "serialize_by_alias": True, "frozen": True}
+    model_config = {
+        "populate_by_name": True,
+        "serialize_by_alias": True,
+        "frozen": True,
+    }
 
     from_: str = Field(alias="from")
     to: str
@@ -100,8 +105,8 @@ def _build_oil_snapshot() -> VirtualExperimentSnapshot:
         return _OIL_SNAPSHOT_CACHE
 
     from hyppo.adapters.wfopt_adapter import (
-        HYPOTHESIS_PARAM_MAP,
         CONFIGURATION_SPACE,
+        HYPOTHESIS_PARAM_MAP,
         build_oil_virtual_experiment,
     )
 
@@ -115,18 +120,17 @@ def _build_oil_snapshot() -> VirtualExperimentSnapshot:
             for cls in type(model).mro():
                 if cls.__name__ != "object":
                     model_classes.append(cls.__name__)
-        hyps.append(HypothesisRef(
-            kind=kind,
-            description=h.description or "",
-            model_classes=model_classes,
-            hyperparam_axes=HYPOTHESIS_PARAM_MAP.get(kind, []),
-        ))
+        hyps.append(
+            HypothesisRef(
+                kind=kind,
+                description=h.description or "",
+                model_classes=model_classes,
+                hyperparam_axes=HYPOTHESIS_PARAM_MAP.get(kind, []),
+            )
+        )
 
     nx_graph = ve["lattice"]
-    edges = [
-        LatticeEdge(**{"from": src, "to": dst})
-        for src, dst in nx_graph.edges()
-    ]
+    edges = [LatticeEdge(**{"from": src, "to": dst}) for src, dst in nx_graph.edges()]
     cfg = [
         ConfigurationAxis(name=name, section=spec["section"], levels=spec["levels"])
         for name, spec in CONFIGURATION_SPACE.items()
@@ -145,9 +149,14 @@ def _build_oil_snapshot() -> VirtualExperimentSnapshot:
     trust=TrustLevel.SAFE,
     inputs=BuildVirtualExperimentInput,
     outputs=VirtualExperimentSnapshot,
-    allowed_roles={AgentRole.Coordinator, AgentRole.ReservoirEngineer,
-                   AgentRole.Auditor, AgentRole.Geologist,
-                   AgentRole.ProductionEngineer, AgentRole.Economist},
+    allowed_roles={
+        AgentRole.Coordinator,
+        AgentRole.ReservoirEngineer,
+        AgentRole.Auditor,
+        AgentRole.Geologist,
+        AgentRole.ProductionEngineer,
+        AgentRole.Economist,
+    },
 )
 def build_virtual_experiment(
     payload: BuildVirtualExperimentInput,
@@ -166,9 +175,14 @@ def build_virtual_experiment(
     trust=TrustLevel.SAFE,
     inputs=GetHypothesisLatticeInput,
     outputs=LatticeGraph,
-    allowed_roles={AgentRole.Coordinator, AgentRole.ReservoirEngineer,
-                   AgentRole.Auditor, AgentRole.Geologist,
-                   AgentRole.ProductionEngineer, AgentRole.Economist},
+    allowed_roles={
+        AgentRole.Coordinator,
+        AgentRole.ReservoirEngineer,
+        AgentRole.Auditor,
+        AgentRole.Geologist,
+        AgentRole.ProductionEngineer,
+        AgentRole.Economist,
+    },
 )
 def get_hypothesis_lattice(payload: GetHypothesisLatticeInput) -> LatticeGraph:
     """Return only the derived_by graph (nodes + edges) — cheap, for UI.

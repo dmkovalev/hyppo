@@ -8,12 +8,11 @@
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, field
-from typing import Set, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Mapping, Optional, Set
 
 import networkx as nx
-
-import logging
 
 if TYPE_CHECKING:
     from hyppo.lattice_constructor._base import HypothesisLattice
@@ -31,6 +30,7 @@ class ExecutionPlan:
         cached: Pe -- множество гипотез, для которых можно использовать
             ранее вычисленные результаты.
     """
+
     needs_execution: Set = field(default_factory=set)
     cached: Set = field(default_factory=set)
 
@@ -72,6 +72,30 @@ def _find_nearest_lattice(
     return best_lattice
 
 
+def _cfg_dict(configuration) -> dict:
+    """Привести конфигурацию к dict для ключа общего кэша (config_hash).
+    Согласовано с runner, который пишет результаты по (hypothesis_id, config)."""
+    if isinstance(configuration, dict):
+        return configuration
+    params = getattr(configuration, "parameters", None)
+    if params is not None:
+        return {"parameters": [str(p) for p in params]}
+    return {"repr": str(configuration)}
+
+
+def _config_for(hypothesis, configuration, per_hypothesis_configs) -> object:
+    """Разрешить конфигурацию для конкретной гипотезы.
+
+    Если задан ``per_hypothesis_configs`` (отображение id гипотезы → конфигурация),
+    возвращается индивидуальная конфигурация гипотезы (при отсутствии — общий
+    ``configuration`` как значение по умолчанию). Иначе — общий ``configuration``
+    для всех гипотез (прежнее поведение)."""
+    if per_hypothesis_configs is None:
+        return configuration
+    name = getattr(hypothesis, "name", str(hypothesis))
+    return per_hypothesis_configs.get(name, configuration)
+
+
 def _has_cached_result(
     hypothesis,
     configuration,
@@ -93,6 +117,15 @@ def _has_cached_result(
         кешированный результат; False -- если хотя бы для одной комбинации
         результат отсутствует.
     """
+    # Быстрый путь: репозиторий с ключом (гипотеза, конфигурация) — ОБЩИЙ кэш
+    # planner↔runner (SharedCache / MetadataRepository). Так планировщик видит
+    # результаты, записанные раннером, в одном SQLite. Legacy Database (только
+    # load/save) идёт по старому пути ниже.
+    if hasattr(db, "has_result") and hasattr(db, "load_result"):
+        return db.has_result(
+            getattr(hypothesis, "name", str(hypothesis)), _cfg_dict(configuration)
+        )
+
     # Получаем модели, реализующие гипотезу.
     # В онтологии is_implemented_by_model -- ObjectProperty, возвращающее список
     # связанных объектов Model. Owlready2 делает его вызываемым для получения
@@ -117,9 +150,11 @@ def _has_cached_result(
     for cm in param_sets:
         for model in models:
             # Формируем ключ кеша: идентификатор гипотезы + модели + параметров
-            cache_key = f"{getattr(hypothesis, 'name', str(hypothesis))}" \
-                        f"__{getattr(model, 'name', str(model))}" \
-                        f"__{str(cm)}"
+            cache_key = (
+                f"{getattr(hypothesis, 'name', str(hypothesis))}"
+                f"__{getattr(model, 'name', str(model))}"
+                f"__{str(cm)}"
+            )
             result = db.load(cache_key, storage="results")
             if result is None:
                 return False
@@ -137,6 +172,15 @@ def _get_cached_r2(
     Returns:
         R² (float) или None, если результат не найден или R² не записан.
     """
+    # Быстрый путь: общий кэш planner↔runner (см. _has_cached_result).
+    if hasattr(db, "has_result") and hasattr(db, "load_result"):
+        rec = db.load_result(
+            getattr(hypothesis, "name", str(hypothesis)), _cfg_dict(configuration)
+        )
+        if rec:
+            return rec.get("metrics", {}).get("r2")
+        return None
+
     models_attr = getattr(hypothesis, "is_implemented_by_model", None)
     if callable(models_attr):
         models = models_attr()
@@ -170,6 +214,8 @@ def build_optimal_plan(
     lattice: "HypothesisLattice",
     db: "Database",
     r2_threshold: float = 0.7,
+    *,
+    per_hypothesis_configs: "Mapping | None" = None,
 ) -> ExecutionPlan:
     """Построение оптимального плана виртуального эксперимента (Алгоритм 4).
 
@@ -198,6 +244,11 @@ def build_optimal_plan(
         r2_threshold: Минимальный порог R² для включения гипотезы в план.
             Гипотезы с R² < порога и все их потомки исключаются (Раздел 3.1.6.2).
             По умолчанию 0.7.
+        per_hypothesis_configs: Необязательное отображение id гипотезы →
+            конфигурация. Если задано, кэш каждой гипотезы проверяется по её
+            собственной конфигурации (при отсутствии — по общей ``configuration``).
+            Это позволяет инвалидировать кэш ОТДЕЛЬНОЙ гипотезы: смена её
+            конфигурации даёт промах только по ней и пересчёт её замыкания вниз.
 
     Returns:
         ExecutionPlan с двумя множествами:
@@ -246,14 +297,18 @@ def build_optimal_plan(
         # Выбираем вершины без входящих ребер среди необработанных
         # (топологический порядок: сначала обрабатываем «верхние» гипотезы)
         roots = [
-            h for h in remaining
+            h
+            for h in remaining
             if all(pred in finished for pred in graph.predecessors(h))
         ]
 
-        # Если нет доступных корней -- в графе есть цикл.
-        # Берем произвольную вершину, чтобы не зависнуть.
         if not roots:
-            roots = [next(iter(remaining))]
+            raise ValueError(
+                "Hypothesis graph contains a cycle — "
+                "precondition of Algorithm 4 violated "
+                "(Theorem 1 requires a DAG). "
+                "Run check_consistency() before build_optimal_plan()."
+            )
 
         for h in roots:
             if h in finished:
@@ -265,8 +320,11 @@ def build_optimal_plan(
                 finished.add(h)
                 continue
 
+            # Конфигурация именно этой гипотезы (по-гипотезная или общая)
+            cfg_h = _config_for(h, configuration, per_hypothesis_configs)
+
             # Проверяем наличие кешированного результата для данной конфигурации
-            if not _has_cached_result(h, configuration, db):
+            if not _has_cached_result(h, cfg_h, db):
                 # Результата нет: помечаем гипотезу и все зависимые (потомки в графе)
                 # как требующие пересчета
                 dependents = nx.descendants(graph, h)
@@ -276,7 +334,7 @@ def build_optimal_plan(
                 finished.update(dependents)
             else:
                 # Результат есть: проверяем R² перед включением в Pe
-                r2 = _get_cached_r2(h, configuration, db)
+                r2 = _get_cached_r2(h, cfg_h, db)
                 if r2 is not None and r2 < r2_threshold:
                     # R² ниже порога: отсекаем гипотезу и все зависимые
                     dependents = nx.descendants(graph, h)
@@ -316,6 +374,7 @@ class Planner:
         configuration,
         lattice: "HypothesisLattice",
         r2_threshold: float | None = None,
+        per_hypothesis_configs: "Mapping | None" = None,
     ) -> ExecutionPlan:
         """Построить план виртуального эксперимента.
 
@@ -323,9 +382,17 @@ class Planner:
             configuration: Конфигурация эксперимента.
             lattice: Решетка гипотез.
             r2_threshold: Порог R² для отсечения (переопределяет значение из __init__).
+            per_hypothesis_configs: Необязательное отображение id гипотезы →
+                конфигурация (см. build_optimal_plan).
 
         Returns:
             ExecutionPlan с множествами needs_execution и cached.
         """
         threshold = r2_threshold if r2_threshold is not None else self.r2_threshold
-        return build_optimal_plan(configuration, lattice, self.db, r2_threshold=threshold)
+        return build_optimal_plan(
+            configuration,
+            lattice,
+            self.db,
+            r2_threshold=threshold,
+            per_hypothesis_configs=per_hypothesis_configs,
+        )

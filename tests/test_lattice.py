@@ -1,4 +1,5 @@
 """Tests for hypothesis lattice construction."""
+
 import networkx as nx
 import pytest
 
@@ -17,7 +18,7 @@ class FakeStructure:
         if isinstance(other, FakeStructure):
             others = [other]
         else:
-            others = other if hasattr(other, '__iter__') else [other]
+            others = other if hasattr(other, "__iter__") else [other]
         new_eqs = list(self.equations)
         new_vars = set(self.vars)
         for o in others:
@@ -26,11 +27,11 @@ class FakeStructure:
         fs = FakeStructure(equations=new_eqs, vars_set=new_vars)
         # union is complete if both parts were marked complete
         fs._complete = self._complete and all(
-            getattr(o, '_complete', False) for o in others
+            getattr(o, "_complete", False) for o in others
         )
         fs._tc = {**self._tc}
         for o in others:
-            fs._tc.update(getattr(o, '_tc', {}))
+            fs._tc.update(getattr(o, "_tc", {}))
         return fs
 
     def is_complete(self):
@@ -38,6 +39,13 @@ class FakeStructure:
 
     def build_transitive_closure(self):
         return self._tc
+
+
+class FakeEquation:
+    """Minimal stand-in for a COA Equation exposing its variables."""
+
+    def __init__(self, vars_list):
+        self.vars = list(vars_list)
 
 
 class FakeHypothesis:
@@ -83,20 +91,28 @@ def test_build_lattice_no_complete_union():
 
 
 def test_build_lattice_with_complete_union():
-    """When a union is complete, build_lattice should add edges based on transitive closure."""
+    """When h1's output feeds h2's equation, build_lattice adds edge (h1, h2)."""
     from hyppo.lattice_constructor._base import HypothesisLattice
 
-    tc = {"a": {"b", "c"}, "b": {"c"}}
-    s1 = FakeStructure(vars_set={"a", "b"}, complete=True, tc=tc)
-    s2 = FakeStructure(vars_set={"b", "c"}, complete=True, tc=tc)
+    # h1 produces "a" (from equation over {a, x}); h2 consumes "a" as an input
+    # of its {a, b} equation while producing "b" (a is exogenous in h2).
+    s1 = FakeStructure(
+        equations=[FakeEquation(["a", "x"])], vars_set={"a", "x"}, complete=True
+    )
+    s2 = FakeStructure(
+        equations=[FakeEquation(["a"]), FakeEquation(["a", "b"])],
+        vars_set={"a", "b"},
+        complete=True,
+    )
     h1 = FakeHypothesis("h1", s1)
     h2 = FakeHypothesis("h2", s2)
     wf = FakeWorkflow([[h1], [h2]])
 
     hl = HypothesisLattice(hypotheses=[h1, h2], workflow=wf)
     assert isinstance(hl.lattice, nx.DiGraph)
-    # With the tc above, b is a subset of a, so there should be an edge (b, a)
+    # h1's output "a" appears among h2's inputs → derived_by edge (h1, h2)
     assert hl.lattice.number_of_edges() > 0
+    assert (h1, h2) in hl.lattice.edges
 
 
 def test_add_hypothesis_increases_edges():

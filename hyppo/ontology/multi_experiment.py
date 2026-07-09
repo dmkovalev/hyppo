@@ -6,7 +6,7 @@ Rule 13 -- SharedHypothesis: a hypothesis used by two or more experiments,
 
 from __future__ import annotations
 
-from owlready2 import Inverse, ObjectProperty, Thing
+from owlready2 import ObjectProperty, Thing
 
 from hyppo.core._base import Hypothesis, virtual_experiment_onto
 
@@ -17,7 +17,6 @@ __all__ = [
 ]
 
 with virtual_experiment_onto:
-
     # ── Supporting classes / properties ─────────────────────────────────────
     class Experiment(Thing):
         """A named experiment container (may differ from VirtualExperiment

@@ -1,0 +1,3 @@
+# hyppo.generator
+
+::: hyppo.generator

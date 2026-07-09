@@ -1,6 +1,4 @@
 """Smoke tests for hyppo.mcp server factory + tool wiring."""
-import pytest
-
 
 EXPECTED_TOOLS = {
     "BuildVirtualExperiment",
@@ -24,6 +22,7 @@ def test_mcp_sdk_is_available():
 
 def test_create_server_named_hyppo():
     from hyppo.mcp.server import create_server
+
     server = create_server()
     assert getattr(server, "name", None) == "hyppo"
 

@@ -1,0 +1,24 @@
+{
+  "experiment": "resume_vs_cascade",
+  "equivalence_on_file_dags": {
+    "trials": 1000,
+    "mismatches": 0,
+    "note": "Nextflow -resume == hyppo plan() on file-DAGs"
+  },
+  "hidden_staleness": {
+    "graph": "A->B->C",
+    "scenario": "A's hypothesis invalidated semantically; A's output file byte-identical",
+    "nextflow_resume_recompute": [],
+    "hyppo_cascade_recompute": [
+      "A",
+      "B",
+      "C"
+    ],
+    "missed_by_resume": [
+      "A",
+      "B",
+      "C"
+    ]
+  },
+  "conclusion": "On file-DAGs both cascade identically (\u00b1); hyppo's advantage is the semantic derived_by graph, which catches staleness invisible to file-content hashing."
+}

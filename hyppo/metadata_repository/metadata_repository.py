@@ -53,12 +53,24 @@ class MetadataRepository:
 
     @staticmethod
     def _config_hash(config: dict) -> str:
-        return hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest()[:16]
+        return hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest()[
+            :16
+        ]
 
-    def save_result(self, hypothesis_id: str, config: dict, metrics: dict, status: str = "SUCCESS") -> None:
+    def save_result(
+        self, hypothesis_id: str, config: dict, metrics: dict, status: str = "SUCCESS"
+    ) -> None:
         self._conn.execute(
-            "INSERT OR REPLACE INTO results (hypothesis_id, config_hash, config_json, metrics_json, status) VALUES (?, ?, ?, ?, ?)",
-            (hypothesis_id, self._config_hash(config), json.dumps(config), json.dumps(metrics), status),
+            "INSERT OR REPLACE INTO results "
+            "(hypothesis_id, config_hash, config_json, metrics_json, status) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (
+                hypothesis_id,
+                self._config_hash(config),
+                json.dumps(config),
+                json.dumps(metrics),
+                status,
+            ),
         )
         self._conn.commit()
 
@@ -69,21 +81,35 @@ class MetadataRepository:
         ).fetchone()
         if row is None:
             return None
-        return {"hypothesis_id": row["hypothesis_id"], "config": json.loads(row["config_json"]),
-                "metrics": json.loads(row["metrics_json"]), "status": row["status"], "timestamp": row["timestamp"]}
+        return {
+            "hypothesis_id": row["hypothesis_id"],
+            "config": json.loads(row["config_json"]),
+            "metrics": json.loads(row["metrics_json"]),
+            "status": row["status"],
+            "timestamp": row["timestamp"],
+        }
 
     def has_result(self, hypothesis_id: str, config: dict) -> bool:
         return self.load_result(hypothesis_id, config) is not None
 
-    def save_lattice(self, lattice_id: str, nodes: set[str], edges: set[tuple[str, str]]) -> None:
+    def save_lattice(
+        self, lattice_id: str, nodes: set[str], edges: set[tuple[str, str]]
+    ) -> None:
         self._conn.execute(
-            "INSERT OR REPLACE INTO lattices (lattice_id, nodes_json, edges_json) VALUES (?, ?, ?)",
-            (lattice_id, json.dumps(sorted(nodes)), json.dumps(sorted([list(e) for e in edges]))),
+            "INSERT OR REPLACE INTO lattices "
+            "(lattice_id, nodes_json, edges_json) VALUES (?, ?, ?)",
+            (
+                lattice_id,
+                json.dumps(sorted(nodes)),
+                json.dumps(sorted([list(e) for e in edges])),
+            ),
         )
         self._conn.commit()
 
-    def find_nearest_lattice(self, nodes: set[str], edges: set[tuple[str, str]]) -> dict | None:
-        """Find nearest lattice by Definition 12: d(L, L_j) = |V triangle V_j| + |E triangle E_j|."""
+    def find_nearest_lattice(
+        self, nodes: set[str], edges: set[tuple[str, str]]
+    ) -> dict | None:
+        """Find nearest lattice by Definition 12: d(L, L_j) = |V△V_j| + |E△E_j|."""
         rows = self._conn.execute("SELECT * FROM lattices").fetchall()
         if not rows:
             return None
@@ -96,8 +122,12 @@ class MetadataRepository:
                 best, best_dist = row, dist
         if best is None:
             return None
-        return {"lattice_id": best["lattice_id"], "nodes": set(json.loads(best["nodes_json"])),
-                "edges": {tuple(e) for e in json.loads(best["edges_json"])}, "distance": best_dist}
+        return {
+            "lattice_id": best["lattice_id"],
+            "nodes": set(json.loads(best["nodes_json"])),
+            "edges": {tuple(e) for e in json.loads(best["edges_json"])},
+            "distance": best_dist,
+        }
 
     def close(self) -> None:
         self._conn.close()

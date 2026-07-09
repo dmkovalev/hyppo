@@ -1,9 +1,9 @@
 from hyppo.ontology.quality_gates_qa import (
-    check_training_data,
+    apply_realization_coefficient,
     check_coverage,
     check_stability,
+    check_training_data,
     classify_stability,
-    apply_realization_coefficient,
 )
 
 

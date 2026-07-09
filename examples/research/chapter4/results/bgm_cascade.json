@@ -1,0 +1,103 @@
+{
+  "nodes": [
+    "density_law",
+    "age_cells",
+    "SFR",
+    "IMF",
+    "local_volume_density",
+    "star_birthrate",
+    "evolutionary_tracks",
+    "local_luminosity",
+    "velocity_dispersion",
+    "dynamical_self_consistency"
+  ],
+  "edges": [
+    [
+      "age_cells",
+      "local_volume_density"
+    ],
+    [
+      "density_law",
+      "local_volume_density"
+    ],
+    [
+      "SFR",
+      "star_birthrate"
+    ],
+    [
+      "IMF",
+      "star_birthrate"
+    ],
+    [
+      "age_cells",
+      "star_birthrate"
+    ],
+    [
+      "local_volume_density",
+      "evolutionary_tracks"
+    ],
+    [
+      "star_birthrate",
+      "local_luminosity"
+    ],
+    [
+      "local_volume_density",
+      "local_luminosity"
+    ],
+    [
+      "evolutionary_tracks",
+      "velocity_dispersion"
+    ],
+    [
+      "local_luminosity",
+      "dynamical_self_consistency"
+    ],
+    [
+      "evolutionary_tracks",
+      "dynamical_self_consistency"
+    ],
+    [
+      "velocity_dispersion",
+      "dynamical_self_consistency"
+    ]
+  ],
+  "n_hypotheses": 10,
+  "cascade": {
+    "change_SFR": {
+      "recompute": [
+        "SFR",
+        "dynamical_self_consistency",
+        "local_luminosity",
+        "star_birthrate"
+      ],
+      "fraction": 0.4
+    },
+    "change_IMF": {
+      "recompute": [
+        "IMF",
+        "dynamical_self_consistency",
+        "local_luminosity",
+        "star_birthrate"
+      ],
+      "fraction": 0.4
+    }
+  },
+  "imf_ranking_chi2": [
+    {
+      "hypothesis": "Kroupa (2001)",
+      "chi2": 187.0,
+      "rank": 1
+    },
+    {
+      "hypothesis": "Haywood (1997)",
+      "chi2": 342.0,
+      "rank": 2
+    },
+    {
+      "hypothesis": "Salpeter (1955)",
+      "chi2": 518.0,
+      "rank": 3
+    }
+  ],
+  "data_note": "chi^2 from Czekaj+2014 (Tycho-2 thin-disc); cascade structure reproduced from hyppo.coa.HypothesisGraph"
+}

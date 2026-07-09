@@ -15,7 +15,6 @@ from __future__ import annotations
 from owlready2 import (
     AllDisjoint,
     ObjectProperty,
-    Thing,
 )
 
 from hyppo.core._base import (
@@ -54,7 +53,6 @@ __all__ = [
 # All new classes live inside the shared ontology namespace
 # ---------------------------------------------------------------------------
 with virtual_experiment_onto:
-
     # ── Rule 1: Auto-classification ───────────────────────────────────────
     class PhysicsModel(Model):
         """A model built exclusively on physics-based equations."""
@@ -74,27 +72,21 @@ with virtual_experiment_onto:
         cannot verify the closure axiom without explicit enumeration of all
         model links.  The ``only`` check is delegated to Python validation.
         """
-        equivalent_to = [
-            Hypothesis
-            & is_implemented_by_model.some(PhysicsModel)
-        ]
+
+        equivalent_to = [Hypothesis & is_implemented_by_model.some(PhysicsModel)]
 
     class DataDrivenHypothesis(Hypothesis):
         """Hypothesis implemented by at least one data-driven model.
 
         Note: ``only(DataDrivenModel)`` removed -- see PhysicsHypothesis.
         """
-        equivalent_to = [
-            Hypothesis
-            & is_implemented_by_model.some(DataDrivenModel)
-        ]
+
+        equivalent_to = [Hypothesis & is_implemented_by_model.some(DataDrivenModel)]
 
     class HybridHypothesis(Hypothesis):
         """Hypothesis implemented by at least one hybrid model."""
-        equivalent_to = [
-            Hypothesis
-            & is_implemented_by_model.some(HybridModel)
-        ]
+
+        equivalent_to = [Hypothesis & is_implemented_by_model.some(HybridModel)]
 
     # ── Rule 2: Experiment completeness ───────────────────────────────────
     class DomainOntology(Artefact):
@@ -102,6 +94,7 @@ with virtual_experiment_onto:
 
     class has_for_ontology(ObjectProperty):
         """Associates a VirtualExperiment with its domain ontology."""
+
         domain = [virtual_experiment_onto.VirtualExperiment]
         range = [DomainOntology]
 
@@ -115,6 +108,7 @@ with virtual_experiment_onto:
         OWA the reasoner cannot verify exact cardinality without closure
         axioms.  Exact-count validation is delegated to Python layer.
         """
+
         equivalent_to = [
             virtual_experiment_onto.VirtualExperiment
             & has_for_ontology.some(DomainOntology)
@@ -133,6 +127,7 @@ with virtual_experiment_onto:
 
     class MaterialBalanceHypothesis(Hypothesis):
         """Material-balance hypothesis; must depend on a prediction source."""
+
         is_a = [has_dependency.some(PredictionSourceHypothesis)]
 
     # ── Rule 4: Cascade invalidation ──────────────────────────────────────
@@ -156,9 +151,8 @@ with virtual_experiment_onto:
         through the entire dependency chain — the formal analogue of
         Algorithm 4's cascade recomputation.
         """
-        equivalent_to = [
-            Hypothesis & derived_by.some(InvalidHypothesis)
-        ]
+
+        equivalent_to = [Hypothesis & derived_by.some(InvalidHypothesis)]
 
     class UncomputedHypothesis(Hypothesis):
         """A hypothesis not yet associated with any model run.

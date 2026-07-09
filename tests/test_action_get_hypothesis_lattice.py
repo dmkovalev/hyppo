@@ -1,4 +1,5 @@
 """Tests for hyppo.actions.virtual_experiment.get_hypothesis_lattice."""
+
 import pytest
 
 from hyppo.actions.virtual_experiment import (

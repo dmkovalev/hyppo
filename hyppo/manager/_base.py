@@ -53,14 +53,26 @@ class Manager:
         """
         config = config or {h: {} for h in hypotheses}
 
-        # Stage 1: Initialize — build DAG from hypotheses and edges
+        # Stage 1: Initialize
+        # Stage 2: Build lattice (Algorithm 1). When causal structures are
+        # supplied, run HypothesisGraph.build() to derive the lattice edges from
+        # complete causal unions over the workflow-reachable pairs; otherwise fall
+        # back to the workflow DAG itself.
+        lattice_edges = list(workflow_edges)
+        if structures:
+            from hyppo.coa import HypothesisGraph
+
+            idx = {h: i for i, h in enumerate(hypotheses)}
+            graph = HypothesisGraph()
+            for h in hypotheses:
+                graph.add(structures.get(h, []))
+            for u, v in workflow_edges:
+                graph.connect(idx[u], idx[v])
+            lattice_edges = [(hypotheses[i], hypotheses[j]) for i, j in graph.build()]
+
         lattice = nx.DiGraph()
         lattice.add_nodes_from(hypotheses)
-        lattice.add_edges_from(workflow_edges)
-
-        # Stage 2: Build lattice (use provided edges as lattice)
-        # In full implementation, HypothesisLattice.build_lattice() would
-        # analyze causal structures. Here we use the workflow DAG directly.
+        lattice.add_edges_from(lattice_edges)
 
         # Stage 3: Plan — determine P_ne (needs execution) and P_e (cached)
         p_ne: list[str] = []
@@ -84,7 +96,7 @@ class Manager:
             plan={"p_ne": p_ne, "p_e": p_e},
             models=models,
             configs=config,
-            lattice_edges=workflow_edges,
+            lattice_edges=lattice_edges,
         )
 
         return results

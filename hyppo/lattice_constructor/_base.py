@@ -2,55 +2,35 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from hyppo.core._base import virtual_experiment_onto
 import networkx as nx
-from collections import defaultdict
+
+from hyppo.core._base import virtual_experiment_onto
 
 if TYPE_CHECKING:
-    from hyppo.coa._base import Structure, Equation
+    pass
 
 
 with virtual_experiment_onto:
-    class HypothesisLattice:
 
+    class HypothesisLattice:
         def __init__(self, hypotheses, workflow):
             self.hypotheses = hypotheses
             self.workflow = workflow
             self.lattice = self.build_lattice()
 
-
         def build_lattice(self):
-            """Algorithm 1: Build hypothesis lattice from workflow tasks.
+            """Algorithm 1: Build hypothesis lattice from hypothesis structures.
 
-            For each pair of hypotheses (h_i, h_j) from different tasks:
-            - Unite their structures S_i ∪ S_j
-            - If the union is complete, build transitive closure
-            - Use the closure to derive edges in the lattice
+            An edge (h_i, h_j) is derived when the output variable of h_i
+            appears among the input variables of h_j's equations (i.e. h_j is
+            derived_by h_i); see :meth:`_build_hypothesis_var_mapping`.
             """
             lattice = nx.DiGraph()
             # check if all hypotheses are in workflow
             if not self._is_correct():
                 raise Exception("Hypotheses not found in workflow")
 
-            transitive_closure = defaultdict(set)
-
-            tasks = self.workflow.get_tasks()
-            for i, current_task in enumerate(tasks):
-                remaining_tasks = tasks[i + 1:]
-                for h_i in current_task:
-                    for t in remaining_tasks:
-                        for h_j in t:
-                            structure_i = h_i.structure
-                            structure_j = h_j.structure
-                            united_str = structure_i.union(structure_j)
-                            if united_str.is_complete():
-                                tc = united_str.build_transitive_closure()
-                                for key, descendants in tc.items():
-                                    transitive_closure[key].update(descendants)
-
-            hyp_var_map = self._build_hypothesis_var_mapping(transitive_closure)
-
-            for dep in hyp_var_map:
+            for dep in self._build_hypothesis_var_mapping():
                 lattice.add_edge(dep[0], dep[1])
 
             return lattice
@@ -58,30 +38,17 @@ with virtual_experiment_onto:
         def add_hypothesis(self, hypothesis):
             """Algorithm 2: Add a hypothesis to an existing lattice.
 
-            For the added hypothesis h_add and each existing h_i:
-            - If S_i ∪ S_add is complete, build transitive closure
-            - Add derived edges to the existing lattice
+            Registers the new hypothesis, then rebuilds variable-level
+            transitive closure with it, and maps to hypothesis-level edges.
             """
-            # check if all hypotheses are in workflow
             if not self._is_correct():
                 raise Exception("Hypotheses not found in workflow")
-            tasks = self.workflow.get_tasks()
-            transitive_closure = defaultdict(set)
+            if hypothesis not in self.hypotheses:
+                self.hypotheses.append(hypothesis)
+            self.lattice.add_node(hypothesis)
 
-            for current_task in tasks:
-                for h_i in current_task:
-                    structure_i = h_i.structure
-                    united_str = structure_i.union(hypothesis.structure)
-                    if united_str.is_complete():
-                        tc = united_str.build_transitive_closure()
-                        for key, descendants in tc.items():
-                            transitive_closure[key].update(descendants)
-
-            hyp_var_map = self._build_hypothesis_var_mapping(transitive_closure)
-
-            for dep in hyp_var_map:
+            for dep in self._build_hypothesis_var_mapping():
                 self.lattice.add_edge(dep[0], dep[1])
-
 
         def derived_by(self, hypothesis):
             """Return hypotheses that are derived by the given hypothesis."""
@@ -89,32 +56,66 @@ with virtual_experiment_onto:
                 return set()
             return set(self.lattice.predecessors(hypothesis))
 
-        def _build_hypothesis_var_mapping(self, transitive_closure):
-            """
-            Build mapping between hypotheses based on their variable relationships.
+        def _build_hypothesis_var_mapping(self):
+            """Derive hypothesis-level edges from equation variables.
 
-            Args:
-                transitive_closure (defaultdict): Dictionary mapping variables to their
-                    transitive closure relations (sets of reachable variables)
-
-            Returns:
-                list: List of tuples representing hypothesis dependencies (h1, h2)
-                    where h1 depends on h2
+            Edge (h_i, h_j) added iff output variable of h_i appears among
+            input variables of h_j (h_j depends on h_i).
             """
             dependencies = []
-            for h1, relations1 in transitive_closure.items():
-                for h2, relations2 in transitive_closure.items():
-                    if h1 != h2:
-                        # If all relations in h1 are contained in h2's relations, h1 depends on h2
-                        if relations1.issubset(relations2):
-                            dependencies.append((h1, h2))
+            for h_i in self.hypotheses:
+                if not hasattr(h_i, "structure") or not h_i.structure.equations:
+                    continue
+                i_out = self._output_variable(h_i)
+                if i_out is None:
+                    continue
+                for h_j in self.hypotheses:
+                    if h_i is h_j:
+                        continue
+                    if not hasattr(h_j, "structure"):
+                        continue
+                    j_out = self._output_variable(h_j)
+                    for eq in h_j.structure.equations:
+                        if len(eq.vars) <= 1:
+                            continue
+                        for v in eq.vars:
+                            if v != j_out and v == i_out:
+                                dependencies.append((h_i, h_j))
             return dependencies
+
+        @staticmethod
+        def _output_variable(hypothesis):
+            """Return the output variable of a hypothesis.
+
+            If an equation was built from a formula string with an explicit
+            left-hand side (``out = f(...)``), the output is the LHS symbol.
+            Otherwise fall back to the exogenous-variable heuristic (first
+            variable not declared by a single-variable equation).
+            """
+            from sympy import sympify
+
+            for eq in hypothesis.structure.equations:
+                formula = getattr(eq, "formula", None)
+                if formula is not None and "=" in str(formula):
+                    lhs = sympify(str(formula).split("=", 1)[0], locals={})
+                    syms = sorted(lhs.free_symbols, key=lambda s: s.name)
+                    if len(syms) == 1:
+                        return syms[0]
+            exo_vars = set()
+            for e in hypothesis.structure.equations:
+                if len(e.vars) == 1:
+                    exo_vars.add(e.vars[0])
+            for eq in hypothesis.structure.equations:
+                if len(eq.vars) > 1:
+                    candidates = [v for v in eq.vars if v not in exo_vars]
+                    return candidates[0] if candidates else eq.vars[0]
+            return None
 
         def competes(self, hypothesis):
             """Return hypotheses that compete with the given hypothesis."""
             if hypothesis not in self.hypotheses:
                 return set()
-            # Competing hypotheses are those that share predecessors but aren't in a direct relationship
+            # Competing hypotheses share predecessors without a direct relationship
             predecessors = set(self.lattice.predecessors(hypothesis))
             competitors = set()
             for h in self.hypotheses:

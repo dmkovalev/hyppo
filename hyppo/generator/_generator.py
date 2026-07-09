@@ -40,7 +40,7 @@ def generate_hypothesis(
 
     # Stage 3: GP — symbolic regression (optional)
     try:
-        from deap import base as _  # check if deap available
+        from deap import base as _  # noqa: F401 -- check if deap available
         from gplearn.genetic import SymbolicRegressor
 
         sr = SymbolicRegressor(

@@ -1,4 +1,5 @@
 """Tests for HypothesisGenerator."""
+
 import numpy as np
 
 

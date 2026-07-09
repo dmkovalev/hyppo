@@ -3,6 +3,7 @@
 The closure helper is exported (not private) because Task 8
 (ResolveStaleRuns) reuses it.
 """
+
 from __future__ import annotations
 
 from collections import deque
@@ -17,6 +18,7 @@ from hyppo.actions.virtual_experiment import ALL_HYPOTHESIS_KINDS
 
 class HypothesisSnapshot(BaseModel):
     """One side of a diff: which hypotheses are active + their hyperparams."""
+
     model_config = {"frozen": True}
 
     active_hypotheses: list[str] = Field(
@@ -24,8 +26,8 @@ class HypothesisSnapshot(BaseModel):
     )
     hyperparams: dict[str, dict[str, Any]] = Field(
         description="kind -> {axis_name: value}. Only kinds in "
-                    "ALL_HYPOTHESIS_KINDS are accepted; axis names are not "
-                    "validated against default_space.",
+        "ALL_HYPOTHESIS_KINDS are accepted; axis names are not "
+        "validated against default_space.",
     )
 
 
@@ -37,8 +39,8 @@ class DiffHypothesisStatesInput(BaseModel):
     base_snapshot: HypothesisSnapshot | None = Field(
         default=None,
         description="Reserved; currently ignored. Future extension: supply "
-                    "a snapshot whose lattice replaces the hardcoded "
-                    "oil_waterflood edges. Until then this field is a no-op.",
+        "a snapshot whose lattice replaces the hardcoded "
+        "oil_waterflood edges. Until then this field is a no-op.",
     )
 
 
@@ -88,11 +90,11 @@ def derived_by_closure(
 def _default_oil_edges() -> list[tuple[str, str]]:
     return [
         ("h_CRM", "h_LPR"),
-        ("h_ML",  "h_LPR"),
+        ("h_ML", "h_LPR"),
         ("h_LPR", "h_MB"),
-        ("h_MB",  "h_BL"),
-        ("h_BL",  "h_WCT"),
-        ("h_ML",  "h_WCT"),
+        ("h_MB", "h_BL"),
+        ("h_BL", "h_WCT"),
+        ("h_ML", "h_WCT"),
     ]
 
 
@@ -101,9 +103,14 @@ def _default_oil_edges() -> list[tuple[str, str]]:
     trust=TrustLevel.SAFE,
     inputs=DiffHypothesisStatesInput,
     outputs=HypothesisDiff,
-    allowed_roles={AgentRole.Coordinator, AgentRole.ReservoirEngineer,
-                   AgentRole.Auditor, AgentRole.Geologist,
-                   AgentRole.ProductionEngineer, AgentRole.Economist},
+    allowed_roles={
+        AgentRole.Coordinator,
+        AgentRole.ReservoirEngineer,
+        AgentRole.Auditor,
+        AgentRole.Geologist,
+        AgentRole.ProductionEngineer,
+        AgentRole.Economist,
+    },
 )
 def diff_hypothesis_states(payload: DiffHypothesisStatesInput) -> HypothesisDiff:
     """Compute semantic diff between two hypothesis snapshots.

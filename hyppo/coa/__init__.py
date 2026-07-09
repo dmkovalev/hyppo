@@ -1,9 +1,13 @@
-"""
-The :mod:`hyppo.coa` module gathers casual ordering algorithm.
+"""The :mod:`hyppo.coa` module gathers causal-ordering algorithms.
+
+Two layers are importable without pulling sympy/owlready:
+
+* :mod:`hyppo.coa.causal` -- pure Dulmage-Mendelsohn core (matching, SCC, closure);
+* :class:`hyppo.coa.graph.HypothesisGraph` -- Algorithms 1/2/4 over a hypothesis DAG.
+
+The richer :class:`hyppo.coa._base.Structure` (sympy-backed) is imported lazily.
 """
 
-from ._base import Structure, Equation
+from hyppo.coa.graph import HypothesisGraph
 
-__all__ = [
-    "Structure",
-]
+__all__ = ["HypothesisGraph"]

@@ -1,4 +1,5 @@
 """Tests for hyppo.actions.version.get_hypothesis_version."""
+
 from datetime import datetime
 from unittest.mock import AsyncMock
 
@@ -26,9 +27,12 @@ def mock_row():
 
 
 async def test_get_hit_returns_record(monkeypatch, mock_row):
-    from hyppo.mcp import wfdb_client
+    from hyppo.versioning import version_store
+
     monkeypatch.setattr(
-        wfdb_client, "select_version_by_id", AsyncMock(return_value=mock_row),
+        version_store,
+        "select_version_by_id",
+        AsyncMock(return_value=mock_row),
     )
     out: HypothesisVersionRecord = await get_hypothesis_version(
         GetHypothesisVersionInput(version_id="abc-uuid")
@@ -38,9 +42,12 @@ async def test_get_hit_returns_record(monkeypatch, mock_row):
 
 
 async def test_get_miss_raises(monkeypatch):
-    from hyppo.mcp import wfdb_client
+    from hyppo.versioning import version_store
+
     monkeypatch.setattr(
-        wfdb_client, "select_version_by_id", AsyncMock(return_value=None),
+        version_store,
+        "select_version_by_id",
+        AsyncMock(return_value=None),
     )
     with pytest.raises(RuntimeError, match="not found"):
         await get_hypothesis_version(GetHypothesisVersionInput(version_id="zzz"))

@@ -1,4 +1,5 @@
 """Expose hyppo persona prompts as MCP resources."""
+
 from __future__ import annotations
 
 from importlib import resources as imres
@@ -6,11 +7,13 @@ from importlib import resources as imres
 from mcp.server import Server
 from mcp.types import Resource
 
-
 _FILE_RESOURCES: list[tuple[str, str, str, str]] = [
-    ("hyppo://personas/lattice_steward.md",
-     "Lattice Steward agent persona prompt",
-     "text/markdown", "hyppo.personas/lattice_steward.md"),
+    (
+        "hyppo://personas/lattice_steward.md",
+        "Lattice Steward agent persona prompt",
+        "text/markdown",
+        "hyppo.personas/lattice_steward.md",
+    ),
 ]
 
 
@@ -30,7 +33,7 @@ def register_resources(server: Server) -> dict:
     @server.read_resource()
     async def _read(uri: str) -> str:
         uri = str(uri)
-        for (u, _n, _m, path) in _FILE_RESOURCES:
+        for u, _n, _m, path in _FILE_RESOURCES:
             if u == uri:
                 return _load_text(path)
         raise ValueError(f"unknown resource: {uri!r}")

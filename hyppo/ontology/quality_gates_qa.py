@@ -3,6 +3,7 @@
 Pure functions — no OWL dependency. Called by experiment evaluation
 pipelines to produce quality markers.
 """
+
 from typing import Literal
 
 
