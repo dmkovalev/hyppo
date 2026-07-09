@@ -1,5 +1,6 @@
 import sys, hashlib
-sys.path.insert(0, r"F:\git-repos\diss\hyppo-ref")
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 import numpy as np
 from pywaterflood import CRM
 from hyppo.ontology.oil_constraints import FractionalFlowParams
