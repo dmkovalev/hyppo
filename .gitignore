@@ -50,3 +50,4 @@ webui/tsconfig.tsbuildinfo
 # internal dev-process artifacts (kept local only)
 docs/superpowers/
 docs/specs/
+docs/rid/
