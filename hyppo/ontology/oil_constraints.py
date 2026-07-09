@@ -113,6 +113,6 @@ class CoreyExponentParams(BaseModel):
     def _positive(cls, v: float, info: object) -> float:
         if v <= 0:
             raise ValueError(
-                f"{info.field_name} = {v} must be > 0"  # type: ignore[union-attr]
+                f"{info.field_name} = {v} must be > 0"  # type: ignore[attr-defined]
             )
         return v

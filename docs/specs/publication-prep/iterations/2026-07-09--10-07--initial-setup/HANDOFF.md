@@ -306,3 +306,45 @@ R3 (W7) complete. R4 (W8 mypy zero) can proceed.
 Stage: realization | Author: fix-agent
 - [VERIFIED pyproject.toml:69] `[build-system] requires` bumped setuptools>=75 -> >=77 (PEP 639 plain-string `license = "MIT"` needs setuptools>=77); `uv build` re-verified -> gedanken-1.1.0 wheel+sdist built clean; uv.lock unaffected (no diff).
 - Commit: fix(review-async): bump build setuptools floor to >=77 (R3)
+
+## W8
+Stage: realization | Wave: W8 | Author: executor
+
+### Done
+- Re-baselined `uvx mypy hyppo`: 94 raw errors, ~65 pure import-not-found/untyped
+  (uvx isolated env has no project deps). Added global `ignore_missing_imports=true`
+  (matches recon --ignore-missing-imports baseline) → 29 real errors in 5 files.
+- Fixed real (not suppressed):
+  - hyppo/storage/_base.py: `filename: str` → `Union[str, Path]` in save/load/delete
+    (Path(filename) reassign no longer str-assignment error; is_absolute narrows OK);
+    `self.description: Optional[dict] = None` (was inferred None); one targeted
+    `# type: ignore[return-value]` in load_all (get_all_names lists existing files
+    → load never None there).
+  - hyppo/gui/projects.py: `list[dict]` → `List[dict]` on list()/list_iterations()
+    (method named `list` shadowed builtin in class scope → valid-type); added
+    `from typing import List`.
+  - hyppo/gui/services.py: annotated `best: tuple[str | None, dict]` (var-annotated).
+  - hyppo/ontology/oil_constraints.py:116: ignore code `union-attr` → `attr-defined`
+    (info: object → .field_name is attr-defined, not union-attr).
+- Suppressed via config (owlready2 metaclass magic only):
+  - New override module="hyppo.core._base" disable_error_code=["misc"] — 19
+    "Invalid base class" from `class X(Thing)` / `class X(Artefact >> int, ...)`,
+    same pattern as ontology.* but outside that namespace.
+
+### Verified
+- `uvx mypy hyppo` → Success: no issues found in 75 source files (exit 0).
+- `uvx ruff check hyppo tests` → All checks passed!
+- `uvx ruff format --check hyppo tests` → 127 files already formatted.
+- `pytest tests/test_golden_claims.py` → 48 passed (golden invariant intact).
+- `pytest tests -q` → 336 passed (first run hit the transient Windows
+  access-violation flake W7 documented on owl/Java teardown; clean on immediate re-run).
+- Scope-guard: git diff --name-only ⊆ {hyppo/storage/_base.py, hyppo/gui/projects.py,
+  hyppo/gui/services.py, hyppo/ontology/oil_constraints.py, pyproject.toml}. No wave markers.
+
+### Files
+- `pyproject.toml` modified ([tool.mypy]: ignore_missing_imports + core._base override)
+- `hyppo/storage/_base.py`, `hyppo/gui/projects.py`, `hyppo/gui/services.py`,
+  `hyppo/ontology/oil_constraints.py` modified
+
+### Next
+R4 (W8) complete. R5 (W9 webui, W10 docstrings, W12 artifacts) can proceed.

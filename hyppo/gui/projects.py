@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import sqlite3
 import uuid
+from typing import List
 
 
 class ProjectStore:
@@ -50,7 +51,7 @@ class ProjectStore:
             row = c.execute("SELECT * FROM projects WHERE id=?", (pid,)).fetchone()
         return dict(row) if row else None
 
-    def list(self) -> list[dict]:
+    def list(self) -> List[dict]:
         with self._conn() as c:
             rows = c.execute("SELECT * FROM projects ORDER BY created_order").fetchall()
         return [dict(r) for r in rows]
@@ -84,7 +85,7 @@ class ProjectStore:
             c.execute("INSERT INTO iterations VALUES (?,?,?)", (pid, it, payload))
         return it
 
-    def list_iterations(self, pid: str) -> list[dict]:
+    def list_iterations(self, pid: str) -> List[dict]:
         import json as _json
 
         with self._conn() as c:

@@ -40,7 +40,7 @@ class Pickled:
     def __init__(self, obj: Any):
         self.obj = obj
         self.when_saved: datetime = datetime.now()
-        self.description = None
+        self.description: Optional[dict] = None
 
     def save_data_hook(self, **kwargs: Optional[dict]) -> None:
         """Hook called before saving the object."""
@@ -83,7 +83,7 @@ class Database:
     def save(
         cls,
         obj: Any,
-        filename: str,
+        filename: Union[str, Path],
         storage: Union[str, Path] = "",
         **kwargs: Dict[str, Any],
     ) -> None:
@@ -126,7 +126,9 @@ class Database:
             )
 
     @classmethod
-    def load(cls, filename: str, storage: Union[str, Path] = "") -> Optional[Pickled]:
+    def load(
+        cls, filename: Union[str, Path], storage: Union[str, Path] = ""
+    ) -> Optional[Pickled]:
         """Load an object from the database.
 
         Args:
@@ -150,7 +152,7 @@ class Database:
             return None
 
     @classmethod
-    def delete(cls, filename: str, storage: Union[str, Path] = ""):
+    def delete(cls, filename: Union[str, Path], storage: Union[str, Path] = ""):
         """Delete an object from the database.
 
         Args:
@@ -207,10 +209,11 @@ class Database:
         Returns:
             List[Pickled]: List of wrapped stored objects.
         """
+        # get_all_names lists existing files, so load never returns None here.
         objs = [
             cls.load(f, storage=storage) for f in cls.get_all_names(storage=storage)
         ]
-        return objs
+        return objs  # type: ignore[return-value]
 
 
 db = Database

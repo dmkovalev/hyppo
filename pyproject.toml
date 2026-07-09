@@ -85,7 +85,14 @@ select = ["E", "F", "I"]
 
 [tool.mypy]
 python_version = "3.11"
+ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = "hyppo.ontology.*"
 disable_error_code = ["misc", "valid-type", "no-redef", "var-annotated", "call-overload", "assignment"]
+
+# owlready2 builds OWL classes from dynamic bases (Thing, Artefact >> int, ...)
+# that mypy cannot resolve as valid base classes.
+[[tool.mypy.overrides]]
+module = "hyppo.core._base"
+disable_error_code = ["misc"]

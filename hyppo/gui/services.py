@@ -72,7 +72,7 @@ def run_iteration(ve: dict, db_path: str) -> dict:
     finally:
         mgr.close()
 
-    best = max(
+    best: tuple[str | None, dict] = max(
         results.items(),
         key=lambda kv: kv[1].get("metrics", {}).get("r2", 0.0),
         default=(None, {}),

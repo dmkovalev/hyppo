@@ -45,6 +45,7 @@
 - Decision: [tool.mypy] strict-ish globally; hyppo.ontology.* gets disable_error_code for owlready2 dynamic-base magic; ignores must carry codes.
 - Reason: owlready2 metaclasses are untypeable; blanket strict would force bare-ignore litter.
 - Alternative: exclude ontology entirely — hides real errors in its pure-python parts.
+- Refinement (exec): global ignore_missing_imports=true (uvx mypy runs isolated, no project deps → all import-not-found/untyped are env noise, not code defects; matches recon's --ignore-missing-imports baseline). Added override module="hyppo.core._base" disable_error_code=["misc"] — same owlready2 dynamic-base pattern (Thing / `Artefact >> int`) as ontology.*, just outside that namespace. Real type fixes (not config) in storage/_base.py (Path/str param widening, description annotation), gui/projects.py (List[dict] avoids method-name `list` shadowing builtin under class scope), gui/services.py (best tuple annotation), oil_constraints.py (ignore code union-attr→attr-defined). One targeted ignore[return-value] in storage load_all (get_all_names guarantees existing files → load never None there).
 
 ## W4/importers: correct version_store move file-set (critic)
 - Decision: W4 updates conftest.py + 6 test_action_*.py (all monkeypatch/import hyppo.mcp.version_store/_db); drop mcp/tools.py, mcp/resources.py, test_mcp_resources.py from the list (they never import version_store).
