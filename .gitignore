@@ -4,6 +4,7 @@ __pycache__/
 dist/
 build/
 .venv/
+site/
 *.db
 experiments/iip2026/cache/
 experiments/iip2026/out/

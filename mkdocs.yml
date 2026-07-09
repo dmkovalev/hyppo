@@ -1,0 +1,53 @@
+site_name: gedanken
+site_description: A platform for virtual (thought) experiments over hypothesis lattices
+repo_url: https://github.com/dmkovalev/hyppo-ref
+repo_name: dmkovalev/hyppo-ref
+
+docs_dir: docs
+exclude_docs: |
+  specs/
+  superpowers/
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: ["."]
+          options:
+            docstring_style: google
+            docstring_options:
+              warn_missing_types: false
+            show_source: false
+            show_root_heading: true
+            merge_init_into_class: true
+            filters: ["!^_"]
+
+nav:
+  - Home: index.md
+  - Architecture: architecture.md
+  - API Reference:
+      - Core: api/core.md
+      - COA: api/coa.md
+      - Lattice Constructor: api/lattice_constructor.md
+      - Planner: api/planner.md
+      - Runner: api/runner.md
+      - Manager: api/manager.md
+      - Storage: api/storage.md
+      - Versioning: api/versioning.md
+      - Comparison: api/comparison.md
+      - Ontology: api/ontology.md
+      - Actions: api/actions.md
+      - Adapters: api/adapters.md
+      - GUI: api/gui.md
+      - MCP: api/mcp.md
+      - Metadata Repository: api/metadata_repository.md
+      - Generator: api/generator.md
+  - GUI Demo Spec: gui_demo_spec.md
