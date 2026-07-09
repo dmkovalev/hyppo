@@ -7,9 +7,9 @@ build/
 site/
 *.db
 scratch/
-examples/research/iip2026/cache/
-examples/research/iip2026/out/
-examples/research/iip2026/data/
+examples/research/planning/cache/
+examples/research/planning/out/
+examples/research/planning/data/
 
 # webui build artifacts
 webui/node_modules/

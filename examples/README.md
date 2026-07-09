@@ -58,5 +58,5 @@ Expected tail: `PRIMER OK` (exit 0).
 - `volve_run.py`: Real Volve field-level CRM fit + integrity-control demo.
 - `functional_connectivity/`: HCP brain functional-connectivity example (legacy, see its own README).
 - `random_structures/`: Generates random complete COA structures (see its own README).
-- `research/`: dissertation research experiments (chapter4, iip2026, norne) —
+- `research/`: dissertation research experiments (chapter4, planning, norne) —
   not part of the published package; see `research/README.md`.

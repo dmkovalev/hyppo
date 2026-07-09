@@ -71,7 +71,7 @@ native heap is flaky under sustained heavy allocation, so `dm_drive.py` isolates
 each replica in its own process and retries any that crash.
 
 ```bash
-cd examples/research/iip2026
+cd examples/research/planning
 
 # Section 5.1 — Algorithm 1 build exponent (process-isolated, ~2-4 min)
 python scripts/dm_drive.py

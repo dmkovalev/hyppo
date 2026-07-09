@@ -262,7 +262,7 @@ with virtual_experiment_onto:
 
     AllDisjoint([VirtualExperiment, Configuration, Workflow, Hypothesis, Model])
 
-    # ── Theorem 1 axiomatic support (iip2026_planning.tex §3) ──────────────
+    # ── Theorem 1 axiomatic support (dissertation, planning chapter) ────────
     # Adds the three OWL axioms required for the C2 source-of-inconsistency
     # bijection in the consistency-check correctness proof:
     #   (i)  is_implemented_by_model is Functional → uniqueness of m

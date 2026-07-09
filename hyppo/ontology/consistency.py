@@ -1,5 +1,5 @@
 """Two-stage consistency check for virtual experiments (Algorithm 1 of
-`iip2026_planning.tex`).
+the planning chapter of the dissertation).
 
 Stage A — semantic: OWL 2 DL classification via HermiT detects
     C1 (ontology completeness via Concept closure axiom + AllDifferent),

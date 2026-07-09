@@ -18,7 +18,7 @@ try:
 except Exception:
     pass
 
-ROOT = Path(__file__).resolve().parent.parent   # examples/research/iip2026/
+ROOT = Path(__file__).resolve().parent.parent   # examples/research/planning/
 CACHE = ROOT / "cache"
 OUT_DIR = ROOT / "out"
 DATA  = ROOT / "data"

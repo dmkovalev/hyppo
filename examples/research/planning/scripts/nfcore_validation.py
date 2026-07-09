@@ -36,7 +36,7 @@ from go_validation import (  # type: ignore
     plan, gen_er_sparse, gen_ba,
 )
 
-ROOT = Path(__file__).resolve().parent.parent   # examples/research/iip2026/
+ROOT = Path(__file__).resolve().parent.parent   # examples/research/planning/
 CACHE = ROOT / "cache"
 OUT   = ROOT / "out"
 DATA  = ROOT / "data"

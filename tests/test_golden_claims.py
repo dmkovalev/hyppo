@@ -2,7 +2,6 @@
 
 Sources of the claims:
   [SVD]  thesis/papers/sht_dostupnost_v1.tex — журнал «Системы высокой доступности»
-  [IIP]  thesis/papers/iip2026_planning_v4.tex — DAMDID (планирование)
 
 Contract: if a test here fails, either the code or the paper text is wrong.
 Fix whichever is wrong; only then may the expected values change.
@@ -117,7 +116,7 @@ def test_alg1_norne_graph_matches_figure():
 
 
 # ---------------------------------------------------------------------------
-# Algorithm 2 — incremental add equals full rebuild  [IIP, лемма 2]
+# Algorithm 2 — incremental add equals full rebuild  (лемма 2)
 # ---------------------------------------------------------------------------
 
 
@@ -149,7 +148,7 @@ def test_alg2_incremental_equals_full_rebuild(seed):
 
 
 # ---------------------------------------------------------------------------
-# Algorithm 4 — plan == cascade closure oracle  [IIP §4; SVD положение о каскаде]
+# Algorithm 4 — plan == cascade closure oracle  [SVD положение о каскаде]
 # ---------------------------------------------------------------------------
 
 
@@ -182,7 +181,7 @@ def test_alg4_plan_matches_reachability_oracle(seed):
 
 
 # ---------------------------------------------------------------------------
-# Theorem 1 — correctness and minimality of the plan  [IIP теорема 1]
+# Theorem 1 — correctness and minimality of the plan  (теорема 1)
 # ---------------------------------------------------------------------------
 
 
@@ -238,7 +237,7 @@ def _chain_graph(n: int) -> HypothesisGraph:
 
 
 def test_alg1_complexity_quadratic_pair_enumeration(monkeypatch):
-    """[IIP лемма 1] Algorithm 1 costs O(|H|^2 · s · v): the number of causal
+    """(лемма 1) Algorithm 1 costs O(|H|^2 · s · v): the number of causal
     completeness checks equals the number of reachable pairs (n(n-1)/2 on a
     chain), i.e. grows quadratically."""
     counts = {}
@@ -263,7 +262,7 @@ def test_alg1_complexity_quadratic_pair_enumeration(monkeypatch):
 
 
 def test_alg2_complexity_linear_in_hypotheses(monkeypatch):
-    """[IIP лемма 2] Algorithm 2 performs exactly |H| causal unions —
+    """(лемма 2) Algorithm 2 performs exactly |H| causal unions —
     linear, against |H|^2 for a full rebuild."""
     orig = causal.is_complete
     for n in (10, 20, 40):
@@ -290,7 +289,7 @@ class _CountingSet(set):
 
 
 def test_alg4_complexity_linear_in_nodes_plus_edges():
-    """[IIP] Algorithm 4 runs in O(|V|+|E|): adjacency traversals grow
+    """Algorithm 4 runs in O(|V|+|E|): adjacency traversals grow
     linearly with the chain length (ratio ~2 when n doubles, not ~4)."""
     ops = {}
     for n in (200, 400, 800):
@@ -319,7 +318,7 @@ def test_rule5_acyclicity_detected_procedurally():
 
 
 # ---------------------------------------------------------------------------
-# Algorithm 3 — two-stage consistency check  [IIP alg:consistency; положение 1]
+# Algorithm 3 — two-stage consistency check  (двухэтапная проверка; положение 1)
 # ---------------------------------------------------------------------------
 # Claim [положение 1]: «корректная определённость проверяется статически,
 # до запуска моделей, двухэтапным (семантическим и структурным) алгоритмом»;

@@ -1,4 +1,4 @@
-"""Benchmark for Algorithm 1 (consistency check) of `iip2026_planning.tex`.
+"""Benchmark for Algorithm 1 (consistency check) of the planning chapter.
 
 Builds synthetic OWL 2 DL ontologies of varying size |H|, runs
 ``hyppo.ontology.consistency.check_consistency``, and records
