@@ -1,0 +1,3 @@
+# hyppo.adapters
+
+::: hyppo.adapters
