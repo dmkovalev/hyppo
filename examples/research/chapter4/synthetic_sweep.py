@@ -5,11 +5,11 @@ Shows that the hypothesis-management mechanism works across a range of
 regime-change severities, not just at one cherry-picked point.
 
 Usage:
-    uv run python experiments/chapter4/synthetic_sweep.py
+    uv run python examples/research/chapter4/synthetic_sweep.py
 
 Output:
-    experiments/chapter4/results/synthetic_sweep.json
-    experiments/chapter4/figures/sweep_mape_vs_spike.png
+    examples/research/chapter4/results/synthetic_sweep.json
+    examples/research/chapter4/figures/sweep_mape_vs_spike.png
 """
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ from pathlib import Path
 
 import numpy as np
 
-from experiments.chapter4.synthetic_ab import (
+from examples.research.chapter4.synthetic_ab import (
     RANDOM_SEED,
     N_PRODUCERS,
     N_INJECTORS,

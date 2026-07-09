@@ -19,8 +19,8 @@ and the comparison decision.
 HCP S1200 fMRI is access-restricted (DUA); only published aggregate statistics
 are used here, so the demo is reproducible without the raw data.
 
-Usage:  uv run python experiments/chapter4/hcp_cascade.py
-Output: experiments/chapter4/results/hcp_cascade.json
+Usage:  uv run python examples/research/chapter4/hcp_cascade.py
+Output: examples/research/chapter4/results/hcp_cascade.json
 """
 from __future__ import annotations
 

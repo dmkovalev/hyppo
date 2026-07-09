@@ -1,6 +1,6 @@
 """Топология 19-узлового графа HybridCRM и физические каскады."""
 
-from experiments.chapter4.synthetic_honest import (
+from examples.research.chapter4.synthetic_honest import (
     HYBRIDCRM_19_EDGES,
     HYBRIDCRM_19_NODES,
 )

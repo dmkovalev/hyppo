@@ -26,8 +26,8 @@ Two results:
       marks the descendants stale. This is the qualitative advantage of the
       semantic graph over file hashing.
 
-Run: PYTHONPATH=<hyppo-ref> python experiments/iip2026/scripts/resume_vs_cascade.py
-Out: experiments/iip2026/data/resume_vs_cascade.json
+Run: PYTHONPATH=<hyppo-ref> python examples/research/iip2026/scripts/resume_vs_cascade.py
+Out: examples/research/iip2026/data/resume_vs_cascade.json
 """
 from __future__ import annotations
 

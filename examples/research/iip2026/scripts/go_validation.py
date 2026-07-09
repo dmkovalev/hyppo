@@ -29,7 +29,7 @@ import matplotlib.pyplot as plt
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8")
 
-ROOT = Path(__file__).resolve().parent.parent   # experiments/iip2026/
+ROOT = Path(__file__).resolve().parent.parent   # examples/research/iip2026/
 CACHE = ROOT / "cache"
 OUT   = ROOT / "out"
 DATA  = ROOT / "data"

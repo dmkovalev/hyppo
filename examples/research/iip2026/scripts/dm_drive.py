@@ -6,7 +6,7 @@ on the dissertation grid [10..500], fits a log-log power law with a bootstrap CI
 and writes data/asymptotic_results_dm.json (er_build + er_powerlaw).
 
 Run from hyppo-ref:
-  .venv/Scripts/python.exe experiments/iip2026/scripts/dm_drive.py
+  .venv/Scripts/python.exe examples/research/iip2026/scripts/dm_drive.py
 (any interpreter works; the driver allocates nothing heavy -- the workers do.)
 """
 import json

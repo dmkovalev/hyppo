@@ -1,4 +1,4 @@
-# Experiments
+# Research
 
 Research experiments backing the dissertation chapters and papers. Not
 part of the published `gedanken`/`hyppo` package (not installed, not

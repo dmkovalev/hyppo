@@ -4,7 +4,7 @@ complete, so Theta(|H|^2) transitive closures run, each O(k^2)=O(|H|^2) for spar
 equations -> total O(|H|^4). Measures the build-time exponent; expect a~4.
 
 Pure stdlib (causal core only). Run on a clean interpreter (no numpy):
-  PYTHONPATH=<hyppo-ref> python experiments/iip2026/scripts/dm_worstcase.py
+  PYTHONPATH=<hyppo-ref> python examples/research/iip2026/scripts/dm_worstcase.py
 """
 import json
 import math

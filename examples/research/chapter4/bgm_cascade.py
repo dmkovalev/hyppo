@@ -17,8 +17,8 @@ chi^2 values are taken from the published BGM fits (Czekaj et al. 2014, Tycho-2
 thin-disc (B-V)_T); Tycho-2 (VizieR) and the BGM web model are public but not
 bundled here.
 
-Usage:  uv run python experiments/chapter4/bgm_cascade.py
-Output: experiments/chapter4/results/bgm_cascade.json
+Usage:  uv run python examples/research/chapter4/bgm_cascade.py
+Output: examples/research/chapter4/results/bgm_cascade.json
 """
 from __future__ import annotations
 

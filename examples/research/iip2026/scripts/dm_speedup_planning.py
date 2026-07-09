@@ -8,7 +8,7 @@ data from dm_drive.py):
 Both are low-allocation, so a single clean-interpreter process is stable (unlike
 the O(|H|^2) build, which trips the machine's native-heap flakiness at scale).
 
-Run: PYTHONPATH=<hyppo-ref> C:/Python314/python.exe experiments/iip2026/scripts/dm_speedup_planning.py
+Run: PYTHONPATH=<hyppo-ref> C:/Python314/python.exe examples/research/iip2026/scripts/dm_speedup_planning.py
 """
 import json
 import math

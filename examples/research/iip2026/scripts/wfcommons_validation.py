@@ -37,7 +37,7 @@ except Exception:
     pass
 
 
-ROOT = Path(__file__).resolve().parent.parent  # experiments/iip2026/
+ROOT = Path(__file__).resolve().parent.parent  # examples/research/iip2026/
 CACHE = ROOT / "cache" / "wfcommons"
 OUT_DIR = ROOT / "out"
 PAPERS = ROOT / "data"

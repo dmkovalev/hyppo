@@ -687,3 +687,18 @@ deleted regenerable `hyppo_gui.db` (verified default recreated by
 access-violation flake on first run, clean on re-run, unrelated to this
 change). Commit: chore(root): sweep untracked scratch into gitignored
 scratch/ (R7d).
+
+## R7e fix: structure
+Stage: realization | Author: fix-agent
+Audit: notebooks/ already gone, egg-info never tracked (gitignored),
+scripts/gui_real_data.py referenced by hyppo/gui/api/real.py + webui/README.md
+(offline data-prep tool) — kept in place. Merged experiments/{chapter4,
+iip2026,norne} -> examples/research/ (git mv, untracked
+iip2026/scripts/aggregate_table_171.py moved along); experiments/README.md
+folded into examples/research/README.md; examples/README.md indexes
+research/. Fixed 3 real code refs (test_synthetic_honest_cascade.py +
+2 examples files importing `experiments.chapter4...`) plus doc-path
+mentions in .gitignore and script docstrings. pytest 339 passed (retry
+after known access-violation flake), mkdocs --strict clean. Commit:
+refactor(structure): merge experiments into examples/research, prune
+notebooks/scripts/egg-info (R7e)

@@ -8,12 +8,12 @@ Independent variable: presence of hyppo hypothesis-management layer.
 Dependent variable: MAPE OPR on validation period.
 
 Usage:
-    uv run python experiments/chapter4/synthetic_ab.py
+    uv run python examples/research/chapter4/synthetic_ab.py
 
 Output:
-    experiments/chapter4/results/synthetic_comparison.json
-    experiments/chapter4/figures/forecast_comparison.png
-    experiments/chapter4/figures/hypothesis_cascade.png
+    examples/research/chapter4/results/synthetic_comparison.json
+    examples/research/chapter4/figures/forecast_comparison.png
+    examples/research/chapter4/figures/hypothesis_cascade.png
 """
 from __future__ import annotations
 
@@ -471,7 +471,7 @@ def main():
     plot_hypothesis_cascade()
 
     print(f"\n{'=' * 70}")
-    print("Experiment complete. Artifacts in experiments/chapter4/")
+    print("Experiment complete. Artifacts in examples/research/chapter4/")
     print(f"{'=' * 70}")
 
     return results

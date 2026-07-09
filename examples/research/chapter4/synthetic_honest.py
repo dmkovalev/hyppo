@@ -26,8 +26,8 @@ Result design:
 
 Pure NumPy + the CRM surrogate from synthetic_ab; GPU-free, no proprietary data.
 
-Run: PYTHONPATH=<hyppo-ref> python experiments/chapter4/synthetic_honest.py
-Out: experiments/chapter4/results/synthetic_honest.json
+Run: PYTHONPATH=<hyppo-ref> python examples/research/chapter4/synthetic_honest.py
+Out: examples/research/chapter4/results/synthetic_honest.json
 """
 from __future__ import annotations
 
@@ -37,7 +37,7 @@ from pathlib import Path
 
 import numpy as np
 
-from experiments.chapter4.synthetic_ab import (
+from examples.research.chapter4.synthetic_ab import (
     RANDOM_SEED, N_PRODUCERS, N_INJECTORS, N_MONTHS_HISTORY, N_MONTHS_VALIDATION,
     generate_synthetic_field, phase1_initial_training, forecast_with_model,
     compute_mape,

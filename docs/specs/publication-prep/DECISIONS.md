@@ -61,3 +61,11 @@
 - Decision: debug scripts deleted; gitignored data (_*.csv, *.h5, *.jar) untouched.
 - Reason: scripts superseded by golden tests; data still feeds experiments/.
 - Alternative: move scripts to experiments/ — dead weight, logic already in tests.
+
+## structure/examples-merge
+- Decision: `experiments/*` (chapter4, iip2026, norne) merged into
+  `examples/research/*`; single top-level `examples/` — user demos at
+  root, dissertation research under `research/`.
+- Reason: user order + one discoverable entry point (repo audit found
+  `experiments/` and `examples/` as parallel, confusing top-level dirs).
+- Alternative: keep two top-level dirs — rejected by user.
