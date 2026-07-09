@@ -6,6 +6,7 @@ build/
 .venv/
 site/
 *.db
+scratch/
 experiments/iip2026/cache/
 experiments/iip2026/out/
 experiments/iip2026/data/

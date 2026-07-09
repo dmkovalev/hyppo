@@ -676,3 +676,14 @@ examples/functional_connectivity/README.md and experiments/README.md
 (new). webui/README.md, examples/random_structures/README.md: verified
 accurate, no defects, untouched. grep sweep (hyppo gui/hyppo-ve/streamlit/
 wfonto) across all README.md — 0 hits.
+
+## R7d fix: root sweep
+Stage: realization | Author: fix-agent
+Moved untracked root clutter (data files, ad hoc scripts, jars) into new
+gitignored `scratch/{data,scripts,tools}/` (mv, nothing deleted from data);
+deleted regenerable `hyppo_gui.db` (verified default recreated by
+`hyppo/gui/cli.py` on `hyppo-gui` start), `.coverage`, `build/`, `dist/`.
+`.gitignore` +`scratch/`. `pytest tests -q` -> 339 passed (one transient
+access-violation flake on first run, clean on re-run, unrelated to this
+change). Commit: chore(root): sweep untracked scratch into gitignored
+scratch/ (R7d).
