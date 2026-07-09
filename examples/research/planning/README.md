@@ -1,12 +1,11 @@
-# Experiments — Информатика и её применения (ИиП) 2026
+# Experiments — virtual-experiment planning
 
-Reproducibility package for **"Планирование виртуальных экспериментов
-с повторным использованием вычисленных фрагментов"** by D. Yu. Kovalev,
-submitted to the journal *Informatika i Ee Primeneniya* (FRC IU RAS).
+Reproducibility package for the dissertation chapter on planning virtual
+experiments with reuse of previously computed fragments (D. Yu. Kovalev).
 
 ## Single source of truth
 
-The three algorithms of the paper live in the **library**, not in these
+The three algorithms of the chapter live in the **library**, not in these
 scripts — every measurement calls them, so the reported numbers are
 reproducible from `hyppo` itself:
 
@@ -104,15 +103,8 @@ Windows 11 / x86-64 host expect:
 
 ## Citing
 
-```bibtex
-@article{Kovalev2026Planning,
-  author  = {Kovalev, D. Yu.},
-  title   = {Planning virtual experiments with reuse of computed fragments},
-  journal = {Informatics and Applications},
-  year    = {2026},
-  note    = {submitted}
-}
-```
+To cite this work, use the repository's `CITATION.cff` (reference
+implementation accompanying the dissertation of D. Yu. Kovalev).
 
 Backing reference for the cascade-effect experiment:
 
