@@ -1,6 +1,8 @@
 import json
 from math import prod
+
 from fastapi import APIRouter, HTTPException, Request
+
 from hyppo.gui.schemas import VEDefinition, VEView
 
 router = APIRouter(prefix="/api/projects/{pid}/hypotheses", tags=["hypotheses"])

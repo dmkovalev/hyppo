@@ -1,7 +1,11 @@
 from hyppo.gui.services import build_graph, plan_preview
 
 VE = {
-    "hypotheses": [{"id": "a", "params": {}}, {"id": "b", "params": {}}, {"id": "c", "params": {}}],
+    "hypotheses": [
+        {"id": "a", "params": {}},
+        {"id": "b", "params": {}},
+        {"id": "c", "params": {}},
+    ],
     "workflow_edges": [["a", "b"], ["b", "c"]],
 }
 

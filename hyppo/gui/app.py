@@ -9,37 +9,49 @@ def create_app(db_path: str = "hyppo_gui.db") -> FastAPI:
     def health() -> dict:
         return {"status": "ok"}
 
-    from hyppo.gui.projects import ProjectStore
     from hyppo.gui.api import projects as projects_api
+    from hyppo.gui.projects import ProjectStore
+
     app.state.projects = ProjectStore(db_path=db_path)
     from hyppo.gui.demo import seed_demo
+
     seed_demo(app.state.projects)
     app.include_router(projects_api.router)
 
     from hyppo.gui.api import hypotheses as hypotheses_api
+
     app.include_router(hypotheses_api.router)
 
     from hyppo.gui.api import ve as ve_api
+
     app.include_router(ve_api.router)
 
     from hyppo.gui.api import real as real_api
+
     app.include_router(real_api.router)
 
-    from hyppo.gui.api import graph as graph_api, plan as plan_api
+    from hyppo.gui.api import graph as graph_api
+    from hyppo.gui.api import plan as plan_api
+
     app.include_router(graph_api.router)
     app.include_router(plan_api.router)
 
     from hyppo.gui.api import runs as runs_api
+
     app.include_router(runs_api.router)
 
     from hyppo.gui.api import comparison as comparison_api
+
     app.include_router(comparison_api.router)
 
     from hyppo.gui import ws as ws_module
+
     app.include_router(ws_module.router)
 
     from pathlib import Path
+
     from fastapi.staticfiles import StaticFiles
+
     dist = Path(__file__).resolve().parents[2] / "webui" / "dist"
     if dist.exists():
         app.mount("/", StaticFiles(directory=str(dist), html=True), name="spa")

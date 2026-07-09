@@ -9,14 +9,38 @@ See Section 4.10 of dissertation.
 
 from __future__ import annotations
 
-import pytest
-
 # ── Guard: Pellet availability ───────────────────────────────────────────────
 import os
 import shutil
 
+import pytest
+
+# ── Imports ──────────────────────────────────────────────────────────────────
+from hyppo.adapters.wfopt_adapter import (
+    HYPOTHESIS_PARAM_MAP,
+    ConnectivityFraction,
+    Injector,
+    OilFieldOntology,
+    Producer,
+    ReservoirParameter,
+    TimeConstant,
+    Well,
+    build_oil_virtual_experiment,
+    run_oil_experiment_demo,
+)
+from hyppo.ontology.core_rules import (
+    DataDrivenHypothesis,
+    HybridHypothesis,
+    InvalidHypothesis,
+    PhysicsHypothesis,
+    StaleHypothesis,
+)
+
 try:
-    from owlready2 import sync_reasoner_hermit, default_world
+    from owlready2 import (  # noqa: F401 -- availability check
+        default_world,
+        sync_reasoner_hermit,
+    )
 
     _OWL_AVAILABLE = True
 except ImportError:
@@ -45,34 +69,8 @@ needs_pellet = pytest.mark.skipif(
     reason="owlready2 + Pellet (Java 17) required",
 )
 
-# ── Imports ──────────────────────────────────────────────────────────────────
-from hyppo.core._base import (
-    Hypothesis,
-    virtual_experiment_onto as onto,
-)
-from hyppo.ontology.core_rules import (
-    InvalidHypothesis,
-    PhysicsHypothesis,
-    DataDrivenHypothesis,
-    HybridHypothesis,
-    StaleHypothesis,
-)
-from hyppo.adapters.wfopt_adapter import (
-    OilFieldOntology,
-    Well,
-    Injector,
-    Producer,
-    ReservoirParameter,
-    ConnectivityFraction,
-    TimeConstant,
-    HYPOTHESIS_PARAM_MAP,
-    CONFIGURATION_SPACE,
-    build_oil_virtual_experiment,
-    run_oil_experiment_demo,
-)
-
-
 # ── Fixtures ─────────────────────────────────────────────────────────────────
+
 
 @pytest.fixture(scope="module")
 def ve_data():
@@ -99,6 +97,7 @@ def _restore_owl_state(ve_data):
 # ============================================================================
 # Structural tests (no Pellet needed)
 # ============================================================================
+
 
 class TestBuildOilExperiment:
     """Tests for build_oil_virtual_experiment()."""
@@ -138,6 +137,7 @@ class TestBuildOilExperiment:
     def test_lattice_is_dag(self, ve_data):
         """Lattice must be a directed acyclic graph."""
         import networkx as nx
+
         assert nx.is_directed_acyclic_graph(ve_data["lattice"])
 
     def test_configuration_space_has_17_axes(self, ve_data):
@@ -153,7 +153,7 @@ class TestBuildOilExperiment:
         assert all_params.issubset(config_keys)
 
     def test_models_attached(self, ve_data):
-        """Each hypothesis must have a model attached (FunctionalProperty: single value)."""
+        """Each hypothesis has a model attached (FunctionalProperty: single value)."""
         for h in ve_data["hypotheses"]:
             assert h.is_implemented_by_model is not None
 
@@ -170,18 +170,21 @@ class TestHypothesisClassificationStructural:
     def test_h_CRM_has_physics_model(self, ve_data):
         """h_CRM must be implemented by a PhysicsModel."""
         from hyppo.ontology.core_rules import PhysicsModel
+
         h = ve_data["hypotheses_map"]["h_CRM"]
         assert isinstance(h.is_implemented_by_model, PhysicsModel)
 
     def test_h_ML_has_datadriven_model(self, ve_data):
         """h_ML must be implemented by a DataDrivenModel."""
         from hyppo.ontology.core_rules import DataDrivenModel
+
         h = ve_data["hypotheses_map"]["h_ML"]
         assert isinstance(h.is_implemented_by_model, DataDrivenModel)
 
     def test_h_LPR_has_hybrid_model(self, ve_data):
         """h_LPR must be implemented by a HybridModel."""
         from hyppo.ontology.core_rules import HybridModel
+
         h = ve_data["hypotheses_map"]["h_LPR"]
         assert isinstance(h.is_implemented_by_model, HybridModel)
 
@@ -243,41 +246,49 @@ class TestOilConstraintsValidation:
 
     def test_fractional_flow_valid(self):
         from hyppo.ontology.oil_constraints import FractionalFlowParams
+
         p = FractionalFlowParams(f_ij=[0.3, 0.4, 0.2])
         assert abs(sum(p.f_ij) - 0.9) < 1e-9
 
     def test_fractional_flow_exceeds_one(self):
         from hyppo.ontology.oil_constraints import FractionalFlowParams
+
         with pytest.raises(ValueError, match="exceeds 1.0"):
             FractionalFlowParams(f_ij=[0.6, 0.5])
 
     def test_timescale_valid(self):
         from hyppo.ontology.oil_constraints import TimeScaleParams
+
         p = TimeScaleParams(tau_fast=1.0, tau_slow=10.0)
         assert p.tau_fast < p.tau_slow
 
     def test_timescale_fast_ge_slow_fails(self):
         from hyppo.ontology.oil_constraints import TimeScaleParams
+
         with pytest.raises(ValueError, match="tau_fast"):
             TimeScaleParams(tau_fast=10.0, tau_slow=5.0)
 
     def test_saturation_valid(self):
         from hyppo.ontology.oil_constraints import SaturationParams
+
         p = SaturationParams(s_o=0.3, s_w=0.7)
         assert abs(p.s_o + p.s_w - 1.0) < 1e-9
 
     def test_saturation_invalid(self):
         from hyppo.ontology.oil_constraints import SaturationParams
+
         with pytest.raises(ValueError, match="expected 1.0"):
             SaturationParams(s_o=0.5, s_w=0.6)
 
     def test_corey_positive(self):
         from hyppo.ontology.oil_constraints import CoreyExponentParams
+
         p = CoreyExponentParams(n_oil=2.0, n_water=3.0)
         assert p.n_oil > 0
 
     def test_corey_negative_fails(self):
         from hyppo.ontology.oil_constraints import CoreyExponentParams
+
         with pytest.raises(ValueError, match="must be > 0"):
             CoreyExponentParams(n_oil=-1.0, n_water=2.0)
 
@@ -295,12 +306,14 @@ class TestOilDomainOntologyClasses:
 
     def test_oil_field_ontology_is_domain_ontology(self):
         from hyppo.ontology.core_rules import DomainOntology
+
         assert issubclass(OilFieldOntology, DomainOntology)
 
 
 # ============================================================================
 # Reasoning tests (require Pellet)
 # ============================================================================
+
 
 @needs_pellet
 class TestPelletClassification:

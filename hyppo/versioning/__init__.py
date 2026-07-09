@@ -5,6 +5,7 @@ and engine). Kept independent of ``hyppo.mcp`` / ``hyppo.actions`` to avoid an
 import cycle: ``hyppo.actions`` depends on this package, not the other way
 around.
 """
+
 from __future__ import annotations
 
 from hyppo.versioning import _db, version_store

@@ -1,3 +1,4 @@
+from hyppo.manager import Manager
 from hyppo.metadata_repository import MetadataRepository
 
 
@@ -39,20 +40,19 @@ def plan_preview(ve: dict, db_path: str) -> dict:
         repo.close()
 
 
-from hyppo.manager import Manager
-
-
 def _stub_model(hid: str):
     # Deterministic placeholder model: real models are registered by the
     # researcher; the GUI ships stubs so the lifecycle is exercisable on demo.
     def model(config: dict) -> dict:
         seed = sum(ord(ch) for ch in hid)
         return {"r2": 0.5 + (seed % 40) / 100.0}
+
     return model
 
 
 def run_iteration(ve: dict, db_path: str) -> dict:
     from hyppo.metadata_repository import MetadataRepository
+
     nodes = [h["id"] for h in ve["hypotheses"]]
     edges = [tuple(e) for e in ve.get("workflow_edges", [])]
 
@@ -80,8 +80,7 @@ def run_iteration(ve: dict, db_path: str) -> dict:
     return {
         "results": results,
         "reused": reused,
-        "best": {"hypothesis": best[0],
-                 "r2": best[1].get("metrics", {}).get("r2")},
+        "best": {"hypothesis": best[0], "r2": best[1].get("metrics", {}).get("r2")},
     }
 
 

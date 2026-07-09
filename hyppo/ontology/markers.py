@@ -39,7 +39,6 @@ from __future__ import annotations
 import logging
 import warnings
 from dataclasses import dataclass, field
-from typing import Iterable
 
 log = logging.getLogger(__name__)
 
@@ -64,19 +63,29 @@ except ImportError:  # pragma: no cover - environment guard
 # Lazy imports of marker classes (avoid circular import at module load time)
 # ---------------------------------------------------------------------------
 
+
 def _import_marker_classes():
     """Return a namespace dict with all required marker classes."""
+    from hyppo.core._base import Hypothesis
     from hyppo.ontology.core_rules import CompleteExperiment
-    from hyppo.ontology.workflow_validation import OrphanHypothesis, WorkflowTask, hasHypothesis
-    from hyppo.ontology.quality_gates import PrunableSubtree, LowQuality, hasDescendant
-    from hyppo.ontology.multi_experiment import SharedHypothesis, Experiment, usesHypothesis
     from hyppo.ontology.model_compatibility import (
         DatasetNotInConfig,
         ModelWithDatasetNeed,
-        usedInConfig,
         hasAvailableDataset,
+        usedInConfig,
     )
-    from hyppo.core._base import Hypothesis
+    from hyppo.ontology.multi_experiment import (
+        Experiment,
+        SharedHypothesis,
+        usesHypothesis,
+    )
+    from hyppo.ontology.quality_gates import LowQuality, PrunableSubtree, hasDescendant
+    from hyppo.ontology.workflow_validation import (
+        OrphanHypothesis,
+        WorkflowTask,
+        hasHypothesis,
+    )
+
     return dict(
         CompleteExperiment=CompleteExperiment,
         OrphanHypothesis=OrphanHypothesis,
@@ -99,6 +108,7 @@ def _import_marker_classes():
 # ---------------------------------------------------------------------------
 # Result container
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class MarkerReport:
@@ -129,6 +139,7 @@ class MarkerReport:
 # ---------------------------------------------------------------------------
 # Internal helpers
 # ---------------------------------------------------------------------------
+
 
 def _assert_marker(
     individual,
@@ -161,7 +172,9 @@ def _assert_marker(
         return True
 
     if not _HERMIT_AVAILABLE:
-        log.debug("HermiT unavailable — skipping consistency check for %s", individual.iri)
+        log.debug(
+            "HermiT unavailable — skipping consistency check for %s", individual.iri
+        )
         return True
 
     # Step 3: run reasoner
@@ -181,7 +194,9 @@ def _assert_marker(
         )
         log.warning(
             "Marker rolled back: %s ∈ %s (inconsistency: %s)",
-            individual.iri, marker_cls.__name__, exc,
+            individual.iri,
+            marker_cls.__name__,
+            exc,
         )
         if rolled_back is not None:
             rolled_back.append(individual.iri)
@@ -193,6 +208,7 @@ def _assert_marker(
 # ---------------------------------------------------------------------------
 # Rule 2: CompleteExperiment
 # ---------------------------------------------------------------------------
+
 
 def apply_rule_2(
     ontology,
@@ -226,8 +242,11 @@ def apply_rule_2(
         has_cfg = bool(ve.has_for_configuration)
         if has_onto and has_wf and has_hyp and has_model and has_cfg:
             ok = _assert_marker(
-                ve, CompleteExperiment, ontology,
-                run_hermit=run_hermit, rolled_back=rolled_back,
+                ve,
+                CompleteExperiment,
+                ontology,
+                run_hermit=run_hermit,
+                rolled_back=rolled_back,
             )
             if ok:
                 marked.append(ve.iri)
@@ -237,6 +256,7 @@ def apply_rule_2(
 # ---------------------------------------------------------------------------
 # Rule 9: OrphanHypothesis
 # ---------------------------------------------------------------------------
+
 
 def apply_rule_9(
     ontology,
@@ -265,8 +285,11 @@ def apply_rule_9(
     for h in Hypothesis.instances():
         if h not in referenced:
             ok = _assert_marker(
-                h, OrphanHypothesis, ontology,
-                run_hermit=run_hermit, rolled_back=rolled_back,
+                h,
+                OrphanHypothesis,
+                ontology,
+                run_hermit=run_hermit,
+                rolled_back=rolled_back,
             )
             if ok:
                 marked.append(h.iri)
@@ -277,13 +300,14 @@ def apply_rule_9(
 # Rule 11: PrunableSubtree
 # ---------------------------------------------------------------------------
 
+
 def apply_rule_11(
     ontology,
     *,
     run_hermit: bool = True,
     rolled_back: list[str] | None = None,
 ) -> list[str]:
-    """Mark low-quality hypotheses whose entire descendant subtree is also low-quality (Rule 11).
+    """Mark low-quality hypotheses whose descendant subtree is low-quality (Rule 11).
 
     CWA condition (universal quantifier ∀ hasDescendant.LowQuality):
     a hypothesis is a PrunableSubtree root if:
@@ -295,7 +319,6 @@ def apply_rule_11(
     ns = _import_marker_classes()
     PrunableSubtree = ns["PrunableSubtree"]
     LowQuality = ns["LowQuality"]
-    Hypothesis = ns["Hypothesis"]
 
     marked: list[str] = []
     for h in LowQuality.instances():
@@ -303,8 +326,11 @@ def apply_rule_11(
         descendants = _collect_descendants(h)
         if all(isinstance(d, LowQuality) or LowQuality in d.is_a for d in descendants):
             ok = _assert_marker(
-                h, PrunableSubtree, ontology,
-                run_hermit=run_hermit, rolled_back=rolled_back,
+                h,
+                PrunableSubtree,
+                ontology,
+                run_hermit=run_hermit,
+                rolled_back=rolled_back,
             )
             if ok:
                 marked.append(h.iri)
@@ -313,7 +339,10 @@ def apply_rule_11(
 
 def _collect_descendants(root) -> list:
     """BFS over hasDescendant links to collect all descendants."""
-    from hyppo.ontology.quality_gates import hasDescendant as _hasDescendant  # noqa: F401
+    from hyppo.ontology.quality_gates import (
+        hasDescendant as _hasDescendant,  # noqa: F401
+    )
+
     visited: list = []
     queue = list(root.hasDescendant)
     seen: set = {root}
@@ -330,6 +359,7 @@ def _collect_descendants(root) -> list:
 # ---------------------------------------------------------------------------
 # Rule 13: SharedHypothesis
 # ---------------------------------------------------------------------------
+
 
 def apply_rule_13(
     ontology,
@@ -362,8 +392,11 @@ def apply_rule_13(
         exps = hyp_to_exps.get(h, [])
         if len(exps) >= 2:
             ok = _assert_marker(
-                h, SharedHypothesis, ontology,
-                run_hermit=run_hermit, rolled_back=rolled_back,
+                h,
+                SharedHypothesis,
+                ontology,
+                run_hermit=run_hermit,
+                rolled_back=rolled_back,
             )
             if ok:
                 marked.append(h.iri)
@@ -373,6 +406,7 @@ def apply_rule_13(
 # ---------------------------------------------------------------------------
 # Rule 15: DatasetNotInConfig
 # ---------------------------------------------------------------------------
+
 
 def apply_rule_15(
     ontology,
@@ -409,8 +443,11 @@ def apply_rule_15(
 
         if not has_accessible:
             ok = _assert_marker(
-                m, DatasetNotInConfig, ontology,
-                run_hermit=run_hermit, rolled_back=rolled_back,
+                m,
+                DatasetNotInConfig,
+                ontology,
+                run_hermit=run_hermit,
+                rolled_back=rolled_back,
             )
             if ok:
                 marked.append(m.iri)
@@ -420,6 +457,7 @@ def apply_rule_15(
 # ---------------------------------------------------------------------------
 # Aggregate entry point
 # ---------------------------------------------------------------------------
+
 
 def apply_markers(ontology, *, run_hermit: bool = True) -> MarkerReport:
     """Apply all five layer-2 marker rules to the current ABox.
@@ -447,11 +485,21 @@ def apply_markers(ontology, *, run_hermit: bool = True) -> MarkerReport:
         report.hermit_skipped = True
         run_hermit = False
 
-    report.rule2_marked = apply_rule_2(ontology, run_hermit=run_hermit, rolled_back=report.rolled_back)
-    report.rule9_marked = apply_rule_9(ontology, run_hermit=run_hermit, rolled_back=report.rolled_back)
-    report.rule11_marked = apply_rule_11(ontology, run_hermit=run_hermit, rolled_back=report.rolled_back)
-    report.rule13_marked = apply_rule_13(ontology, run_hermit=run_hermit, rolled_back=report.rolled_back)
-    report.rule15_marked = apply_rule_15(ontology, run_hermit=run_hermit, rolled_back=report.rolled_back)
+    report.rule2_marked = apply_rule_2(
+        ontology, run_hermit=run_hermit, rolled_back=report.rolled_back
+    )
+    report.rule9_marked = apply_rule_9(
+        ontology, run_hermit=run_hermit, rolled_back=report.rolled_back
+    )
+    report.rule11_marked = apply_rule_11(
+        ontology, run_hermit=run_hermit, rolled_back=report.rolled_back
+    )
+    report.rule13_marked = apply_rule_13(
+        ontology, run_hermit=run_hermit, rolled_back=report.rolled_back
+    )
+    report.rule15_marked = apply_rule_15(
+        ontology, run_hermit=run_hermit, rolled_back=report.rolled_back
+    )
 
     log.info(
         "apply_markers complete: rule2=%d rule9=%d rule11=%d rule13=%d rule15=%d",

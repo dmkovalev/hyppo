@@ -12,6 +12,7 @@ measured complexity is the library's, not a script's reimplementation.
 Pure stdlib (imports only :mod:`hyppo.coa.causal`); safe to import without
 sympy/owlready.
 """
+
 from __future__ import annotations
 
 from collections import defaultdict

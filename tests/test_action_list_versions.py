@@ -1,4 +1,5 @@
 """Tests for hyppo.actions.version.list_versions_for_hypothesis."""
+
 from datetime import datetime
 from unittest.mock import AsyncMock
 
@@ -31,8 +32,11 @@ async def test_list_returns_descending_order(monkeypatch):
         _row("v1", datetime(2026, 5, 10, 12, 0, 0)),
     ]
     from hyppo.versioning import version_store
+
     monkeypatch.setattr(
-        version_store, "select_versions_by_kind", AsyncMock(return_value=rows),
+        version_store,
+        "select_versions_by_kind",
+        AsyncMock(return_value=rows),
     )
     out: HypothesisVersionList = await list_versions_for_hypothesis(
         ListVersionsForHypothesisInput(hypothesis_kind="h_CRM")
@@ -43,8 +47,11 @@ async def test_list_returns_descending_order(monkeypatch):
 
 async def test_list_empty_is_ok(monkeypatch):
     from hyppo.versioning import version_store
+
     monkeypatch.setattr(
-        version_store, "select_versions_by_kind", AsyncMock(return_value=[]),
+        version_store,
+        "select_versions_by_kind",
+        AsyncMock(return_value=[]),
     )
     out = await list_versions_for_hypothesis(
         ListVersionsForHypothesisInput(hypothesis_kind="h_ML")

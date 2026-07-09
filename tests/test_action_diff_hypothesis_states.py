@@ -16,6 +16,7 @@ Cascade truth-table (kind changed → kinds that become stale):
     h_BL  ⇒ {h_WCT}
     h_WCT ⇒ set()
 """
+
 import pytest
 
 from hyppo.actions.diff import (
@@ -52,19 +53,17 @@ def test_identical_snapshots_produce_empty_diff():
     "changed_kind,expected_cascade",
     [
         ("h_CRM", {"h_LPR", "h_MB", "h_BL", "h_WCT"}),
-        ("h_ML",  {"h_LPR", "h_MB", "h_BL", "h_WCT"}),
+        ("h_ML", {"h_LPR", "h_MB", "h_BL", "h_WCT"}),
         ("h_LPR", {"h_MB", "h_BL", "h_WCT"}),
-        ("h_MB",  {"h_BL", "h_WCT"}),
-        ("h_BL",  {"h_WCT"}),
+        ("h_MB", {"h_BL", "h_WCT"}),
+        ("h_BL", {"h_WCT"}),
         ("h_WCT", set()),
     ],
 )
 def test_cascade_truth_table(changed_kind, expected_cascade):
     a = _default_snapshot()
     b = _default_snapshot(overrides={changed_kind: {"USE_DUAL_TAU_CRM": True}})
-    out = diff_hypothesis_states(
-        DiffHypothesisStatesInput(snapshot_a=a, snapshot_b=b)
-    )
+    out = diff_hypothesis_states(DiffHypothesisStatesInput(snapshot_a=a, snapshot_b=b))
     assert changed_kind in out.changed_hypotheses
     assert set(out.stale_cascade) == expected_cascade
 
@@ -72,9 +71,7 @@ def test_cascade_truth_table(changed_kind, expected_cascade):
 def test_hyperparam_only_change_populates_hyperparam_diff():
     a = _default_snapshot(overrides={"h_BL": {"BACKPERIOD": 24}})
     b = _default_snapshot(overrides={"h_BL": {"BACKPERIOD": 36}})
-    out = diff_hypothesis_states(
-        DiffHypothesisStatesInput(snapshot_a=a, snapshot_b=b)
-    )
+    out = diff_hypothesis_states(DiffHypothesisStatesInput(snapshot_a=a, snapshot_b=b))
     assert out.hyperparam_diff == {"h_BL": {"BACKPERIOD": [24, 36]}}
     assert "h_BL" in out.changed_hypotheses
     assert set(out.stale_cascade) == {"h_WCT"}
@@ -83,10 +80,10 @@ def test_hyperparam_only_change_populates_hyperparam_diff():
 def test_inactive_kind_in_b_is_treated_as_change():
     a = _default_snapshot()
     b_kinds = ["h_CRM", "h_ML", "h_LPR", "h_MB", "h_BL"]  # h_WCT off
-    b = HypothesisSnapshot(active_hypotheses=b_kinds, hyperparams={k: {} for k in b_kinds})
-    out = diff_hypothesis_states(
-        DiffHypothesisStatesInput(snapshot_a=a, snapshot_b=b)
+    b = HypothesisSnapshot(
+        active_hypotheses=b_kinds, hyperparams={k: {} for k in b_kinds}
     )
+    out = diff_hypothesis_states(DiffHypothesisStatesInput(snapshot_a=a, snapshot_b=b))
     assert "h_WCT" in out.changed_hypotheses
     # leaf node: no downstream cascade
     assert "h_WCT" not in out.stale_cascade
@@ -104,8 +101,14 @@ def test_invalid_kind_in_snapshot_raises():
 
 
 def test_derived_by_closure_isolated():
-    edges = [("h_CRM", "h_LPR"), ("h_ML", "h_LPR"), ("h_LPR", "h_MB"),
-             ("h_MB", "h_BL"), ("h_BL", "h_WCT"), ("h_ML", "h_WCT")]
+    edges = [
+        ("h_CRM", "h_LPR"),
+        ("h_ML", "h_LPR"),
+        ("h_LPR", "h_MB"),
+        ("h_MB", "h_BL"),
+        ("h_BL", "h_WCT"),
+        ("h_ML", "h_WCT"),
+    ]
     assert derived_by_closure(edges, ["h_CRM"]) == ["h_LPR", "h_MB", "h_BL", "h_WCT"]
     assert derived_by_closure(edges, ["h_BL"]) == ["h_WCT"]
     assert derived_by_closure(edges, ["h_WCT"]) == []

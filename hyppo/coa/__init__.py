@@ -7,6 +7,7 @@ Two layers are importable without pulling sympy/owlready:
 
 The richer :class:`hyppo.coa._base.Structure` (sympy-backed) is imported lazily.
 """
+
 from hyppo.coa.graph import HypothesisGraph
 
 __all__ = ["HypothesisGraph"]

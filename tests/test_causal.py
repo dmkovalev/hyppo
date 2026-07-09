@@ -12,8 +12,11 @@ def test_variables_and_completeness():
 
 
 def test_perfect_matching_assigns_contained_vars():
-    eqs = [frozenset({"x_0", "x_1"}), frozenset({"x_1", "x_2"}),
-           frozenset({"x_0", "x_2"})]
+    eqs = [
+        frozenset({"x_0", "x_1"}),
+        frozenset({"x_1", "x_2"}),
+        frozenset({"x_0", "x_2"}),
+    ]
     m = causal.perfect_matching(eqs)
     assert m is not None
     assert len(m) == 3
@@ -51,10 +54,15 @@ def _random_complete(n_eq, rng):
 
 
 def test_minimal_blocks_named_example():
-    eqs = [frozenset({"x_1"}), frozenset({"x_2"}), frozenset({"x_3"}),
-           frozenset({"x_1", "x_2", "x_3", "x_4", "x_5"}),
-           frozenset({"x_1", "x_3", "x_4", "x_5"}),
-           frozenset({"x_4", "x_6"}), frozenset({"x_5", "x_7"})]
+    eqs = [
+        frozenset({"x_1"}),
+        frozenset({"x_2"}),
+        frozenset({"x_3"}),
+        frozenset({"x_1", "x_2", "x_3", "x_4", "x_5"}),
+        frozenset({"x_1", "x_3", "x_4", "x_5"}),
+        frozenset({"x_4", "x_6"}),
+        frozenset({"x_5", "x_7"}),
+    ]
     got = causal.minimal_blocks(eqs)
     assert set(got) == _brute_minimal(eqs)
     assert set(got) == {frozenset({0}), frozenset({1}), frozenset({2})}
@@ -81,8 +89,11 @@ def test_block_decomposition_partitions_all_equations():
 
 
 def test_causal_mapping_valid():
-    eqs = [frozenset({"x_0", "x_1"}), frozenset({"x_1", "x_2"}),
-           frozenset({"x_0", "x_2"})]
+    eqs = [
+        frozenset({"x_0", "x_1"}),
+        frozenset({"x_1", "x_2"}),
+        frozenset({"x_0", "x_2"}),
+    ]
     m = causal.causal_mapping(eqs)
     for i, v in m.items():
         assert v in eqs[i]
@@ -90,8 +101,11 @@ def test_causal_mapping_valid():
 
 
 def test_transitive_closure_triangular():
-    eqs = [frozenset({"x_0"}), frozenset({"x_0", "x_1"}),
-           frozenset({"x_0", "x_1", "x_2"})]
+    eqs = [
+        frozenset({"x_0"}),
+        frozenset({"x_0", "x_1"}),
+        frozenset({"x_0", "x_1", "x_2"}),
+    ]
     tc = causal.transitive_closure(eqs)
     assert tc["x_0"] == {"x_1", "x_2"}
     assert tc["x_2"] == set()
@@ -99,8 +113,11 @@ def test_transitive_closure_triangular():
 
 
 def test_transitive_closure_excludes_self_in_cycle():
-    eqs = [frozenset({"x_0", "x_1"}), frozenset({"x_1", "x_2"}),
-           frozenset({"x_0", "x_2"})]
+    eqs = [
+        frozenset({"x_0", "x_1"}),
+        frozenset({"x_1", "x_2"}),
+        frozenset({"x_0", "x_2"}),
+    ]
     tc = causal.transitive_closure(eqs)
     for v in ("x_0", "x_1", "x_2"):
         assert v not in tc[v]
@@ -118,7 +135,7 @@ def test_stress_10k_no_crash():
             continue
         m = causal.causal_mapping(eqs)
         assert m is not None
-        for i, v in m.items():                 # bug-fix invariant
+        for i, v in m.items():  # bug-fix invariant
             assert v in eqs[i]
         causal.minimal_blocks(eqs)
         causal.transitive_closure(eqs)

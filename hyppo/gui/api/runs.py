@@ -1,6 +1,8 @@
 import json
+
 from fastapi import APIRouter, HTTPException, Request
-from hyppo.gui.services import run_iteration, iteration_history
+
+from hyppo.gui.services import iteration_history, run_iteration
 
 router = APIRouter(prefix="/api/projects/{pid}/runs", tags=["runs"])
 

@@ -9,6 +9,7 @@ Fix whichever is wrong; only then may the expected values change.
 
 Complexity is pinned by *operation counts* (deterministic), not wall time.
 """
+
 from __future__ import annotations
 
 import itertools
@@ -21,7 +22,6 @@ from hyppo.coa import causal
 from hyppo.coa._base import Equation, Structure
 from hyppo.coa.graph import HypothesisGraph
 from hyppo.lattice_constructor._base import HypothesisLattice
-
 
 # ---------------------------------------------------------------------------
 # Fixtures: the Norne HybridCRM hypothesis set (formulas as in [SVD] §3.9)
@@ -52,11 +52,24 @@ NORNE_HYPS = [
 # variable flow of the equations above, independently of the implementation).
 # H8->H11 links the liquid-prediction branch to the material balance (H11 uses l).
 NORNE_GOLDEN_EDGES = {
-    ("H1", "H2"), ("H1", "H3"), ("H2", "H4"), ("H3", "H4"), ("H4", "H5"),
-    ("H6", "H5"), ("GRP", "H5"), ("H5", "H8"), ("H7", "H8"), ("H8", "H19"),
+    ("H1", "H2"),
+    ("H1", "H3"),
+    ("H2", "H4"),
+    ("H3", "H4"),
+    ("H4", "H5"),
+    ("H6", "H5"),
+    ("GRP", "H5"),
+    ("H5", "H8"),
+    ("H7", "H8"),
+    ("H8", "H19"),
     ("H8", "H11"),
-    ("H11", "H12"), ("H11", "H12b"), ("H12", "H13"), ("H12b", "H13"),
-    ("H13", "H14"), ("H14", "H15"), ("H15", "H19"),
+    ("H11", "H12"),
+    ("H11", "H12b"),
+    ("H12", "H13"),
+    ("H12b", "H13"),
+    ("H13", "H14"),
+    ("H14", "H15"),
+    ("H15", "H19"),
 }
 
 
@@ -90,6 +103,7 @@ def _named_edges(g: nx.DiGraph) -> set[tuple[str, str]]:
 # Algorithm 1 — build_lattice  [SVD §3.9, рис. 3]
 # ---------------------------------------------------------------------------
 
+
 def test_alg1_norne_graph_matches_figure():
     """[SVD] «16 гипотез и 18 рёбер зависимостей (глубина графа 10)»,
     «рёбра выведены автоматически из потока переменных уравнений»."""
@@ -105,6 +119,7 @@ def test_alg1_norne_graph_matches_figure():
 # ---------------------------------------------------------------------------
 # Algorithm 2 — incremental add equals full rebuild  [IIP, лемма 2]
 # ---------------------------------------------------------------------------
+
 
 def _random_formula_hyps(rng: random.Random, n: int) -> list[_Hyp]:
     """Hypothesis i computes x_i from a random subset of earlier outputs."""
@@ -137,6 +152,7 @@ def test_alg2_incremental_equals_full_rebuild(seed):
 # Algorithm 4 — plan == cascade closure oracle  [IIP §4; SVD положение о каскаде]
 # ---------------------------------------------------------------------------
 
+
 def _random_dag(rng: random.Random, n: int, p: float) -> list[tuple[int, int]]:
     return [(i, j) for i in range(n) for j in range(i + 1, n) if rng.random() < p]
 
@@ -168,6 +184,7 @@ def test_alg4_plan_matches_reachability_oracle(seed):
 # ---------------------------------------------------------------------------
 # Theorem 1 — correctness and minimality of the plan  [IIP теорема 1]
 # ---------------------------------------------------------------------------
+
 
 def _is_valid_plan(p: set[int], n: int, edges, cached) -> bool:
     """A recompute set is correct iff it contains every non-cached hypothesis
@@ -210,10 +227,11 @@ def test_theorem1_plan_is_minimal_correct_plan(seed):
 # Complexity pins (operation counts, deterministic)
 # ---------------------------------------------------------------------------
 
+
 def _chain_graph(n: int) -> HypothesisGraph:
     g = HypothesisGraph()
     for i in range(n):
-        g.add([{f"x{i}", f"x{i-1}"}] if i else [{f"x{i}"}])
+        g.add([{f"x{i}", f"x{i - 1}"}] if i else [{f"x{i}"}])
     for i in range(n - 1):
         g.connect(i, i + 1)
     return g
@@ -258,7 +276,7 @@ def test_alg2_complexity_linear_in_hypotheses(monkeypatch):
             return orig(eqs)
 
         monkeypatch.setattr(causal, "is_complete", counting)
-        g.add_hypothesis([{f"x{n}", f"x{n-1}"}])
+        g.add_hypothesis([{f"x{n}", f"x{n - 1}"}])
         monkeypatch.setattr(causal, "is_complete", orig)
         assert calls == n
 
@@ -289,6 +307,7 @@ def test_alg4_complexity_linear_in_nodes_plus_edges():
 # Rule 5 / Algorithm 3 — procedural acyclicity  [SVD §3.2, правило 5]
 # ---------------------------------------------------------------------------
 
+
 def test_rule5_acyclicity_detected_procedurally():
     """[SVD] «ацикличность проверяется процедурно (топологическая сортировка)»."""
     from hyppo.ontology.consistency import _find_cycle_via_kahn
@@ -307,7 +326,10 @@ def test_rule5_acyclicity_detected_procedurally():
 # stage B checks C3 (ацикличность), C4 (согласованность артефактов),
 # C5 (конечность доменов конфигурации).
 
-from hyppo.ontology.consistency import Status, check_consistency
+from hyppo.ontology.consistency import (  # noqa: E402 -- colocated with its test section
+    Status,
+    check_consistency,
+)
 
 
 class _FiniteQ:
@@ -327,15 +349,22 @@ _GOOD_ARTEFACTS = {
 
 def test_alg3_stage_b_accepts_correct_experiment():
     res = check_consistency(
-        None, None, _GOOD_LATTICE, run_hermit=False,
-        artefacts=_GOOD_ARTEFACTS, configurations=[_FiniteQ([1, 2])],
+        None,
+        None,
+        _GOOD_LATTICE,
+        run_hermit=False,
+        artefacts=_GOOD_ARTEFACTS,
+        configurations=[_FiniteQ([1, 2])],
     )
     assert res.ok and res.status == Status.OK
 
 
 def test_alg3_c3_rejects_cycle_with_witness():
     res = check_consistency(
-        None, None, {0: {1}, 1: {2}, 2: {0}}, run_hermit=False,
+        None,
+        None,
+        {0: {1}, 1: {2}, 2: {0}},
+        run_hermit=False,
     )
     assert not res.ok and res.status == Status.C3_VIOLATED
     assert res.details["cycle_witness"]
@@ -345,7 +374,11 @@ def test_alg3_c4_rejects_edge_without_artefact_flow():
     """[SVD §2.1] ребро согласовано, если Out(m_i) ∩ In(m_j) ≠ ∅."""
     bad = {**_GOOD_ARTEFACTS, 1: {"in": {"a"}, "out": {"zzz"}}}
     res = check_consistency(
-        None, None, _GOOD_LATTICE, run_hermit=False, artefacts=bad,
+        None,
+        None,
+        _GOOD_LATTICE,
+        run_hermit=False,
+        artefacts=bad,
     )
     assert not res.ok and res.status == Status.C4_VIOLATED
     assert tuple(res.details["c4_edge"]) == (1, 2)
@@ -356,8 +389,12 @@ def test_alg3_c5_rejects_undeclared_infinite_domain():
         pass
 
     res = check_consistency(
-        None, None, _GOOD_LATTICE, run_hermit=False,
-        artefacts=_GOOD_ARTEFACTS, configurations=[_FiniteQ([1]), _NoFlag()],
+        None,
+        None,
+        _GOOD_LATTICE,
+        run_hermit=False,
+        artefacts=_GOOD_ARTEFACTS,
+        configurations=[_FiniteQ([1]), _NoFlag()],
     )
     assert not res.ok and res.status == Status.C5_VIOLATED
 
@@ -368,14 +405,22 @@ def test_c7_accepts_grounded_and_rejects_ungrounded_variable():
     без domain_terms/hypothesis_vars она skipped и не влияет на C1–C5."""
     vocab = {"Sw", "Winj", "l", "fw", "muw", "muo"}
     ok = check_consistency(
-        None, None, _GOOD_LATTICE, run_hermit=False,
-        domain_terms=vocab, hypothesis_vars={0: {"Sw", "Winj", "l"}, 1: {"fw", "muw"}},
+        None,
+        None,
+        _GOOD_LATTICE,
+        run_hermit=False,
+        domain_terms=vocab,
+        hypothesis_vars={0: {"Sw", "Winj", "l"}, 1: {"fw", "muw"}},
     )
     assert ok.ok and ok.status == Status.OK and ok.details["c7"].startswith("passed")
 
     bad = check_consistency(
-        None, None, _GOOD_LATTICE, run_hermit=False,
-        domain_terms=vocab, hypothesis_vars={0: {"Sw"}, 1: {"fw", "phi_unknown"}},
+        None,
+        None,
+        _GOOD_LATTICE,
+        run_hermit=False,
+        domain_terms=vocab,
+        hypothesis_vars={0: {"Sw"}, 1: {"fw", "phi_unknown"}},
     )
     assert not bad.ok and bad.status == Status.C7_VIOLATED
     assert bad.details["c7_hypothesis"] == 1
@@ -389,7 +434,10 @@ def test_c7_accepts_grounded_and_rejects_ungrounded_variable():
 def test_alg3_structural_checks_run_in_declared_order():
     """Two-stage design: with C3 and C4 both violated, C3 is reported first."""
     res = check_consistency(
-        None, None, {0: {1}, 1: {0}}, run_hermit=False,
+        None,
+        None,
+        {0: {1}, 1: {0}},
+        run_hermit=False,
         artefacts={0: {"in": set(), "out": set()}, 1: {"in": set(), "out": set()}},
     )
     assert res.status == Status.C3_VIOLATED
@@ -397,12 +445,17 @@ def test_alg3_structural_checks_run_in_declared_order():
 
 def _fresh_world():
     from owlready2 import (
-        AllDifferent, FunctionalProperty, ObjectProperty, Thing, World,
+        AllDifferent,
+        FunctionalProperty,
+        ObjectProperty,
+        Thing,
+        World,
     )
 
     w = World()
     onto = w.get_ontology("http://golden.test/alg3_stage_a.owl")
     with onto:
+
         class GModel(Thing):
             pass
 

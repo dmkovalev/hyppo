@@ -140,7 +140,8 @@ def check_consistency(
         # `is_finite=True` is treated as a violation (matches paper's
         # «проверка явного объявления каждого Q_i как конечного»).
         infinite = [
-            i for i, q in enumerate(configurations)
+            i
+            for i, q in enumerate(configurations)
             if not (
                 getattr(q, "finite", False) is True
                 or getattr(q, "is_finite", False) is True
@@ -148,7 +149,8 @@ def check_consistency(
         ]
         if infinite:
             return ConsistencyResult(
-                False, Status.C5_VIOLATED,
+                False,
+                Status.C5_VIOLATED,
                 {**details, "c5": f"failed (infinite Q_i at {infinite})"},
             )
         d = sum(1 for _ in configurations)
@@ -165,7 +167,8 @@ def check_consistency(
         if offending is not None:
             h_id, ungrounded = offending
             return ConsistencyResult(
-                False, Status.C7_VIOLATED,
+                False,
+                Status.C7_VIOLATED,
                 {**details, "c7_hypothesis": h_id, "c7_ungrounded": sorted(ungrounded)},
             )
         details["c7"] = "passed (все переменные грунтированы в домене)"

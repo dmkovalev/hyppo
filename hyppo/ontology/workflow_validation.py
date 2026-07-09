@@ -26,7 +26,6 @@ __all__ = [
 ]
 
 with virtual_experiment_onto:
-
     # ── Supporting classes / properties ─────────────────────────────────────
     class WorkflowTask(Thing):
         """A single task within an experiment workflow."""
@@ -60,6 +59,5 @@ with virtual_experiment_onto:
         Formally: WorkflowTask AND hasHypothesis SOME (competes SOME Hypothesis).
         This positive existential restriction works under OWA.
         """
-        equivalent_to = [
-            WorkflowTask & hasHypothesis.some(competes.some(Hypothesis))
-        ]
+
+        equivalent_to = [WorkflowTask & hasHypothesis.some(competes.some(Hypothesis))]

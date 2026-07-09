@@ -1,4 +1,5 @@
 """Smoke tests for hyppo.mcp.cli argparse."""
+
 import pytest
 
 from hyppo.mcp.cli import main

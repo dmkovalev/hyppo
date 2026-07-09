@@ -2,21 +2,21 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from hyppo.core._base import virtual_experiment_onto
 import networkx as nx
 
+from hyppo.core._base import virtual_experiment_onto
+
 if TYPE_CHECKING:
-    from hyppo.coa._base import Structure, Equation
+    pass
 
 
 with virtual_experiment_onto:
-    class HypothesisLattice:
 
+    class HypothesisLattice:
         def __init__(self, hypotheses, workflow):
             self.hypotheses = hypotheses
             self.workflow = workflow
             self.lattice = self.build_lattice()
-
 
         def build_lattice(self):
             """Algorithm 1: Build hypothesis lattice from hypothesis structures.
@@ -49,7 +49,6 @@ with virtual_experiment_onto:
 
             for dep in self._build_hypothesis_var_mapping():
                 self.lattice.add_edge(dep[0], dep[1])
-
 
         def derived_by(self, hypothesis):
             """Return hypotheses that are derived by the given hypothesis."""
@@ -116,7 +115,7 @@ with virtual_experiment_onto:
             """Return hypotheses that compete with the given hypothesis."""
             if hypothesis not in self.hypotheses:
                 return set()
-            # Competing hypotheses are those that share predecessors but aren't in a direct relationship
+            # Competing hypotheses share predecessors without a direct relationship
             predecessors = set(self.lattice.predecessors(hypothesis))
             competitors = set()
             for h in self.hypotheses:

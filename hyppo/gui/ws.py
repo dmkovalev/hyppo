@@ -1,8 +1,11 @@
 import json
+
 from fastapi import APIRouter, WebSocket
+
 from hyppo.gui.services import run_iteration
 
 router = APIRouter()
+
 
 @router.websocket("/api/projects/{pid}/runs/ws")
 async def run_ws(websocket: WebSocket, pid: str) -> None:

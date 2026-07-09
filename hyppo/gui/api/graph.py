@@ -1,5 +1,7 @@
 import json
+
 from fastapi import APIRouter, HTTPException, Request
+
 from hyppo.gui.services import build_graph
 
 router = APIRouter(prefix="/api/projects/{pid}/graph", tags=["graph"])

@@ -16,29 +16,30 @@ in data-intensive domains", Chapter 4, Section 4.4 (HybridCRM domain).
 
 from __future__ import annotations
 
-import numpy as np
 from dataclasses import dataclass
 from typing import Dict
+
+import numpy as np
 
 
 @dataclass(frozen=True)
 class FieldParams:
     """Physical parameters calibrated to AS10 statistics."""
 
-    swc: float = 0.20           # Connate water saturation
-    sor: float = 0.20           # Residual oil saturation
-    bl_M: float = 3.0           # Buckley-Leverett mobility ratio
-    bl_n: float = 2.5           # Corey exponent
-    vp_min: float = 100_000.0   # Min pore volume, m3
-    vp_max: float = 500_000.0   # Max pore volume, m3
-    sw0_min: float = 0.25       # Min initial water saturation
-    sw0_max: float = 0.55       # Max initial water saturation
-    inj_min: float = 1_000.0    # Min base injection, m3/month
-    inj_max: float = 4_000.0    # Max base injection, m3/month
-    noise_inj: float = 200.0    # Injection noise std
-    noise_wct: float = 0.02     # Water cut measurement noise std
-    f_weight_min: float = 0.3   # Min CRM connectivity weight
-    f_weight_max: float = 0.8   # Max CRM connectivity weight
+    swc: float = 0.20  # Connate water saturation
+    sor: float = 0.20  # Residual oil saturation
+    bl_M: float = 3.0  # Buckley-Leverett mobility ratio
+    bl_n: float = 2.5  # Corey exponent
+    vp_min: float = 100_000.0  # Min pore volume, m3
+    vp_max: float = 500_000.0  # Max pore volume, m3
+    sw0_min: float = 0.25  # Min initial water saturation
+    sw0_max: float = 0.55  # Max initial water saturation
+    inj_min: float = 1_000.0  # Min base injection, m3/month
+    inj_max: float = 4_000.0  # Max base injection, m3/month
+    noise_inj: float = 200.0  # Injection noise std
+    noise_wct: float = 0.02  # Water cut measurement noise std
+    f_weight_min: float = 0.3  # Min CRM connectivity weight
+    f_weight_max: float = 0.8  # Max CRM connectivity weight
 
 
 def buckley_leverett(
@@ -61,7 +62,7 @@ def buckley_leverett(
     sw_norm = (sw - swc) / (1.0 - swc - sor + 1e-9)
     sw_norm = np.clip(sw_norm, 1e-6, 1.0 - 1e-6)
 
-    krw = sw_norm ** bl_n
+    krw = sw_norm**bl_n
     kro = (1.0 - sw_norm) ** bl_n
 
     fw = 1.0 / (1.0 + kro / (bl_M * krw + 1e-9))
@@ -76,7 +77,7 @@ def material_balance_sw(
     swc: float,
 ) -> np.ndarray:
     """
-    Simplified material balance: Sw(t) = Sw0 + (Sw_max - Sw0) * (1 - exp(-cum_inj / Vp)).
+    Simplified material balance: Sw(t) = Sw0 + (Sw_max - Sw0) * (1 - exp(-cum_inj/Vp)).
 
     :param sw0: Initial water saturation, shape ``(n_wells,)`` or ``(n_wells, 1)``.
     :param cum_inj: Cumulative weighted injection, shape ``(n_wells, n_months)``.
@@ -117,7 +118,7 @@ def generate_synthetic_field(
         - ``lpr``: Liquid production rate, shape ``(n_producers, n_months)``
         - ``wct``: Water cut, shape ``(n_producers, n_months)``
         - ``inj``: Injection rates, shape ``(n_injectors, n_months)``
-        - ``connectivity``: CRM connectivity matrix, shape ``(n_producers, n_injectors)``
+        - ``connectivity``: CRM connectivity, shape ``(n_producers, n_injectors)``
         - ``coords_prod``: Producer coordinates, shape ``(n_producers, 2)``
         - ``coords_inj``: Injector coordinates, shape ``(n_injectors, 2)``
         - ``params``: :class:`FieldParams` used for generation
@@ -142,9 +143,8 @@ def generate_synthetic_field(
     # Row-normalize and scale to [f_weight_min, f_weight_max]
     f_sum = f_raw.sum(axis=1, keepdims=True) + 1e-9
     connectivity = f_raw / f_sum
-    connectivity = (
-        params.f_weight_min
-        + connectivity * (params.f_weight_max - params.f_weight_min)
+    connectivity = params.f_weight_min + connectivity * (
+        params.f_weight_max - params.f_weight_min
     )
 
     # --- True physical parameters per producer ---
@@ -153,9 +153,7 @@ def generate_synthetic_field(
 
     # --- Injection rates (n_injectors, n_months) ---
     base_inj = rng.uniform(params.inj_min, params.inj_max, size=n_injectors)
-    time_mod = 1.0 + 0.3 * np.sin(
-        np.arange(n_months, dtype=np.float64) * 0.05
-    )
+    time_mod = 1.0 + 0.3 * np.sin(np.arange(n_months, dtype=np.float64) * 0.05)
     inj = base_inj[:, np.newaxis] * time_mod[np.newaxis, :]
     inj += rng.randn(n_injectors, n_months) * params.noise_inj
     inj = np.clip(inj, 0.0, None)
@@ -224,12 +222,15 @@ if __name__ == "__main__":
         writer.writerow(["well", "month", "opr", "lpr", "wct"])
         for w in range(args.n_producers):
             for t in range(args.n_months):
-                writer.writerow([
-                    f"P{w+1:03d}", t + 1,
-                    f"{data['opr'][w, t]:.2f}",
-                    f"{data['lpr'][w, t]:.2f}",
-                    f"{data['wct'][w, t]:.4f}",
-                ])
+                writer.writerow(
+                    [
+                        f"P{w + 1:03d}",
+                        t + 1,
+                        f"{data['opr'][w, t]:.2f}",
+                        f"{data['lpr'][w, t]:.2f}",
+                        f"{data['wct'][w, t]:.4f}",
+                    ]
+                )
 
     # Save injection data
     with open(os.path.join(args.out_dir, "injection.csv"), "w", newline="") as f:
@@ -237,26 +238,46 @@ if __name__ == "__main__":
         writer.writerow(["well", "month", "inj"])
         for w in range(args.n_injectors):
             for t in range(args.n_months):
-                writer.writerow([f"I{w+1:03d}", t + 1, f"{data['inj'][w, t]:.2f}"])
+                writer.writerow([f"I{w + 1:03d}", t + 1, f"{data['inj'][w, t]:.2f}"])
 
     # Save coordinates
     with open(os.path.join(args.out_dir, "coords.csv"), "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(["well", "x", "y", "type"])
         for w in range(args.n_producers):
-            writer.writerow([f"P{w+1:03d}", f"{data['coords_prod'][w,0]:.1f}", f"{data['coords_prod'][w,1]:.1f}", "producer"])
+            writer.writerow(
+                [
+                    f"P{w + 1:03d}",
+                    f"{data['coords_prod'][w, 0]:.1f}",
+                    f"{data['coords_prod'][w, 1]:.1f}",
+                    "producer",
+                ]
+            )
         for w in range(args.n_injectors):
-            writer.writerow([f"I{w+1:03d}", f"{data['coords_inj'][w,0]:.1f}", f"{data['coords_inj'][w,1]:.1f}", "injector"])
+            writer.writerow(
+                [
+                    f"I{w + 1:03d}",
+                    f"{data['coords_inj'][w, 0]:.1f}",
+                    f"{data['coords_inj'][w, 1]:.1f}",
+                    "injector",
+                ]
+            )
 
     # Save connectivity
     with open(os.path.join(args.out_dir, "connectivity.csv"), "w", newline="") as f:
         writer = csv.writer(f)
-        header = ["producer"] + [f"I{w+1:03d}" for w in range(args.n_injectors)]
+        header = ["producer"] + [f"I{w + 1:03d}" for w in range(args.n_injectors)]
         writer.writerow(header)
         for w in range(args.n_producers):
-            writer.writerow([f"P{w+1:03d}"] + [f"{data['connectivity'][w,i]:.4f}" for i in range(args.n_injectors)])
+            writer.writerow(
+                [f"P{w + 1:03d}"]
+                + [f"{data['connectivity'][w, i]:.4f}" for i in range(args.n_injectors)]
+            )
 
     print(f"Synthetic field saved to {args.out_dir}/")
-    print(f"  {args.n_producers} producers, {args.n_injectors} injectors, {args.n_months} months")
+    print(
+        f"  {args.n_producers} producers, {args.n_injectors} injectors, "
+        f"{args.n_months} months"
+    )
     print(f"  OPR range: [{data['opr'].min():.0f}, {data['opr'].max():.0f}] m3/month")
     print(f"  WCT range: [{data['wct'].min():.3f}, {data['wct'].max():.3f}]")

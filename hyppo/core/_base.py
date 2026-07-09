@@ -1,95 +1,162 @@
 import datetime
 
-# from owlready2 import get_ontology, Thing, DataProperty, FunctionalProperty, ObjectProperty, TransitiveProperty, \
-#     AllDisjoint
+from owlready2 import (
+    AllDisjoint,
+    DataProperty,
+    FunctionalProperty,
+    ObjectProperty,
+    SymmetricProperty,
+    Thing,
+    TransitiveProperty,
+    get_ontology,
+)
 
-from owlready2 import *
-
-virtual_experiment_onto = get_ontology("http://synthesis.ipi.ac.ru/virtual_experiment.owl")
+virtual_experiment_onto = get_ontology(
+    "http://synthesis.ipi.ac.ru/virtual_experiment.owl"
+)
 hcp_brain_onto = get_ontology("http://synthesis.ipi.ac.ru/hcp_brain_onto.owl")
 virtual_experiment_onto.imported_ontologies.append(hcp_brain_onto)
 
 with virtual_experiment_onto:
     # define base class and its properties
-    class Artefact(Thing): pass
+    class Artefact(Thing):
+        pass
+
     # class Specification(Thing): pass
     class has_for_id(Artefact >> int, DataProperty, FunctionalProperty):
         python_name = "id"
+
     class has_for_name(Artefact >> str, DataProperty, FunctionalProperty):
         python_name = "name"
+
     class has_for_description(Artefact >> str, DataProperty, FunctionalProperty):
         python_name = "description"
+
     class has_for_authors(Artefact >> str, DataProperty):
         python_name = "authors"
-    class has_for_createdate(Artefact >> datetime.datetime, DataProperty, FunctionalProperty):
+
+    class has_for_createdate(
+        Artefact >> datetime.datetime, DataProperty, FunctionalProperty
+    ):
         python_name = "create_date"
-    class has_for_lastupdate(Artefact >> datetime.datetime, DataProperty, FunctionalProperty):
+
+    class has_for_lastupdate(
+        Artefact >> datetime.datetime, DataProperty, FunctionalProperty
+    ):
         python_name = "last_update"
+
     # class has_for_specification(Artefact >> Specification): pass
 
-    Artefact.is_a.extend([
-        has_for_authors.min(1),
-        has_for_name.exactly(1),
-        has_for_description.exactly(1),
-        has_for_id.exactly(1),
-        has_for_lastupdate.exactly(1),
-        has_for_createdate.exactly(1),
-    ])
+    Artefact.is_a.extend(
+        [
+            has_for_authors.min(1),
+            has_for_name.exactly(1),
+            has_for_description.exactly(1),
+            has_for_id.exactly(1),
+            has_for_lastupdate.exactly(1),
+            has_for_createdate.exactly(1),
+        ]
+    )
 
-    class Hypothesis(Artefact): pass
-    class Model(Artefact): pass
+    class Hypothesis(Artefact):
+        pass
+
+    class Model(Artefact):
+        pass
+
     # class Mapping(Artefact): pass
     # class Relation(Artefact): pass
 
     # TODO probability > 0.0 and < 1.0
-    class has_for_probability(Hypothesis >> float,
-                              DataProperty, FunctionalProperty):
+    class has_for_probability(Hypothesis >> float, DataProperty, FunctionalProperty):
         python_name = "probability"
-    class is_implemented_by_model(Hypothesis >> Model): class_property_type = ["some"]
+
+    class is_implemented_by_model(Hypothesis >> Model):
+        class_property_type = ["some"]
+
     class refers_to_hypothesis(ObjectProperty):
-        domain              = [Model]
-        range               = [Hypothesis]
-        inverse_property    = is_implemented_by_model
+        domain = [Model]
+        range = [Hypothesis]
+        inverse_property = is_implemented_by_model
         class_property_type = ["only"]
 
-    class competes(Hypothesis >> Hypothesis, SymmetricProperty): pass
-    class derived_by(Hypothesis >> Hypothesis, TransitiveProperty): pass
+    class competes(Hypothesis >> Hypothesis, SymmetricProperty):
+        pass
+
+    class derived_by(Hypothesis >> Hypothesis, TransitiveProperty):
+        pass
+
     # Note: AsymmetricProperty and IrreflexiveProperty removed because
     # OWL 2 DL simplicity constraint forbids them on transitive properties.
     # Acyclicity is enforced by Algorithm 3 (consistency check), not OWL axioms.
     class impacts(ObjectProperty, TransitiveProperty):
-        domain              = [Hypothesis]
-        range               = [Hypothesis]
-        inverse_property     = derived_by
+        domain = [Hypothesis]
+        range = [Hypothesis]
+        inverse_property = derived_by
 
-    class VirtualExperiment(Artefact): pass
-    class Configuration(Artefact): pass
-    class Workflow(Artefact): pass
+    class VirtualExperiment(Artefact):
+        pass
+
+    class Configuration(Artefact):
+        pass
+
+    class Workflow(Artefact):
+        pass
+
     # class Task(Thing): pass
 
-    class has_for_hypothesis(VirtualExperiment >> Hypothesis): class_property_type = ["some"]
-    class has_for_model(VirtualExperiment >> Model): class_property_type = ["some"]
-    class has_for_workflow(VirtualExperiment >> Workflow): class_property_type = ["only"]
-    class has_for_configuration(VirtualExperiment >> Configuration): class_property_type = ["some"]
+    class has_for_hypothesis(VirtualExperiment >> Hypothesis):
+        class_property_type = ["some"]
+
+    class has_for_model(VirtualExperiment >> Model):
+        class_property_type = ["some"]
+
+    class has_for_workflow(VirtualExperiment >> Workflow):
+        class_property_type = ["only"]
+
+    class has_for_configuration(VirtualExperiment >> Configuration):
+        class_property_type = ["some"]
+
     # class has_for_task(Workflow >> Task): class_property_type = ["some"]
 
+    class Structure(Artefact):
+        pass
 
-    class Structure(Artefact): pass
-    class FullStructure(Structure): pass
-    class Equation(Thing): pass
-    class Variable(Thing): pass
+    class FullStructure(Structure):
+        pass
+
+    class Equation(Thing):
+        pass
+
+    class Variable(Thing):
+        pass
+
     class has_for_varname(Variable >> str, DataProperty, FunctionalProperty):
         python_name = "name"
-    class FullCausalMapping(Artefact): pass
 
-    class has_for_fcm(FullStructure >> FullCausalMapping): class_property_type = ["only"]
+    class FullCausalMapping(Artefact):
+        pass
 
-    class has_for_structure(Hypothesis >> Structure): class_property_type = ["only"]
-    class DependencySet(Artefact): pass
-    class has_for_dependecy_set(FullStructure >> DependencySet):  class_property_type = ["only"]
-    class TransitiveClosure(DependencySet): pass
-    class ResearchLattice(Artefact): pass
-    class has_for_lattice_hypothesis(ResearchLattice >> Hypothesis): class_property_type = ["some"]
+    class has_for_fcm(FullStructure >> FullCausalMapping):
+        class_property_type = ["only"]
+
+    class has_for_structure(Hypothesis >> Structure):
+        class_property_type = ["only"]
+
+    class DependencySet(Artefact):
+        pass
+
+    class has_for_dependecy_set(FullStructure >> DependencySet):
+        class_property_type = ["only"]
+
+    class TransitiveClosure(DependencySet):
+        pass
+
+    class ResearchLattice(Artefact):
+        pass
+
+    class has_for_lattice_hypothesis(ResearchLattice >> Hypothesis):
+        class_property_type = ["some"]
 
     # class has_for_vars(Equation >> Variable, DataProperty):
     #     class_property_type = ["some"]
@@ -101,7 +168,6 @@ with virtual_experiment_onto:
     # class has_for_structure_variable(Structure >> Variable):
     #     class_property_type = ["some"]
     #     python_name = "vars"
-
 
     AllDisjoint([VirtualExperiment, Configuration, Workflow, Hypothesis, Model])
 
@@ -125,8 +191,10 @@ with virtual_experiment_onto:
     Hypothesis.is_a.append(is_implemented_by_model.some(Model))
 
 
-if __name__ == '__main__':
-    virtual_experiment_onto = get_ontology("http://synthesis.ipi.ac.ru/virtual_experiment.owl")
+if __name__ == "__main__":
+    virtual_experiment_onto = get_ontology(
+        "http://synthesis.ipi.ac.ru/virtual_experiment.owl"
+    )
     print(list(virtual_experiment_onto.classes()))
     virtual_experiment_onto.save("ve.owl")
     art = Artefact("123")

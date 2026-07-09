@@ -2,14 +2,14 @@ import math
 
 import numpy as np
 from scipy import stats
-from sklearn.metrics import r2_score, mean_squared_error
+from sklearn.metrics import mean_squared_error, r2_score
 
 from hyppo.core._base import virtual_experiment_onto
-
 
 # ---------------------------------------------------------------------------
 # Module-level pure functions (Definitions from Chapter 2)
 # ---------------------------------------------------------------------------
+
 
 def get_aic(n_params: int, log_likelihood: float) -> float:
     """AIC = 2k - 2ln(L). Определение 10 из Главы 2."""
@@ -21,7 +21,9 @@ def get_bic(n_params: int, n_observations: int, log_likelihood: float) -> float:
     return n_params * math.log(n_observations) - 2 * log_likelihood
 
 
-def range_models(scores: dict[str, float], threshold: float = 0.7) -> list[tuple[str, float]]:
+def range_models(
+    scores: dict[str, float], threshold: float = 0.7
+) -> list[tuple[str, float]]:
     """Ранжирование моделей по метрике с отсечением по порогу.
 
     Returns sorted list of (model_name, score) pairs above threshold.
@@ -31,11 +33,13 @@ def range_models(scores: dict[str, float], threshold: float = 0.7) -> list[tuple
 
 
 with virtual_experiment_onto:
+
     class Hypothesis(virtual_experiment_onto.Artefact):
         namespace = virtual_experiment_onto.get_namespace(
-            "http://synthesis.ipi.ac.ru/virtual_experiment.owl")
-    # def __init__(self):
-    #     self._parameters = dict()
+            "http://synthesis.ipi.ac.ru/virtual_experiment.owl"
+        )
+        # def __init__(self):
+        #     self._parameters = dict()
 
         @property
         def parameters(self):
@@ -53,19 +57,19 @@ with virtual_experiment_onto:
             models = self.is_implemented_by_model()
             result = {}
 
-            if metrics == 'mae':
+            if metrics == "mae":
                 for key in models.keys():
                     error = models.predict(X) - y
                     if error <= threshold:
                         result[key] = np.mean(np.abs(error))
 
-            elif metrics == 'r2':
+            elif metrics == "r2":
                 for key in models.keys():
                     error = r2_score(y, models[key].predict(X))
                     if error >= threshold:
                         result[key] = error
 
-            elif metrics == 'mse':
+            elif metrics == "mse":
                 for key in models.keys():
                     error = mean_squared_error(y, models[key].predict(X))
                     if error <= threshold:
@@ -76,9 +80,9 @@ with virtual_experiment_onto:
         # TODO add several > 2 models
         def compare_preds_on_single_dataset(self, dataset, stat_test):
             models = self.is_implemented_by_model()
-            linear_prediction = models['model_1'].predict(dataset)
-            gp_prediction = models['model_2'].predict(dataset)
-            if stat_test == 'wilcoxon':
+            linear_prediction = models["model_1"].predict(dataset)
+            gp_prediction = models["model_2"].predict(dataset)
+            if stat_test == "wilcoxon":
                 result = stats.wilcoxon(linear_prediction, gp_prediction)
             else:
                 raise NotImplementedError(f"stat_test={stat_test!r} not supported")
@@ -86,9 +90,9 @@ with virtual_experiment_onto:
 
         def compare_preds_on_different_datasets(self, dataset_1, dataset_2, stat_test):
             models = self.is_implemented_by_model()
-            linear_prediction = models['model_1'].predict(dataset_1)
-            gp_prediction = models['model_2'].predict(dataset_2)
-            if stat_test == 'wilcoxon':
+            linear_prediction = models["model_1"].predict(dataset_1)
+            gp_prediction = models["model_2"].predict(dataset_2)
+            if stat_test == "wilcoxon":
                 result = stats.wilcoxon(linear_prediction, gp_prediction)
             else:
                 raise NotImplementedError(f"stat_test={stat_test!r} not supported")
@@ -96,7 +100,10 @@ with virtual_experiment_onto:
 
 
 class Model(virtual_experiment_onto.Artefact):
-    namespace = virtual_experiment_onto.get_namespace("http://synthesis.ipi.ac.ru/virtual_experiment.owl")
+    namespace = virtual_experiment_onto.get_namespace(
+        "http://synthesis.ipi.ac.ru/virtual_experiment.owl"
+    )
+
     def __init__(self):
         pass
 
@@ -112,35 +119,45 @@ class Model(virtual_experiment_onto.Artefact):
         MLE residual variance. Normalise across competing hypotheses with
         :func:`hyppo.comparison.bayesian_posterior`."""
         from hyppo.comparison.compare import gaussian_log_likelihood
+
         ll = gaussian_log_likelihood(y, self.predict(X))
         return float("inf") if ll == float("inf") else prior * math.exp(ll)
 
     def bayesian_score(self, X, y):
         """Gaussian log-likelihood of this model's predictions on (X, y)."""
         from hyppo.comparison.compare import gaussian_log_likelihood
+
         return gaussian_log_likelihood(y, self.predict(X))
 
 
 class NonLinearModel(Model):
-    namespace = virtual_experiment_onto.get_namespace("http://synthesis.ipi.ac.ru/virtual_experiment.owl")
+    namespace = virtual_experiment_onto.get_namespace(
+        "http://synthesis.ipi.ac.ru/virtual_experiment.owl"
+    )
 
     def fit(self, X, y):
         from gplearn.genetic import SymbolicRegressor
-        est_gp = SymbolicRegressor(population_size=1000,
-                                   tournament_size=20,
-                                   generations=150, stopping_criteria=0.001,
-                                   const_range=(-1, 1),
-                                   p_crossover=0.7, p_subtree_mutation=0.12,
-                                   p_hoist_mutation=0.06, p_point_mutation=0.12,
-                                   p_point_replace=1,
-                                   init_depth=(6, 10),
-                                   function_set=('mul', 'sub', 'div', 'add', 'cos'),
-                                   max_samples=0.9,
-                                   verbose=1,
-                                   metric='mse',
-                                   parsimony_coefficient=0.0005,
-                                   random_state=0,
-                                   n_jobs=1)
+
+        est_gp = SymbolicRegressor(
+            population_size=1000,
+            tournament_size=20,
+            generations=150,
+            stopping_criteria=0.001,
+            const_range=(-1, 1),
+            p_crossover=0.7,
+            p_subtree_mutation=0.12,
+            p_hoist_mutation=0.06,
+            p_point_mutation=0.12,
+            p_point_replace=1,
+            init_depth=(6, 10),
+            function_set=("mul", "sub", "div", "add", "cos"),
+            max_samples=0.9,
+            verbose=1,
+            metric="mse",
+            parsimony_coefficient=0.0005,
+            random_state=0,
+            n_jobs=1,
+        )
 
         est_gp.fit(X, y)
         return est_gp
@@ -149,25 +166,25 @@ class NonLinearModel(Model):
         prediction = self.predict(X)
         error = prediction - y
         complexity = self.size
-        log_likelihood = np.log(np.mean(error ** 2 / error.shape[0]))
+        log_likelihood = np.log(np.mean(error**2 / error.shape[0]))
         return log_likelihood - 2 * complexity
 
     def compute_bic(self, X, y):
         prediction = self.predict(X)
         error = prediction - y
-        log_likelihood = -np.mean(error ** 2 / error.shape[0])
+        log_likelihood = -np.mean(error**2 / error.shape[0])
         complexity = self.size
         return log_likelihood - np.log(y.shape[0]) * complexity
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     h = Hypothesis()
-    h.has_for_name = 'first'
+    h.has_for_name = "first"
     h1 = Hypothesis()
     h.has_for_probability = 0.0
-    h1.has_for_name = 'second'
+    h1.has_for_name = "second"
     h2 = Hypothesis()
-    h2.has_for_name = 'third'
+    h2.has_for_name = "third"
 
     h.competes = [h1, h2]
 

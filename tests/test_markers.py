@@ -67,10 +67,12 @@ needs_hermit = pytest.mark.skipif(
 # ---------------------------------------------------------------------------
 if _OWL_AVAILABLE:
     from hyppo.core._base import (
-        Hypothesis,
-        Workflow,
         Configuration,
+        Hypothesis,
         VirtualExperiment,
+        Workflow,
+    )
+    from hyppo.core._base import (
         virtual_experiment_onto as onto,
     )
     from hyppo.ontology.core_rules import (
@@ -79,27 +81,6 @@ if _OWL_AVAILABLE:
         # Use a concrete subclass of Model to avoid collision with the
         # Python-layer Model defined in hyppo.core._hypothesis (no-arg __init__).
         PhysicsModel,
-        DataDrivenModel,
-    )
-    from hyppo.ontology.workflow_validation import (
-        OrphanHypothesis,
-        WorkflowTask,
-    )
-    from hyppo.ontology.quality_gates import (
-        LowQuality,
-        HighQuality,
-        PrunableSubtree,
-    )
-    from hyppo.ontology.multi_experiment import (
-        Experiment,
-        SharedHypothesis,
-    )
-    from hyppo.ontology.model_compatibility import (
-        DatasetNotInConfig,
-        ModelWithDatasetNeed,
-        ModelConfig,
-        Dataset,
-        TimeSeriesProducer,  # concrete Model subclass safe to instantiate
     )
     from hyppo.ontology.markers import (
         MarkerReport,
@@ -109,6 +90,26 @@ if _OWL_AVAILABLE:
         apply_rule_11,
         apply_rule_13,
         apply_rule_15,
+    )
+    from hyppo.ontology.model_compatibility import (
+        Dataset,
+        DatasetNotInConfig,
+        ModelConfig,
+        ModelWithDatasetNeed,
+        TimeSeriesProducer,  # concrete Model subclass safe to instantiate
+    )
+    from hyppo.ontology.multi_experiment import (
+        Experiment,
+        SharedHypothesis,
+    )
+    from hyppo.ontology.quality_gates import (
+        HighQuality,
+        LowQuality,
+        PrunableSubtree,
+    )
+    from hyppo.ontology.workflow_validation import (
+        OrphanHypothesis,
+        WorkflowTask,
     )
 
 # ---------------------------------------------------------------------------
@@ -125,6 +126,7 @@ def _uid(prefix: str = "ind") -> str:
 
 def _destroy_individuals() -> None:
     from owlready2 import destroy_entity
+
     for ind in list(onto.individuals()):
         destroy_entity(ind)
 
@@ -140,6 +142,7 @@ def _cleanup():
 # ===========================================================================
 # Rule 2: CompleteExperiment marker
 # ===========================================================================
+
 
 class TestRule2:
     """Rule 2: CompleteExperiment marker is set procedurally after CWA check."""
@@ -219,6 +222,7 @@ class TestRule2:
 # Rule 9: OrphanHypothesis marker
 # ===========================================================================
 
+
 class TestRule9:
     """Rule 9: OrphanHypothesis marker — CWA check over WorkflowTask ABox."""
 
@@ -270,11 +274,12 @@ class TestRule9:
 # Rule 11: PrunableSubtree marker
 # ===========================================================================
 
+
 class TestRule11:
     """Rule 11: PrunableSubtree marker — CWA universal-quantifier check."""
 
     def test_prunable_marked_when_all_descendants_low_quality(self):
-        """A LowQuality root whose all descendants are LowQuality is marked PrunableSubtree."""
+        """A LowQuality root whose descendants are all LowQuality is marked Prunable."""
         root = LowQuality(_uid("root"))
         child1 = LowQuality(_uid("child1"))
         child2 = LowQuality(_uid("child2"))
@@ -286,7 +291,7 @@ class TestRule11:
         assert PrunableSubtree in root.is_a
 
     def test_not_prunable_when_high_quality_descendant(self):
-        """A LowQuality root with a HighQuality descendant is NOT marked PrunableSubtree."""
+        """A LowQuality root with a HighQuality descendant is not marked Prunable."""
         root = LowQuality(_uid("root"))
         child_bad = LowQuality(_uid("child_bad"))
         child_good = HighQuality(_uid("child_good"))
@@ -331,6 +336,7 @@ class TestRule11:
 # Rule 13: SharedHypothesis marker
 # ===========================================================================
 
+
 class TestRule13:
     """Rule 13: SharedHypothesis marker — minimum-cardinality inverse CWA check."""
 
@@ -348,7 +354,7 @@ class TestRule13:
         assert SharedHypothesis in h.is_a
 
     def test_not_shared_when_one_experiment(self):
-        """A hypothesis used by exactly one experiment is NOT marked SharedHypothesis."""
+        """A hypothesis used by exactly one experiment is not marked Shared."""
         h = Hypothesis(_uid("h"))
         e1 = Experiment(_uid("e1"))
         e1.usesHypothesis = [h]
@@ -409,6 +415,7 @@ class TestRule13:
 # Rule 15: DatasetNotInConfig marker
 # ===========================================================================
 
+
 class TestRule15:
     """Rule 15: DatasetNotInConfig marker — negation CWA check."""
 
@@ -468,6 +475,7 @@ class TestRule15:
 # apply_markers aggregate
 # ===========================================================================
 
+
 class TestApplyMarkers:
     """apply_markers() orchestrates all five rules in one call."""
 
@@ -496,6 +504,7 @@ class TestApplyMarkers:
     def test_report_hermit_skipped_flag(self):
         """hermit_skipped flag is set when HermiT is unavailable."""
         from unittest.mock import patch
+
         import hyppo.ontology.markers as _markers_mod
 
         # Force _HERMIT_AVAILABLE to False to simulate missing Java
@@ -505,10 +514,12 @@ class TestApplyMarkers:
         assert report.hermit_skipped is True
 
     def test_rollback_on_inconsistency(self):
-        """_assert_marker rolls back the marker, emits a warning, and records the IRI."""
+        """_assert_marker rolls back the marker, emits a warning, records the IRI."""
         from unittest.mock import patch
-        import hyppo.ontology.markers as _markers_mod
+
         from owlready2 import OwlReadyInconsistentOntologyError
+
+        import hyppo.ontology.markers as _markers_mod
 
         h = Hypothesis(_uid("h"))
         marker_cls = OrphanHypothesis
@@ -521,8 +532,11 @@ class TestApplyMarkers:
                 with warnings.catch_warnings(record=True) as caught:
                     warnings.simplefilter("always")
                     result = _markers_mod._assert_marker(
-                        h, marker_cls, onto,
-                        run_hermit=True, rolled_back=sink,
+                        h,
+                        marker_cls,
+                        onto,
+                        run_hermit=True,
+                        rolled_back=sink,
                     )
 
         # marker must have been retracted
@@ -542,8 +556,10 @@ class TestApplyMarkers:
     def test_rollback_populates_report_rolled_back(self):
         """apply_markers propagates rollback IRI into MarkerReport.rolled_back."""
         from unittest.mock import patch
-        import hyppo.ontology.markers as _markers_mod
+
         from owlready2 import OwlReadyInconsistentOntologyError
+
+        import hyppo.ontology.markers as _markers_mod
 
         # A lone hypothesis (no WorkflowTask) triggers rule 9 → OrphanHypothesis.
         # Mock HermiT to reject *that* assertion as inconsistent.

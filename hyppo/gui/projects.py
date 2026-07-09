@@ -52,9 +52,7 @@ class ProjectStore:
 
     def list(self) -> list[dict]:
         with self._conn() as c:
-            rows = c.execute(
-                "SELECT * FROM projects ORDER BY created_order"
-            ).fetchall()
+            rows = c.execute("SELECT * FROM projects ORDER BY created_order").fetchall()
         return [dict(r) for r in rows]
 
     def delete(self, pid: str) -> None:
@@ -83,13 +81,12 @@ class ProjectStore:
                 (pid,),
             ).fetchone()[0]
             it = n + 1
-            c.execute(
-                "INSERT INTO iterations VALUES (?,?,?)", (pid, it, payload)
-            )
+            c.execute("INSERT INTO iterations VALUES (?,?,?)", (pid, it, payload))
         return it
 
     def list_iterations(self, pid: str) -> list[dict]:
         import json as _json
+
         with self._conn() as c:
             rows = c.execute(
                 "SELECT payload FROM iterations WHERE project_id=? "

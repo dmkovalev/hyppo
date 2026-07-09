@@ -1,5 +1,5 @@
 """Tests for hyppo.actions.version.register_hypothesis_version."""
-import asyncio
+
 from unittest.mock import AsyncMock
 
 import pytest
@@ -14,8 +14,11 @@ from hyppo.actions.version import (
 @pytest.fixture
 def mock_store(monkeypatch):
     from hyppo.versioning import version_store
+
     monkeypatch.setattr(version_store, "insert_hypothesis_version", AsyncMock())
-    monkeypatch.setattr(version_store, "find_latest_active", AsyncMock(return_value=None))
+    monkeypatch.setattr(
+        version_store, "find_latest_active", AsyncMock(return_value=None)
+    )
     return version_store
 
 
@@ -40,9 +43,11 @@ async def test_register_happy_path_no_prior(mock_store):
 
 async def test_register_supersedes_prior_version(monkeypatch):
     from hyppo.versioning import version_store
+
     monkeypatch.setattr(version_store, "insert_hypothesis_version", AsyncMock())
     monkeypatch.setattr(
-        version_store, "find_latest_active",
+        version_store,
+        "find_latest_active",
         AsyncMock(return_value="prior-uuid-xxxx"),
     )
     out = await register_hypothesis_version(
@@ -57,13 +62,17 @@ async def test_register_supersedes_prior_version(monkeypatch):
 
 async def test_register_duplicate_raises(monkeypatch):
     from sqlalchemy.exc import IntegrityError
+
     from hyppo.versioning import version_store
 
     monkeypatch.setattr(
-        version_store, "insert_hypothesis_version",
+        version_store,
+        "insert_hypothesis_version",
         AsyncMock(side_effect=IntegrityError("stmt", {}, Exception("dup"))),
     )
-    monkeypatch.setattr(version_store, "find_latest_active", AsyncMock(return_value=None))
+    monkeypatch.setattr(
+        version_store, "find_latest_active", AsyncMock(return_value=None)
+    )
     with pytest.raises(RuntimeError, match="already registered"):
         await register_hypothesis_version(
             RegisterHypothesisVersionInput(
@@ -88,6 +97,7 @@ async def test_register_rejects_unknown_kind(monkeypatch):
 def test_content_sha_is_deterministic():
     """Same snapshot dict → same sha across runs (canonicalisation is stable)."""
     from hyppo.actions.version import _canonical_sha256
+
     a = _canonical_sha256({"x": 1, "y": [2, 3], "z": {"k": "v"}})
     b = _canonical_sha256({"z": {"k": "v"}, "y": [2, 3], "x": 1})
     assert a == b, "key order must not affect the hash"

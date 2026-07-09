@@ -1,13 +1,13 @@
 from hyppo.comparison.compare import (
-    sign_test,
-    wilcoxon_test,
+    bayesian_posterior,
     benjamini_yekutieli,
-    pairwise_wilcoxon_by,
+    combined_ranking,
     compute_aic,
     compute_bic,
     gaussian_log_likelihood,
-    bayesian_posterior,
-    combined_ranking,
+    pairwise_wilcoxon_by,
+    sign_test,
+    wilcoxon_test,
 )
 
 __all__ = [

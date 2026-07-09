@@ -3,6 +3,7 @@
 T5 implements `register_hypothesis_version`. T6-T8 append more actions
 to this same file. All DB I/O goes through hyppo.versioning.version_store.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -38,7 +39,8 @@ class RegisterHypothesisVersionInput(BaseModel):
         description="Must be one of h_CRM, h_ML, h_LPR, h_MB, h_BL, h_WCT.",
     )
     snapshot_json: dict[str, Any] = Field(
-        description="Hyperparam dict for this hypothesis (subset of default_space axes).",
+        description="Hyperparam dict for this hypothesis (subset of default_space "
+        "axes)."
     )
     model_id: str | None = Field(
         default=None,
@@ -73,8 +75,7 @@ async def register_hypothesis_version(
     """Insert a new hypothesis_version row; auto-link supersedes."""
     if payload.hypothesis_kind not in ALL_HYPOTHESIS_KINDS:
         raise ValueError(
-            f"hypothesis_kind={payload.hypothesis_kind!r} not in "
-            f"{ALL_HYPOTHESIS_KINDS}"
+            f"hypothesis_kind={payload.hypothesis_kind!r} not in {ALL_HYPOTHESIS_KINDS}"
         )
 
     content_sha256 = _canonical_sha256(payload.snapshot_json)
@@ -122,9 +123,14 @@ class GetHypothesisVersionInput(BaseModel):
     trust=TrustLevel.SAFE,
     inputs=GetHypothesisVersionInput,
     outputs=HypothesisVersionRecord,
-    allowed_roles={AgentRole.Coordinator, AgentRole.ReservoirEngineer,
-                   AgentRole.Auditor, AgentRole.Geologist,
-                   AgentRole.ProductionEngineer, AgentRole.Economist},
+    allowed_roles={
+        AgentRole.Coordinator,
+        AgentRole.ReservoirEngineer,
+        AgentRole.Auditor,
+        AgentRole.Geologist,
+        AgentRole.ProductionEngineer,
+        AgentRole.Economist,
+    },
 )
 async def get_hypothesis_version(
     payload: GetHypothesisVersionInput,
@@ -153,9 +159,14 @@ class HypothesisVersionList(BaseModel):
     trust=TrustLevel.SAFE,
     inputs=ListVersionsForHypothesisInput,
     outputs=HypothesisVersionList,
-    allowed_roles={AgentRole.Coordinator, AgentRole.ReservoirEngineer,
-                   AgentRole.Auditor, AgentRole.Geologist,
-                   AgentRole.ProductionEngineer, AgentRole.Economist},
+    allowed_roles={
+        AgentRole.Coordinator,
+        AgentRole.ReservoirEngineer,
+        AgentRole.Auditor,
+        AgentRole.Geologist,
+        AgentRole.ProductionEngineer,
+        AgentRole.Economist,
+    },
 )
 async def list_versions_for_hypothesis(
     payload: ListVersionsForHypothesisInput,
@@ -244,9 +255,14 @@ class ResolveStaleRunsOutput(BaseModel):
     trust=TrustLevel.SAFE,
     inputs=ResolveStaleRunsInput,
     outputs=ResolveStaleRunsOutput,
-    allowed_roles={AgentRole.Coordinator, AgentRole.ReservoirEngineer,
-                   AgentRole.Auditor, AgentRole.Geologist,
-                   AgentRole.ProductionEngineer, AgentRole.Economist},
+    allowed_roles={
+        AgentRole.Coordinator,
+        AgentRole.ReservoirEngineer,
+        AgentRole.Auditor,
+        AgentRole.Geologist,
+        AgentRole.ProductionEngineer,
+        AgentRole.Economist,
+    },
 )
 async def resolve_stale_runs(payload: ResolveStaleRunsInput) -> ResolveStaleRunsOutput:
     """Find runs pinned to `version_id` after a newer version of the same

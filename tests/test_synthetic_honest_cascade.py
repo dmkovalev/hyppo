@@ -1,8 +1,10 @@
 """Топология 19-узлового графа HybridCRM и физические каскады."""
-from hyppo.actions.diff import derived_by_closure
+
 from experiments.chapter4.synthetic_honest import (
-    HYBRIDCRM_19_EDGES, HYBRIDCRM_19_NODES,
+    HYBRIDCRM_19_EDGES,
+    HYBRIDCRM_19_NODES,
 )
+from hyppo.actions.diff import derived_by_closure
 
 
 def test_graph_has_19_nodes_21_edges():
@@ -27,6 +29,7 @@ def test_connectivity_change_cascade_h1():
 def test_longest_path_is_7():
     import functools
     from collections import defaultdict
+
     adj = defaultdict(list)
     for a, b in HYBRIDCRM_19_EDGES:
         adj[a].append(b)
@@ -34,4 +37,5 @@ def test_longest_path_is_7():
     @functools.lru_cache(None)
     def lp(n):
         return 0 if not adj[n] else 1 + max(lp(c) for c in adj[n])
+
     assert max(lp(n) for n in HYBRIDCRM_19_NODES) == 7

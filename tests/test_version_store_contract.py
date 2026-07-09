@@ -4,11 +4,8 @@ These tests do NOT hit Postgres. They check the module exposes the right
 async coroutine functions with the right names — later action tests
 monkeypatch them with AsyncMocks.
 """
+
 import asyncio
-import inspect
-
-import pytest
-
 
 EXPECTED_FUNCTIONS = {
     "insert_hypothesis_version",
@@ -40,6 +37,7 @@ def test_wfworker_grpc_address_helper_is_present():
     """Mirror wfonto.mcp.wfworker_client — gives bridge clients a uniform
     way to read connection config, even though we won't use gRPC."""
     from hyppo.versioning import version_store
+
     assert hasattr(version_store, "database_url"), (
         "Expected a database_url() helper that reads DATABASE_URL env var"
     )

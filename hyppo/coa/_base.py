@@ -4,6 +4,7 @@ Formula parsing uses sympy.sympify (works on Python 3.13); all causal-ordering
 algorithms delegate to the pure core in :mod:`hyppo.coa.causal`. Variables are
 sympy Symbols on the public surface; the core works on their names internally.
 """
+
 from __future__ import annotations
 
 from sympy import sympify
@@ -103,8 +104,10 @@ class Structure:
         tc = causal.transitive_closure(self._eqsets)
         if tc is None:
             return {}
-        return {self._name2sym[k]: {self._name2sym[n] for n in deps}
-                for k, deps in tc.items()}
+        return {
+            self._name2sym[k]: {self._name2sym[n] for n in deps}
+            for k, deps in tc.items()
+        }
 
     # ---- set operations -------------------------------------------------
     def union(self, other):

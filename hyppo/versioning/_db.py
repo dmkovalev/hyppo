@@ -4,6 +4,7 @@ Models and the engine are native to hyppo, so the reference library has no
 dependency on any external production ORM. Async SQLAlchemy 2.0 over the
 ``DATABASE_URL`` engine (aiosqlite in tests, Postgres in deployment).
 """
+
 from __future__ import annotations
 
 import os

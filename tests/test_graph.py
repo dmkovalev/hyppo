@@ -3,15 +3,16 @@
 Covers construction, the build lattice (Alg 1), incremental add (Alg 2), the
 cascade-aware plan (Alg 4), and a polynomial-scaling smoke test for build.
 """
+
 import math
 import random
 
 from hyppo.coa import HypothesisGraph
 
-
 # --------------------------------------------------------------------------
 # construction
 # --------------------------------------------------------------------------
+
 
 def test_add_and_len():
     g = HypothesisGraph()
@@ -43,12 +44,13 @@ def test_connect_out_of_range_raises():
 # Algorithm 1: build
 # --------------------------------------------------------------------------
 
+
 def test_build_links_complete_union():
     """Two complete, variable-disjoint structures -> their union is complete,
     so the reachable pair appears as a lattice edge."""
     g = HypothesisGraph()
-    g.add([frozenset({"a", "b"}), frozenset({"b"})])   # complete: 2 eq, vars {a,b}
-    g.add([frozenset({"c", "d"}), frozenset({"d"})])   # complete: 2 eq, vars {c,d}
+    g.add([frozenset({"a", "b"}), frozenset({"b"})])  # complete: 2 eq, vars {a,b}
+    g.add([frozenset({"c", "d"}), frozenset({"d"})])  # complete: 2 eq, vars {c,d}
     g.connect(0, 1)
     assert g.build() == [(0, 1)]
 
@@ -57,7 +59,7 @@ def test_build_skips_incomplete_union():
     """Variable-overlapping structures whose union is not complete -> no edge."""
     g = HypothesisGraph()
     g.add([frozenset({"a", "b"}), frozenset({"b"})])
-    g.add([frozenset({"a", "c"}), frozenset({"c"})])   # union has 4 eq, 3 vars
+    g.add([frozenset({"a", "c"}), frozenset({"c"})])  # union has 4 eq, 3 vars
     g.connect(0, 1)
     assert g.build() == []
 
@@ -74,6 +76,7 @@ def test_build_only_reachable_pairs():
 # Algorithm 2: add_hypothesis
 # --------------------------------------------------------------------------
 
+
 def test_add_hypothesis_appends_node():
     g = HypothesisGraph()
     g.add([frozenset({"a", "b"}), frozenset({"b"})])
@@ -85,6 +88,7 @@ def test_add_hypothesis_appends_node():
 # --------------------------------------------------------------------------
 # Algorithm 4: plan (cascade)
 # --------------------------------------------------------------------------
+
 
 def _chain(n):
     """A linear derived_by chain 0 -> 1 -> ... -> n-1 of trivial hypotheses."""
@@ -132,13 +136,15 @@ def test_plan_protected_subtree():
 # scaling: build exponent is polynomial (sanity, small grid)
 # --------------------------------------------------------------------------
 
+
 def _gen_struct(rng, n_eq=5, pool=20):
     av = [f"x_{k}" for k in range(pool)]
     chosen = rng.sample(av, n_eq)
     eqs = []
     for i in range(n_eq):
-        extras = rng.sample([v for v in chosen if v != chosen[i]],
-                            rng.randint(1, min(3, n_eq - 1)))
+        extras = rng.sample(
+            [v for v in chosen if v != chosen[i]], rng.randint(1, min(3, n_eq - 1))
+        )
         eqs.append(frozenset([chosen[i], *extras]))
     return eqs
 
@@ -156,6 +162,7 @@ def _build_graph(n_h, rng, p=0.3):
 
 def test_build_exponent_is_polynomial():
     import time
+
     h_values = [10, 20, 30, 50, 70, 100]
     means = []
     for n_h in h_values:
@@ -171,5 +178,7 @@ def test_build_exponent_is_polynomial():
     lt = [math.log(m) for m in means]
     n = len(lh)
     mx, my = sum(lh) / n, sum(lt) / n
-    a = sum((x - mx) * (y - my) for x, y in zip(lh, lt)) / sum((x - mx) ** 2 for x in lh)
+    a = sum((x - mx) * (y - my) for x, y in zip(lh, lt)) / sum(
+        (x - mx) ** 2 for x in lh
+    )
     assert a < 2.8, f"exponent {a:.3f} too high -- expected near-quadratic"

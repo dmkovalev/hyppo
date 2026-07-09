@@ -4,6 +4,7 @@ Self-contained: models and engine live in :mod:`hyppo.versioning._db` -- no
 dependency on any external ORM. Each function opens an async session, performs
 the query, and commits where needed.
 """
+
 from __future__ import annotations
 
 import os
@@ -163,7 +164,8 @@ async def upsert_run_link(
     inserted, False if an existing row already matched."""
     async with await _get_session() as session:
         existing = await session.get(
-            HypothesisRunLink, (run_id, hypothesis_kind),
+            HypothesisRunLink,
+            (run_id, hypothesis_kind),
         )
         if existing is not None:
             if existing.version_id == version_id:

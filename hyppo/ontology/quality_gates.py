@@ -10,7 +10,6 @@ from __future__ import annotations
 
 from owlready2 import (
     ObjectProperty,
-    Thing,
     TransitiveProperty,
 )
 
@@ -26,7 +25,6 @@ __all__ = [
 ]
 
 with virtual_experiment_onto:
-
     # ── Quality markers ────────────────────────────────────────────────────
     class LowQuality(Hypothesis):
         """Hypothesis flagged as low-quality by a quality gate."""
@@ -40,6 +38,7 @@ with virtual_experiment_onto:
 
     class hasAncestor(Hypothesis >> Hypothesis, ObjectProperty, TransitiveProperty):
         """Transitive ancestor relation in the hypothesis lattice."""
+
         inverse_property = hasDescendant
 
     # ── Rule 11: PrunableSubtree ──────────────────────────────────────────
@@ -60,6 +59,5 @@ with virtual_experiment_onto:
 
         Formally: hasAncestor SOME HighQuality.
         """
-        equivalent_to = [
-            Hypothesis & hasAncestor.some(HighQuality)
-        ]
+
+        equivalent_to = [Hypothesis & hasAncestor.some(HighQuality)]

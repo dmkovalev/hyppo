@@ -1,4 +1,5 @@
 """MCP server factory and transport runners for hyppo."""
+
 from __future__ import annotations
 
 from mcp.server import Server
@@ -29,12 +30,13 @@ async def run_stdio() -> None:
 
 def run_http(host: str, port: int) -> None:
     """Run as a streamable HTTP MCP server (sibling to neqsim/wfonto)."""
-    import uvicorn
     from contextlib import asynccontextmanager
+
+    import uvicorn
+    from mcp.server.fastmcp.server import StreamableHTTPASGIApp
+    from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
     from starlette.applications import Starlette
     from starlette.routing import Route
-    from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
-    from mcp.server.fastmcp.server import StreamableHTTPASGIApp
 
     mcp_server = create_server()
     session_manager = StreamableHTTPSessionManager(

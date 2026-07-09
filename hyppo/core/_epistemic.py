@@ -16,6 +16,7 @@ competitors) and writes the resulting status. Defaults follow the dissertation:
 ``theta_sup = 0.7`` (Burnham-Anderson conservative threshold) and ``theta_aic = 10``
 (Delta AIC > 10 == no empirical support for the worse model).
 """
+
 from __future__ import annotations
 
 from enum import Enum

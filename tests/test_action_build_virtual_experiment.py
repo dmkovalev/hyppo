@@ -1,4 +1,5 @@
 """Tests for hyppo.actions.virtual_experiment.build_virtual_experiment."""
+
 import pytest
 
 from hyppo.actions.virtual_experiment import (
@@ -7,7 +8,6 @@ from hyppo.actions.virtual_experiment import (
     VirtualExperimentSnapshot,
     build_virtual_experiment,
 )
-
 
 EXPECTED_KINDS = {"h_CRM", "h_ML", "h_LPR", "h_MB", "h_BL", "h_WCT"}
 
@@ -48,10 +48,10 @@ def test_build_each_hypothesis_has_classification_chain():
 
 EXPECTED_PRIMARY_CLASS = {
     "h_CRM": "PhysicsModel",
-    "h_ML":  "DataDrivenModel",
+    "h_ML": "DataDrivenModel",
     "h_LPR": "HybridModel",
-    "h_MB":  "PhysicsModel",
-    "h_BL":  "PhysicsModel",
+    "h_MB": "PhysicsModel",
+    "h_BL": "PhysicsModel",
     "h_WCT": "HybridModel",
 }
 

@@ -6,6 +6,7 @@ The Dulmage-Mendelsohn decomposition (a perfect matching plus the strongly
 connected components of the matching-induced dependency digraph) yields the
 irreducible ("minimal complete") blocks in polynomial time.
 """
+
 from __future__ import annotations
 
 from collections import defaultdict, deque
@@ -41,7 +42,7 @@ def perfect_matching(equations: list[frozenset[str]]) -> dict[int, str] | None:
     """
     cand = [sorted(eq) for eq in equations]
     n = len(equations)
-    match_eq: dict[int, str] = {}   # eq index -> var
+    match_eq: dict[int, str] = {}  # eq index -> var
     match_var: dict[str, int] = {}  # var -> eq index
     INF = float("inf")
     dist: dict[int, float] = {}
@@ -73,13 +74,13 @@ def perfect_matching(equations: list[frozenset[str]]) -> dict[int, str] | None:
         equation ``start`` and flip it. ``dist`` confines the search to BFS layers
         and dead ends are pruned via ``dist[i] = INF``."""
         stack = [(start, iter(cand[start]))]
-        trail: list[tuple[int, str]] = []   # (eq, var) edges descended into
+        trail: list[tuple[int, str]] = []  # (eq, var) edges descended into
         while stack:
             i, it = stack[-1]
             descended = False
             for v in it:
                 w = match_var.get(v)
-                if w is None:               # free var -> flip the whole path
+                if w is None:  # free var -> flip the whole path
                     match_eq[i] = v
                     match_var[v] = i
                     for eq_p, var_p in reversed(trail):
@@ -92,7 +93,7 @@ def perfect_matching(equations: list[frozenset[str]]) -> dict[int, str] | None:
                     descended = True
                     break
             if not descended:
-                dist[i] = INF               # exhausted in this phase
+                dist[i] = INF  # exhausted in this phase
                 stack.pop()
                 if trail:
                     trail.pop()
@@ -124,9 +125,7 @@ def _dependency_graph(
     return adj
 
 
-def strongly_connected_components(
-    adj: dict[str, set[str]]
-) -> list[frozenset[str]]:
+def strongly_connected_components(adj: dict[str, set[str]]) -> list[frozenset[str]]:
     """Tarjan's SCC. ``adj``: {node: set(successors)}. Returns list of frozensets."""
     index: dict[str, int] = {}
     low: dict[str, int] = {}

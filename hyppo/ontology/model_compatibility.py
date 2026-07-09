@@ -35,7 +35,6 @@ __all__ = [
 ]
 
 with virtual_experiment_onto:
-
     # ── Rule 14: FormatMismatch ───────────────────────────────────────────
 
     class DataFormat(Thing):
@@ -64,9 +63,8 @@ with virtual_experiment_onto:
 
         Formally: TimeSeriesProducer AND feedsInto SOME GraphConsumer.
         """
-        equivalent_to = [
-            TimeSeriesProducer & feedsInto.some(GraphConsumer)
-        ]
+
+        equivalent_to = [TimeSeriesProducer & feedsInto.some(GraphConsumer)]
 
     # ── Rule 15: DatasetMissing ───────────────────────────────────────────
 

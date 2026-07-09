@@ -1,5 +1,7 @@
 import json
+
 from fastapi import APIRouter, HTTPException, Request
+
 from hyppo.gui.services import plan_preview
 
 router = APIRouter(prefix="/api/projects/{pid}/plan", tags=["plan"])

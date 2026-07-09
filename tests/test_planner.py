@@ -3,12 +3,12 @@
 import networkx as nx
 import pytest
 
-from hyppo.planner._base import ExecutionPlan, Planner, build_optimal_plan
-
+from hyppo.planner._base import Planner, build_optimal_plan
 
 # ---------------------------------------------------------------------------
 # Helpers: lightweight fakes for lattice, configuration, and Database
 # ---------------------------------------------------------------------------
+
 
 class FakeModel:
     def __init__(self, name: str):
@@ -63,9 +63,11 @@ class FakeDatabase:
         return self._lattices
 
     # --- convenience for tests ---
-    def put_result(self, hypothesis: FakeHypothesis, config: FakeConfiguration, obj: dict) -> None:
+    def put_result(
+        self, hypothesis: FakeHypothesis, config: FakeConfiguration, obj: dict
+    ) -> None:
         """Store a fake cached result for the given hypothesis + config."""
-        for cm in (config.parameters or [config]):
+        for cm in config.parameters or [config]:
             for model in hypothesis.is_implemented_by_model:
                 key = f"{hypothesis.name}__{model.name}__{str(cm)}"
                 self._results[f"results/{key}"] = _FakePickled(obj)
@@ -74,6 +76,7 @@ class FakeDatabase:
 # ---------------------------------------------------------------------------
 # Tests
 # ---------------------------------------------------------------------------
+
 
 def test_plan_all_new():
     """All hypotheses without cache -> all in needs_execution (P_ne)."""
@@ -185,7 +188,8 @@ def test_shared_cache_planner_sees_runner_saves():
     from hyppo.metadata_repository import SharedCache
 
     h1, h2 = FakeHypothesis("h1"), FakeHypothesis("h2")
-    g = nx.DiGraph(); g.add_edge(h1, h2)
+    g = nx.DiGraph()
+    g.add_edge(h1, h2)
     lattice = FakeLattice(g)
     config = FakeConfiguration()
     cache = SharedCache(":memory:")
@@ -215,7 +219,9 @@ def test_per_hypothesis_config_invalidates_single_branch():
     from hyppo.metadata_repository import SharedCache
 
     h1, h2, h3 = FakeHypothesis("h1"), FakeHypothesis("h2"), FakeHypothesis("h3")
-    g = nx.DiGraph(); g.add_edge(h1, h2); g.add_edge(h2, h3)
+    g = nx.DiGraph()
+    g.add_edge(h1, h2)
+    g.add_edge(h2, h3)
     lattice = FakeLattice(g)
     cache = SharedCache(":memory:")
 

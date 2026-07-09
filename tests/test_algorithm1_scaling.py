@@ -1,13 +1,14 @@
 """Algorithm 1 (lattice build) scales polynomially in |H| with the polynomial
 core. Runs the real library on Python 3.13; asserts the fitted log-log exponent
 is well below the old exponential blow-up and consistent with ~quadratic."""
+
 import math
 import random
 import time
 
 from sympy import Symbol
 
-from hyppo.coa._base import Structure, Equation
+from hyppo.coa._base import Equation, Structure
 
 
 def _gen_struct(rng, n_eq=5, pool=20):
@@ -15,8 +16,9 @@ def _gen_struct(rng, n_eq=5, pool=20):
     chosen = rng.sample(av, n_eq)
     eqs = []
     for i in range(n_eq):
-        extras = rng.sample([v for v in chosen if v != chosen[i]],
-                            rng.randint(1, min(3, n_eq - 1)))
+        extras = rng.sample(
+            [v for v in chosen if v != chosen[i]], rng.randint(1, min(3, n_eq - 1))
+        )
         names = [chosen[i], *extras]
         eqs.append(Equation(vars={Symbol(nm) for nm in names}))
     return Structure(eqs)
@@ -24,8 +26,9 @@ def _gen_struct(rng, n_eq=5, pool=20):
 
 def _build_cost(n_h, rng):
     hyps = [_gen_struct(rng) for _ in range(n_h)]
-    edges = [(i, j) for i in range(n_h) for j in range(i + 1, n_h)
-             if rng.random() < 0.3]
+    edges = [
+        (i, j) for i in range(n_h) for j in range(i + 1, n_h) if rng.random() < 0.3
+    ]
     adj = {i: set() for i in range(n_h)}
     for u, v in edges:
         adj[u].add(v)
@@ -61,6 +64,8 @@ def test_algorithm1_exponent_is_polynomial():
     lt = [math.log(m) for m in means]
     n = len(lh)
     mx, my = sum(lh) / n, sum(lt) / n
-    a = sum((x - mx) * (y - my) for x, y in zip(lh, lt)) / sum((x - mx) ** 2 for x in lh)
+    a = sum((x - mx) * (y - my) for x, y in zip(lh, lt)) / sum(
+        (x - mx) ** 2 for x in lh
+    )
     print(f"fitted exponent a = {a:.3f}")
     assert a < 2.8, f"exponent {a:.3f} too high -- expected near-quadratic"

@@ -14,7 +14,7 @@ Rule 31 -- PreferredHypothesis: an active hypothesis whose competitor has been
 
 from __future__ import annotations
 
-from owlready2 import AllDisjoint, Inverse, ObjectProperty
+from owlready2 import AllDisjoint, Inverse
 
 from hyppo.core._base import (
     Hypothesis,
@@ -38,7 +38,6 @@ __all__ = [
 ]
 
 with virtual_experiment_onto:
-
     # ── Lifecycle states ──────────────────────────────────────────────────
     class DraftHypothesis(Hypothesis):
         """Hypothesis in draft / work-in-progress state."""
@@ -53,13 +52,13 @@ with virtual_experiment_onto:
         """Hypothesis permanently archived (read-only)."""
 
     # Pairwise disjointness of lifecycle states.
-    AllDisjoint([DraftHypothesis, ActiveHypothesis,
-                 DeprecatedHypothesis, ArchivedHypothesis])
+    AllDisjoint(
+        [DraftHypothesis, ActiveHypothesis, DeprecatedHypothesis, ArchivedHypothesis]
+    )
 
     # Covering axiom: every Hypothesis belongs to exactly one state.
     Hypothesis.equivalent_to.append(
-        DraftHypothesis | ActiveHypothesis
-        | DeprecatedHypothesis | ArchivedHypothesis
+        DraftHypothesis | ActiveHypothesis | DeprecatedHypothesis | ArchivedHypothesis
     )
 
     # ── Rule 16: BlockingDeprecation ──────────────────────────────────────
@@ -69,9 +68,9 @@ with virtual_experiment_onto:
 
         Formally: DeprecatedHypothesis AND inverse(derived_by) SOME ActiveHypothesis.
         """
+
         equivalent_to = [
-            DeprecatedHypothesis
-            & Inverse(derived_by).some(ActiveHypothesis)
+            DeprecatedHypothesis & Inverse(derived_by).some(ActiveHypothesis)
         ]
 
     # ── Rule 17: ConflictingHypothesis ────────────────────────────────────
@@ -80,9 +79,8 @@ with virtual_experiment_onto:
 
         Formally: ActiveHypothesis AND competes SOME ActiveHypothesis.
         """
-        equivalent_to = [
-            ActiveHypothesis & competes.some(ActiveHypothesis)
-        ]
+
+        equivalent_to = [ActiveHypothesis & competes.some(ActiveHypothesis)]
 
     # ── Rule 30: FreshHypothesis (marker, closes repair cycle) ───────────
     class FreshHypothesis(Hypothesis):
@@ -106,12 +104,12 @@ with virtual_experiment_onto:
         Formally: ActiveHypothesis AND competes SOME InvalidHypothesis.
         Auto-inferred by HermiT (positive existential, DL-compatible).
         """
-        equivalent_to = [
-            ActiveHypothesis & competes.some(InvalidHypothesis)
-        ]
+
+        equivalent_to = [ActiveHypothesis & competes.some(InvalidHypothesis)]
 
 
 # ── Procedural bridges (Python → ontology) ──────────────────────────────
+
 
 def refresh_hypothesis(hypothesis, ontology=None):
     """Close the repair cycle: Stale → Fresh after recomputation.
@@ -121,7 +119,7 @@ def refresh_hypothesis(hypothesis, ontology=None):
     formal counterpart to the planner executing the recalculation plan.
     """
     from hyppo.ontology.core_rules import StaleHypothesis
-    ont = ontology or virtual_experiment_onto
+
     # Remove stale marker (if present)
     if StaleHypothesis in hypothesis.is_a:
         hypothesis.is_a.remove(StaleHypothesis)
@@ -138,20 +136,24 @@ def apply_pydantic_to_ontology(individual, params, ontology=None):
     enabling the DL reasoner to propagate the consequence via cascade (rule 4).
     """
     from pydantic import ValidationError
-    ont = ontology or virtual_experiment_onto
+
     try:
         # params is a dict like {"f_ij": [...]} → validated by Pydantic model
         if "f_ij" in params:
             from hyppo.ontology.oil_constraints import FractionalFlowParams
+
             FractionalFlowParams(f_ij=params["f_ij"])
         if "tau_fast" in params and "tau_slow" in params:
             from hyppo.ontology.oil_constraints import TimeScaleParams
+
             TimeScaleParams(tau_fast=params["tau_fast"], tau_slow=params["tau_slow"])
         if "s_o" in params and "s_w" in params:
             from hyppo.ontology.oil_constraints import SaturationParams
+
             SaturationParams(s_o=params["s_o"], s_w=params["s_w"])
         if "n_oil" in params and "n_water" in params:
             from hyppo.ontology.oil_constraints import CoreyExponentParams
+
             CoreyExponentParams(n_oil=params["n_oil"], n_water=params["n_water"])
         return True  # all constraints passed
     except ValidationError:

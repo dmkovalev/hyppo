@@ -59,8 +59,8 @@ class Runner:
         """Execute plan and return results.
 
         Args:
-            plan: {"p_ne": set of hypothesis IDs to compute, "p_e": set to load from cache}
-            models: {hypothesis_id: callable(config) -> {"r2": float, "aic": float, ...}}
+            plan: {"p_ne": IDs to compute, "p_e": IDs to load from cache}
+            models: {hypothesis_id: callable(config) -> {"r2": float, "aic": ...}}
             configs: {hypothesis_id: config_dict}
             lattice_edges: list of (parent, child) derived_by edges
             competes: {hypothesis_id: set of competing hypothesis IDs} -- used to
@@ -85,9 +85,14 @@ class Runner:
 
         # Load cached results for P_e
         for h_id in p_e:
-            if self.repository and self.repository.has_result(h_id, configs.get(h_id, {})):
+            if self.repository and self.repository.has_result(
+                h_id, configs.get(h_id, {})
+            ):
                 cached = self.repository.load_result(h_id, configs.get(h_id, {}))
-                results[h_id] = {"status": Status.SUCCESS.value, "metrics": cached.get("metrics", {})}
+                results[h_id] = {
+                    "status": Status.SUCCESS.value,
+                    "metrics": cached.get("metrics", {}),
+                }
             else:
                 results[h_id] = {"status": Status.SUCCESS.value, "metrics": {}}
 
@@ -105,7 +110,11 @@ class Runner:
             config = configs.get(h_id, {})
             model_fn = models.get(h_id)
             if model_fn is None:
-                results[h_id] = {"status": Status.FAILED.value, "metrics": {}, "error": "No model function"}
+                results[h_id] = {
+                    "status": Status.FAILED.value,
+                    "metrics": {},
+                    "error": "No model function",
+                }
                 self._cascade_skip(h_id, dependents, failed_ancestors)
                 continue
 
@@ -117,15 +126,23 @@ class Runner:
                     results[h_id] = {"status": Status.SUCCESS.value, "metrics": metrics}
                     # Save to repository
                     if self.repository:
-                        self.repository.save_result(h_id, config, metrics, Status.SUCCESS.value)
+                        self.repository.save_result(
+                            h_id, config, metrics, Status.SUCCESS.value
+                        )
                     success = True
                     break
                 except Exception as e:
                     last_error = str(e)
-                    logger.warning(f"Attempt {attempt}/{self.max_retries} failed for {h_id}: {e}")
+                    logger.warning(
+                        f"Attempt {attempt}/{self.max_retries} failed for {h_id}: {e}"
+                    )
 
             if not success:
-                results[h_id] = {"status": Status.FAILED.value, "metrics": {}, "error": last_error}
+                results[h_id] = {
+                    "status": Status.FAILED.value,
+                    "metrics": {},
+                    "error": last_error,
+                }
                 self._cascade_skip(h_id, dependents, failed_ancestors)
                 logger.error(f"Failed {h_id} after {self.max_retries} attempts")
 
@@ -143,6 +160,7 @@ class Runner:
         evaluated hypothesis is SUPPORTED/REFUTED by its R^2, or SUPERSEDED if a
         competitor's AIC beats it by more than ``theta_aic``; anything not evaluated
         (no R^2, or FAILED/SKIPPED) stays PROPOSED."""
+
         def aic_of(hid: str) -> float | None:
             r = results.get(hid)
             if r and r["status"] == Status.SUCCESS.value:
@@ -155,14 +173,18 @@ class Runner:
                 continue
             r2 = res["metrics"].get("r2")
             own_aic = res["metrics"].get("aic")
-            competitor_aics = [a for c in competes.get(h_id, set())
-                               if (a := aic_of(c)) is not None]
+            competitor_aics = [
+                a for c in competes.get(h_id, set()) if (a := aic_of(c)) is not None
+            ]
             best = min(competitor_aics) if competitor_aics else None
-            status = evaluate_status(r2, own_aic, best,
-                                     theta_sup=theta_sup, theta_aic=theta_aic)
+            status = evaluate_status(
+                r2, own_aic, best, theta_sup=theta_sup, theta_aic=theta_aic
+            )
             res["epistemic_status"] = status.value
 
-    def _cascade_skip(self, h_id: str, dependents: dict[str, set[str]], failed_set: set[str]) -> None:
+    def _cascade_skip(
+        self, h_id: str, dependents: dict[str, set[str]], failed_set: set[str]
+    ) -> None:
         """Recursively mark all dependents as needing skip."""
         for dep in dependents.get(h_id, set()):
             failed_set.add(dep)

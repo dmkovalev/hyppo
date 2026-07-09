@@ -1,4 +1,5 @@
 """@action decorator and global registry — verbatim of the wfonto pattern."""
+
 from __future__ import annotations
 
 from collections import OrderedDict
@@ -35,6 +36,7 @@ def action(
     requires_audit: bool = False,
 ):
     """Decorator that registers a function as a typed Action."""
+
     def wrap(fn: Callable):
         if kind in ACTION_REGISTRY:
             raise ValueError(f"Action {kind!r} already registered")
@@ -50,6 +52,7 @@ def action(
         )
         ACTION_REGISTRY[kind] = spec
         return fn
+
     return wrap
 
 

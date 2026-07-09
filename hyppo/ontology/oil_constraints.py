@@ -42,18 +42,14 @@ class FractionalFlowParams(BaseModel):
     def _each_in_unit_interval(cls, v: list[float]) -> list[float]:
         for i, x in enumerate(v):
             if not 0.0 <= x <= 1.0:
-                raise ValueError(
-                    f"f_ij[{i}] = {x} is outside [0, 1]"
-                )
+                raise ValueError(f"f_ij[{i}] = {x} is outside [0, 1]")
         return v
 
     @model_validator(mode="after")
     def _sum_leq_one(self) -> "FractionalFlowParams":
         total = sum(self.f_ij)
         if total > 1.0 + 1e-12:
-            raise ValueError(
-                f"sum(f_ij) = {total:.6f} exceeds 1.0"
-            )
+            raise ValueError(f"sum(f_ij) = {total:.6f} exceeds 1.0")
         return self
 
 
@@ -95,9 +91,7 @@ class SaturationParams(BaseModel):
     def _saturations_sum_to_one(self) -> "SaturationParams":
         total = self.s_o + self.s_w
         if abs(total - 1.0) > 1e-9:
-            raise ValueError(
-                f"S_o + S_w = {total:.9f}, expected 1.0"
-            )
+            raise ValueError(f"S_o + S_w = {total:.9f}, expected 1.0")
         return self
 
 

@@ -88,8 +88,11 @@ def pairwise_wilcoxon_by(
     its per-sample errors. Returns ``(name_a, name_b, p_by, significant)`` for
     every unordered pair, where ``p_by`` is the BY-adjusted p-value."""
     names = list(errors)
-    pairs = [(names[i], names[j])
-             for i in range(len(names)) for j in range(i + 1, len(names))]
+    pairs = [
+        (names[i], names[j])
+        for i in range(len(names))
+        for j in range(i + 1, len(names))
+    ]
     raw = [wilcoxon_test(errors[a], errors[b]) for a, b in pairs]
     rejected, adjusted = benjamini_yekutieli(raw, q)
     return [(a, b, adjusted[k], rejected[k]) for k, (a, b) in enumerate(pairs)]
@@ -137,8 +140,9 @@ def bayesian_posterior(
     if prior is None:
         prior = {nm: 1.0 / len(names) for nm in names}
     bmin = min(bic_by_hypothesis.values())
-    weights = {nm: prior[nm] * math.exp(-0.5 * (bic_by_hypothesis[nm] - bmin))
-               for nm in names}
+    weights = {
+        nm: prior[nm] * math.exp(-0.5 * (bic_by_hypothesis[nm] - bmin)) for nm in names
+    }
     z = sum(weights.values())
     if z <= 0.0:
         return {nm: 1.0 / len(names) for nm in names}

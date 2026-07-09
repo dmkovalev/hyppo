@@ -8,12 +8,11 @@
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, field
-from typing import Mapping, Set, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Mapping, Optional, Set
 
 import networkx as nx
-
-import logging
 
 if TYPE_CHECKING:
     from hyppo.lattice_constructor._base import HypothesisLattice
@@ -31,6 +30,7 @@ class ExecutionPlan:
         cached: Pe -- множество гипотез, для которых можно использовать
             ранее вычисленные результаты.
     """
+
     needs_execution: Set = field(default_factory=set)
     cached: Set = field(default_factory=set)
 
@@ -122,8 +122,9 @@ def _has_cached_result(
     # результаты, записанные раннером, в одном SQLite. Legacy Database (только
     # load/save) идёт по старому пути ниже.
     if hasattr(db, "has_result") and hasattr(db, "load_result"):
-        return db.has_result(getattr(hypothesis, "name", str(hypothesis)),
-                             _cfg_dict(configuration))
+        return db.has_result(
+            getattr(hypothesis, "name", str(hypothesis)), _cfg_dict(configuration)
+        )
 
     # Получаем модели, реализующие гипотезу.
     # В онтологии is_implemented_by_model -- ObjectProperty, возвращающее список
@@ -149,9 +150,11 @@ def _has_cached_result(
     for cm in param_sets:
         for model in models:
             # Формируем ключ кеша: идентификатор гипотезы + модели + параметров
-            cache_key = f"{getattr(hypothesis, 'name', str(hypothesis))}" \
-                        f"__{getattr(model, 'name', str(model))}" \
-                        f"__{str(cm)}"
+            cache_key = (
+                f"{getattr(hypothesis, 'name', str(hypothesis))}"
+                f"__{getattr(model, 'name', str(model))}"
+                f"__{str(cm)}"
+            )
             result = db.load(cache_key, storage="results")
             if result is None:
                 return False
@@ -171,8 +174,9 @@ def _get_cached_r2(
     """
     # Быстрый путь: общий кэш planner↔runner (см. _has_cached_result).
     if hasattr(db, "has_result") and hasattr(db, "load_result"):
-        rec = db.load_result(getattr(hypothesis, "name", str(hypothesis)),
-                            _cfg_dict(configuration))
+        rec = db.load_result(
+            getattr(hypothesis, "name", str(hypothesis)), _cfg_dict(configuration)
+        )
         if rec:
             return rec.get("metrics", {}).get("r2")
         return None
@@ -293,7 +297,8 @@ def build_optimal_plan(
         # Выбираем вершины без входящих ребер среди необработанных
         # (топологический порядок: сначала обрабатываем «верхние» гипотезы)
         roots = [
-            h for h in remaining
+            h
+            for h in remaining
             if all(pred in finished for pred in graph.predecessors(h))
         ]
 
@@ -384,5 +389,10 @@ class Planner:
             ExecutionPlan с множествами needs_execution и cached.
         """
         threshold = r2_threshold if r2_threshold is not None else self.r2_threshold
-        return build_optimal_plan(configuration, lattice, self.db, r2_threshold=threshold,
-                                  per_hypothesis_configs=per_hypothesis_configs)
+        return build_optimal_plan(
+            configuration,
+            lattice,
+            self.db,
+            r2_threshold=threshold,
+            per_hypothesis_configs=per_hypothesis_configs,
+        )

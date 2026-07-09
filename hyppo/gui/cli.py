@@ -11,6 +11,7 @@ def main() -> None:
     args = p.parse_args()
 
     import uvicorn
+
     from hyppo.gui.app import create_app
 
     app = create_app(db_path=args.db)
