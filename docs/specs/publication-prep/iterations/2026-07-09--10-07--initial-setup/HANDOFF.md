@@ -665,3 +665,14 @@ added "What is this?" + Quickstart (verified runnable, `.venv/Scripts/python`
 exit 0), Purpose-column architecture table, How-to-cite/Contributing/License
 sections. Commit: fix(review): professional README — quickstart, purpose
 table, cite/license (R7b)
+
+## R7c fix: readmes
+Stage: realization | Author: fix-agent
+Verified CLAUDE.md content (golden-test contract, HypothesisLattice-only
+rule, H1-H16 numbering) already lives in CONTRIBUTING.md +
+docs/gui_demo_spec.md intro; `git rm CLAUDE.md`, no docs edit needed.
+Filled examples/README.md gap (all scripts listed), added
+examples/functional_connectivity/README.md and experiments/README.md
+(new). webui/README.md, examples/random_structures/README.md: verified
+accurate, no defects, untouched. grep sweep (hyppo gui/hyppo-ve/streamlit/
+wfonto) across all README.md — 0 hits.
