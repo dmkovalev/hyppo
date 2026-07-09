@@ -8,7 +8,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any, Literal
 from uuid import uuid4
 
@@ -80,7 +80,7 @@ async def register_hypothesis_version(
     content_sha256 = _canonical_sha256(payload.snapshot_json)
     supersedes = await version_store.find_latest_active(payload.hypothesis_kind)
     version_id = str(uuid4())
-    created_at = datetime.utcnow()
+    created_at = datetime.now(UTC)
     created_by = "hyppo-mcp"
 
     try:

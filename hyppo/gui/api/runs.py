@@ -14,8 +14,6 @@ def create_run(pid: str, req: Request) -> dict:
     outcome = run_iteration(json.loads(raw), db_path=req.app.state.db_path)
     it = store.add_iteration(pid, json.dumps(outcome))
     record = {"iteration": it, **outcome}
-    store.add_iteration  # noqa: keep import usage explicit
-    # overwrite stored payload to include iteration number
     return record
 
 

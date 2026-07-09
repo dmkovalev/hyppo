@@ -81,7 +81,7 @@ with virtual_experiment_onto:
             if stat_test == 'wilcoxon':
                 result = stats.wilcoxon(linear_prediction, gp_prediction)
             else:
-                raise NotImplemented()
+                raise NotImplementedError(f"stat_test={stat_test!r} not supported")
             return result
 
         def compare_preds_on_different_datasets(self, dataset_1, dataset_2, stat_test):
@@ -91,7 +91,7 @@ with virtual_experiment_onto:
             if stat_test == 'wilcoxon':
                 result = stats.wilcoxon(linear_prediction, gp_prediction)
             else:
-                raise NotImplemented()
+                raise NotImplementedError(f"stat_test={stat_test!r} not supported")
             return result
 
 

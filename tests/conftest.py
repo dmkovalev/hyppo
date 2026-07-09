@@ -3,6 +3,20 @@ import pytest
 import pytest_asyncio
 
 
+@pytest.fixture(scope="session", autouse=True)
+def _close_owlready2_default_world():
+    """Close owlready2's global SQLite world at session end.
+
+    Under `pytest --cov`, this connection otherwise surfaces as an
+    "unclosed database" ResourceWarning (owlready2 keeps one process-wide
+    sqlite3 connection open by design; it is unrelated to hyppo/coa/causal.py).
+    """
+    yield
+    import owlready2
+
+    owlready2.default_world.close()
+
+
 # ── owlready2 world isolation via test ordering ─────────────────────────────
 # owlready2 stores all OWL individuals in a single global SQLite world.
 # Tests that create OWL individuals (test_owl_reasoning, test_oil_adapter)
