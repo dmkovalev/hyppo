@@ -1,4 +1,13 @@
+import pytest
+
 from hyppo.storage import Database
+
+
+def test_save_unpicklable_raises(tmp_path):
+    Database.set_root(str(tmp_path))
+    unpicklable = (x for x in range(3))  # generators cannot be pickled
+    with pytest.raises(Exception):
+        Database.save(unpicklable, "unpicklable_object")
 
 
 def test_save_load_roundtrip(tmp_path):

@@ -102,7 +102,7 @@ class Database:
                 object, e.g. `description`.
 
         Note:
-            Pickling failures are logged, not raised (matches prior behavior).
+            Pickling failures are logged, then re-raised.
         """
         filename = Path(filename)
 
@@ -124,6 +124,7 @@ class Database:
             logger.exception(
                 "Object type does not match the database. Object type: %s", type(obj)
             )
+            raise
 
     @classmethod
     def load(
