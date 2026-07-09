@@ -16,7 +16,7 @@ reproducible from `hyppo` itself:
 | Algorithm 4 — `plan` (cascade) | `hyppo.coa.HypothesisGraph.plan()` |
 
 `HypothesisGraph` delegates all causal work to `hyppo.coa.causal`, the pure
-Dulmage–Mendelsohn core (Kuhn matching + Tarjan SCC + BFS closure), giving the
+Dulmage–Mendelsohn core (Hopcroft-Karp matching + Tarjan SCC + BFS closure), giving the
 polynomial complexity of Lemma 1 — `O(|H|² · s_max · v_max)`. The earlier
 standalone *greedy* reimplementation (which produced the stale `a ≈ 2.19`) has
 been removed; the scripts below are thin measurement harnesses over the library.

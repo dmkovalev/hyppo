@@ -6,7 +6,7 @@ A *hypothesis* is a structure: a ``list[frozenset[str]]`` of equations over
 variable names. A :class:`HypothesisGraph` holds hypotheses connected by
 ``derived_by`` edges (a DAG) and is the single source of truth for the three
 planning algorithms. All causal work delegates to :mod:`hyppo.coa.causal`
-(the Dulmage-Mendelsohn decomposition: Kuhn matching + Tarjan SCC), so the
+(the Dulmage-Mendelsohn decomposition: Hopcroft-Karp matching + Tarjan SCC), so the
 measured complexity is the library's, not a script's reimplementation.
 
 Pure stdlib (imports only :mod:`hyppo.coa.causal`); safe to import without

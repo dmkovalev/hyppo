@@ -106,7 +106,7 @@ def main():
     print(f"\nDM core [10..500]: a = {a:.3f}  95%-CI [{lo:.3f}, {hi:.3f}] (bootstrap "
           f"over reps)  a0={a0:.6f}  R2={r2:.4f}", flush=True)
 
-    out = {"platform": "Windows 11", "python": "3.13", "algorithm": "DM (Kuhn+Tarjan)",
+    out = {"platform": "Windows 11", "python": "3.13", "algorithm": "DM (Hopcroft-Karp+Tarjan)",
            "h_grid": GRID, "n_reps": N_REPS, "er_build": er_build,
            "er_powerlaw": {"a": a, "a0": a0, "R2": r2, "ci95": [lo, hi],
                            "ci_method": "bootstrap over replicas (B=2000)"}}
