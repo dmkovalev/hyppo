@@ -245,8 +245,7 @@ def main() -> None:
     act_1_tuple()
     _lattice, g = act_2_algorithm1()
     act_3_algorithm2(g)
-    p_ne = act_4_plan_theorem1(g)
-    print(f"\n(P_ne carried into Act 5 execution: {sorted(p_ne)})")
+    _p_ne = act_4_plan_theorem1(g)  # consumed by act 5 (Task 5)
 
 
 if __name__ == "__main__":
