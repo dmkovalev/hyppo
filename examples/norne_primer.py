@@ -16,6 +16,7 @@ every act reproduces the golden values pinned by tests/test_golden_claims.py
 from __future__ import annotations
 
 import argparse
+from collections.abc import Callable
 
 import networkx as nx
 
@@ -243,15 +244,20 @@ def act_5_run(g: nx.DiGraph, p_ne: set[str]) -> None:
     r2_table = {code: 0.75 + 0.01 * i for i, (code, _, _, _) in enumerate(HYPS)}
     r2_table["H7"] = 0.65  # the pure-ML hypothesis under-performs alone
 
-    def make_model(code: str):
+    def make_model(code: str) -> Callable[[dict], dict]:
         def model(config: dict) -> dict:
-            return {"r2": r2_table[code], "aic": 100.0 - 10.0 * r2_table[code]}
+            return {
+                "r2": round(r2_table[code], 4),
+                "aic": round(100.0 - 10.0 * r2_table[code], 1),
+            }
 
         return model
 
     models = {code: make_model(code) for code, _, _, _ in HYPS}
     all_codes = {code for code, _, _, _ in HYPS}
-    plan = {"p_ne": set(p_ne), "p_e": all_codes - set(p_ne)}
+    # Runner expects P_ne already in topological order (see Runner.execute).
+    p_ne_ordered = [str(n) for n in nx.topological_sort(g) if str(n) in p_ne]
+    plan = {"p_ne": p_ne_ordered, "p_e": all_codes - set(p_ne)}
     runner = Runner()
     results = runner.execute(
         plan,
@@ -264,6 +270,11 @@ def act_5_run(g: nx.DiGraph, p_ne: set[str]) -> None:
         f"recomputed with real metrics; P_e ({len(plan['p_e'])}) returned as "
         "vacuous SUCCESS with empty metrics — no repository attached, so "
         "cached results cannot be loaded."
+    )
+    print(
+        "P_ne rows are SUPPORTED because their synthetic r2 (>= 0.75) exceeds "
+        "theta_sup = 0.7; P_e rows stay PROPOSED because empty metrics mean "
+        "'not evaluated' — membership in P_ne does not imply support."
     )
     for code in sorted(results, key=lambda c: int(PAPER[c][1:])):
         r = results[code]
