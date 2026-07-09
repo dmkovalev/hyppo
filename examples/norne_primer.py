@@ -301,13 +301,17 @@ def act_6_compare() -> None:
     err_phys = list(np.abs(y_true - pred_phys))
     err_ml = list(np.abs(y_true - pred_ml))
     p = sign_test(err_phys, err_ml)
+    n_h5_better = sum(a < b for a, b in zip(err_phys, err_ml, strict=True))
+    # H5: ~3 physics params (J, a, b); H7: toy MLP ~12 weights
     aic_phys = compute_aic(3, gaussian_log_likelihood(y_true, pred_phys))
     aic_ml = compute_aic(12, gaussian_log_likelihood(y_true, pred_ml))
     print(
-        f"\nSign test (|err_H5| vs |err_H7|): p = {p:.4f} "
-        "(small p -> H5 errors systematically smaller)"
+        f"\nH5 errors smaller in {n_h5_better}/{len(err_phys)} pairs; "
+        f"sign test p = {p:.4f} (small p -> the difference is systematic)"
     )
     print(f"AIC: H5 (3 params) = {aic_phys:.1f}   H7 (12 params) = {aic_ml:.1f}")
+    if not (p < 0.05 and aic_phys < aic_ml):
+        raise SystemExit("ACT 6 VERDICT CHECK FAILED")
     print("Verdict: H5 preferred on both criteria; H8 fuses the two, which is")
     print("why the paper keeps BOTH in the lattice instead of discarding H7.")
     _pause()
