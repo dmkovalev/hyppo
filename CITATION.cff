@@ -12,9 +12,9 @@ authors:
   - given-names: Dmitry
     family-names: Kovalev
     alias: dmkovalev
-    email: backtoreal911@gmail.com
+    email: dm.kovalev@gmail.com
 license: MIT
-repository-code: "https://github.com/dmkovalev/hyppo-ref"
+repository-code: "https://github.com/dmkovalev/hyppo"
 keywords:
   - hypothesis
   - virtual-experiment
