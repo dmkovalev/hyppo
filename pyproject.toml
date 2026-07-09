@@ -71,6 +71,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.package-data]
 hyppo = ["personas/*.md", "py.typed"]
+"hyppo.gui" = ["static/**/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

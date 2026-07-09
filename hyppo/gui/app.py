@@ -1,7 +1,14 @@
+import logging
+from pathlib import Path
+
 from fastapi import FastAPI
 
+logger = logging.getLogger(__name__)
 
-def create_app(db_path: str = "hyppo_gui.db") -> FastAPI:
+
+def create_app(
+    db_path: str = "hyppo_gui.db", static_dir: Path | None = None
+) -> FastAPI:
     app = FastAPI(title="Hyppo GUI")
     app.state.db_path = db_path
 
@@ -48,12 +55,18 @@ def create_app(db_path: str = "hyppo_gui.db") -> FastAPI:
 
     app.include_router(ws_module.router)
 
-    from pathlib import Path
-
     from fastapi.staticfiles import StaticFiles
 
-    dist = Path(__file__).resolve().parents[2] / "webui" / "dist"
-    if dist.exists():
-        app.mount("/", StaticFiles(directory=str(dist), html=True), name="spa")
+    if static_dir is None:
+        static_dir = Path(__file__).resolve().parent / "static"
+    if static_dir.exists():
+        app.mount("/", StaticFiles(directory=str(static_dir), html=True), name="spa")
+    else:
+        logger.warning(
+            "SPA static assets not found at %s; run `cd webui && npm ci && "
+            "npm run build` then copy webui/dist/* into hyppo/gui/static/ "
+            "to enable the web UI (API-only mode active)",
+            static_dir,
+        )
 
     return app

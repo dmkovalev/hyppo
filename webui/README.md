@@ -24,6 +24,7 @@ PYTHONUTF8=1 uv run python scripts/gui_real_data.py      # → hyppo/gui/real_da
 
 # 2. сборка фронта (только если менялся webui/src)
 cd webui && npm run build && cd ..                       # → webui/dist
+rm -rf hyppo/gui/static && cp -r webui/dist hyppo/gui/static  # → served + packaged in wheel
 
 # 3. сервер + браузер
 uv run hyppo-gui --port 8801 --no-browser &
@@ -32,8 +33,12 @@ start "" "http://localhost:8801/"
 
 - После шага 1 **перезапустить сервер** — он кэширует `real_data.json` в памяти
   (`hyppo/gui/api/real.py`, `_CACHE`).
-- После шага 2 достаточно **обновить страницу** (Ctrl+F5): `StaticFiles` читает
-  `dist` с диска, рестарт не нужен.
+- После шага 2 нужно скопировать `webui/dist/*` в `hyppo/gui/static/` (команда
+  выше) и **обновить страницу** (Ctrl+F5): `StaticFiles` в `hyppo/gui/app.py`
+  читает `hyppo/gui/static` с диска (не `webui/dist` напрямую) — этот же каталог
+  упаковывается в wheel через `pyproject.toml` → `[tool.setuptools.package-data]`.
+- Без `hyppo/gui/static/index.html` сервер логирует явное предупреждение и
+  работает в режиме только API (см. warning в `hyppo/gui/app.py`).
 
 ## Режим B — разработка фронта (HMR)
 
@@ -72,5 +77,6 @@ uv run hyppo-gui --port 8801 --no-browser &
 
 ## Обычный цикл
 
-- Правил только `webui/src` → `npm run build` + Ctrl+F5 (или Режим B с HMR).
+- Правил только `webui/src` → `npm run build` + копирование в `hyppo/gui/static/`
+  + Ctrl+F5 (или Режим B с HMR, без копирования).
 - Правил `scripts/gui_real_data.py` (данные/граф) → шаг 1 + перезапуск сервера.
