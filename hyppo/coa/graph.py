@@ -1,6 +1,6 @@
-"""Hypothesis-graph layer over the COA core -- Algorithms 1, 2 and 4 of the paper
-"Планирование виртуальных экспериментов с повторным использованием вычисленных
-фрагментов" (Kovalev, ИиП 2026).
+"""Hypothesis-graph layer over the COA core -- Algorithms 1, 2 and 4 of the
+dissertation chapter on planning virtual experiments with reuse of previously
+computed fragments (D. Yu. Kovalev).
 
 A *hypothesis* is a structure: a ``list[frozenset[str]]`` of equations over
 variable names. A :class:`HypothesisGraph` holds hypotheses connected by
