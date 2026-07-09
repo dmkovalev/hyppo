@@ -17,7 +17,10 @@ from __future__ import annotations
 
 import argparse
 
+import networkx as nx
+
 from hyppo.coa._base import Equation, Structure
+from hyppo.lattice_constructor._base import HypothesisLattice
 
 # --- Norne HybridCRM data (paper [SVD], fig. 3; same case as the GUI demo) ---
 # (code_name, paper_name, formula, meaning)
@@ -141,6 +144,27 @@ def act_1_tuple() -> None:
     _pause()
 
 
+def act_2_algorithm1() -> tuple[HypothesisLattice, "nx.DiGraph"]:
+    """Algorithm 1: build the hypothesis lattice from equations + workflow."""
+    _act(2, "Algorithm 1 — automatic hypothesis-graph construction")
+    lattice = HypothesisLattice(ALL_HYPS, WF)
+    g = lattice.lattice
+    print("\nDerived_by edges (h_i -> h_j means h_j consumes the output of h_i):")
+    for u, v in sorted(g.edges(), key=lambda e: (PAPER[str(e[0])], PAPER[str(e[1])])):
+        print(
+            f"  {PAPER[str(u)]:<4} -> {PAPER[str(v)]:<4}   "
+            f"(output of {u} appears in the equation of {v})"
+        )
+    depth = nx.dag_longest_path_length(g)
+    print(
+        f"\nNodes: {g.number_of_nodes()}   Edges: {g.number_of_edges()}   "
+        f"DAG: {nx.is_directed_acyclic_graph(g)}   Depth: {depth}"
+    )
+    print("Golden (paper [SVD], fig. 3): 16 nodes, 18 edges, depth 10.")
+    _pause()
+    return lattice, g
+
+
 def main() -> None:
     global PAUSE
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
@@ -149,6 +173,7 @@ def main() -> None:
     )
     PAUSE = parser.parse_args().pause
     act_1_tuple()
+    _lattice, g = act_2_algorithm1()
 
 
 if __name__ == "__main__":
