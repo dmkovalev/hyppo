@@ -211,9 +211,9 @@ def _build_hypotheses(ns: Any) -> dict[str, Hypothesis]:
     m_phys_bl = ns.PhysicsModel(_uid("m_phys_bl"))
     m_hybrid_wct = ns.HybridModel(_uid("m_hybrid_wct"))
 
-    # is_implemented_by_model is FunctionalProperty after _base.py R3+
-    # (Theorem 1 axiom — see commit 911172c). Each Hypothesis gets at most
-    # one Model; single-value assignment required.
+    # is_implemented_by_model is Functional (Theorem 1 axiom — see commit
+    # 911172c). Each Hypothesis gets at most one Model; single-value
+    # assignment required.
     h_CRM.is_implemented_by_model = m_phys
     h_ML.is_implemented_by_model = m_dd
     h_LPR.is_implemented_by_model = m_hybrid
@@ -271,7 +271,7 @@ def _build_lattice_graph(hyps: dict[str, Hypothesis]) -> Any:
 def build_oil_virtual_experiment(world: World | None = None) -> dict[str, Any]:
     """Build virtual experiment for HybridCRM waterflood optimization.
 
-    Each call composes the full schema (base + 16 rules + oil domain) into a
+    Each call composes the full schema (base schema + rule modules + oil domain) into a
     fresh, isolated owlready2 ``World`` and creates all individuals there, so
     the module is re-callable without ``sqlite3.IntegrityError`` on the fixed
     individual IRIs. Pass a pre-built ``World`` (e.g. from
@@ -304,7 +304,7 @@ def build_oil_virtual_experiment(world: World | None = None) -> dict[str, Any]:
     hyps = _build_hypotheses(ns)
     lattice = _build_lattice_graph(hyps)
 
-    # Collect all models from hypotheses (single value per hypothesis after R3+).
+    # Collect all models from hypotheses (Functional property: single value each).
     models: list[Model] = []
     for h in hyps.values():
         m = h.is_implemented_by_model

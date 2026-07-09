@@ -31,7 +31,7 @@ def create_ve_world(
     """Compose the full virtual-experiment schema into an isolated owlready2 World.
 
     Declares, against a fresh ``World`` (or the one passed in), the base schema
-    (:func:`hyppo.core._base.define_ve_schema`), all 16 OWL rules (the seven
+    (:func:`hyppo.core._base.define_ve_schema`), all OWL rules (the seven
     ``hyppo.ontology`` rule modules) and the oil-waterflood domain classes
     (:func:`hyppo.adapters.norne_adapter.define_oil_schema`), threading a single
     ``SimpleNamespace`` so cross-module class references (InvalidHypothesis,

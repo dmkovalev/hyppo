@@ -116,7 +116,7 @@ def _build_oil_snapshot() -> VirtualExperimentSnapshot:
     ve = build_oil_virtual_experiment()
     hyps = []
     for kind, h in ve["hypotheses_map"].items():
-        # is_implemented_by_model is FunctionalProperty (R3+); single value or None.
+        # is_implemented_by_model is Functional (Theorem 1 axiom): single value or None.
         model = h.is_implemented_by_model
         model_classes: list[str] = []
         if model is not None:
