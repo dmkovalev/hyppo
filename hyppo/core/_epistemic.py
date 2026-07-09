@@ -23,6 +23,12 @@ from enum import Enum
 
 
 class EpistemicStatus(Enum):
+    """Scientific verdict on a hypothesis after evaluation against data.
+
+    See the module docstring for the meaning of each member and the
+    thresholds (``theta_sup``, ``theta_aic``) used to derive them.
+    """
+
     PROPOSED = "PROPOSED"
     SUPPORTED = "SUPPORTED"
     REFUTED = "REFUTED"
@@ -50,6 +56,11 @@ def evaluate_status(
 
     Precedence (part2.tex:584): SUPERSEDED dominates -- a hypothesis decisively
     beaten by a competitor is superseded even if its own R^2 clears the threshold.
+
+    Returns:
+        EpistemicStatus: ``PROPOSED`` if ``r2`` is ``None``; else ``SUPERSEDED``
+        if decisively beaten by a competitor; else ``SUPPORTED`` if
+        ``r2 >= theta_sup``; else ``REFUTED``.
     """
     if r2 is None:
         return EpistemicStatus.PROPOSED

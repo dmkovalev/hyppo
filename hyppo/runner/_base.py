@@ -18,6 +18,12 @@ logger = logging.getLogger(__name__)
 
 
 class Status(Enum):
+    """Execution status of a single hypothesis run.
+
+    Distinct from :class:`hyppo.core._epistemic.EpistemicStatus` (the
+    scientific verdict) — this tracks whether the model function ran at all.
+    """
+
     SUCCESS = "SUCCESS"
     FAILED = "FAILED"
     SKIPPED = "SKIPPED"
@@ -25,6 +31,17 @@ class Status(Enum):
 
 @dataclass
 class RunResult:
+    """Outcome of executing one hypothesis's model.
+
+    Attributes:
+        hypothesis_id: ID of the hypothesis that was executed.
+        status: Execution outcome (SUCCESS/FAILED/SKIPPED).
+        metrics: Metrics returned by the model function (e.g. r2, aic).
+        error: Error message if the run failed, else None.
+        epistemic_status: Scientific verdict assigned after execution
+            (Section 2); defaults to PROPOSED until evaluated.
+    """
+
     hypothesis_id: str
     status: Status
     metrics: dict = field(default_factory=dict)
@@ -43,6 +60,14 @@ class Runner:
     """
 
     def __init__(self, repository=None, max_retries: int = 3) -> None:
+        """Initialize the runner.
+
+        Args:
+            repository: Optional result-cache object exposing
+                ``has_result``/``load_result``/``save_result``; None disables
+                caching of P_e results.
+            max_retries: Number of attempts before a hypothesis is marked FAILED.
+        """
         self.repository = repository
         self.max_retries = max_retries
 

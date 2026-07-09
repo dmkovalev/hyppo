@@ -1,3 +1,11 @@
+"""Hypothesis/Model OWL classes and model-selection scoring (Definition 10, Chapter 2).
+
+Extends the ``virtual_experiment_onto`` classes from
+:mod:`hyppo.core._base` with the behaviour needed at runtime: AIC/BIC scoring
+(Definition 10), model ranking, and pairwise prediction comparison used by
+:func:`hyppo.core._epistemic.evaluate_status`.
+"""
+
 import math
 
 import numpy as np
@@ -12,21 +20,43 @@ from hyppo.core._base import virtual_experiment_onto
 
 
 def get_aic(n_params: int, log_likelihood: float) -> float:
-    """AIC = 2k - 2ln(L). Определение 10 из Главы 2."""
+    """Compute the Akaike Information Criterion (Definition 10, Chapter 2).
+
+    Args:
+        n_params: Number of free parameters k in the model.
+        log_likelihood: Log-likelihood ln(L) of the fitted model.
+
+    Returns:
+        AIC = 2k - 2ln(L); lower is better.
+    """
     return 2 * n_params - 2 * log_likelihood
 
 
 def get_bic(n_params: int, n_observations: int, log_likelihood: float) -> float:
-    """BIC = k*ln(n) - 2ln(L). Определение 10 из Главы 2."""
+    """Compute the Bayesian Information Criterion (Definition 10, Chapter 2).
+
+    Args:
+        n_params: Number of free parameters k in the model.
+        n_observations: Number of observations n used to fit the model.
+        log_likelihood: Log-likelihood ln(L) of the fitted model.
+
+    Returns:
+        BIC = k*ln(n) - 2ln(L); lower is better.
+    """
     return n_params * math.log(n_observations) - 2 * log_likelihood
 
 
 def range_models(
     scores: dict[str, float], threshold: float = 0.7
 ) -> list[tuple[str, float]]:
-    """Ранжирование моделей по метрике с отсечением по порогу.
+    """Rank models by a metric, dropping those below a threshold.
 
-    Returns sorted list of (model_name, score) pairs above threshold.
+    Args:
+        scores: Mapping of model name to its score.
+        threshold: Minimum score (inclusive) for a model to be kept.
+
+    Returns:
+        (model_name, score) pairs above ``threshold``, sorted descending by score.
     """
     filtered = [(name, score) for name, score in scores.items() if score >= threshold]
     return sorted(filtered, key=lambda x: x[1], reverse=True)
@@ -35,6 +65,10 @@ def range_models(
 with virtual_experiment_onto:
 
     class Hypothesis(virtual_experiment_onto.Artefact):
+        """Runtime ``Hypothesis`` individual: scoring/comparison behaviour
+        layered on top of the OWL class declared in
+        :mod:`hyppo.core._base` (Definition 1)."""
+
         namespace = virtual_experiment_onto.get_namespace(
             "http://synthesis.ipi.ac.ru/virtual_experiment.owl"
         )
@@ -43,6 +77,7 @@ with virtual_experiment_onto:
 
         @property
         def parameters(self):
+            """dict: Model/fit parameters attached to this hypothesis."""
             return self._parameters
 
         @parameters.setter
@@ -54,6 +89,19 @@ with virtual_experiment_onto:
             return self._parameters
 
         def range_models(self, X, y, metrics, threshold):
+            """Score and filter the models implementing this hypothesis.
+
+            Args:
+                X: Input features passed to each model's ``predict``.
+                y: Target/observed values to compare predictions against.
+                metrics: One of ``"mae"``, ``"r2"``, ``"mse"``.
+                threshold: Cutoff applied to the metric (kept if the model
+                    passes the metric-specific comparison against it).
+
+            Returns:
+                dict: Mapping of model key to its score, restricted to models
+                that pass the threshold for the chosen metric.
+            """
             models = self.is_implemented_by_model()
             result = {}
 
@@ -79,6 +127,20 @@ with virtual_experiment_onto:
 
         # TODO add several > 2 models
         def compare_preds_on_single_dataset(self, dataset, stat_test):
+            """Compare two competing models' predictions on one dataset.
+
+            Args:
+                dataset: Input passed to both ``model_1.predict`` and
+                    ``model_2.predict``.
+                stat_test: Statistical test to run; only ``"wilcoxon"`` is
+                    supported.
+
+            Returns:
+                The result object returned by ``scipy.stats.wilcoxon``.
+
+            Raises:
+                NotImplementedError: If ``stat_test`` is not ``"wilcoxon"``.
+            """
             models = self.is_implemented_by_model()
             linear_prediction = models["model_1"].predict(dataset)
             gp_prediction = models["model_2"].predict(dataset)
@@ -89,6 +151,20 @@ with virtual_experiment_onto:
             return result
 
         def compare_preds_on_different_datasets(self, dataset_1, dataset_2, stat_test):
+            """Compare two competing models' predictions on two datasets.
+
+            Args:
+                dataset_1: Input passed to ``model_1.predict``.
+                dataset_2: Input passed to ``model_2.predict``.
+                stat_test: Statistical test to run; only ``"wilcoxon"`` is
+                    supported.
+
+            Returns:
+                The result object returned by ``scipy.stats.wilcoxon``.
+
+            Raises:
+                NotImplementedError: If ``stat_test`` is not ``"wilcoxon"``.
+            """
             models = self.is_implemented_by_model()
             linear_prediction = models["model_1"].predict(dataset_1)
             gp_prediction = models["model_2"].predict(dataset_2)
@@ -100,42 +176,88 @@ with virtual_experiment_onto:
 
 
 class Model(virtual_experiment_onto.Artefact):
+    """Base ``Model`` individual: the implementation paired 1:1 with a
+    ``Hypothesis`` via ``is_implemented_by_model`` (Theorem 1). Subclasses
+    provide the actual ``fit``/``predict`` behaviour."""
+
     namespace = virtual_experiment_onto.get_namespace(
         "http://synthesis.ipi.ac.ru/virtual_experiment.owl"
     )
 
     def __init__(self):
+        """Initialize an empty model. No-op on the base class."""
         pass
 
     def fit(self, X, y):
+        """Fit the model to data. No-op on the base class; override in subclasses.
+
+        Args:
+            X: Training features.
+            y: Training targets.
+        """
         pass
 
     def predict(self, X):
+        """Predict outputs for X. No-op on the base class; override in subclasses.
+
+        Args:
+            X: Input features.
+        """
         pass
 
     def update_bayesian_probability(self, X, y, prior):
-        """Unnormalised Bayesian posterior weight for this hypothesis given data
-        (X, y): ``prior * exp(log-likelihood)`` with a Gaussian likelihood at the
+        """Compute the unnormalised Bayesian posterior weight for this hypothesis.
+
+        ``prior * exp(log-likelihood)`` with a Gaussian likelihood at the
         MLE residual variance. Normalise across competing hypotheses with
-        :func:`hyppo.comparison.bayesian_posterior`."""
+        :func:`hyppo.comparison.bayesian_posterior`.
+
+        Args:
+            X: Input features passed to ``predict``.
+            y: Observed targets.
+            prior: Prior probability of this hypothesis.
+
+        Returns:
+            float: Unnormalised posterior weight (``inf`` if the
+            log-likelihood is ``inf``).
+        """
         from hyppo.comparison.compare import gaussian_log_likelihood
 
         ll = gaussian_log_likelihood(y, self.predict(X))
         return float("inf") if ll == float("inf") else prior * math.exp(ll)
 
     def bayesian_score(self, X, y):
-        """Gaussian log-likelihood of this model's predictions on (X, y)."""
+        """Compute the Gaussian log-likelihood of predictions on (X, y).
+
+        Args:
+            X: Input features passed to ``predict``.
+            y: Observed targets.
+
+        Returns:
+            float: Gaussian log-likelihood of the model's predictions.
+        """
         from hyppo.comparison.compare import gaussian_log_likelihood
 
         return gaussian_log_likelihood(y, self.predict(X))
 
 
 class NonLinearModel(Model):
+    """Symbolic-regression ``Model`` (gplearn genetic programming)."""
+
     namespace = virtual_experiment_onto.get_namespace(
         "http://synthesis.ipi.ac.ru/virtual_experiment.owl"
     )
 
     def fit(self, X, y):
+        """Fit a symbolic regressor via genetic programming (gplearn).
+
+        Args:
+            X: Training features.
+            y: Training targets.
+
+        Returns:
+            The fitted ``gplearn.genetic.SymbolicRegressor`` instance.
+        """
         from gplearn.genetic import SymbolicRegressor
 
         est_gp = SymbolicRegressor(
@@ -163,6 +285,16 @@ class NonLinearModel(Model):
         return est_gp
 
     def compute_aic(self, X, y):
+        """Compute an AIC-like score for this symbolic model (Definition 10).
+
+        Args:
+            X: Input features.
+            y: Observed targets.
+
+        Returns:
+            float: ``log_likelihood - 2 * complexity`` where complexity is
+            the model's ``size`` (program length).
+        """
         prediction = self.predict(X)
         error = prediction - y
         complexity = self.size
@@ -170,6 +302,16 @@ class NonLinearModel(Model):
         return log_likelihood - 2 * complexity
 
     def compute_bic(self, X, y):
+        """Compute a BIC-like score for this symbolic model (Definition 10).
+
+        Args:
+            X: Input features.
+            y: Observed targets.
+
+        Returns:
+            float: ``log_likelihood - log(n) * complexity`` where n is the
+            number of observations and complexity is the model's ``size``.
+        """
         prediction = self.predict(X)
         error = prediction - y
         log_likelihood = -np.mean(error**2 / error.shape[0])
