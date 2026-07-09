@@ -50,7 +50,7 @@ async def version_db_session(monkeypatch, tmp_path):
     """Per-test aiosqlite database with all ORM tables provisioned."""
     from sqlalchemy.ext.asyncio import create_async_engine
 
-    from hyppo.versioning._db import Base
+    from hyppo.versioning._db import Base, reset_engines
 
     db_path = tmp_path / "hyppo_test.sqlite"
     db_url = f"sqlite+aiosqlite:///{db_path}"
@@ -62,3 +62,9 @@ async def version_db_session(monkeypatch, tmp_path):
     await engine.dispose()
 
     yield db_url
+
+    # This fixture's engine (created above) is separate from the module-global
+    # _ENGINES cache that get_engine()/init_db() populate when version_store
+    # functions run against db_url during the test. Dispose+clear that cache
+    # here to prevent one aiosqlite engine leaking per test.
+    await reset_engines()

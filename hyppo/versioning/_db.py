@@ -55,10 +55,43 @@ class HypothesisRunLink(Base):
     marked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
+_ENGINES: dict[str, AsyncEngine] = {}
+_INITIALIZED: set[str] = set()
+
+
 def get_engine(url: str | None = None) -> AsyncEngine:
-    """Async engine from ``url`` or ``DATABASE_URL`` (in-memory aiosqlite default)."""
-    url = url or os.environ.get("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
-    return create_async_engine(url, echo=False)
+    """Memoized async engine for ``url`` (or ``DATABASE_URL``, default a file
+    ``hyppo_versions.db`` in the current working directory). One engine per
+    url per process -- repeated calls with the same url return the same
+    object, so the schema created by :func:`init_db` is visible to later
+    calls."""
+    if url is None:
+        url = os.environ.get("DATABASE_URL") or "sqlite+aiosqlite:///hyppo_versions.db"
+    resolved_url: str = url
+    engine = _ENGINES.get(resolved_url)
+    if engine is None:
+        engine = create_async_engine(resolved_url, echo=False)
+        _ENGINES[resolved_url] = engine
+    return engine
+
+
+async def init_db(engine: AsyncEngine) -> None:
+    """Create all tables for ``engine`` once (idempotent, guarded by url)."""
+    url = str(engine.url)
+    if url in _INITIALIZED:
+        return
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all, checkfirst=True)
+    _INITIALIZED.add(url)
+
+
+async def reset_engines() -> None:
+    """Dispose and forget all cached engines. Test-only: prevents module-global
+    engine leakage across tests that use their own short-lived engine/url."""
+    for engine in _ENGINES.values():
+        await engine.dispose()
+    _ENGINES.clear()
+    _INITIALIZED.clear()
 
 
 def get_session_factory(engine: AsyncEngine) -> async_sessionmaker:

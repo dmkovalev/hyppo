@@ -130,9 +130,10 @@ After connecting, clients see tools `mcp__hyppo__BuildVirtualExperiment`,
 persona resource `hyppo://personas/lattice_steward.md`.
 
 Write actions (`RegisterHypothesisVersion`, `MarkRunWithVersion`) persist
-to an embedded SQLite store (aiosqlite, in-memory by default) out of the
-box. Set `DATABASE_URL` to point at an external database (e.g. Postgres)
-for production deployments.
+to an embedded SQLite store (aiosqlite, file `hyppo_versions.db` in the
+current working directory by default) out of the box — no setup needed.
+Set `DATABASE_URL` to point at an external database (e.g. Postgres) for
+production deployments.
 
 ## How to cite
 

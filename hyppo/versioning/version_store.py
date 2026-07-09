@@ -18,6 +18,7 @@ from hyppo.versioning._db import (
     HypothesisVersion,
     get_engine,
     get_session_factory,
+    init_db,
 )
 
 
@@ -28,6 +29,7 @@ def database_url() -> str | None:
 
 async def _get_session():
     engine = get_engine()
+    await init_db(engine)
     factory = get_session_factory(engine)
     return factory()
 
