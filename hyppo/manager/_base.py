@@ -75,21 +75,7 @@ class Manager:
         lattice.add_edges_from(lattice_edges)
 
         # Stage 3: Plan — determine P_ne (needs execution) and P_e (cached)
-        p_ne: list[str] = []
-        p_e: set[str] = set()
-
-        topo_order = list(nx.topological_sort(lattice))
-        for h in topo_order:
-            if self.repository.has_result(h, config.get(h, {})):
-                cached = self.repository.load_result(h, config.get(h, {}))
-                if cached is not None:
-                    r2 = cached.get("metrics", {}).get("r2")
-                    if r2 is not None and r2 < self.r2_threshold:
-                        # Prune low-quality hypothesis and descendants
-                        continue
-                p_e.add(h)
-            else:
-                p_ne.append(h)
+        p_ne, p_e = self._partition(lattice, config)
 
         # Stage 4: Execute
         results = self.runner.execute(
@@ -100,6 +86,49 @@ class Manager:
         )
 
         return results
+
+    def _partition(
+        self, lattice: nx.DiGraph, config: dict[str, dict]
+    ) -> tuple[list[str], set[str]]:
+        """Three-way cascading partition of the lattice (Section 3.1.6.2).
+
+        Mirrors ``planner.build_optimal_plan`` semantics exactly, over the
+        ``derived_by`` lattice DAG:
+
+        - cache miss => the hypothesis and ALL its descendants need recompute
+          (into P_ne, the cascade effect);
+        - cached but R2 < threshold => the hypothesis and ALL its descendants
+          are pruned from BOTH P_ne and P_e (low-quality branch cut);
+        - cached and R2 >= threshold (or R2 absent) => reused (into P_e).
+
+        A single topological pass suffices: a node is settled by the first
+        missing/pruned ancestor (``nx.descendants`` is transitive), so it is
+        only cache-checked on its own when every ancestor was cached-and-good.
+
+        Returns ``(p_ne, p_e)`` where ``p_ne`` is a topologically ordered list
+        (the runner cascades SKIPPED in order) and ``p_e`` is a set.
+        """
+        topo_order = list(nx.topological_sort(lattice))
+        pne: set[str] = set()
+        pe: set[str] = set()
+        pruned: set[str] = set()
+        for h in topo_order:
+            if h in pne or h in pruned:
+                continue
+            cfg_h = config.get(h, {})
+            if not self.repository.has_result(h, cfg_h):
+                pne.add(h)
+                pne.update(nx.descendants(lattice, h))
+            else:
+                cached = self.repository.load_result(h, cfg_h)
+                r2 = cached.get("metrics", {}).get("r2") if cached is not None else None
+                if r2 is not None and r2 < self.r2_threshold:
+                    pruned.add(h)
+                    pruned.update(nx.descendants(lattice, h))
+                else:
+                    pe.add(h)
+        p_ne = [h for h in topo_order if h in pne]
+        return p_ne, pe
 
     def close(self) -> None:
         """Close the underlying repository connection."""

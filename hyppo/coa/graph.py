@@ -151,3 +151,24 @@ class HypothesisGraph:
             else:
                 processed.add(h)
         return p_ne
+
+
+def plan_cascade(
+    nodes: list[str],
+    edges: list[tuple[str, str]],
+    cached: set[str],
+) -> set[str]:
+    """String-id façade over :meth:`HypothesisGraph.plan` (Algorithm 4).
+
+    Pure two-way topological cascade: the recompute set ``P_ne`` is every
+    non-cached node together with all of its ``derived_by`` descendants. No R²
+    filtering (the R²-aware three-way prune lives in the planner/manager layer,
+    which cannot be expressed by this two-way core). Maps string ids to the
+    integer core, delegates to the single golden-pinned ``plan`` implementation,
+    and maps the result back to strings.
+    """
+    index = {name: i for i, name in enumerate(nodes)}
+    int_edges = [(index[u], index[v]) for u, v in edges]
+    int_cached = {index[h] for h in cached if h in index}
+    p_ne_int = HypothesisGraph.from_edges(len(nodes), int_edges).plan(int_cached)
+    return {nodes[i] for i in p_ne_int}
