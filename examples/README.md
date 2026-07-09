@@ -27,6 +27,25 @@ The example will output:
 - Transitive closure of variable dependencies
 - A complexity analysis plot saved as 'complexity_analysis.png'
 
+## Norne Primer
+
+### norne_primer.py — end-to-end walkthrough
+
+The full virtual-experiment lifecycle on the Norne HybridCRM case in one
+readable script: the Definition 1 tuple <O,H,M,R,W,C>, Algorithm 1 (lattice:
+16 nodes / 18 edges / depth 10), Algorithm 2 incremental update (Lemma 2),
+Algorithm 4 recompute plan with a Theorem 1 correctness/minimality check,
+Runner execution with epistemic statuses, and statistical comparison of
+competing hypotheses. Self-checks against the golden values pinned by
+`tests/test_golden_claims.py`.
+
+```bash
+python examples/norne_primer.py            # full narrative
+python examples/norne_primer.py --pause    # step through act by act
+```
+
+Expected tail: `PRIMER OK` (exit 0).
+
 ## Other Examples
 
 - `all_rules.py`: All-17-rules demo (owlready2/HermiT) on the real Brugge-fitted hypothesis graph.

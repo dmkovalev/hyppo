@@ -19,9 +19,11 @@ import argparse
 from collections.abc import Callable
 
 import networkx as nx
+import numpy as np
 
 from hyppo.coa._base import Equation, Structure
 from hyppo.coa.graph import HypothesisGraph
+from hyppo.comparison.compare import compute_aic, gaussian_log_likelihood, sign_test
 from hyppo.lattice_constructor._base import HypothesisLattice
 from hyppo.runner import Runner
 
@@ -112,7 +114,10 @@ WF = Workflow(TASKS, HYP_OBJS)
 
 def _pause() -> None:
     if PAUSE:
-        input("\n-- press Enter to continue --")
+        try:
+            input("\n-- press Enter to continue --")
+        except EOFError:
+            pass
 
 
 def _act(n: int, title: str) -> None:
@@ -286,6 +291,43 @@ def act_5_run(g: nx.DiGraph, p_ne: set[str]) -> None:
     _pause()
 
 
+def act_6_compare() -> None:
+    """Compare two competing hypotheses (Definitions 9-11)."""
+    _act(6, "Comparison — physics (H5) vs ML (H7) liquid-rate hypotheses")
+    rng = np.random.default_rng(42)
+    y_true = rng.normal(100.0, 10.0, size=50)
+    pred_phys = y_true + rng.normal(0.0, 3.0, size=50)  # tighter residuals
+    pred_ml = y_true + rng.normal(0.0, 6.0, size=50)
+    err_phys = list(np.abs(y_true - pred_phys))
+    err_ml = list(np.abs(y_true - pred_ml))
+    p = sign_test(err_phys, err_ml)
+    aic_phys = compute_aic(3, gaussian_log_likelihood(y_true, pred_phys))
+    aic_ml = compute_aic(12, gaussian_log_likelihood(y_true, pred_ml))
+    print(
+        f"\nSign test (|err_H5| vs |err_H7|): p = {p:.4f} "
+        "(small p -> H5 errors systematically smaller)"
+    )
+    print(f"AIC: H5 (3 params) = {aic_phys:.1f}   H7 (12 params) = {aic_ml:.1f}")
+    print("Verdict: H5 preferred on both criteria; H8 fuses the two, which is")
+    print("why the paper keeps BOTH in the lattice instead of discarding H7.")
+    _pause()
+
+
+def act_7_selfcheck(g: nx.DiGraph) -> None:
+    """Assert golden values from tests/test_golden_claims.py."""
+    _act(7, "Self-check against golden claims")
+    ok = (
+        g.number_of_nodes() == 16
+        and g.number_of_edges() == 18
+        and nx.is_directed_acyclic_graph(g)
+        and nx.dag_longest_path_length(g) == 10
+    )
+    print(f"\n16 nodes / 18 edges / DAG / depth 10: {ok}")
+    if not ok:
+        raise SystemExit("GOLDEN SELF-CHECK FAILED")
+    print("\nPRIMER OK")
+
+
 def main() -> None:
     global PAUSE
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
@@ -298,6 +340,8 @@ def main() -> None:
     act_3_algorithm2(g)
     p_ne = act_4_plan_theorem1(g)
     act_5_run(g, p_ne)
+    act_6_compare()
+    act_7_selfcheck(g)
 
 
 if __name__ == "__main__":
