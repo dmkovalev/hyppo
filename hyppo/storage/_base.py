@@ -1,23 +1,40 @@
-import cloudpickle as pickle
+"""Local filesystem object store based on cloudpickle.
+
+Usage:
+    from hyppo.storage import Database
+
+    Database.set_root('/tmp/my_db')
+    Database.save([1, 2, 3], 'my_object', storage='sub_dir', description='A list of numbers')
+    wrapped = Database.load('my_object', storage='sub_dir')
+    wrapped.obj  # -> [1, 2, 3]
+"""
+
+import logging
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, Any, List, Union, Optional
 
+import cloudpickle as pickle
+
+logger = logging.getLogger(__name__)
+
 
 class Pickled:
-    """Обертка для объектов, сохраняющихся в Storage
-    Поддерживаемые хуки:
-    - save_data_hook (вызывается перед сохранением объекта)
-    - load_data_hook (вызывается после загрузки объекта)
+    """Wrapper for objects persisted through Storage.
+
+    Supported hooks:
+    - save_data_hook (called before the object is saved)
+    - load_data_hook (called after the object is loaded)
+
     Note:
-        По умолчанию в атрибуты записывается время сохрвнения (`when_saved`).
+        By default the save time is recorded in `when_saved`.
+
     Args:
-        obj (Any): Сохраняемый объект.
+        obj (Any): Object to store.
+
     Attributes:
-        when_saved (datetime): Время сохранения объекта
-        description (str): Описание сохраняемого файла.
-    TODO:
-        * Добавить сохранение всех kwargs, а не только description.
+        when_saved (datetime): Time the object was saved.
+        description (str): Description of the stored object.
     """
 
     def __init__(self, obj: Any):
@@ -26,73 +43,66 @@ class Pickled:
         self.description = None
 
     def save_data_hook(self, **kwargs: Optional[dict]) -> None:
-        """Хук, вызывающийся до сохранения объекта."""
+        """Hook called before saving the object."""
         self.when_saved = datetime.now()
         self.description = kwargs.get('description')
 
     def load_data_hook(self) -> None:
-        """Хук, вызывающийся после загрузки объекта."""
+        """Hook called after loading the object."""
         if self.description:
-            print(f'Описание: {self.description}')
+            logger.info('Description: %s', self.description)
 
 
 class Database:
-    """Класс только со статическими методами, реализующий объектную базу данных (Storage) in local filesystem.
-    Основной функционал реализует сохранение объектов в поддиректор(ию/ии)
-    относительно корня, хранящегося в атрибуте `root`. Поддиректория передатется
-    в качестве атрибута в методы загрузки и сохранения.
+    """Static-method-only class implementing an object database (Storage) on the local filesystem.
+
+    The core functionality saves objects into a subdirectory (or nested
+    subdirectories) relative to the root stored in the `root` attribute.
+    The subdirectory is passed as an argument to the load/save methods.
+
     Note:
-        Использование cloudpickle позволяет сохранять практически любой объект.
-        По умолчанию расширение всех файлов это `.pickle`
+        Using cloudpickle allows saving almost any object.
+        By default all files use the `.pickle` extension.
+
     Attributes:
-        root (Path): Корень, относительно которого будут искаться объекты.
-        debug (Bool): Выводить ли справочную информацию.
-        debug_print_margin (str): Отступ при печати справочной информации.
-    Examples:
-        >>> db.set_root('/tmp')
-        >>> a = [1, 2, 3]
-        >>> db.save(a, 'my_object', storage='sub_dir', description='Список с числами')
-        Текущая директория: /home/alice/Documents/projects/geost_animation
-        Корень базы данных: /tmp
-        Хранилище: sub_dir/
-        >>> db.load('my_object', storage='sub_dir').obj
-        Loading from: /tmp/sub_dir/my_object.pickle
-        Описание: Очень важный список
-        Out: [1, 2, 3]
+        root (Path): Root directory objects are resolved against.
     """
 
     root: Path = Path('./')
-    debug: bool = True
-    debug_print_margin: str = '\t'
 
     @classmethod
     def set_root(cls, root: str) -> None:
-        """Задавание корня базы данных, относительно которого будет осуществляться
-        поиск.
+        """Set the database root used to resolve objects.
+
         Args:
-            root (str): Корень базы данных.
+            root (str): Database root directory.
         """
         cls.root = Path(root)
 
     @classmethod
     def save(cls, obj: Any, filename: str, storage: Union[str, Path] = '', **kwargs: Dict[str, Any]) -> None:
-        """Метод сохранения объекта в базу данных.
+        """Save an object to the database.
+
         Note:
-            Необходимые подпапки создаются автоматически.
+            Required subfolders are created automatically.
+
         Args:
-            filename (str): С каким имененм сохранять. Шаблон сохраненного файла `{filename}.pickle`.
-            obj (Any): Объект, который необходимо сохранить.
-            storage (Union[str, Path], optional): Папка или последовательности вложенных папок относительно корня,
-                куда сохранить объект. Если параметр не указан, объект сохранится в корень.
-            kwargs (Dict[str, Any], optional): Дополнительные аргументы, сохранящиеся в объект-обертку.
-                Например, `description`.
+            filename (str): Name to save under. Saved as `{filename}.pickle`.
+            obj (Any): Object to save.
+            storage (Union[str, Path], optional): Folder or sequence of nested folders
+                relative to the root to save the object into. If not given, the object
+                is saved into the root.
+            kwargs (Dict[str, Any], optional): Extra arguments stored on the wrapper
+                object, e.g. `description`.
+
+        Note:
+            Pickling failures are logged, not raised (matches prior behavior).
         """
         filename = Path(filename)
 
-        if cls.debug:
-            print(f'{cls.debug_print_margin}Текущая директория: {Path.cwd()}')
-            print(f'{cls.debug_print_margin}Корень базы данных: {cls.root}')
-            print(f'{cls.debug_print_margin}Хранилище: {storage or "./"}')
+        logger.debug('Current directory: %s', Path.cwd())
+        logger.debug('Database root: %s', cls.root)
+        logger.debug('Storage: %s', storage or './')
 
         cls.root.mkdir(parents=True, exist_ok=True)
         if not filename.is_absolute():
@@ -104,80 +114,88 @@ class Database:
             pickled_obj.save_data_hook(**kwargs)
             with open(cls.root / storage / filename, 'wb') as f:
                 pickle.dump(pickled_obj, f)
-        except Exception as e:
-            print('Тип данных не соответвует базе данных.')
-            print('Тип объекта: ', type(obj))
-            print('Исключение:', e)
+        except Exception:
+            logger.exception('Object type does not match the database. Object type: %s', type(obj))
 
     @classmethod
-    def load(cls, filename: str, storage: Union[str, Path] = '') -> Pickled:
-        """Метод для загрузки объекта из базы данных.
+    def load(cls, filename: str, storage: Union[str, Path] = '') -> Optional[Pickled]:
+        """Load an object from the database.
+
         Args:
-            filename (str): Название файла.
-            storage (Union[str, Path], optional): Папка или последовательности вложенных папок
-                относительно корня, откуда загружать объект. Если параметр не указан, объект сохранится
-                в корень.
+            filename (str): File name.
+            storage (Union[str, Path], optional): Folder or sequence of nested folders
+                relative to the root to load from. If not given, the object is loaded
+                from the root.
+
         Returns:
-            Pickled: обернутый сохраненный объект.
+            Optional[Pickled]: The wrapped stored object, or None if not found.
         """
         try:
             filename = Path(f'{filename}.pickle')
-            print(f'Loading from: {cls.root / storage / filename}') if cls.debug else None
+            logger.debug('Loading from: %s', cls.root / storage / filename)
             with open(cls.root / storage / filename, 'rb') as f:
                 obj = pickle.load(f)
             obj.load_data_hook()
             return obj
         except FileNotFoundError:
-            print('Объект отсутствует в базе данных.')
+            logger.warning('Object is missing from the database.')
+            return None
 
     @classmethod
     def delete(cls, filename: str, storage: Union[str, Path] = ''):
-        """Метод для удаления объекта из базы данных.
-        Parameters:
-            filename (str): Путь к файлу относительно корня базы данных
-            storage (Union[str, Path], optional): Папка или последовательности вложенных папок
-                относительно корня, откуда удалять объект.
+        """Delete an object from the database.
+
+        Args:
+            filename (str): Path to the file relative to the database root.
+            storage (Union[str, Path], optional): Folder or sequence of nested folders
+                relative to the root to delete from.
         """
         try:
             filename = Path(f'{filename}.pickle')
             (cls.root / storage / filename).unlink()
         except FileNotFoundError:
-            print('Объект отсутствует в базе данных.')
+            logger.warning('Object is missing from the database.')
 
     @classmethod
     def all_storages(cls, storage: Union[str, Path] = '') -> List[str]:
-        """Метод, возвращающий список всех `подпапок` (storages), содержащихся в {root}/{storage}.
+        """Return all subfolders (storages) contained in {root}/{storage}.
+
         Args:
-            storage (Union[str, Path], optional): Папка или последовательности вложенных папок
-                относительно корня, где иискать подпапки.
+            storage (Union[str, Path], optional): Folder or sequence of nested folders
+                relative to the root to search in.
+
         Returns:
-            List[str]: Список подпапок в виде массива строк.
+            List[str]: List of subfolder names.
         """
         return [p.stem for p in (cls.root / storage).glob('*') if p.is_dir()]
 
     @classmethod
     def get_all_names(cls, storage: Union[str, Path] = '', ext: str = 'pickle') -> List[str]:
-        """Метод, возвращающий список имен `файлов` содержащихся в {root}/{storage}.
+        """Return the names of all files contained in {root}/{storage}.
 
         Args:
-            storage (Union[str, Path], optional): Папка или последовательности вложенных папок
-                относительно корня, где иискать файлы.
-            ext (str): Расширение файлов. Значение по умолчанию - 'pickle'.
+            storage (Union[str, Path], optional): Folder or sequence of nested folders
+                relative to the root to search in.
+            ext (str): File extension. Defaults to 'pickle'.
+
         Returns:
-            List[str]: Список всех названий объектов в базе данных в виде массива строк.
+            List[str]: List of all object names in the database.
         """
         return [f.stem for f in cls.root.glob(f'{storage}/*.{ext}') if f.is_file()]
 
     @classmethod
     def load_all(cls, storage: Union[str, Path] = '') -> List[Pickled]:
-        """Метод, загружающий все объекты из базы данных, содержащихся в {root}/{storage}.
+        """Load all objects contained in {root}/{storage}.
+
         Args:
-            storage (Union[str, Path], optional): Папка или последовательности вложенных папок
-                относительно корня, где иискать файлы.
+            storage (Union[str, Path], optional): Folder or sequence of nested folders
+                relative to the root to search in.
+
         Note:
-            Чтобы получить сам сохраенный объект, необходимо обратиться к атрибуту `obj`.
+            Access the `obj` attribute to get the actual stored object.
+
         Returns:
-            List[Pickled]: Список обернутых сохраенных объектов (типа Pickled).
+            List[Pickled]: List of wrapped stored objects.
         """
         objs = [cls.load(f, storage=storage) for f in cls.get_all_names(storage=storage)]
         return objs
