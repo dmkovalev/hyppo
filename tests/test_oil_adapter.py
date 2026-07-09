@@ -1,4 +1,4 @@
-"""Tests for the WFOpt oil waterflood adapter.
+"""Tests for the Norne/Brugge oil waterflood adapter.
 
 Structural tests (no Pellet required) verify hypothesis creation, lattice
 topology, parameter mapping, and cascade invalidation.  Reasoning tests
@@ -16,7 +16,7 @@ import shutil
 import pytest
 
 # ── Imports ──────────────────────────────────────────────────────────────────
-from hyppo.adapters.wfopt_adapter import (
+from hyppo.adapters.norne_adapter import (
     HYPOTHESIS_PARAM_MAP,
     ConnectivityFraction,
     Injector,

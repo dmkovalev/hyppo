@@ -1,11 +1,12 @@
-"""Hyppo <-> WFOpt adapter for oil waterflood virtual experiment.
+"""Hyppo adapter for the Norne/Brugge oil waterflood virtual experiment.
 
 Creates OWL DL representations of the six HybridCRM sub-hypotheses and maps
-them to the discrete hyperparameter space defined in
-``wfopt/application/services/tuning/default_space.yaml``.
+them to the discrete hyperparameter space of the CRM (capacitance-resistance
+model) tuning problem for the Norne/Brugge waterflood case.
 
-This module does NOT import from wfopt -- it builds purely ontological
-artefacts that mirror the WFOpt model architecture for formal reasoning.
+This module does NOT import any external optimizer or reservoir-simulation
+package -- it builds purely ontological artefacts that mirror the HybridCRM
+model architecture for formal reasoning.
 
 See Section 4.10 of dissertation.
 """
@@ -151,7 +152,7 @@ def _make_artefact(cls: type, name: str, desc: str) -> Any:
     ind.name = name
     ind.description = desc
     ind.id = hash(name) & 0x7FFFFFFF
-    ind.authors = ["WFOpt adapter"]
+    ind.authors = ["Norne adapter"]
     ind.create_date = _stamp()
     ind.last_update = _stamp()
     return ind
@@ -346,7 +347,7 @@ def run_oil_experiment_demo() -> dict[str, Any]:
     4. Show provenance: version h_CRM_v1 -> h_CRM_v2, detect StaleRun.
     5. Print classification results.
 
-    Does NOT actually call wfopt training (no GPU needed).
+    Does NOT actually run CRM training (no GPU needed).
 
     :return: dict with ``ve``, ``classifications``, ``stale_after_invalidation``,
         ``provenance`` keys.

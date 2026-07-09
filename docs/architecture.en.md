@@ -101,9 +101,9 @@ is added.
 
 ### `hyppo.adapters`
 
-Bridges to external systems, e.g. `hyppo.adapters.wfopt_adapter` builds an
-oil-waterflow virtual experiment from `pywaterflood` data (optional `data`
-extra).
+Bridges to external systems, e.g. `hyppo.adapters.norne_adapter` builds an
+oil-waterflow virtual experiment (Norne/Brugge) from `pywaterflood` data
+(optional `data` extra).
 
 ### `hyppo.gui`
 

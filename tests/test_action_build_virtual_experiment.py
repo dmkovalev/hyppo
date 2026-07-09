@@ -57,7 +57,7 @@ EXPECTED_PRIMARY_CLASS = {
 
 
 def test_build_all_hypotheses_classify_correctly():
-    """Each hypothesis must carry the model class wfopt_adapter assigns it."""
+    """Each hypothesis must carry the model class norne_adapter assigns it."""
     snap = build_virtual_experiment(BuildVirtualExperimentInput())
     by_kind = {h.kind: h for h in snap.hypotheses}
     for kind, expected_class in EXPECTED_PRIMARY_CLASS.items():

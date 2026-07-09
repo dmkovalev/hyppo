@@ -44,7 +44,7 @@ class RegisterHypothesisVersionInput(BaseModel):
     )
     model_id: str | None = Field(
         default=None,
-        description="Optional sha256 of the wfopt ModelRecord this version came from.",
+        description="Optional sha256 of the CRM ModelRecord this version came from.",
     )
 
 

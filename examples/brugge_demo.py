@@ -15,7 +15,7 @@ for ind in list(onto.individuals()):
     ind.destroy()
 
 with onto:
-    # Brugge 6-component hypothesis graph (mirrors wfopt_adapter.py:221-224)
+    # Brugge 6-component hypothesis graph (mirrors norne_adapter.py:163-192)
     h_CRM = Hypothesis("brugge_h_CRM")   # CRM core (physics)
     h_ML  = Hypothesis("brugge_h_ML")    # ML correction
     h_LPR = Hypothesis("brugge_h_LPR")   # liquid production rate

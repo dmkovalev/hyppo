@@ -1,12 +1,12 @@
 """Read-only virtual-experiment introspection actions.
 
-Wraps hyppo.adapters.wfopt_adapter so the dissertation reference code
+Wraps hyppo.adapters.norne_adapter so the dissertation reference code
 stays untouched. Two actions:
 - BuildVirtualExperiment: full snapshot (hypotheses + edges + config space)
 - GetHypothesisLattice: graph-only subset (nodes + edges)
 
 Both are SAFE: no DB I/O, deterministic, side-effect free except for
-the owlready2 individuals created inside `wfopt_adapter`.
+the owlready2 individuals created inside `norne_adapter`.
 """
 
 from __future__ import annotations
@@ -93,9 +93,9 @@ _OIL_SNAPSHOT_CACHE: VirtualExperimentSnapshot | None = None
 
 
 def _build_oil_snapshot() -> VirtualExperimentSnapshot:
-    """Single source of truth — call wfopt_adapter once, project to Pydantic.
+    """Single source of truth — call norne_adapter once, project to Pydantic.
 
-    Memoised at module scope because `wfopt_adapter.build_oil_virtual_experiment`
+    Memoised at module scope because `norne_adapter.build_oil_virtual_experiment`
     creates OWL individuals with fixed IRIs in the default world; a second call
     in the same process would raise `sqlite3.IntegrityError`. Reuse is safe —
     the output is deterministic.
@@ -104,7 +104,7 @@ def _build_oil_snapshot() -> VirtualExperimentSnapshot:
     if _OIL_SNAPSHOT_CACHE is not None:
         return _OIL_SNAPSHOT_CACHE
 
-    from hyppo.adapters.wfopt_adapter import (
+    from hyppo.adapters.norne_adapter import (
         CONFIGURATION_SPACE,
         HYPOTHESIS_PARAM_MAP,
         build_oil_virtual_experiment,

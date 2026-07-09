@@ -2228,7 +2228,7 @@ if __name__ == "__main__":
 | `hyppo/actions/version.py` | 281 |
 | `hyppo/actions/virtual_experiment.py` | 197 |
 | `hyppo/adapters/__init__.py` | 5 |
-| `hyppo/adapters/wfopt_adapter.py` | 423 |
+| `hyppo/adapters/norne_adapter.py` | 424 |
 | `hyppo/coa/__init__.py` | 13 |
 | `hyppo/comparison/__init__.py` | 23 |
 | `hyppo/comparison/compare.py` | 187 |

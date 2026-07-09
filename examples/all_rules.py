@@ -22,7 +22,7 @@ for n in ["crm_pred_multi.npy","hybrid_pred_multi.npy","wct_pred.npy","opr_pred.
 
 for ind in list(onto.individuals()): ind.destroy()
 with onto:
-    # ── the HybridCRM graph (wfopt_adapter structure), each = real fitted model ──
+    # ── the HybridCRM graph (norne_adapter structure), each = real fitted model ──
     hCRM=cr.Hypothesis("h_CRM"); hML=cr.Hypothesis("h_ML"); hLPR=cr.Hypothesis("h_LPR")
     hMB=cr.MaterialBalanceHypothesis("h_MB"); hBL=cr.Hypothesis("h_BL")
     hWCT=cr.Hypothesis("h_WCT"); OPR=cr.Hypothesis("OPR")

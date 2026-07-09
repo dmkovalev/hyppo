@@ -110,8 +110,8 @@ cloudpickle) для произвольных артефактов экспери
 
 ### `hyppo.adapters`
 
-Мосты к внешним системам, например `hyppo.adapters.wfopt_adapter` строит
-виртуальный эксперимент нефтяного заводнения по данным `pywaterflood`
+Мосты к внешним системам, например `hyppo.adapters.norne_adapter` строит
+виртуальный эксперимент нефтяного заводнения (Norne/Brugge) по данным `pywaterflood`
 (опциональный экстра `data`).
 
 ### `hyppo.gui`

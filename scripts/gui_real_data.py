@@ -283,7 +283,7 @@ def extract_pywaterflood_domain():
 
 
 def config_axes():
-    from hyppo.adapters.wfopt_adapter import CONFIGURATION_SPACE
+    from hyppo.adapters.norne_adapter import CONFIGURATION_SPACE
     axes = [{"name": n, "section": s["section"], "levels": list(s["levels"])}
             for n, s in CONFIGURATION_SPACE.items()]
     size = 1
