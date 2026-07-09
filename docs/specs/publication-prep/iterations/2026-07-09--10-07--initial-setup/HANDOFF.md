@@ -657,3 +657,11 @@ Non-goals respected: dist=gedanken, import stays hyppo; actions still single-dom
 IF-criterion: app.py static = Path(__file__).resolve().parent/"static" (no parents[2] escape); logger.warning names build cmd when absent.
 Observations (non-blocking): pre-existing Russian comment pyproject.toml:55 (key data-dep note, allowed); phase-B stray "R3+" false-positives (OWL-rule refs, not wave markers) unchanged.
 Verdict: G1–G8 all PASS. No POINT-FIX, no BLOCKER. READY TO FINISH.
+
+## R7b fix: README
+Stage: realization | Author: fix-agent
+Rewrote README.md: removed stale streamlit/wfonto/wfdb/sub-project jargon,
+added "What is this?" + Quickstart (verified runnable, `.venv/Scripts/python`
+exit 0), Purpose-column architecture table, How-to-cite/Contributing/License
+sections. Commit: fix(review): professional README — quickstart, purpose
+table, cite/license (R7b)
