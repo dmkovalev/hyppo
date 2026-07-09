@@ -4,7 +4,7 @@ Run under .venv311 (has pywaterflood + owlready2):
 
     .venv311/Scripts/python.exe scripts/gui_real_data.py
 
-Produces hyppo/gui/real_data.json:
+Produces scripts/gui_real_data.json:
 - the 19-hypothesis HybridCRM graph (part4.tex §4.4) DERIVED by Algorithm 1
   from the hypothesis equations (COA causal ordering) — reproduces the 21 edges
   of Figure lattice_crm exactly;
@@ -23,7 +23,7 @@ import numpy as np
 sys.path.insert(0, os.getcwd())
 
 RUN = r"F:\git-repos\diss\thesis\papers\brugge_run"
-OUT = os.path.join("hyppo", "gui", "real_data.json")
+OUT = os.path.join("scripts", "gui_real_data.json")
 
 
 # ───────── 19 hypotheses (part4.tex §4.4), equations chosen so COA derives ────
