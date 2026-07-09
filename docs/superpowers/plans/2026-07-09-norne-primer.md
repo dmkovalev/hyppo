@@ -383,9 +383,13 @@ def act_5_run(g: "nx.DiGraph", p_ne: set[str]) -> None:
         lattice_edges=[(str(u), str(v)) for u, v in g.edges()],
         competes={"H5": {"H7"}, "H7": {"H5"}},
     )
-    print(f"\nExecuted {len(results)} hypotheses "
-          f"(P_ne recomputed: {len(plan['p_ne'])}, cached P_e skipped: "
-          f"{len(plan['p_e'])} — no repository attached, so only P_ne runs).")
+    print(f"\nExecuted {len(results)} hypotheses: P_ne ({len(plan['p_ne'])}) "
+          f"recomputed with real metrics; P_e ({len(plan['p_e'])}) returned as "
+          "vacuous SUCCESS with empty metrics — no repository attached, so "
+          "cached results cannot be loaded.")
+    # NOTE (review finding): Runner marks repository-less p_e ids as SUCCESS
+    # with empty metrics (hyppo/runner/_base.py:111-122); "skipped" wording
+    # would contradict the printed table.
     for code in sorted(results, key=lambda c: PAPER[c]):
         r = results[code]
         print(f"  {PAPER[code]:<4} status={r['status']:<8} "
