@@ -118,7 +118,9 @@ def benchmark(
         try:
             _warmup_lattice = _build_synthetic_lattice(sizes[0], mean_deg, rng)
             _warmup_onto, _, _ = _build_synthetic_ontology(sizes[0], _warmup_lattice)
-            check_consistency(None, _warmup_onto, _warmup_lattice, run_hermit=True)
+            check_consistency(
+                None, _warmup_onto, _warmup_lattice, stage_a_engine="hermit"
+            )
         except Exception as exc:  # pragma: no cover
             print(f"  warmup failed (non-fatal): {exc}", file=sys.stderr)
 
@@ -149,7 +151,7 @@ def benchmark(
                     # so the subtraction t_ab - t_b correctly isolates HermiT.
                     t_ab_start = time.perf_counter()
                     res = check_consistency(
-                        ve, onto, lattice, run_hermit=True
+                        ve, onto, lattice, stage_a_engine="hermit"
                     )
                     t_ab = time.perf_counter() - t_ab_start
 
