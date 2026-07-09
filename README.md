@@ -4,6 +4,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python >=3.11](https://img.shields.io/badge/python-%3E%3D3.11-blue.svg)](https://www.python.org/)
 
+> 🇷🇺 [Русская версия](README.ru.md)
+
 > gedanken — a platform for virtual (thought) experiments over hypothesis
 > lattices
 

@@ -10,13 +10,55 @@ exclude_docs: |
 
 theme:
   name: material
+  language: ru
   features:
     - navigation.sections
     - navigation.top
     - content.code.copy
 
+markdown_extensions:
+  - toc:
+      permalink: true
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+
+# Plugin order matters: i18n must run before mkdocstrings so that the
+# localized (suffix-based) file set and nav are resolved first; mkdocstrings
+# then generates API pages against that already-i18n-aware file/nav state.
+# See https://ultrabug.github.io/mkdocs-static-i18n/ (plugin ordering).
 plugins:
   - search
+  - i18n:
+      docs_structure: suffix
+      reconfigure_material: true
+      reconfigure_search: true
+      languages:
+        - locale: ru
+          name: Русский
+          default: true
+          build: true
+        - locale: en
+          name: English
+          build: true
+          nav_translations:
+            Главная: Home
+            Архитектура: Architecture
+            Справочник API: API Reference
+            Ядро: Core
+            Конструктор решётки: Lattice Constructor
+            Планировщик: Planner
+            Исполнитель: Runner
+            Менеджер: Manager
+            Хранилище: Storage
+            Версионирование: Versioning
+            Сравнение: Comparison
+            Онтология: Ontology
+            Действия: Actions
+            Адаптеры: Adapters
+            Репозиторий метаданных: Metadata Repository
+            Генератор: Generator
+            Спецификация GUI-демо: GUI Demo Spec
   - mkdocstrings:
       handlers:
         python:
@@ -31,23 +73,23 @@ plugins:
             filters: ["!^_"]
 
 nav:
-  - Home: index.md
-  - Architecture: architecture.md
-  - API Reference:
-      - Core: api/core.md
+  - Главная: index.md
+  - Архитектура: architecture.md
+  - Справочник API:
+      - Ядро: api/core.md
       - COA: api/coa.md
-      - Lattice Constructor: api/lattice_constructor.md
-      - Planner: api/planner.md
-      - Runner: api/runner.md
-      - Manager: api/manager.md
-      - Storage: api/storage.md
-      - Versioning: api/versioning.md
-      - Comparison: api/comparison.md
-      - Ontology: api/ontology.md
-      - Actions: api/actions.md
-      - Adapters: api/adapters.md
+      - Конструктор решётки: api/lattice_constructor.md
+      - Планировщик: api/planner.md
+      - Исполнитель: api/runner.md
+      - Менеджер: api/manager.md
+      - Хранилище: api/storage.md
+      - Версионирование: api/versioning.md
+      - Сравнение: api/comparison.md
+      - Онтология: api/ontology.md
+      - Действия: api/actions.md
+      - Адаптеры: api/adapters.md
       - GUI: api/gui.md
       - MCP: api/mcp.md
-      - Metadata Repository: api/metadata_repository.md
-      - Generator: api/generator.md
-  - GUI Demo Spec: gui_demo_spec.md
+      - Репозиторий метаданных: api/metadata_repository.md
+      - Генератор: api/generator.md
+  - Спецификация GUI-демо: gui_demo_spec.md

@@ -1,125 +1,137 @@
-# Architecture
+# Архитектура
 
-`hyppo` implements the virtual-experiment management platform of
-dissertation Chapter 3: a layered pipeline from user-facing surfaces down
-to the OWL domain ontology.
+`hyppo` реализует платформу управления виртуальными экспериментами из
+главы 3 диссертации: многослойный конвейер от пользовательских поверхностей
+до предметной OWL-онтологии.
 
 ```
 gui / mcp
     -> manager
         -> runner / planner
             -> lattice_constructor / coa
-                -> core (OWL ontology, Definition 1)
+                -> core (OWL-онтология, Определение 1)
 ```
 
-Cross-cutting packages (`storage`, `versioning`, `metadata_repository`,
-`comparison`, `ontology`, `actions`, `adapters`, `generator`) are consumed
-by one or more layers above without being layers themselves.
+Сквозные пакеты (`storage`, `versioning`, `metadata_repository`,
+`comparison`, `ontology`, `actions`, `adapters`, `generator`) используются
+одним или несколькими слоями выше, сами при этом слоями не являясь.
 
-## Layers
+## Слои
 
 ### `hyppo.core`
 
-The domain core: the virtual-experiment OWL ontology (`virtual_experiment_onto`,
-Definition 1) built on owlready2, plus the epistemic-status transition
-function (Section 2) that classifies a hypothesis as confirmed / rejected /
-undetermined given its evidence.
+Предметное ядро: OWL-онтология виртуального эксперимента
+(`virtual_experiment_onto`, Определение 1) на базе owlready2, а также
+функция перехода эпистемического статуса (раздел 2), классифицирующая
+гипотезу как подтверждённую / отвергнутую / неопределённую по имеющимся
+свидетельствам.
 
 ### `hyppo.coa`
 
-Causal-ordering algorithms (COA constructor). A pure Dulmage-Mendelsohn
-core (`hyppo.coa.causal`: matching, strongly-connected components,
-transitive closure) importable without sympy/owlready, plus the
-`Structure`/`Equation` data model consumed by the lattice constructor.
+Алгоритмы каузального упорядочивания (конструктор COA). Чистое ядро
+Дюльмажа-Мендельсона (`hyppo.coa.causal`: паросочетание, сильно связные
+компоненты, транзитивное замыкание), импортируемое без sympy/owlready, а
+также модель данных `Structure`/`Equation`, потребляемая конструктором
+решётки.
 
 ### `hyppo.lattice_constructor`
 
-Algorithm 1 (and its incremental variant, Algorithm 2): builds the
-hypothesis dependency graph (`HypothesisLattice`) from a set of hypotheses'
-equations. The output variable of a hypothesis is the left-hand side of
-its formula; edges `h_i -> h_j` mean `h_j` depends on `h_i`. This is the
-only place graph edges are derived — no component re-implements Algorithm 1.
+Алгоритм 1 (и его инкрементальный вариант, Алгоритм 2): строит граф
+зависимостей гипотез (`HypothesisLattice`) по набору уравнений гипотез.
+Выходная переменная гипотезы — левая часть её формулы; рёбра `h_i -> h_j`
+означают, что `h_j` зависит от `h_i`. Это единственное место, где выводятся
+рёбра графа — ни один другой компонент не переизобретает Алгоритм 1.
 
 ### `hyppo.planner`
 
-Algorithm 4: builds an `ExecutionPlan` as a cascaded closure over the
-lattice, proven correct and ⊆-minimal (Theorem 1).
+Алгоритм 4: строит план пересчёта (`ExecutionPlan`) как каскадное замыкание
+над решёткой, корректность и ⊆-минимальность которого доказаны
+(Теорема 1).
 
 ### `hyppo.runner`
 
-Executes an `ExecutionPlan`: runs each hypothesis's model, assigns
-epistemic status, cascades skips to dependents when a prerequisite fails.
+Исполняет план пересчёта (`ExecutionPlan`): запускает модель каждой
+гипотезы, присваивает эпистемический статус, каскадно пропускает
+зависимые гипотезы при сбое предшественника.
 
 ### `hyppo.manager`
 
-Top-level orchestrator (`Manager`) coordinating generator, lattice
-constructor, planner and runner into one virtual-experiment lifecycle.
+Оркестратор верхнего уровня (`Manager`), координирующий генератор,
+конструктор решётки, планировщик и исполнитель в единый жизненный цикл
+виртуального эксперимента.
 
 ### `hyppo.generator`
 
-`HypothesisGenerator`: proposes candidate hypotheses (including a
-genetic-programming backend, `deap`, optional extra `gp`).
+`HypothesisGenerator`: предлагает гипотезы-кандидаты (включая бэкенд
+генетического программирования, `deap`, опциональный экстра `gp`).
 
 ### `hyppo.storage`
 
-Content-addressed pickle object store (`Database`, cloudpickle-backed) for
-arbitrary experiment artifacts.
+Хранилище объектов с адресацией по содержимому (`Database`, на базе
+cloudpickle) для произвольных артефактов эксперимента.
 
 ### `hyppo.versioning`
 
-Hypothesis-version persistence: content-addressed snapshots and run
-provenance (SQLAlchemy models + async query functions). Deliberately
-independent of `hyppo.mcp` and `hyppo.actions` — `hyppo.actions` depends on
-`hyppo.versioning`, not the other way around, breaking what used to be an
-`actions <-> mcp` import cycle.
+Персистентность версий гипотез: снимки с адресацией по содержимому и
+происхождение запусков (модели SQLAlchemy + асинхронные функции запросов).
+Намеренно независим от `hyppo.mcp` и `hyppo.actions` — `hyppo.actions`
+зависит от `hyppo.versioning`, а не наоборот, что разрывает бывший цикл
+импорта `actions <-> mcp`.
 
 ### `hyppo.metadata_repository`
 
-`MetadataRepository` + `SharedCache`: persisted run/hypothesis metadata and
-an in-process cache shared across a virtual-experiment session.
+`MetadataRepository` + `SharedCache`: персистентные метаданные
+запусков/гипотез и внутрипроцессный кэш, общий для сессии виртуального
+эксперимента.
 
 ### `hyppo.comparison`
 
-Statistical comparison of competing hypotheses/models: AIC/BIC, Bayesian
-posterior, Benjamini-Yekutieli correction, combined ranking.
+Статистическое сравнение конкурирующих гипотез/моделей: AIC/BIC,
+байесовская апостериорная оценка, поправка Бенджамини-Иекутиели,
+комбинированное ранжирование.
 
 ### `hyppo.ontology`
 
-16 OWL 2 DL reasoning rules (no SWRL, no arithmetic) extending the base
-ontology from `hyppo.core._base`: consistency checks, workflow validation,
-quality gates, multi-experiment rules, model compatibility, lifecycle
-rules. Procedural acyclicity (rule 5) is one of the golden-test claims.
+16 правил рассуждения OWL 2 DL (без SWRL, без арифметики), расширяющих
+базовую онтологию из `hyppo.core._base`: проверки согласованности,
+валидация workflow, контроль качества, правила для нескольких
+экспериментов, совместимость моделей, правила жизненного цикла.
+Процедурная ацикличность (правило 5) — одно из утверждений golden-тестов.
 
 ### `hyppo.actions`
 
-Typed operations callable by agents over MCP (register/diff/resolve
-hypothesis versions, build/run a virtual experiment). **Known limitation**:
-the domain identifier is a `Literal["oil_waterflood"]` rather than a
-registry — only one domain exists so far and a registry abstraction was
-judged premature (rule of three not met); revisit if/when a second domain
-is added.
+Типизированные операции, вызываемые агентами через MCP
+(регистрация/сравнение/разрешение версий гипотез, построение/запуск
+виртуального эксперимента). **Известное ограничение**: идентификатор
+предметной области — `Literal["oil_waterflood"]`, а не реестр; пока
+существует только одна предметная область, и абстракция реестра признана
+преждевременной (правило трёх не выполнено); пересмотреть при появлении
+второй предметной области.
 
 ### `hyppo.adapters`
 
-Bridges to external systems, e.g. `hyppo.adapters.wfopt_adapter` builds an
-oil-waterflow virtual experiment from `pywaterflood` data (optional `data`
-extra).
+Мосты к внешним системам, например `hyppo.adapters.wfopt_adapter` строит
+виртуальный эксперимент нефтяного заводнения по данным `pywaterflood`
+(опциональный экстра `data`).
 
 ### `hyppo.gui`
 
-FastAPI application (`create_app`) serving the packaged single-page web UI
-(`hyppo/gui/static`, committed build output) plus a JSON API for the
-virtual-experiment lifecycle. Entry point: `hyppo-gui`.
+Приложение FastAPI (`create_app`), обслуживающее собранный
+одностраничный веб-интерфейс (`hyppo/gui/static`, зафиксированный в
+репозитории результат сборки), а также JSON API для жизненного цикла
+виртуального эксперимента. Точка входа: `hyppo-gui`.
 
 ### `hyppo.mcp`
 
-MCP server package (stdio and streamable-HTTP transports) exposing
-`hyppo.actions` as typed MCP tools and a `Lattice Steward` persona
-resource. Entry point: `hyppo-mcp`.
+Пакет MCP-сервера (транспорты stdio и streamable-HTTP), предоставляющий
+`hyppo.actions` как типизированные MCP-инструменты и ресурс-персону
+`Lattice Steward`. Точка входа: `hyppo-mcp`.
 
-## Golden-test contract
+## Golden-контракт тестов
 
-Every algorithmic claim above (Algorithm 1 graph shape, Algorithm 2
-incremental-equals-rebuild, Algorithm 4 correctness/minimality, Theorem 1,
-operation-count complexity, rule-5 acyclicity) is pinned to a real platform
-call in `tests/test_golden_claims.py`. See [Home](index.md#golden-test-contract).
+Каждое алгоритмическое утверждение выше (форма графа Алгоритма 1,
+инкрементальное построение Алгоритма 2 == полная перестройка,
+корректность/минимальность Алгоритма 4, Теорема 1, оценка сложности по
+счётчикам операций, ацикличность по правилу 5) зафиксировано за реальным
+вызовом платформы в `tests/test_golden_claims.py`. См.
+[Главную страницу](index.md#golden-контракт-тестов).
