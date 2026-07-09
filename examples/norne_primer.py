@@ -169,6 +169,32 @@ def act_2_algorithm1() -> tuple[HypothesisLattice, nx.DiGraph]:
     return lattice, g
 
 
+def act_3_algorithm2(g_full: nx.DiGraph) -> None:
+    """Algorithm 2: incremental add is equivalent to a full rebuild (Lemma 2)."""
+    _act(3, "Algorithm 2 — incremental addition (Lemma 2)")
+    partial = HypothesisLattice(ALL_HYPS[:-1], WF)  # without H19 (paper H16)
+    before = partial.lattice.number_of_edges()
+    before_edges = {(str(u), str(v)) for u, v in partial.lattice.edges()}
+    partial.add_hypothesis(HYP_OBJS["H19"])  # incremental, O(|H|) merges
+    after_edges = {(str(u), str(v)) for u, v in partial.lattice.edges()}
+    full_edges = {(str(u), str(v)) for u, v in g_full.edges()}
+    new = sorted(after_edges - before_edges)
+    print(f"\nLattice without H16: {before} edges.")
+    print(
+        "add_hypothesis(H16) added edges: "
+        f"{[f'{PAPER[u]}->{PAPER[v]}' for u, v in new]}"
+    )
+    equal = after_edges == full_edges
+    print(f"incremental == full rebuild: {equal}")
+    print(
+        "Golden: True; new edges H8->H16, H14->H16 "
+        "(liquid and watercut branches merge into the oil forecast)."
+    )
+    if not equal:
+        raise SystemExit("LEMMA 2 CHECK FAILED")
+    _pause()
+
+
 def main() -> None:
     global PAUSE
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
@@ -178,6 +204,7 @@ def main() -> None:
     PAUSE = parser.parse_args().pause
     act_1_tuple()
     _lattice, g = act_2_algorithm1()
+    act_3_algorithm2(g)
 
 
 if __name__ == "__main__":
