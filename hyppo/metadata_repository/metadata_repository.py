@@ -12,12 +12,14 @@ import sqlite3
 from dataclasses import dataclass
 from pathlib import Path
 
+from hyppo.core._types import Metrics
+
 
 @dataclass
 class ResultRecord:
     hypothesis_id: str
     config: dict
-    metrics: dict
+    metrics: Metrics
     status: str  # SUCCESS, FAILED, SKIPPED
     timestamp: str | None = None
 
@@ -58,7 +60,11 @@ class MetadataRepository:
         ]
 
     def save_result(
-        self, hypothesis_id: str, config: dict, metrics: dict, status: str = "SUCCESS"
+        self,
+        hypothesis_id: str,
+        config: dict,
+        metrics: Metrics,
+        status: str = "SUCCESS",
     ) -> None:
         self._conn.execute(
             "INSERT OR REPLACE INTO results "

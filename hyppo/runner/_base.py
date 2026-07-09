@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 from hyppo.core._epistemic import EpistemicStatus, evaluate_status
+from hyppo.core._types import Metrics
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +45,7 @@ class RunResult:
 
     hypothesis_id: str
     status: Status
-    metrics: dict = field(default_factory=dict)
+    metrics: Metrics = field(default_factory=lambda: Metrics())
     error: str | None = None
     epistemic_status: EpistemicStatus = EpistemicStatus.PROPOSED
 
@@ -74,7 +75,7 @@ class Runner:
     def execute(
         self,
         plan: dict,  # {"p_ne": set[str], "p_e": set[str]}
-        models: dict[str, Callable],
+        models: dict[str, Callable[[dict], Metrics]],
         configs: dict[str, dict] | None = None,
         lattice_edges: list[tuple[str, str]] | None = None,
         competes: dict[str, set[str]] | None = None,

@@ -9,7 +9,6 @@ lives in :mod:`hyppo.comparison`.
 
 import math
 
-import numpy as np
 from sklearn.metrics import mean_squared_error, r2_score
 
 from hyppo.core._base import virtual_experiment_onto
@@ -22,6 +21,8 @@ from hyppo.core._base import virtual_experiment_onto
 def get_aic(n_params: int, log_likelihood: float) -> float:
     """Compute the Akaike Information Criterion (Definition 10, Chapter 2).
 
+    Delegates to :func:`hyppo.comparison.compare.compute_aic` (same formula).
+
     Args:
         n_params: Number of free parameters k in the model.
         log_likelihood: Log-likelihood ln(L) of the fitted model.
@@ -29,11 +30,15 @@ def get_aic(n_params: int, log_likelihood: float) -> float:
     Returns:
         AIC = 2k - 2ln(L); lower is better.
     """
-    return 2 * n_params - 2 * log_likelihood
+    from hyppo.comparison import compare
+
+    return compare.compute_aic(n_params, log_likelihood)
 
 
 def get_bic(n_params: int, n_observations: int, log_likelihood: float) -> float:
     """Compute the Bayesian Information Criterion (Definition 10, Chapter 2).
+
+    Delegates to :func:`hyppo.comparison.compare.compute_bic` (same formula).
 
     Args:
         n_params: Number of free parameters k in the model.
@@ -43,7 +48,9 @@ def get_bic(n_params: int, n_observations: int, log_likelihood: float) -> float:
     Returns:
         BIC = k*ln(n) - 2ln(L); lower is better.
     """
-    return n_params * math.log(n_observations) - 2 * log_likelihood
+    from hyppo.comparison import compare
+
+    return compare.compute_bic(n_params, n_observations, log_likelihood)
 
 
 def range_models(
@@ -228,40 +235,6 @@ class NonLinearModel(Model):
 
         est_gp.fit(X, y)
         return est_gp
-
-    def compute_aic(self, X, y):
-        """Compute an AIC-like score for this symbolic model (Definition 10).
-
-        Args:
-            X: Input features.
-            y: Observed targets.
-
-        Returns:
-            float: ``log_likelihood - 2 * complexity`` where complexity is
-            the model's ``size`` (program length).
-        """
-        prediction = self.predict(X)
-        error = prediction - y
-        complexity = self.size
-        log_likelihood = np.log(np.mean(error**2 / error.shape[0]))
-        return log_likelihood - 2 * complexity
-
-    def compute_bic(self, X, y):
-        """Compute a BIC-like score for this symbolic model (Definition 10).
-
-        Args:
-            X: Input features.
-            y: Observed targets.
-
-        Returns:
-            float: ``log_likelihood - log(n) * complexity`` where n is the
-            number of observations and complexity is the model's ``size``.
-        """
-        prediction = self.predict(X)
-        error = prediction - y
-        log_likelihood = -np.mean(error**2 / error.shape[0])
-        complexity = self.size
-        return log_likelihood - np.log(y.shape[0]) * complexity
 
 
 if __name__ == "__main__":
