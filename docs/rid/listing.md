@@ -2233,7 +2233,7 @@ if __name__ == "__main__":
 | `hyppo/comparison/__init__.py` | 23 |
 | `hyppo/comparison/compare.py` | 187 |
 | `hyppo/core/__init__.py` | 11 |
-| `hyppo/core/_hypothesis.py` | 335 |
+| `hyppo/core/_hypothesis.py` | 280 |
 | `hyppo/core/_workflow.py` | 68 |
 | `hyppo/generator/__init__.py` | 3 |
 | `hyppo/generator/_generator.py` | 67 |
@@ -2287,9 +2287,9 @@ if __name__ == "__main__":
 | `hyppo/versioning/_db.py` | 65 |
 | `hyppo/versioning/version_store.py` | 185 |
 
-**Итого прочих модулей:** 66 файлов, 5 375 строк.
+**Итого прочих модулей:** 66 файлов, 5 320 строк.
 
 **Итого по пакету `hyppo` (полные тексты выше + сводная таблица):**
-75 файлов, 7 123 строки Python-кода (≈ 250 КБ); плюс сквозной пример
+75 файлов, 7 068 строк Python-кода (≈ 250 КБ); плюс сквозной пример
 `examples/norne_primer.py` (352 строки) и статические ассеты
 веб-интерфейса `hyppo/gui/static/` (3 файла, ≈ 232 КБ).

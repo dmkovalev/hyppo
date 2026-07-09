@@ -2,14 +2,14 @@
 
 Extends the ``virtual_experiment_onto`` classes from
 :mod:`hyppo.core._base` with the behaviour needed at runtime: AIC/BIC scoring
-(Definition 10), model ranking, and pairwise prediction comparison used by
-:func:`hyppo.core._epistemic.evaluate_status`.
+(Definition 10) and model ranking used by
+:func:`hyppo.core._epistemic.evaluate_status`. Pairwise prediction comparison
+lives in :mod:`hyppo.comparison`.
 """
 
 import math
 
 import numpy as np
-from scipy import stats
 from sklearn.metrics import mean_squared_error, r2_score
 
 from hyppo.core._base import virtual_experiment_onto
@@ -94,7 +94,7 @@ with virtual_experiment_onto:
             Args:
                 X: Input features passed to each model's ``predict``.
                 y: Target/observed values to compare predictions against.
-                metrics: One of ``"mae"``, ``"r2"``, ``"mse"``.
+                metrics: One of ``"r2"``, ``"mse"``.
                 threshold: Cutoff applied to the metric (kept if the model
                     passes the metric-specific comparison against it).
 
@@ -105,13 +105,7 @@ with virtual_experiment_onto:
             models = self.is_implemented_by_model()
             result = {}
 
-            if metrics == "mae":
-                for key in models.keys():
-                    error = models.predict(X) - y
-                    if error <= threshold:
-                        result[key] = np.mean(np.abs(error))
-
-            elif metrics == "r2":
+            if metrics == "r2":
                 for key in models.keys():
                     error = r2_score(y, models[key].predict(X))
                     if error >= threshold:
@@ -123,55 +117,6 @@ with virtual_experiment_onto:
                     if error <= threshold:
                         result[key] = error
 
-            return result
-
-        # TODO add several > 2 models
-        def compare_preds_on_single_dataset(self, dataset, stat_test):
-            """Compare two competing models' predictions on one dataset.
-
-            Args:
-                dataset: Input passed to both ``model_1.predict`` and
-                    ``model_2.predict``.
-                stat_test: Statistical test to run; only ``"wilcoxon"`` is
-                    supported.
-
-            Returns:
-                The result object returned by ``scipy.stats.wilcoxon``.
-
-            Raises:
-                NotImplementedError: If ``stat_test`` is not ``"wilcoxon"``.
-            """
-            models = self.is_implemented_by_model()
-            linear_prediction = models["model_1"].predict(dataset)
-            gp_prediction = models["model_2"].predict(dataset)
-            if stat_test == "wilcoxon":
-                result = stats.wilcoxon(linear_prediction, gp_prediction)
-            else:
-                raise NotImplementedError(f"stat_test={stat_test!r} not supported")
-            return result
-
-        def compare_preds_on_different_datasets(self, dataset_1, dataset_2, stat_test):
-            """Compare two competing models' predictions on two datasets.
-
-            Args:
-                dataset_1: Input passed to ``model_1.predict``.
-                dataset_2: Input passed to ``model_2.predict``.
-                stat_test: Statistical test to run; only ``"wilcoxon"`` is
-                    supported.
-
-            Returns:
-                The result object returned by ``scipy.stats.wilcoxon``.
-
-            Raises:
-                NotImplementedError: If ``stat_test`` is not ``"wilcoxon"``.
-            """
-            models = self.is_implemented_by_model()
-            linear_prediction = models["model_1"].predict(dataset_1)
-            gp_prediction = models["model_2"].predict(dataset_2)
-            if stat_test == "wilcoxon":
-                result = stats.wilcoxon(linear_prediction, gp_prediction)
-            else:
-                raise NotImplementedError(f"stat_test={stat_test!r} not supported")
             return result
 
 
