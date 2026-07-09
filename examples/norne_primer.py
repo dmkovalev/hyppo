@@ -22,6 +22,7 @@ import networkx as nx
 from hyppo.coa._base import Equation, Structure
 from hyppo.coa.graph import HypothesisGraph
 from hyppo.lattice_constructor._base import HypothesisLattice
+from hyppo.runner import Runner
 
 # --- Norne HybridCRM data (paper [SVD], fig. 3; same case as the GUI demo) ---
 # (code_name, paper_name, formula, meaning)
@@ -235,6 +236,44 @@ def act_4_plan_theorem1(g: nx.DiGraph) -> set[str]:
     return {codes[i] for i in plan}
 
 
+def act_5_run(g: nx.DiGraph, p_ne: set[str]) -> None:
+    """Execute the plan with the Runner (topological order, retries, statuses)."""
+    _act(5, "Execution — Runner walks P_ne in topological order")
+    # Synthetic model fits: deterministic metrics per hypothesis.
+    r2_table = {code: 0.75 + 0.01 * i for i, (code, _, _, _) in enumerate(HYPS)}
+    r2_table["H7"] = 0.65  # the pure-ML hypothesis under-performs alone
+
+    def make_model(code: str):
+        def model(config: dict) -> dict:
+            return {"r2": r2_table[code], "aic": 100.0 - 10.0 * r2_table[code]}
+
+        return model
+
+    models = {code: make_model(code) for code, _, _, _ in HYPS}
+    all_codes = {code for code, _, _, _ in HYPS}
+    plan = {"p_ne": set(p_ne), "p_e": all_codes - set(p_ne)}
+    runner = Runner()
+    results = runner.execute(
+        plan,
+        models,
+        lattice_edges=[(str(u), str(v)) for u, v in g.edges()],
+        competes={"H5": {"H7"}, "H7": {"H5"}},
+    )
+    print(
+        f"\nExecuted {len(results)} hypotheses "
+        f"(P_ne recomputed: {len(plan['p_ne'])}, cached P_e skipped: "
+        f"{len(plan['p_e'])} — no repository attached, so only P_ne runs)."
+    )
+    for code in sorted(results, key=lambda c: int(PAPER[c][1:])):
+        r = results[code]
+        print(
+            f"  {PAPER[code]:<4} status={r['status']:<8} "
+            f"epistemic={r.get('epistemic_status', '-'):<10} "
+            f"metrics={r.get('metrics', {})}"
+        )
+    _pause()
+
+
 def main() -> None:
     global PAUSE
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
@@ -245,7 +284,8 @@ def main() -> None:
     act_1_tuple()
     _lattice, g = act_2_algorithm1()
     act_3_algorithm2(g)
-    _p_ne = act_4_plan_theorem1(g)  # consumed by act 5 (Task 5)
+    p_ne = act_4_plan_theorem1(g)
+    act_5_run(g, p_ne)
 
 
 if __name__ == "__main__":
