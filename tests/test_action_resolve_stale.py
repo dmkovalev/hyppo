@@ -13,7 +13,7 @@ from hyppo.actions.version import (
 
 
 async def test_runs_pinned_to_superseded_version_are_returned(monkeypatch):
-    from hyppo.mcp import version_store
+    from hyppo.versioning import version_store
 
     monkeypatch.setattr(
         version_store, "select_version_by_id",
@@ -51,7 +51,7 @@ async def test_runs_pinned_to_superseded_version_are_returned(monkeypatch):
 
 
 async def test_no_superseding_versions_returns_empty(monkeypatch):
-    from hyppo.mcp import version_store
+    from hyppo.versioning import version_store
     monkeypatch.setattr(
         version_store, "select_version_by_id",
         AsyncMock(return_value={"version_id": "vlatest",
@@ -76,7 +76,7 @@ async def test_no_superseding_versions_returns_empty(monkeypatch):
 
 
 async def test_unknown_version_raises(monkeypatch):
-    from hyppo.mcp import version_store
+    from hyppo.versioning import version_store
     monkeypatch.setattr(
         version_store, "select_version_by_id", AsyncMock(return_value=None),
     )

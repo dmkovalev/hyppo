@@ -11,7 +11,7 @@ from hyppo.actions.version import (
 
 
 async def test_mark_writes_one_row_per_kind(monkeypatch):
-    from hyppo.mcp import version_store
+    from hyppo.versioning import version_store
     upsert = AsyncMock(return_value=True)
     monkeypatch.setattr(version_store, "upsert_run_link", upsert)
     out: MarkRunWithVersionOutput = await mark_run_with_version(
@@ -27,7 +27,7 @@ async def test_mark_writes_one_row_per_kind(monkeypatch):
 
 async def test_mark_idempotent_returns_zero(monkeypatch):
     """Second call with identical inputs upserts no new rows."""
-    from hyppo.mcp import version_store
+    from hyppo.versioning import version_store
     monkeypatch.setattr(version_store, "upsert_run_link", AsyncMock(return_value=False))
     out = await mark_run_with_version(
         MarkRunWithVersionInput(

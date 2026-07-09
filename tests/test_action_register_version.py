@@ -13,7 +13,7 @@ from hyppo.actions.version import (
 
 @pytest.fixture
 def mock_store(monkeypatch):
-    from hyppo.mcp import version_store
+    from hyppo.versioning import version_store
     monkeypatch.setattr(version_store, "insert_hypothesis_version", AsyncMock())
     monkeypatch.setattr(version_store, "find_latest_active", AsyncMock(return_value=None))
     return version_store
@@ -39,7 +39,7 @@ async def test_register_happy_path_no_prior(mock_store):
 
 
 async def test_register_supersedes_prior_version(monkeypatch):
-    from hyppo.mcp import version_store
+    from hyppo.versioning import version_store
     monkeypatch.setattr(version_store, "insert_hypothesis_version", AsyncMock())
     monkeypatch.setattr(
         version_store, "find_latest_active",
@@ -57,7 +57,7 @@ async def test_register_supersedes_prior_version(monkeypatch):
 
 async def test_register_duplicate_raises(monkeypatch):
     from sqlalchemy.exc import IntegrityError
-    from hyppo.mcp import version_store
+    from hyppo.versioning import version_store
 
     monkeypatch.setattr(
         version_store, "insert_hypothesis_version",

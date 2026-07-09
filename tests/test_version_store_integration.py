@@ -4,7 +4,7 @@ import asyncio
 import pytest
 from sqlalchemy.exc import IntegrityError
 
-from hyppo.mcp import version_store
+from hyppo.versioning import version_store
 
 
 async def test_insert_and_find_latest(version_db_session):

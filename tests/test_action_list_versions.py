@@ -30,7 +30,7 @@ async def test_list_returns_descending_order(monkeypatch):
         _row("v2", datetime(2026, 5, 20, 12, 0, 0)),
         _row("v1", datetime(2026, 5, 10, 12, 0, 0)),
     ]
-    from hyppo.mcp import version_store
+    from hyppo.versioning import version_store
     monkeypatch.setattr(
         version_store, "select_versions_by_kind", AsyncMock(return_value=rows),
     )
@@ -42,7 +42,7 @@ async def test_list_returns_descending_order(monkeypatch):
 
 
 async def test_list_empty_is_ok(monkeypatch):
-    from hyppo.mcp import version_store
+    from hyppo.versioning import version_store
     monkeypatch.setattr(
         version_store, "select_versions_by_kind", AsyncMock(return_value=[]),
     )

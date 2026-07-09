@@ -1,9 +1,8 @@
-"""Async persistence helpers for hyppo MCP write actions (hypothesis versioning
-and run provenance).
+"""Async persistence helpers for hypothesis versioning and run provenance.
 
-Self-contained: models and engine live in :mod:`hyppo.mcp._db` -- no dependency
-on any external ORM. Each function opens an async session, performs the query,
-and commits where needed.
+Self-contained: models and engine live in :mod:`hyppo.versioning._db` -- no
+dependency on any external ORM. Each function opens an async session, performs
+the query, and commits where needed.
 """
 from __future__ import annotations
 
@@ -13,7 +12,7 @@ from typing import Any
 
 from sqlalchemy import select
 
-from hyppo.mcp._db import (
+from hyppo.versioning._db import (
     HypothesisRunLink,
     HypothesisVersion,
     get_engine,

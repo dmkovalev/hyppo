@@ -47,7 +47,7 @@ def pytest_collection_modifyitems(items):
 async def version_db_session(monkeypatch, tmp_path):
     """Per-test aiosqlite database with all ORM tables provisioned."""
     from sqlalchemy.ext.asyncio import create_async_engine
-    from hyppo.mcp._db import Base
+    from hyppo.versioning._db import Base
 
     db_path = tmp_path / "hyppo_test.sqlite"
     db_url = f"sqlite+aiosqlite:///{db_path}"

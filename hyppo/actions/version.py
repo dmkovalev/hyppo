@@ -1,7 +1,7 @@
 """Hypothesis-version actions: register, get, list, mark, resolve.
 
 T5 implements `register_hypothesis_version`. T6-T8 append more actions
-to this same file. All DB I/O goes through hyppo.mcp.version_store.
+to this same file. All DB I/O goes through hyppo.versioning.version_store.
 """
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ from sqlalchemy.exc import IntegrityError
 from hyppo.actions.registry import action
 from hyppo.actions.types import AgentRole, TrustLevel
 from hyppo.actions.virtual_experiment import ALL_HYPOTHESIS_KINDS
-from hyppo.mcp import version_store
+from hyppo.versioning import version_store
 
 logger = logging.getLogger(__name__)
 

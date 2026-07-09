@@ -26,7 +26,7 @@ def mock_row():
 
 
 async def test_get_hit_returns_record(monkeypatch, mock_row):
-    from hyppo.mcp import version_store
+    from hyppo.versioning import version_store
     monkeypatch.setattr(
         version_store, "select_version_by_id", AsyncMock(return_value=mock_row),
     )
@@ -38,7 +38,7 @@ async def test_get_hit_returns_record(monkeypatch, mock_row):
 
 
 async def test_get_miss_raises(monkeypatch):
-    from hyppo.mcp import version_store
+    from hyppo.versioning import version_store
     monkeypatch.setattr(
         version_store, "select_version_by_id", AsyncMock(return_value=None),
     )
