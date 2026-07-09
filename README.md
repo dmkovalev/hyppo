@@ -100,7 +100,7 @@ lifecycle: define hypotheses -> graph -> plan -> run -> compare -> iterate.
 |-----------|--------|---------|
 | Core | `hyppo.core` | OWL ontology + epistemic status of hypotheses |
 | Manager | `hyppo.manager` | Lifecycle orchestration of virtual experiments |
-| HypothesisGenerator | `hyppo.generator` | Hypothesis generation from data |
+| HypothesisGenerator | `hyppo.generator` | Baseline hypothesis generation (linear regression + optional genetic programming) |
 | COAConstructor | `hyppo.coa` | Causal ordering of equation systems |
 | LatticesConstructor | `hyppo.lattice_constructor` | Algorithm 1 — hypothesis lattice |
 | Planner | `hyppo.planner` | Minimal recomputation plan (Algorithm 4) |
@@ -127,10 +127,10 @@ After connecting, clients see tools `mcp__hyppo__BuildVirtualExperiment`,
 `...DiffHypothesisStates`, `...RegisterHypothesisVersion`, etc., and the
 persona resource `hyppo://personas/lattice_steward.md`.
 
-Write actions (`RegisterHypothesisVersion`, `MarkRunWithVersion`) require
-an external versioning database. Without it configured, write actions
-return a structured `{"error":"not_implemented"}` response and
-non-blocking agents route around them.
+Write actions (`RegisterHypothesisVersion`, `MarkRunWithVersion`) persist
+to an embedded SQLite store (aiosqlite, in-memory by default) out of the
+box. Set `DATABASE_URL` to point at an external database (e.g. Postgres)
+for production deployments.
 
 ## How to cite
 
