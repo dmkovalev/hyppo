@@ -1,9 +1,26 @@
-# Hyppo — Hypothesis Platform for Virtual Experiments
+# gedanken
+
+[![CI](https://github.com/dmkovalev/hyppo-ref/actions/workflows/ci.yml/badge.svg)](https://github.com/dmkovalev/hyppo-ref/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python >=3.11](https://img.shields.io/badge/python-%3E%3D3.11-blue.svg)](https://www.python.org/)
+
+> gedanken — a platform for virtual (thought) experiments over hypothesis
+> lattices
 
 Reference implementation of the virtual experiment management platform
-described in Chapter 3 of the dissertation.
+described in Chapter 3 of the dissertation. The distribution is published
+as `gedanken` on PyPI; the import path remains `hyppo`.
+
+Documentation site: <https://dmkovalev.github.io/hyppo-ref/> (placeholder —
+published once the `mkdocs` deployment workflow ships).
 
 ## Installation
+
+```bash
+pip install gedanken
+```
+
+For local development:
 
 ```bash
 pip install -e ".[dev]"
@@ -19,8 +36,10 @@ pytest tests/ -v
 
 Launch the web GUI locally:
 
-    pip install "hyppo[gui]"
-    hyppo gui
+```bash
+pip install "gedanken[gui]"
+hyppo-gui
+```
 
 Opens a browser at http://127.0.0.1:8787 with a preloaded `norne-brugge`
 demo. Walk the full virtual-experiment lifecycle: define hypotheses →
@@ -48,10 +67,10 @@ Hyppo exposes 8 typed actions and a `Lattice Steward` persona via MCP.
 
 ```bash
 # stdio (Claude Code / Desktop)
-uv run python -m hyppo.mcp
+hyppo-mcp
 
 # streamable HTTP for cross-MCP callers (e.g. the wfonto bridge)
-uv run python -m hyppo.mcp --transport http --port 8082
+hyppo-mcp --transport http --port 8082
 ```
 
 After connecting, clients see tools `mcp__hyppo__BuildVirtualExperiment`,

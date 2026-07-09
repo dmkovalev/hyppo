@@ -21,8 +21,8 @@ from hyppo.coa._base import Equation, Structure
 G = HypothesisLattice(hypotheses, workflow).lattice   # networkx.DiGraph
 ```
 
-**Golden**: ровно 17 рёбер `NORNE_GOLDEN_EDGES` (см. тест
-`test_alg1_norne_graph_matches_figure`), 16 узлов, DAG, глубина 5.
+**Golden**: ровно 18 рёбер `NORNE_GOLDEN_EDGES` (см. тест
+`test_alg1_norne_graph_matches_figure`), 16 узлов, DAG, глубина 10.
 
 **Визуализация**: граф (две ветви + слияние, как рис. 3 статьи). На ребре —
 объяснение вывода: «выход `I_agg` (H1) входит в уравнение H2». Выход

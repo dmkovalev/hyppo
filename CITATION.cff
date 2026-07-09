@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: gedanken
+version: 1.1.0
+date-released: "2026-07-09"
+abstract: >-
+  A platform for virtual (thought) experiments over hypothesis lattices:
+  reference implementation accompanying the dissertation (import path
+  stays `hyppo`).
+authors:
+  - given-names: Dmitry
+    family-names: Kovalev
+    alias: dmkovalev
+    email: backtoreal911@gmail.com
+license: MIT
+repository-code: "https://github.com/dmkovalev/hyppo-ref"
+keywords:
+  - hypothesis
+  - virtual-experiment
+  - causal-inference
+  - lattice
+  - dissertation
