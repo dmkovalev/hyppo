@@ -23,7 +23,16 @@ by one or more layers above without being layers themselves.
 The domain core: the virtual-experiment OWL ontology (`virtual_experiment_onto`,
 Definition 1) built on owlready2, plus the epistemic-status transition
 function (Section 2) that classifies a hypothesis as confirmed / rejected /
-undetermined given its evidence.
+undetermined given its evidence. Schema and rule definitions are extracted
+into factory functions (`define_ve_schema`, `create_ve_world`), so each
+virtual experiment can be built in its own isolated owlready2 `World`:
+`hyppo.adapters.norne_adapter.build_oil_virtual_experiment` is safely
+re-callable within one process with no cross-call identifier conflicts.
+The module-global `virtual_experiment_onto` (used by the golden tests)
+remains an instance of the same factory in the default world — existing
+code's behaviour is unchanged. Limitation: `hyppo.ontology.markers` stays
+bound to the default world (it uses `class.instances()`); isolating
+markers is left for a separate iteration.
 
 ### `hyppo.coa`
 
@@ -43,7 +52,16 @@ only place graph edges are derived — no component re-implements Algorithm 1.
 ### `hyppo.planner`
 
 Algorithm 4: builds an `ExecutionPlan` as a cascaded closure over the
-lattice, proven correct and ⊆-minimal (Theorem 1).
+lattice, proven correct and ⊆-minimal (Theorem 1). The pure two-way
+cascade (no R² awareness) exists exactly once in the system —
+`hyppo.coa.HypothesisGraph.plan`, also exposed as the string-keyed façade
+`hyppo.coa.plan_cascade`, which the GUI's plan-preview (`hyppo.gui`)
+delegates to directly. The two-way cascade cannot express the three-way
+R² exclusion (recompute / cached / pruned from the plan entirely), so
+`hyppo.planner` and `hyppo.manager` each walk the lattice with that
+semantics (using `nx.descendants` as a library primitive rather than
+re-implementing Algorithm 4) — the two traversals are kept identical to
+each other.
 
 ### `hyppo.runner`
 
@@ -71,7 +89,11 @@ Hypothesis-version persistence: content-addressed snapshots and run
 provenance (SQLAlchemy models + async query functions). Deliberately
 independent of `hyppo.mcp` and `hyppo.actions` — `hyppo.actions` depends on
 `hyppo.versioning`, not the other way around, breaking what used to be an
-`actions <-> mcp` import cycle.
+`actions <-> mcp` import cycle. The SQLAlchemy engine is cached per URL (one
+engine per process per connection string) and the schema is auto-created on
+first use; with no `DATABASE_URL` set, data persists to a file
+`hyppo_versions.db` in the current working directory, so versioning works
+out of the box with no manual setup.
 
 ### `hyppo.metadata_repository`
 
