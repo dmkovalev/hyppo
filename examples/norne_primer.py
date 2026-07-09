@@ -207,7 +207,7 @@ def act_4_plan_theorem1(g: nx.DiGraph) -> set[str]:
     changed = "H8"  # scenario: the LPR fusion was re-fit
     cached = set(range(len(codes))) - {idx[changed]}
     plan = hg.plan(cached)
-    plan_names = sorted(PAPER[codes[i]] for i in plan)
+    plan_names = sorted((PAPER[codes[i]] for i in plan), key=lambda p: int(p[1:]))
     print(f"\nScenario: {PAPER[changed]} changed -> plan P_ne = {plan_names}")
     print("Cascade: the whole liquid-fusion downstream (material balance,")
     print("watercut chain, oil forecast) is invalidated; upstream is not.")
