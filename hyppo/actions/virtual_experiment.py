@@ -95,10 +95,13 @@ _OIL_SNAPSHOT_CACHE: VirtualExperimentSnapshot | None = None
 def _build_oil_snapshot() -> VirtualExperimentSnapshot:
     """Single source of truth — call norne_adapter once, project to Pydantic.
 
-    Memoised at module scope because `norne_adapter.build_oil_virtual_experiment`
-    creates OWL individuals with fixed IRIs in the default world; a second call
-    in the same process would raise `sqlite3.IntegrityError`. Reuse is safe —
-    the output is deterministic.
+    Memoised at module scope purely for performance: the projection is
+    deterministic and the frozen ``VirtualExperimentSnapshot`` holds only
+    primitives (kinds, descriptions, class-name tuples, edges), so no owlready2
+    individual escapes. ``norne_adapter.build_oil_virtual_experiment`` now
+    allocates a fresh isolated ``World`` per call (no fixed-IRI collision), so
+    the cache is a perf memo, not a correctness guard; the transient World is
+    discarded once the snapshot is extracted.
     """
     global _OIL_SNAPSHOT_CACHE
     if _OIL_SNAPSHOT_CACHE is not None:

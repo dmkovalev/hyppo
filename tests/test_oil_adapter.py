@@ -28,13 +28,6 @@ from hyppo.adapters.norne_adapter import (
     build_oil_virtual_experiment,
     run_oil_experiment_demo,
 )
-from hyppo.ontology.core_rules import (
-    DataDrivenHypothesis,
-    HybridHypothesis,
-    InvalidHypothesis,
-    PhysicsHypothesis,
-    StaleHypothesis,
-)
 
 try:
     from owlready2 import (  # noqa: F401 -- availability check
@@ -161,7 +154,9 @@ class TestBuildOilExperiment:
         """The VE individual must have an OilFieldOntology attached."""
         ve = ve_data["virtual_experiment"]
         assert len(ve.has_for_ontology) == 1
-        assert isinstance(ve.has_for_ontology[0], OilFieldOntology)
+        # Individuals live in the VE's own isolated world; classify against
+        # that world's schema (ns), not the module-global default-world class.
+        assert isinstance(ve.has_for_ontology[0], ve_data["ns"].OilFieldOntology)
 
 
 class TestHypothesisClassificationStructural:
@@ -169,24 +164,18 @@ class TestHypothesisClassificationStructural:
 
     def test_h_CRM_has_physics_model(self, ve_data):
         """h_CRM must be implemented by a PhysicsModel."""
-        from hyppo.ontology.core_rules import PhysicsModel
-
         h = ve_data["hypotheses_map"]["h_CRM"]
-        assert isinstance(h.is_implemented_by_model, PhysicsModel)
+        assert isinstance(h.is_implemented_by_model, ve_data["ns"].PhysicsModel)
 
     def test_h_ML_has_datadriven_model(self, ve_data):
         """h_ML must be implemented by a DataDrivenModel."""
-        from hyppo.ontology.core_rules import DataDrivenModel
-
         h = ve_data["hypotheses_map"]["h_ML"]
-        assert isinstance(h.is_implemented_by_model, DataDrivenModel)
+        assert isinstance(h.is_implemented_by_model, ve_data["ns"].DataDrivenModel)
 
     def test_h_LPR_has_hybrid_model(self, ve_data):
         """h_LPR must be implemented by a HybridModel."""
-        from hyppo.ontology.core_rules import HybridModel
-
         h = ve_data["hypotheses_map"]["h_LPR"]
-        assert isinstance(h.is_implemented_by_model, HybridModel)
+        assert isinstance(h.is_implemented_by_model, ve_data["ns"].HybridModel)
 
 
 class TestCascadeInvalidation:
@@ -197,8 +186,9 @@ class TestCascadeInvalidation:
         hyps = ve_data["hypotheses_map"]
         h_crm = hyps["h_CRM"]
 
-        # Mark h_CRM as invalid
-        h_crm.is_a.append(InvalidHypothesis)
+        # Mark h_CRM as invalid (use the VE world's own class, not the
+        # module-global one — is_a storids are world-local).
+        h_crm.is_a.append(ve_data["ns"].InvalidHypothesis)
 
         # Walk the derived_by chain structurally
         stale: set[str] = set()
@@ -234,7 +224,7 @@ class TestCascadeInvalidation:
         h_crm = hyps["h_CRM"]
         h_ml = hyps["h_ML"]
 
-        h_crm.is_a.append(InvalidHypothesis)
+        h_crm.is_a.append(ve_data["ns"].InvalidHypothesis)
 
         # h_ML has no derived_by pointing to h_CRM
         deps = h_ml.derived_by if h_ml.derived_by else []
@@ -321,28 +311,30 @@ class TestPelletClassification:
 
     def test_hypothesis_classification_physics(self, ve_data):
         """Pellet must classify h_CRM as PhysicsHypothesis."""
-        sync_reasoner_hermit(infer_property_values=True)
+        # Reason over the VE's own ontology/world, where the individuals live.
+        sync_reasoner_hermit(ve_data["onto"], infer_property_values=True)
         h = ve_data["hypotheses_map"]["h_CRM"]
-        assert PhysicsHypothesis in h.is_a
+        assert ve_data["ns"].PhysicsHypothesis in h.is_a
 
     def test_hypothesis_classification_datadriven(self, ve_data):
         """Pellet must classify h_ML as DataDrivenHypothesis."""
-        sync_reasoner_hermit(infer_property_values=True)
+        sync_reasoner_hermit(ve_data["onto"], infer_property_values=True)
         h = ve_data["hypotheses_map"]["h_ML"]
-        assert DataDrivenHypothesis in h.is_a
+        assert ve_data["ns"].DataDrivenHypothesis in h.is_a
 
     def test_hypothesis_classification_hybrid(self, ve_data):
         """Pellet must classify h_LPR as HybridHypothesis."""
-        sync_reasoner_hermit(infer_property_values=True)
+        sync_reasoner_hermit(ve_data["onto"], infer_property_values=True)
         h = ve_data["hypotheses_map"]["h_LPR"]
-        assert HybridHypothesis in h.is_a
+        assert ve_data["ns"].HybridHypothesis in h.is_a
 
     def test_pellet_cascade_invalidation(self, ve_data):
         """Pellet must infer StaleHypothesis for h_LPR when h_CRM is invalid."""
+        ns = ve_data["ns"]
         hyps = ve_data["hypotheses_map"]
-        hyps["h_CRM"].is_a.append(InvalidHypothesis)
-        sync_reasoner_hermit(infer_property_values=True)
-        assert StaleHypothesis in hyps["h_LPR"].is_a
+        hyps["h_CRM"].is_a.append(ns.InvalidHypothesis)
+        sync_reasoner_hermit(ve_data["onto"], infer_property_values=True)
+        assert ns.StaleHypothesis in hyps["h_LPR"].is_a
 
 
 class TestDemoRun:

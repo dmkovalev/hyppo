@@ -8,6 +8,7 @@ by :class:`hyppo.lattice_constructor._base.HypothesisLattice` (Algorithm 1).
 """
 
 import datetime
+from types import SimpleNamespace
 
 from owlready2 import (
     AllDisjoint,
@@ -26,260 +27,348 @@ virtual_experiment_onto = get_ontology(
 hcp_brain_onto = get_ontology("http://synthesis.ipi.ac.ru/hcp_brain_onto.owl")
 virtual_experiment_onto.imported_ontologies.append(hcp_brain_onto)
 
-with virtual_experiment_onto:
-    # define base class and its properties
-    class Artefact(Thing):
-        """Root OWL class for every documented artefact (Definition 1).
 
-        Base class for ``Hypothesis``, ``Model``, ``VirtualExperiment`` and
-        the structural classes below; carries the mandatory identity/
-        provenance properties (id, name, description, authors, timestamps).
-        """
+def define_ve_schema(onto):
+    """Declare the virtual-experiment OWL schema in ``onto`` and return a
+    namespace of the created classes and properties.
 
-    # class Specification(Thing): pass
-    class has_for_id(Artefact >> int, DataProperty, FunctionalProperty):
-        """Functional data property: unique integer identifier of an artefact."""
+    Called at import against the module-global ``virtual_experiment_onto``
+    to reproduce the package's default schema, and by
+    :func:`hyppo.core.create_ve_world` against a fresh isolated ``World``.
+    """
+    with onto:
+        # define base class and its properties
+        class Artefact(Thing):
+            """Root OWL class for every documented artefact (Definition 1).
 
-        python_name = "id"
+            Base class for ``Hypothesis``, ``Model``, ``VirtualExperiment`` and
+            the structural classes below; carries the mandatory identity/
+            provenance properties (id, name, description, authors, timestamps).
+            """
 
-    class has_for_name(Artefact >> str, DataProperty, FunctionalProperty):
-        """Functional data property: human-readable name of an artefact."""
+        # class Specification(Thing): pass
+        class has_for_id(Artefact >> int, DataProperty, FunctionalProperty):
+            """Functional data property: unique integer identifier of an artefact."""
 
-        python_name = "name"
+            python_name = "id"
 
-    class has_for_description(Artefact >> str, DataProperty, FunctionalProperty):
-        """Functional data property: free-text description of an artefact."""
+        class has_for_name(Artefact >> str, DataProperty, FunctionalProperty):
+            """Functional data property: human-readable name of an artefact."""
 
-        python_name = "description"
+            python_name = "name"
 
-    class has_for_authors(Artefact >> str, DataProperty):
-        """Non-functional data property: one or more author names (min 1)."""
+        class has_for_description(Artefact >> str, DataProperty, FunctionalProperty):
+            """Functional data property: free-text description of an artefact."""
 
-        python_name = "authors"
+            python_name = "description"
 
-    class has_for_createdate(
-        Artefact >> datetime.datetime, DataProperty, FunctionalProperty
-    ):
-        """Functional data property: artefact creation timestamp."""
+        class has_for_authors(Artefact >> str, DataProperty):
+            """Non-functional data property: one or more author names (min 1)."""
 
-        python_name = "create_date"
+            python_name = "authors"
 
-    class has_for_lastupdate(
-        Artefact >> datetime.datetime, DataProperty, FunctionalProperty
-    ):
-        """Functional data property: artefact last-modification timestamp."""
+        class has_for_createdate(
+            Artefact >> datetime.datetime, DataProperty, FunctionalProperty
+        ):
+            """Functional data property: artefact creation timestamp."""
 
-        python_name = "last_update"
+            python_name = "create_date"
 
-    # class has_for_specification(Artefact >> Specification): pass
+        class has_for_lastupdate(
+            Artefact >> datetime.datetime, DataProperty, FunctionalProperty
+        ):
+            """Functional data property: artefact last-modification timestamp."""
 
-    Artefact.is_a.extend(
-        [
-            has_for_authors.min(1),
-            has_for_name.exactly(1),
-            has_for_description.exactly(1),
-            has_for_id.exactly(1),
-            has_for_lastupdate.exactly(1),
-            has_for_createdate.exactly(1),
-        ]
+            python_name = "last_update"
+
+        # class has_for_specification(Artefact >> Specification): pass
+
+        Artefact.is_a.extend(
+            [
+                has_for_authors.min(1),
+                has_for_name.exactly(1),
+                has_for_description.exactly(1),
+                has_for_id.exactly(1),
+                has_for_lastupdate.exactly(1),
+                has_for_createdate.exactly(1),
+            ]
+        )
+
+        class Hypothesis(Artefact):
+            """OWL individual for a hypothesis h in H (Definition 1).
+
+            Node type of the hypothesis lattice built by Algorithm 1
+            (:class:`hyppo.lattice_constructor._base.HypothesisLattice`); linked
+            to its implementing ``Model`` via ``is_implemented_by_model`` and to
+            competing/derived hypotheses via ``competes``/``derived_by``.
+            """
+
+        class Model(Artefact):
+            """OWL individual for the model that implements a ``Hypothesis``.
+
+            Paired 1:1 with its hypothesis through the mutually-inverse,
+            functional properties ``is_implemented_by_model`` / ``refers_to_hypothesis``
+            (see the Theorem 1 axiomatic support note below).
+            """
+
+        # class Mapping(Artefact): pass
+        # class Relation(Artefact): pass
+
+        # TODO probability > 0.0 and < 1.0
+        class has_for_probability(
+            Hypothesis >> float, DataProperty, FunctionalProperty
+        ):
+            """Functional data property: prior/posterior probability of a hypothesis."""
+
+            python_name = "probability"
+
+        class is_implemented_by_model(Hypothesis >> Model):
+            """Object property: hypothesis -> the model implementing it (some Model)."""
+
+            class_property_type = ["some"]
+
+        class refers_to_hypothesis(ObjectProperty):
+            """Object property: model -> the hypothesis it implements (inverse of
+            ``is_implemented_by_model``); both are declared functional below for
+            the Theorem 1 uniqueness proof (paired 1:1 correspondence)."""
+
+            domain = [Model]
+            range = [Hypothesis]
+            inverse_property = is_implemented_by_model
+            class_property_type = ["only"]
+
+        class competes(Hypothesis >> Hypothesis, SymmetricProperty):
+            """Symmetric object property: two hypotheses compete over the same
+            phenomenon (used by :func:`hyppo.core._epistemic.evaluate_status` via
+            the runner's Delta-AIC SUPERSEDED check)."""
+
+        class derived_by(Hypothesis >> Hypothesis, TransitiveProperty):
+            """Transitive object property: lattice edge h_j derived_by h_i, i.e.
+            h_j depends on h_i's output (Definition 1); the edge set is computed
+            by Algorithm 1 and incrementally maintained by Algorithm 2."""
+
+        # Note: AsymmetricProperty and IrreflexiveProperty removed because
+        # OWL 2 DL simplicity constraint forbids them on transitive properties.
+        # Acyclicity is enforced by Algorithm 3 (consistency check), not OWL axioms.
+        class impacts(ObjectProperty, TransitiveProperty):
+            """Transitive object property, inverse of ``derived_by``: h_i impacts
+            h_j means h_j is derived_by h_i. Acyclicity of this relation (no
+            hypothesis impacts itself transitively) is enforced procedurally by
+            Algorithm 3's consistency check, not by an OWL axiom (see note above)."""
+
+            domain = [Hypothesis]
+            range = [Hypothesis]
+            inverse_property = derived_by
+
+        class VirtualExperiment(Artefact):
+            """OWL individual for a virtual experiment: bundles a set of
+            hypotheses, their models, a ``Workflow`` and a ``Configuration``."""
+
+        class Configuration(Artefact):
+            """OWL individual holding the run configuration of a virtual experiment."""
+
+        class Workflow(Artefact):
+            """OWL individual for the task DAG of a virtual experiment; the
+            Python-level counterpart with execution semantics is
+            :class:`hyppo.core._workflow.Workflow`."""
+
+        # class Task(Thing): pass
+
+        class has_for_hypothesis(VirtualExperiment >> Hypothesis):
+            """Object property: virtual experiment -> its hypotheses (some)."""
+
+            class_property_type = ["some"]
+
+        class has_for_model(VirtualExperiment >> Model):
+            """Object property: virtual experiment -> its models (some Model)."""
+
+            class_property_type = ["some"]
+
+        class has_for_workflow(VirtualExperiment >> Workflow):
+            """Object property: virtual experiment -> its task workflow (only)."""
+
+            class_property_type = ["only"]
+
+        class has_for_configuration(VirtualExperiment >> Configuration):
+            """Object property: virtual experiment -> its run configuration
+            (some Configuration)."""
+
+            class_property_type = ["some"]
+
+        # class has_for_task(Workflow >> Task): class_property_type = ["some"]
+
+        class Structure(Artefact):
+            """OWL counterpart of a causal-ordering structure: a set of equations
+            over a set of variables, as manipulated by the pure-Python core
+            :class:`hyppo.coa._base.Structure` (Algorithm 1 input)."""
+
+        class FullStructure(Structure):
+            """A ``Structure`` that is complete (Hall's condition holds): every
+            equation can be matched to a distinct output variable, so a causal
+            mapping (``FullCausalMapping``) can be derived from it."""
+
+        class Equation(Thing):
+            """OWL counterpart of a single causal-ordering equation, mirroring
+            :class:`hyppo.coa._base.Equation` (formula + its free variables)."""
+
+        class Variable(Thing):
+            """OWL individual for a variable appearing in an ``Equation`` /
+            ``Structure`` (sympy Symbol on the pure-Python side)."""
+
+        class has_for_varname(Variable >> str, DataProperty, FunctionalProperty):
+            """Functional data property: the symbolic name of a ``Variable``."""
+
+            python_name = "name"
+
+        class FullCausalMapping(Artefact):
+            """The causal mapping (assignment equation -> output variable)
+            derived from a ``FullStructure`` by the causal ordering algorithm."""
+
+        class has_for_fcm(FullStructure >> FullCausalMapping):
+            """Object property: a ``FullStructure`` -> its derived
+            ``FullCausalMapping`` (only)."""
+
+            class_property_type = ["only"]
+
+        class has_for_structure(Hypothesis >> Structure):
+            """Object property: a ``Hypothesis`` -> the ``Structure`` of
+            equations it is built from (only)."""
+
+            class_property_type = ["only"]
+
+        class DependencySet(Artefact):
+            """Set of variable/hypothesis dependencies derived from a
+            ``FullStructure``'s causal mapping."""
+
+        class has_for_dependecy_set(FullStructure >> DependencySet):
+            """Object property: a ``FullStructure`` -> its ``DependencySet``
+            (only)."""
+
+            class_property_type = ["only"]
+
+        class TransitiveClosure(DependencySet):
+            """A ``DependencySet`` closed under transitivity (all indirect
+            dependencies made explicit)."""
+
+        class ResearchLattice(Artefact):
+            """OWL counterpart of the hypothesis lattice built by Algorithm 1
+            (:class:`hyppo.lattice_constructor._base.HypothesisLattice`): the set
+            of hypotheses under study, linked via ``has_for_lattice_hypothesis``."""
+
+        class has_for_lattice_hypothesis(ResearchLattice >> Hypothesis):
+            """Object property: a ``ResearchLattice`` -> its member hypotheses
+            (some Hypothesis)."""
+
+            class_property_type = ["some"]
+
+        # class has_for_vars(Equation >> Variable, DataProperty):
+        #     class_property_type = ["some"]
+        #     python_name = "vars"
+
+        # class has_for_equation(Structure >> Equation, DataProperty):
+        #     python_name = "equation"
+
+        # class has_for_structure_variable(Structure >> Variable):
+        #     class_property_type = ["some"]
+        #     python_name = "vars"
+
+        AllDisjoint([VirtualExperiment, Configuration, Workflow, Hypothesis, Model])
+
+        # ── Theorem 1 axiomatic support (dissertation, planning chapter) ────────
+        # Adds the three OWL axioms required for the C2 source-of-inconsistency
+        # bijection in the consistency-check correctness proof:
+        #   (i)  is_implemented_by_model is Functional → uniqueness of m
+        #        (each hypothesis is implemented by at most one model);
+        #   (ii) refers_to_hypothesis is Functional → uniqueness of h per model
+        #        (paired-functional design across the inverse property);
+        #   (iii) Hypothesis ⊑ ∃is_implemented_by_model.Model → existence of m
+        #        (every Hypothesis has at least one implementing model).
+        # Together these give the ∃! m ∈ Model. R(m) = h required by C2.
+        # NOTE on UNA: OWL 2 DL does not assume Unique Name Assumption, so
+        # FunctionalProperty alone only unifies (m1 ≡ m2) rather than yielding
+        # owl:Nothing. Concrete VE instantiations must add AllDifferent on the
+        # set of Model individuals to enforce C2-uniqueness inconsistency
+        # detection by HermiT (see paper §2, Theorem 1 proof).
+        is_implemented_by_model.is_a.append(FunctionalProperty)
+        refers_to_hypothesis.is_a.append(FunctionalProperty)
+        Hypothesis.is_a.append(is_implemented_by_model.some(Model))
+
+    return SimpleNamespace(
+        Artefact=Artefact,
+        has_for_id=has_for_id,
+        has_for_name=has_for_name,
+        has_for_description=has_for_description,
+        has_for_authors=has_for_authors,
+        has_for_createdate=has_for_createdate,
+        has_for_lastupdate=has_for_lastupdate,
+        Hypothesis=Hypothesis,
+        Model=Model,
+        has_for_probability=has_for_probability,
+        is_implemented_by_model=is_implemented_by_model,
+        refers_to_hypothesis=refers_to_hypothesis,
+        competes=competes,
+        derived_by=derived_by,
+        impacts=impacts,
+        VirtualExperiment=VirtualExperiment,
+        Configuration=Configuration,
+        Workflow=Workflow,
+        has_for_hypothesis=has_for_hypothesis,
+        has_for_model=has_for_model,
+        has_for_workflow=has_for_workflow,
+        has_for_configuration=has_for_configuration,
+        Structure=Structure,
+        FullStructure=FullStructure,
+        Equation=Equation,
+        Variable=Variable,
+        has_for_varname=has_for_varname,
+        FullCausalMapping=FullCausalMapping,
+        has_for_fcm=has_for_fcm,
+        has_for_structure=has_for_structure,
+        DependencySet=DependencySet,
+        has_for_dependecy_set=has_for_dependecy_set,
+        TransitiveClosure=TransitiveClosure,
+        ResearchLattice=ResearchLattice,
+        has_for_lattice_hypothesis=has_for_lattice_hypothesis,
     )
 
-    class Hypothesis(Artefact):
-        """OWL individual for a hypothesis h in H (Definition 1).
 
-        Node type of the hypothesis lattice built by Algorithm 1
-        (:class:`hyppo.lattice_constructor._base.HypothesisLattice`); linked
-        to its implementing ``Model`` via ``is_implemented_by_model`` and to
-        competing/derived hypotheses via ``competes``/``derived_by``.
-        """
+_ns = define_ve_schema(virtual_experiment_onto)
 
-    class Model(Artefact):
-        """OWL individual for the model that implements a ``Hypothesis``.
-
-        Paired 1:1 with its hypothesis through the mutually-inverse,
-        functional properties ``is_implemented_by_model`` / ``refers_to_hypothesis``
-        (see the Theorem 1 axiomatic support note below).
-        """
-
-    # class Mapping(Artefact): pass
-    # class Relation(Artefact): pass
-
-    # TODO probability > 0.0 and < 1.0
-    class has_for_probability(Hypothesis >> float, DataProperty, FunctionalProperty):
-        """Functional data property: prior/posterior probability of a hypothesis."""
-
-        python_name = "probability"
-
-    class is_implemented_by_model(Hypothesis >> Model):
-        """Object property: hypothesis -> the model implementing it (some Model)."""
-
-        class_property_type = ["some"]
-
-    class refers_to_hypothesis(ObjectProperty):
-        """Object property: model -> the hypothesis it implements (inverse of
-        ``is_implemented_by_model``); both are declared functional below for
-        the Theorem 1 uniqueness proof (paired 1:1 correspondence)."""
-
-        domain = [Model]
-        range = [Hypothesis]
-        inverse_property = is_implemented_by_model
-        class_property_type = ["only"]
-
-    class competes(Hypothesis >> Hypothesis, SymmetricProperty):
-        """Symmetric object property: two hypotheses compete over the same
-        phenomenon (used by :func:`hyppo.core._epistemic.evaluate_status` via
-        the runner's Delta-AIC SUPERSEDED check)."""
-
-    class derived_by(Hypothesis >> Hypothesis, TransitiveProperty):
-        """Transitive object property: lattice edge h_j derived_by h_i, i.e.
-        h_j depends on h_i's output (Definition 1); the edge set is computed
-        by Algorithm 1 and incrementally maintained by Algorithm 2."""
-
-    # Note: AsymmetricProperty and IrreflexiveProperty removed because
-    # OWL 2 DL simplicity constraint forbids them on transitive properties.
-    # Acyclicity is enforced by Algorithm 3 (consistency check), not OWL axioms.
-    class impacts(ObjectProperty, TransitiveProperty):
-        """Transitive object property, inverse of ``derived_by``: h_i impacts
-        h_j means h_j is derived_by h_i. Acyclicity of this relation (no
-        hypothesis impacts itself transitively) is enforced procedurally by
-        Algorithm 3's consistency check, not by an OWL axiom (see note above)."""
-
-        domain = [Hypothesis]
-        range = [Hypothesis]
-        inverse_property = derived_by
-
-    class VirtualExperiment(Artefact):
-        """OWL individual for a virtual experiment: bundles a set of
-        hypotheses, their models, a ``Workflow`` and a ``Configuration``."""
-
-    class Configuration(Artefact):
-        """OWL individual holding the run configuration of a virtual experiment."""
-
-    class Workflow(Artefact):
-        """OWL individual for the task DAG of a virtual experiment; the
-        Python-level counterpart with execution semantics is
-        :class:`hyppo.core._workflow.Workflow`."""
-
-    # class Task(Thing): pass
-
-    class has_for_hypothesis(VirtualExperiment >> Hypothesis):
-        """Object property: virtual experiment -> its hypotheses (some Hypothesis)."""
-
-        class_property_type = ["some"]
-
-    class has_for_model(VirtualExperiment >> Model):
-        """Object property: virtual experiment -> its models (some Model)."""
-
-        class_property_type = ["some"]
-
-    class has_for_workflow(VirtualExperiment >> Workflow):
-        """Object property: virtual experiment -> its task workflow (only Workflow)."""
-
-        class_property_type = ["only"]
-
-    class has_for_configuration(VirtualExperiment >> Configuration):
-        """Object property: virtual experiment -> its run configuration
-        (some Configuration)."""
-
-        class_property_type = ["some"]
-
-    # class has_for_task(Workflow >> Task): class_property_type = ["some"]
-
-    class Structure(Artefact):
-        """OWL counterpart of a causal-ordering structure: a set of equations
-        over a set of variables, as manipulated by the pure-Python core
-        :class:`hyppo.coa._base.Structure` (Algorithm 1 input)."""
-
-    class FullStructure(Structure):
-        """A ``Structure`` that is complete (Hall's condition holds): every
-        equation can be matched to a distinct output variable, so a causal
-        mapping (``FullCausalMapping``) can be derived from it."""
-
-    class Equation(Thing):
-        """OWL counterpart of a single causal-ordering equation, mirroring
-        :class:`hyppo.coa._base.Equation` (formula + its free variables)."""
-
-    class Variable(Thing):
-        """OWL individual for a variable appearing in an ``Equation`` /
-        ``Structure`` (sympy Symbol on the pure-Python side)."""
-
-    class has_for_varname(Variable >> str, DataProperty, FunctionalProperty):
-        """Functional data property: the symbolic name of a ``Variable``."""
-
-        python_name = "name"
-
-    class FullCausalMapping(Artefact):
-        """The causal mapping (assignment equation -> output variable)
-        derived from a ``FullStructure`` by the causal ordering algorithm."""
-
-    class has_for_fcm(FullStructure >> FullCausalMapping):
-        """Object property: a ``FullStructure`` -> its derived
-        ``FullCausalMapping`` (only)."""
-
-        class_property_type = ["only"]
-
-    class has_for_structure(Hypothesis >> Structure):
-        """Object property: a ``Hypothesis`` -> the ``Structure`` of
-        equations it is built from (only)."""
-
-        class_property_type = ["only"]
-
-    class DependencySet(Artefact):
-        """Set of variable/hypothesis dependencies derived from a
-        ``FullStructure``'s causal mapping."""
-
-    class has_for_dependecy_set(FullStructure >> DependencySet):
-        """Object property: a ``FullStructure`` -> its ``DependencySet``
-        (only)."""
-
-        class_property_type = ["only"]
-
-    class TransitiveClosure(DependencySet):
-        """A ``DependencySet`` closed under transitivity (all indirect
-        dependencies made explicit)."""
-
-    class ResearchLattice(Artefact):
-        """OWL counterpart of the hypothesis lattice built by Algorithm 1
-        (:class:`hyppo.lattice_constructor._base.HypothesisLattice`): the set
-        of hypotheses under study, linked via ``has_for_lattice_hypothesis``."""
-
-    class has_for_lattice_hypothesis(ResearchLattice >> Hypothesis):
-        """Object property: a ``ResearchLattice`` -> its member hypotheses
-        (some Hypothesis)."""
-
-        class_property_type = ["some"]
-
-    # class has_for_vars(Equation >> Variable, DataProperty):
-    #     class_property_type = ["some"]
-    #     python_name = "vars"
-
-    # class has_for_equation(Structure >> Equation, DataProperty):
-    #     python_name = "equation"
-
-    # class has_for_structure_variable(Structure >> Variable):
-    #     class_property_type = ["some"]
-    #     python_name = "vars"
-
-    AllDisjoint([VirtualExperiment, Configuration, Workflow, Hypothesis, Model])
-
-    # ── Theorem 1 axiomatic support (dissertation, planning chapter) ────────
-    # Adds the three OWL axioms required for the C2 source-of-inconsistency
-    # bijection in the consistency-check correctness proof:
-    #   (i)  is_implemented_by_model is Functional → uniqueness of m
-    #        (each hypothesis is implemented by at most one model);
-    #   (ii) refers_to_hypothesis is Functional → uniqueness of h per model
-    #        (paired-functional design across the inverse property);
-    #   (iii) Hypothesis ⊑ ∃is_implemented_by_model.Model → existence of m
-    #        (every Hypothesis has at least one implementing model).
-    # Together these give the ∃! m ∈ Model. R(m) = h required by C2.
-    # NOTE on UNA: OWL 2 DL does not assume Unique Name Assumption, so
-    # FunctionalProperty alone only unifies (m1 ≡ m2) rather than yielding
-    # owl:Nothing. Concrete VE instantiations must add AllDifferent on the
-    # set of Model individuals to enforce C2-uniqueness inconsistency
-    # detection by HermiT (see paper §2, Theorem 1 proof).
-    is_implemented_by_model.is_a.append(FunctionalProperty)
-    refers_to_hypothesis.is_a.append(FunctionalProperty)
-    Hypothesis.is_a.append(is_implemented_by_model.some(Model))
+Artefact = _ns.Artefact
+has_for_id = _ns.has_for_id
+has_for_name = _ns.has_for_name
+has_for_description = _ns.has_for_description
+has_for_authors = _ns.has_for_authors
+has_for_createdate = _ns.has_for_createdate
+has_for_lastupdate = _ns.has_for_lastupdate
+Hypothesis = _ns.Hypothesis
+Model = _ns.Model
+has_for_probability = _ns.has_for_probability
+is_implemented_by_model = _ns.is_implemented_by_model
+refers_to_hypothesis = _ns.refers_to_hypothesis
+competes = _ns.competes
+derived_by = _ns.derived_by
+impacts = _ns.impacts
+VirtualExperiment = _ns.VirtualExperiment
+Configuration = _ns.Configuration
+Workflow = _ns.Workflow
+has_for_hypothesis = _ns.has_for_hypothesis
+has_for_model = _ns.has_for_model
+has_for_workflow = _ns.has_for_workflow
+has_for_configuration = _ns.has_for_configuration
+Structure = _ns.Structure
+FullStructure = _ns.FullStructure
+Equation = _ns.Equation
+Variable = _ns.Variable
+has_for_varname = _ns.has_for_varname
+FullCausalMapping = _ns.FullCausalMapping
+has_for_fcm = _ns.has_for_fcm
+has_for_structure = _ns.has_for_structure
+DependencySet = _ns.DependencySet
+has_for_dependecy_set = _ns.has_for_dependecy_set
+TransitiveClosure = _ns.TransitiveClosure
+ResearchLattice = _ns.ResearchLattice
+has_for_lattice_hypothesis = _ns.has_for_lattice_hypothesis
 
 
 if __name__ == "__main__":

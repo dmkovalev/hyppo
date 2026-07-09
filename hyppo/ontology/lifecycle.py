@@ -14,6 +14,8 @@ Rule 31 -- PreferredHypothesis: an active hypothesis whose competitor has been
 
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 from owlready2 import AllDisjoint, Inverse
 
 from hyppo.core._base import (
@@ -37,77 +39,116 @@ __all__ = [
     "apply_pydantic_to_ontology",
 ]
 
-with virtual_experiment_onto:
-    # ── Lifecycle states ──────────────────────────────────────────────────
-    class DraftHypothesis(Hypothesis):
-        """Hypothesis in draft / work-in-progress state."""
 
-    class ActiveHypothesis(Hypothesis):
-        """Hypothesis actively used in experiments."""
+def define_rules(onto, ns):
+    """Declare this module's OWL rules in ``onto`` using base entities
+    from ``ns``; register the created classes back onto ``ns``."""
+    with onto:
+        # ── Lifecycle states ──────────────────────────────────────────────────
+        class DraftHypothesis(ns.Hypothesis):
+            """ns.Hypothesis in draft / work-in-progress state."""
 
-    class DeprecatedHypothesis(Hypothesis):
-        """Hypothesis marked for retirement."""
+        class ActiveHypothesis(ns.Hypothesis):
+            """ns.Hypothesis actively used in experiments."""
 
-    class ArchivedHypothesis(Hypothesis):
-        """Hypothesis permanently archived (read-only)."""
+        class DeprecatedHypothesis(ns.Hypothesis):
+            """ns.Hypothesis marked for retirement."""
 
-    # Pairwise disjointness of lifecycle states.
-    AllDisjoint(
-        [DraftHypothesis, ActiveHypothesis, DeprecatedHypothesis, ArchivedHypothesis]
-    )
+        class ArchivedHypothesis(ns.Hypothesis):
+            """ns.Hypothesis permanently archived (read-only)."""
 
-    # Covering axiom: every Hypothesis belongs to exactly one state.
-    Hypothesis.equivalent_to.append(
-        DraftHypothesis | ActiveHypothesis | DeprecatedHypothesis | ArchivedHypothesis
-    )
+        # Pairwise disjointness of lifecycle states.
+        AllDisjoint(
+            [
+                DraftHypothesis,
+                ActiveHypothesis,
+                DeprecatedHypothesis,
+                ArchivedHypothesis,
+            ]
+        )
 
-    # ── Rule 16: BlockingDeprecation ──────────────────────────────────────
-    class BlockingDeprecation(DeprecatedHypothesis):
-        """A deprecated hypothesis that cannot be safely removed because
-        at least one *active* hypothesis depends on it.
+        # Covering axiom: every ns.Hypothesis belongs to exactly one state.
+        ns.Hypothesis.equivalent_to.append(
+            DraftHypothesis
+            | ActiveHypothesis
+            | DeprecatedHypothesis
+            | ArchivedHypothesis
+        )
 
-        Formally: DeprecatedHypothesis AND inverse(derived_by) SOME ActiveHypothesis.
-        """
+        # ── Rule 16: BlockingDeprecation ──────────────────────────────────────
+        class BlockingDeprecation(DeprecatedHypothesis):
+            """A deprecated hypothesis that cannot be safely removed because
+            at least one *active* hypothesis depends on it.
 
-        equivalent_to = [
-            DeprecatedHypothesis & Inverse(derived_by).some(ActiveHypothesis)
-        ]
+            Formally: DeprecatedHypothesis AND
+            inverse(derived_by) SOME ActiveHypothesis.
+            """
 
-    # ── Rule 17: ConflictingHypothesis ────────────────────────────────────
-    class ConflictingHypothesis(ActiveHypothesis):
-        """An active hypothesis that competes with another active hypothesis.
+            equivalent_to = [
+                DeprecatedHypothesis & Inverse(ns.derived_by).some(ActiveHypothesis)
+            ]
 
-        Formally: ActiveHypothesis AND competes SOME ActiveHypothesis.
-        """
+        # ── Rule 17: ConflictingHypothesis ────────────────────────────────────
+        class ConflictingHypothesis(ActiveHypothesis):
+            """An active hypothesis that ns.competes with another active hypothesis.
 
-        equivalent_to = [ActiveHypothesis & competes.some(ActiveHypothesis)]
+            Formally: ActiveHypothesis AND ns.competes SOME ActiveHypothesis.
+            """
 
-    # ── Rule 30: FreshHypothesis (marker, closes repair cycle) ───────────
-    class FreshHypothesis(Hypothesis):
-        """A hypothesis whose result has been recomputed and is up-to-date.
+            equivalent_to = [ActiveHypothesis & ns.competes.some(ActiveHypothesis)]
 
-        Closes the repair cycle: Plan → Recompute → remove Stale marker
-        → assert Fresh marker.  Procedurally asserted (CWA): the reasoner
-        cannot infer "not Stale" under OWA, so Fresh is a positive marker
-        that replaces Stale after successful recomputation.
+        # ── Rule 30: FreshHypothesis (marker, closes repair cycle) ───────────
+        class FreshHypothesis(ns.Hypothesis):
+            """A hypothesis whose result has been recomputed and is up-to-date.
 
-        Lifecycle dimension: Freshness (orthogonal to Existence/Validity).
-        """
+            Closes the repair cycle: Plan → Recompute → remove Stale marker
+            → assert Fresh marker.  Procedurally asserted (CWA): the reasoner
+            cannot infer "not Stale" under OWA, so Fresh is a positive marker
+            that replaces Stale after successful recomputation.
 
-    # ── Rule 31: PreferredHypothesis (competes resolution) ───────────────
-    class PreferredHypothesis(ActiveHypothesis):
-        """An active hypothesis confirmed by refutation of its competitor.
+            Lifecycle dimension: Freshness (orthogonal to Existence/Validity).
+            """
 
-        If h_A competes with h_B, and h_B is Invalid (refuted), then h_A
-        is Confirmed — the surviving hypothesis in a two-hypothesis contest.
+        # ── Rule 31: PreferredHypothesis (ns.competes resolution) ───────────────
+        class PreferredHypothesis(ActiveHypothesis):
+            """An active hypothesis confirmed by refutation of its competitor.
 
-        Formally: ActiveHypothesis AND competes SOME InvalidHypothesis.
-        Auto-inferred by HermiT (positive existential, DL-compatible).
-        """
+            If h_A ns.competes with h_B, and h_B is Invalid (refuted), then h_A
+            is Confirmed — the surviving hypothesis in a two-hypothesis contest.
 
-        equivalent_to = [ActiveHypothesis & competes.some(InvalidHypothesis)]
+            Formally: ActiveHypothesis AND ns.competes SOME ns.InvalidHypothesis.
+            Auto-inferred by HermiT (positive existential, DL-compatible).
+            """
+
+            equivalent_to = [ActiveHypothesis & ns.competes.some(ns.InvalidHypothesis)]
+
+    ns.DraftHypothesis = DraftHypothesis
+    ns.ActiveHypothesis = ActiveHypothesis
+    ns.DeprecatedHypothesis = DeprecatedHypothesis
+    ns.ArchivedHypothesis = ArchivedHypothesis
+    ns.BlockingDeprecation = BlockingDeprecation
+    ns.ConflictingHypothesis = ConflictingHypothesis
+    ns.FreshHypothesis = FreshHypothesis
+    ns.PreferredHypothesis = PreferredHypothesis
+    return ns
 
 
+_ns = SimpleNamespace(
+    Hypothesis=Hypothesis,
+    InvalidHypothesis=InvalidHypothesis,
+    competes=competes,
+    derived_by=derived_by,
+)
+define_rules(virtual_experiment_onto, _ns)
+
+DraftHypothesis = _ns.DraftHypothesis
+ActiveHypothesis = _ns.ActiveHypothesis
+DeprecatedHypothesis = _ns.DeprecatedHypothesis
+ArchivedHypothesis = _ns.ArchivedHypothesis
+BlockingDeprecation = _ns.BlockingDeprecation
+ConflictingHypothesis = _ns.ConflictingHypothesis
+FreshHypothesis = _ns.FreshHypothesis
+PreferredHypothesis = _ns.PreferredHypothesis
 # ── Procedural bridges (Python → ontology) ──────────────────────────────
 
 

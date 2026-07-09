@@ -8,6 +8,8 @@ Rule 12 -- PromisingRoute: any node that has at least one high-quality
 
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 from owlready2 import (
     ObjectProperty,
     TransitiveProperty,
@@ -24,40 +26,69 @@ __all__ = [
     "PromisingRoute",
 ]
 
-with virtual_experiment_onto:
-    # ── Quality markers ────────────────────────────────────────────────────
-    class LowQuality(Hypothesis):
-        """Hypothesis flagged as low-quality by a quality gate."""
 
-    class HighQuality(Hypothesis):
-        """Hypothesis flagged as high-quality by a quality gate."""
+def define_rules(onto, ns):
+    """Declare this module's OWL rules in ``onto`` using base entities
+    from ``ns``; register the created classes back onto ``ns``."""
+    with onto:
+        # ── Quality markers ────────────────────────────────────────────────────
+        class LowQuality(ns.Hypothesis):
+            """ns.Hypothesis flagged as low-quality by a quality gate."""
 
-    # ── Hierarchy navigation properties ────────────────────────────────────
-    class hasDescendant(Hypothesis >> Hypothesis, ObjectProperty, TransitiveProperty):
-        """Transitive descendant relation in the hypothesis lattice."""
+        class HighQuality(ns.Hypothesis):
+            """ns.Hypothesis flagged as high-quality by a quality gate."""
 
-    class hasAncestor(Hypothesis >> Hypothesis, ObjectProperty, TransitiveProperty):
-        """Transitive ancestor relation in the hypothesis lattice."""
+        # ── Hierarchy navigation properties ────────────────────────────────────
+        class hasDescendant(
+            ns.Hypothesis >> ns.Hypothesis, ObjectProperty, TransitiveProperty
+        ):
+            """Transitive descendant relation in the hypothesis lattice."""
 
-        inverse_property = hasDescendant
+        class hasAncestor(
+            ns.Hypothesis >> ns.Hypothesis, ObjectProperty, TransitiveProperty
+        ):
+            """Transitive ancestor relation in the hypothesis lattice."""
 
-    # ── Rule 11: PrunableSubtree ──────────────────────────────────────────
-    class PrunableSubtree(LowQuality):
-        """A low-quality hypothesis whose *every* descendant is also
-        low-quality -- the entire subtree can be pruned.
+            inverse_property = hasDescendant
 
-        Note: ``hasDescendant.only(LowQuality)`` requires CWA to verify
-        the universal restriction.  Under OWA the reasoner cannot confirm
-        that all descendants are LowQuality.  The class is retained as a
-        positive marker; prunable-subtree detection is delegated to Python
-        validation.
-        """
+        # ── Rule 11: PrunableSubtree ──────────────────────────────────────────
+        class PrunableSubtree(LowQuality):
+            """A low-quality hypothesis whose *every* descendant is also
+            low-quality -- the entire subtree can be pruned.
 
-    # ── Rule 12: PromisingRoute ───────────────────────────────────────────
-    class PromisingRoute(Hypothesis):
-        """A hypothesis reachable from a high-quality ancestor.
+            Note: ``hasDescendant.only(LowQuality)`` requires CWA to verify
+            the universal restriction.  Under OWA the reasoner cannot confirm
+            that all descendants are LowQuality.  The class is retained as a
+            positive marker; prunable-subtree detection is delegated to Python
+            validation.
+            """
 
-        Formally: hasAncestor SOME HighQuality.
-        """
+        # ── Rule 12: PromisingRoute ───────────────────────────────────────────
+        class PromisingRoute(ns.Hypothesis):
+            """A hypothesis reachable from a high-quality ancestor.
 
-        equivalent_to = [Hypothesis & hasAncestor.some(HighQuality)]
+            Formally: hasAncestor SOME HighQuality.
+            """
+
+            equivalent_to = [ns.Hypothesis & hasAncestor.some(HighQuality)]
+
+    ns.LowQuality = LowQuality
+    ns.HighQuality = HighQuality
+    ns.hasDescendant = hasDescendant
+    ns.hasAncestor = hasAncestor
+    ns.PrunableSubtree = PrunableSubtree
+    ns.PromisingRoute = PromisingRoute
+    return ns
+
+
+_ns = SimpleNamespace(
+    Hypothesis=Hypothesis,
+)
+define_rules(virtual_experiment_onto, _ns)
+
+LowQuality = _ns.LowQuality
+HighQuality = _ns.HighQuality
+hasDescendant = _ns.hasDescendant
+hasAncestor = _ns.hasAncestor
+PrunableSubtree = _ns.PrunableSubtree
+PromisingRoute = _ns.PromisingRoute

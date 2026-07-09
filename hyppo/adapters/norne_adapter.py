@@ -14,30 +14,17 @@ See Section 4.10 of dissertation.
 from __future__ import annotations
 
 import datetime
+from types import SimpleNamespace
 from typing import Any
 
-from owlready2 import AllDisjoint, Thing
+from owlready2 import AllDisjoint, Thing, World
 
 from hyppo.core._base import (
-    Configuration,
     Hypothesis,
     Model,
-    VirtualExperiment,
-    Workflow,
     virtual_experiment_onto,
 )
-from hyppo.ontology.core_rules import (
-    DataDrivenModel,
-    HybridModel,
-    InvalidHypothesis,
-    OilDomainOntology,
-    PhysicsModel,
-    StaleHypothesis,
-)
-from hyppo.ontology.provenance import (
-    ExperimentRun,
-    HypothesisVersion,
-)
+from hyppo.ontology.core_rules import OilDomainOntology
 
 __all__ = [
     "OilFieldOntology",
@@ -53,35 +40,60 @@ __all__ = [
     "run_oil_experiment_demo",
 ]
 
+
 # ---------------------------------------------------------------------------
 # Oil domain ontology classes (OWL individuals inside virtual_experiment_onto)
 # ---------------------------------------------------------------------------
-with virtual_experiment_onto:
+def define_oil_schema(onto, ns):
+    """Declare this module's OWL rules in ``onto`` using base entities
+    from ``ns``; register the created classes back onto ``ns``."""
+    with onto:
 
-    class OilFieldOntology(OilDomainOntology):
-        """Oil waterflood domain ontology -- HybridCRM specific."""
+        class OilFieldOntology(ns.OilDomainOntology):
+            """Oil waterflood domain ontology -- HybridCRM specific."""
 
-    class Well(Thing):
-        """A well in the reservoir (injector or producer)."""
+        class Well(Thing):
+            """A well in the reservoir (injector or producer)."""
 
-    class Injector(Well):
-        """Injection well."""
+        class Injector(Well):
+            """Injection well."""
 
-    class Producer(Well):
-        """Production well."""
+        class Producer(Well):
+            """Production well."""
 
-    class ReservoirParameter(Thing):
-        """A physical reservoir parameter."""
+        class ReservoirParameter(Thing):
+            """A physical reservoir parameter."""
 
-    class ConnectivityFraction(ReservoirParameter):
-        """CRM connectivity fraction f_ij between injector-producer pair."""
+        class ConnectivityFraction(ReservoirParameter):
+            """CRM connectivity fraction f_ij between injector-producer pair."""
 
-    class TimeConstant(ReservoirParameter):
-        """CRM time constant tau for pressure response propagation."""
+        class TimeConstant(ReservoirParameter):
+            """CRM time constant tau for pressure response propagation."""
 
-    AllDisjoint([Injector, Producer])
+        AllDisjoint([Injector, Producer])
+
+    ns.OilFieldOntology = OilFieldOntology
+    ns.Well = Well
+    ns.Injector = Injector
+    ns.Producer = Producer
+    ns.ReservoirParameter = ReservoirParameter
+    ns.ConnectivityFraction = ConnectivityFraction
+    ns.TimeConstant = TimeConstant
+    return ns
 
 
+_ns = SimpleNamespace(
+    OilDomainOntology=OilDomainOntology,
+)
+define_oil_schema(virtual_experiment_onto, _ns)
+
+OilFieldOntology = _ns.OilFieldOntology
+Well = _ns.Well
+Injector = _ns.Injector
+Producer = _ns.Producer
+ReservoirParameter = _ns.ReservoirParameter
+ConnectivityFraction = _ns.ConnectivityFraction
+TimeConstant = _ns.TimeConstant
 # ---------------------------------------------------------------------------
 # Hyperparameter-to-hypothesis mapping (mirrors default_space.yaml)
 # ---------------------------------------------------------------------------
@@ -158,46 +170,46 @@ def _make_artefact(cls: type, name: str, desc: str) -> Any:
     return ind
 
 
-def _build_hypotheses() -> dict[str, Hypothesis]:
-    """Create the six HybridCRM hypotheses as OWL individuals."""
+def _build_hypotheses(ns: Any) -> dict[str, Hypothesis]:
+    """Create the six HybridCRM hypotheses as OWL individuals in ``ns``'s world."""
     h_CRM = _make_artefact(
-        Hypothesis,
+        ns.Hypothesis,
         "h_CRM",
         "DualTau CRM -- physics branch: connectivity fractions and time constants",
     )
     h_ML = _make_artefact(
-        Hypothesis,
+        ns.Hypothesis,
         "h_ML",
         "Transformer+GNN -- ML branch: temporal and spatial feature learning",
     )
     h_LPR = _make_artefact(
-        Hypothesis,
+        ns.Hypothesis,
         "h_LPR",
         "Fusion gate -- combines physics and ML liquid production predictions",
     )
     h_MB = _make_artefact(
-        Hypothesis,
+        ns.Hypothesis,
         "h_MB",
         "Material balance -- water saturation update from predicted production",
     )
     h_BL = _make_artefact(
-        Hypothesis,
+        ns.Hypothesis,
         "h_BL",
         "Buckley-Leverett -- fractional flow from saturation profile",
     )
     h_WCT = _make_artefact(
-        Hypothesis,
+        ns.Hypothesis,
         "h_WCT",
         "WCT-anchoring -- water cut correction using physics and ML context",
     )
 
     # -- Attach models to enable auto-classification (Rule 1) --
-    m_phys = PhysicsModel(_uid("m_phys"))
-    m_dd = DataDrivenModel(_uid("m_dd"))
-    m_hybrid = HybridModel(_uid("m_hybrid"))
-    m_phys_mb = PhysicsModel(_uid("m_phys_mb"))
-    m_phys_bl = PhysicsModel(_uid("m_phys_bl"))
-    m_hybrid_wct = HybridModel(_uid("m_hybrid_wct"))
+    m_phys = ns.PhysicsModel(_uid("m_phys"))
+    m_dd = ns.DataDrivenModel(_uid("m_dd"))
+    m_hybrid = ns.HybridModel(_uid("m_hybrid"))
+    m_phys_mb = ns.PhysicsModel(_uid("m_phys_mb"))
+    m_phys_bl = ns.PhysicsModel(_uid("m_phys_bl"))
+    m_hybrid_wct = ns.HybridModel(_uid("m_hybrid_wct"))
 
     # is_implemented_by_model is FunctionalProperty after _base.py R3+
     # (Theorem 1 axiom — see commit 911172c). Each Hypothesis gets at most
@@ -255,17 +267,16 @@ def _build_lattice_graph(hyps: dict[str, Hypothesis]) -> Any:
 # Public API
 # ---------------------------------------------------------------------------
 
-_VE_CACHE: dict[str, Any] | None = None
 
-
-def build_oil_virtual_experiment() -> dict[str, Any]:
+def build_oil_virtual_experiment(world: World | None = None) -> dict[str, Any]:
     """Build virtual experiment for HybridCRM waterflood optimization.
 
-    Memoised at module scope: owlready2 raises sqlite3.IntegrityError
-    when creating OWL individuals with the same IRIs in a second call.
-    The output is deterministic — callers that need mutation isolation
-    (e.g. cascade-invalidation tests) must snapshot and restore
-    ``hypothesis.is_a`` themselves.
+    Each call composes the full schema (base + 16 rules + oil domain) into a
+    fresh, isolated owlready2 ``World`` and creates all individuals there, so
+    the module is re-callable without ``sqlite3.IntegrityError`` on the fixed
+    individual IRIs. Pass a pre-built ``World`` (e.g. from
+    :func:`hyppo.core.create_ve_world`) to build into it; ``None`` allocates a
+    new one per call.
 
     Returns dict with keys matching the VE tuple:
 
@@ -276,17 +287,21 @@ def build_oil_virtual_experiment() -> dict[str, Any]:
     - ``workflow``: Workflow OWL individual
     - ``configuration_space``: dict from CONFIGURATION_SPACE
     - ``lattice``: networkx DiGraph with 6 nodes and 6 edges
+    - ``virtual_experiment``: the VirtualExperiment individual
+    - ``world``: the owlready2 World the VE lives in
+    - ``onto``: the owlready2 Ontology carrying the schema + ABox
+    - ``ns``: SimpleNamespace of the world's schema classes/properties
     """
-    global _VE_CACHE
-    if _VE_CACHE is not None:
-        return _VE_CACHE
+    from hyppo.core import create_ve_world
+
+    world, onto, ns = create_ve_world(world=world)
 
     ontology = _make_artefact(
-        OilFieldOntology,
+        ns.OilFieldOntology,
         "oil_waterflood",
         "HybridCRM waterflood domain ontology",
     )
-    hyps = _build_hypotheses()
+    hyps = _build_hypotheses(ns)
     lattice = _build_lattice_graph(hyps)
 
     # Collect all models from hypotheses (single value per hypothesis after R3+).
@@ -297,20 +312,20 @@ def build_oil_virtual_experiment() -> dict[str, Any]:
             models.append(m)
 
     workflow = _make_artefact(
-        Workflow,
+        ns.Workflow,
         "hybridcrm_workflow",
         "Training -> Optimization pipeline for HybridCRM",
     )
 
     configuration = _make_artefact(
-        Configuration,
+        ns.Configuration,
         "default_hp_space",
         "17-axis discrete hyperparameter space from default_space.yaml",
     )
 
     # Build the VirtualExperiment OWL individual
     ve = _make_artefact(
-        VirtualExperiment,
+        ns.VirtualExperiment,
         "oil_ve",
         "HybridCRM waterflood optimization virtual experiment",
     )
@@ -320,7 +335,7 @@ def build_oil_virtual_experiment() -> dict[str, Any]:
     ve.has_for_model = models
     ve.has_for_configuration = [configuration]
 
-    _ve_result = {
+    return {
         "ontology": ontology,
         "hypotheses": list(hyps.values()),
         "hypotheses_map": hyps,
@@ -329,9 +344,10 @@ def build_oil_virtual_experiment() -> dict[str, Any]:
         "configuration_space": CONFIGURATION_SPACE,
         "lattice": lattice,
         "virtual_experiment": ve,
+        "world": world,
+        "onto": onto,
+        "ns": ns,
     }
-    _VE_CACHE = _ve_result
-    return _ve_result
 
 
 def run_oil_experiment_demo() -> dict[str, Any]:
@@ -354,6 +370,7 @@ def run_oil_experiment_demo() -> dict[str, Any]:
     """
     ve_data = build_oil_virtual_experiment()
     hyps = ve_data["hypotheses_map"]
+    ns = ve_data["ns"]
     results: dict[str, Any] = {"ve": ve_data}
 
     # -- Step 2: structural classification --
@@ -366,7 +383,7 @@ def run_oil_experiment_demo() -> dict[str, Any]:
 
     # -- Step 3: cascade invalidation (structural) --
     h_crm = hyps["h_CRM"]
-    h_crm.is_a.append(InvalidHypothesis)
+    h_crm.is_a.append(ns.InvalidHypothesis)
 
     # Structurally mark downstream hypotheses as stale via derived_by chain
     stale_names: list[str] = []
@@ -384,20 +401,20 @@ def run_oil_experiment_demo() -> dict[str, Any]:
             for dep in deps:
                 if dep is hyps.get(current_name):
                     stale_names.append(name)
-                    h.is_a.append(StaleHypothesis)
+                    h.is_a.append(ns.StaleHypothesis)
                     queue.append(name)
 
     results["stale_after_invalidation"] = stale_names
 
     # -- Step 4: provenance versioning --
-    v1 = HypothesisVersion(_uid("h_CRM_v1"))
+    v1 = ns.HypothesisVersion(_uid("h_CRM_v1"))
     v1.version_of = [h_crm]
 
-    v2 = HypothesisVersion(_uid("h_CRM_v2"))
+    v2 = ns.HypothesisVersion(_uid("h_CRM_v2"))
     v2.version_of = [h_crm]
     v1.superseded_by = [v2]
 
-    run1 = ExperimentRun(_uid("run_old"))
+    run1 = ns.ExperimentRun(_uid("run_old"))
     run1.uses_hypothesis_version = [v1]
 
     results["provenance"] = {
