@@ -236,3 +236,73 @@ Stage: realization | Wave: W4 | Author: executor
 - ruff check on touched files: only pre-existing I001 (import sort)/E501/F401 findings unrelated to this wave's edits (e.g. tests/test_version_store_contract.py unused `asyncio`/`inspect`/`pytest` imports predate this move) — reserved for W7 ruff sweep, not touched here.
 - Scope-guard: `git diff --name-only` matches wave Files list exactly (plus new hyppo/versioning/__init__.py). No stray wave markers (grep clean).
 - Commit: refactor(versioning): move version_store out of mcp, break cycle (W4)
+
+## W7
+Stage: realization | Wave: W7 | Author: executor
+
+### Done
+- hyppo/ontology/__init__.py: replaced 7x `from .X import *` (core_rules,
+  provenance, workflow_validation, quality_gates, multi_experiment,
+  model_compatibility, lifecycle) with explicit named imports (all names
+  taken from each submodule's own `__all__`) + a module-level `__all__`
+  listing everything; kept the existing explicit `consistency` import.
+  Verified `import hyppo.ontology` still works and exposes the same names.
+- hyppo/core/_base.py: `from owlready2 import *` -> explicit import list
+  (AllDisjoint, DataProperty, FunctionalProperty, ObjectProperty,
+  SymmetricProperty, Thing, TransitiveProperty, get_ontology); split every
+  single-line `class X(Y): pass` / `class X(...): attr = val` (E701) onto
+  multiple lines. Verified class list from `virtual_experiment_onto.classes()`
+  unchanged before/after.
+- `uvx ruff check hyppo tests --fix`: 131 auto-fixed (mostly F401/import
+  sort). Manual fixes for the rest:
+  - tests/test_planner.py: split 3 semicolon-joined statements (E702).
+  - F841 dead code removed (real, not suppressed): unused `ont` locals in
+    hyppo/ontology/lifecycle.py (`refresh_hypothesis`,
+    `apply_pydantic_to_ontology`); unused `Hypothesis` binding in
+    hyppo/ontology/markers.py `apply_rule_11`.
+  - hyppo/gui/services.py: moved `from hyppo.manager import Manager` to
+    top of file (E402) — verified no import cycle with hyppo.manager.
+  - tests/test_oil_adapter.py: moved the real feature imports
+    (hyppo.adapters.wfopt_adapter, hyppo.ontology.core_rules) above the
+    Pellet-availability guard block that used to precede them (E402);
+    no behavior change, guard logic untouched.
+  - noqa with inline reason added for intentional patterns: deap
+    availability probe (hyppo/generator/_generator.py:43), owlready2
+    availability probes (tests/test_owl_reasoning.py, tests/test_oil_adapter.py),
+    golden-claims file's "imports colocated with test section" style
+    (tests/test_golden_claims.py:309).
+- Remaining 72 E501 (line-too-long) after `ruff format` reflow: fixed the
+  last ~20 by hand — shortened/rewrapped docstrings, comments, an SQL
+  string (split across lines), and one Russian domain string in
+  hyppo/gui/demo.py. No wording meaning changed, only trimmed for length.
+- `uvx ruff format hyppo tests`: 89 files reformatted (whitespace/quote/
+  wrap style only, per rules 1-2 above no logic changed).
+
+### Not done
+- n/a — wave complete.
+
+### Verified
+- `uvx ruff check hyppo tests` -> All checks passed! (0 findings)
+- `uvx ruff format --check hyppo tests` -> 127 files already formatted (0 diff)
+- `pytest tests/test_golden_claims.py -q` -> 48 passed (golden invariant intact,
+  no operation-count/semantics drift from the core/_base.py and
+  ontology/__init__.py rewrites).
+- `pytest tests -q` -> 336 passed in ~88s (one transient Windows
+  access-violation on a bare collect-all run reproduced as a flake — a clean
+  `--collect-only` and a clean full run both succeeded immediately after;
+  not reproduced a third time, looks like an environment hiccup unrelated
+  to this wave's edits, not investigated further per wave scope).
+- Scope-guard: `git diff --name-only` == hyppo/** + tests/** only (105 files);
+  no pyproject.toml touched (not needed — [tool.ruff] already in place from W1).
+- No-wave-artifact grep on touched files: only benign false positives
+  (R2/R3+ referring to the R² statistic / OWL rule numbers in comments,
+  pre-existing, not wave markers) — no cleanup needed.
+- Commit: chore(lint): ruff check + format sweep, zero findings (W7)
+
+### Next
+R3 (W7) complete. R4 (W8 mypy zero) can proceed.
+
+## R3b
+Stage: realization | Author: fix-agent
+- [VERIFIED pyproject.toml:69] `[build-system] requires` bumped setuptools>=75 -> >=77 (PEP 639 plain-string `license = "MIT"` needs setuptools>=77); `uv build` re-verified -> gedanken-1.1.0 wheel+sdist built clean; uv.lock unaffected (no diff).
+- Commit: fix(review-async): bump build setuptools floor to >=77 (R3)

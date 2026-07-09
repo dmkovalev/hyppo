@@ -66,7 +66,7 @@ include = ["hyppo*"]
 version = { attr = "hyppo.__version__" }
 
 [build-system]
-requires = ["setuptools>=75"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.package-data]
