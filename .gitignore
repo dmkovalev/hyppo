@@ -46,3 +46,7 @@ webui/tsconfig.tsbuildinfo
 /volve_pw2.py
 /fix_lattice_mapping.py
 /run_task11_smoke.sh
+
+# internal dev-process artifacts (kept local only)
+docs/superpowers/
+docs/specs/
