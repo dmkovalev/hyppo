@@ -102,7 +102,9 @@ class Database:
                 object, e.g. `description`.
 
         Note:
-            Pickling failures are logged, then re-raised.
+            Pickling failures are logged, then re-raised. The write is atomic:
+            data goes to a temporary file first and is renamed into place only
+            on success, so a failed save never leaves a corrupt artifact behind.
         """
         filename = Path(filename)
 
@@ -115,12 +117,16 @@ class Database:
             (cls.root / storage / filename).parent.mkdir(parents=True, exist_ok=True)
         filename = Path(f"{filename}.pickle")
 
+        target = cls.root / storage / filename
+        tmp = target.with_suffix(target.suffix + ".tmp")
         try:
             pickled_obj = Pickled(obj=obj)
             pickled_obj.save_data_hook(**kwargs)
-            with open(cls.root / storage / filename, "wb") as f:
+            with open(tmp, "wb") as f:
                 pickle.dump(pickled_obj, f)
+            tmp.replace(target)
         except Exception:
+            tmp.unlink(missing_ok=True)
             logger.exception(
                 "Object type does not match the database. Object type: %s", type(obj)
             )

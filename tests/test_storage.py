@@ -10,6 +10,25 @@ def test_save_unpicklable_raises(tmp_path):
         Database.save(unpicklable, "unpicklable_object")
 
 
+def test_failed_save_leaves_no_artifact(tmp_path):
+    Database.set_root(str(tmp_path))
+    unpicklable = (x for x in range(3))
+    with pytest.raises(Exception):
+        Database.save(unpicklable, "broken")
+    assert not (tmp_path / "broken.pickle").exists()
+    assert not (tmp_path / "broken.pickle.tmp").exists()
+    assert Database.load("broken") is None
+
+
+def test_failed_save_keeps_previous_version(tmp_path):
+    Database.set_root(str(tmp_path))
+    Database.save([1, 2, 3], "stable")
+    with pytest.raises(Exception):
+        Database.save((x for x in range(3)), "stable")
+    loaded = Database.load("stable")
+    assert loaded is not None and loaded.obj == [1, 2, 3]
+
+
 def test_save_load_roundtrip(tmp_path):
     Database.set_root(str(tmp_path))
     Database.save([1, 2, 3], "my_object")
