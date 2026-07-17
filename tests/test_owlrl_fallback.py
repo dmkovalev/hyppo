@@ -94,31 +94,21 @@ def test_forced_owlrl_runs_without_java(monkeypatch):
     assert not res.ok and res.status == Status.C2_VIOLATED
 
 
-def test_auto_degrades_when_java_missing(monkeypatch):
-    """auto: when HermiT raises the Java-unavailable exception, Stage A degrades
-    to owlrl and reports the limited-mode marker — never a raw exception."""
-
-    def _no_java(*a, **k):
-        raise FileNotFoundError("[WinError 2] java not found")
-
-    monkeypatch.setattr(C, "sync_reasoner_hermit", _no_java)
+def test_auto_uses_owlrl_by_default():
+    """auto: the OWL 2 RL closure is the default engine (RL + IC design, §2.4) —
+    no Java / DL reasoner required; a functional-property clash is still caught."""
     _w, onto = _fresh_world(two_models=True)
     res = check_consistency(None, onto, _GOOD_LATTICE, stage_a_engine="auto")
     assert not res.ok and res.status == Status.C2_VIOLATED
-    assert res.details["stage_a_engine"] == "owlrl (limited: OWL 2 RL profile)"
+    assert res.details["stage_a_engine"] == "owlrl"
 
 
-def test_auto_degradation_stays_consistent_for_owa(monkeypatch):
-    """Degradation preserves the OWA verdict: model-less hypothesis stays OK."""
-
-    def _no_java(*a, **k):
-        raise OSError("java runtime absent")
-
-    monkeypatch.setattr(C, "sync_reasoner_hermit", _no_java)
+def test_auto_owlrl_stays_consistent_for_owa():
+    """The RL default preserves the verdict: a model-less hypothesis stays OK."""
     _w, onto = _fresh_world(two_models=False)
     res = check_consistency(None, onto, _GOOD_LATTICE, stage_a_engine="auto")
     assert res.ok and res.status == Status.OK
-    assert res.details["stage_a_engine"] == "owlrl (limited: OWL 2 RL profile)"
+    assert res.details["stage_a_engine"] == "owlrl"
 
 
 def test_all_different_expansion_two_members():

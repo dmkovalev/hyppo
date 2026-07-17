@@ -236,48 +236,45 @@ def _chain_graph(n: int) -> HypothesisGraph:
     return g
 
 
-def test_alg1_complexity_quadratic_pair_enumeration(monkeypatch):
-    """(лемма 1) Algorithm 1 costs O(|H|^2 · s · v): the number of causal
-    completeness checks equals the number of reachable pairs (n(n-1)/2 on a
-    chain), i.e. grows quadratically."""
+def test_alg1_complexity_quadratic_pair_enumeration():
+    """(лемма 1) Algorithm 1 costs O(|H|^2 · v): the number of reachable pairs
+    enumerated in ``build`` equals n(n-1)/2 on a chain, i.e. grows quadratically.
+    Each pair is decided by the cheap Out∩In test — no transitive closure per
+    pair (bridge, Theorem thm:build)."""
     counts = {}
-    orig = causal.is_complete
-
     for n in (10, 20, 40):
-        calls = 0
+        g = _chain_graph(n)
+        calls = [0]
 
-        def counting(eqs):
-            nonlocal calls
-            calls += 1
-            return orig(eqs)
+        class _CountIn(list):
+            def __getitem__(self, i):
+                calls[0] += 1
+                return list.__getitem__(self, i)
 
-        monkeypatch.setattr(causal, "is_complete", counting)
-        _chain_graph(n).build()
-        monkeypatch.setattr(causal, "is_complete", orig)
-        counts[n] = calls
-        assert calls == n * (n - 1) // 2
+        g._in = _CountIn(g._in)  # count In(h_j) accesses = pair enumerations
+        g.build()
+        counts[n] = calls[0]
+        assert calls[0] == n * (n - 1) // 2
 
     assert counts[20] / counts[10] == pytest.approx(4, rel=0.15)
     assert counts[40] / counts[20] == pytest.approx(4, rel=0.15)
 
 
-def test_alg2_complexity_linear_in_hypotheses(monkeypatch):
-    """(лемма 2) Algorithm 2 performs exactly |H| causal unions —
-    linear, against |H|^2 for a full rebuild."""
-    orig = causal.is_complete
+def test_alg2_complexity_linear_in_hypotheses():
+    """(лемма 2) Algorithm 2 performs exactly |H| Out∩In tests against the
+    existing hypotheses — linear, against |H|^2 for a full rebuild."""
     for n in (10, 20, 40):
         g = _chain_graph(n)
-        calls = 0
+        calls = [0]
 
-        def counting(eqs):
-            nonlocal calls
-            calls += 1
-            return orig(eqs)
+        class _CountOut(list):
+            def __getitem__(self, i):
+                calls[0] += 1
+                return list.__getitem__(self, i)
 
-        monkeypatch.setattr(causal, "is_complete", counting)
+        g._out = _CountOut(g._out)  # count Out(h_i) accesses = existing-hyp probes
         g.add_hypothesis([{f"x{n}", f"x{n - 1}"}])
-        monkeypatch.setattr(causal, "is_complete", orig)
-        assert calls == n
+        assert calls[0] == n
 
 
 class _CountingSet(set):
@@ -428,6 +425,58 @@ def test_c7_accepts_grounded_and_rejects_ungrounded_variable():
     # без словаря C7 не выполняется (обратная совместимость)
     skip = check_consistency(None, None, _GOOD_LATTICE, run_hermit=False)
     assert skip.details["c7"] == "skipped"
+
+
+# --- Paper conditions 4 and 5 (§2.4): projectile example ----------------------
+# ids: h1a=0,h1b=1,h1=2, h2^0=3,h2^1=4,h2^2=5, h3=6,h4=7,h5=8,h6=9
+_PROJ_LATTICE = {0: {2}, 1: {2}, 2: {3, 4, 5}, 3: {6, 7, 8}, 4: {6, 7, 8},
+                 5: {6, 7, 8}, 6: {9}, 7: set(), 8: set(), 9: set()}
+_PROJ_TASKS = {"t1": [0, 1], "t2": [2], "t3": [3, 4, 5],
+               "t4": [6], "t5": [7], "t6": [8], "t7": [9]}
+_PROJ_WF = [("t1", "t2"), ("t2", "t3"), ("t3", "t4"),
+            ("t3", "t5"), ("t3", "t6"), ("t4", "t7")]
+_PROJ_DOM = {i: [0, 1] for i in range(10)}
+
+
+def _proj(lattice=None, forbidden=None):
+    return check_consistency(
+        None, None, lattice or _PROJ_LATTICE, run_hermit=False,
+        task_hypotheses=_PROJ_TASKS, workflow_edges=_PROJ_WF,
+        param_domains=_PROJ_DOM, forbidden_combos=forbidden or [],
+    )
+
+
+def test_condition5_accepts_correct_and_rejects_backward_dependency():
+    """Условие 5 (alg. consistence): причинный порядок согласован с потоком работ."""
+    ok = _proj()
+    assert ok.ok and ok.details["cond5"].startswith("passed")
+    # h3 (задача t4) зависит от h6 (задача t7, потомок t4) — встречная поставка
+    bad_lat = {k: set(v) for k, v in _PROJ_LATTICE.items()}
+    bad_lat[6] = set()      # убираем h3->h6, чтобы не было 2-цикла
+    bad_lat[9] = {6}        # h6->h3: h3 зависит от h6 из более поздней задачи
+    bad = _proj(lattice=bad_lat)
+    assert not bad.ok and bad.status == Status.COND5_VIOLATED
+    assert bad.details["cond5"]["task"] == "t4"
+    assert bad.details["cond5"]["dependency_task"] == "t7"
+
+
+def test_condition4_accepts_nonempty_and_rejects_empty_projection():
+    """Условие 4: pi_t(V) != empty для каждой задачи (CSP-выполнимость)."""
+    ok = _proj()
+    assert ok.ok and ok.details["cond4"].startswith("passed")
+    # запрет обоих значений домена h2^0 обнуляет проекцию задачи t3
+    empty = _proj(forbidden=[{3: 0}, {3: 1}])
+    assert not empty.ok and empty.status == Status.COND4_VIOLATED
+    assert empty.details["cond4_task"] == "t3"
+    # запрет одной совместной пары не обнуляет проекцию — эксперимент принимается
+    sat = _proj(forbidden=[{3: 0, 4: 0}])
+    assert sat.ok and sat.details["cond4"].startswith("passed")
+
+
+def test_conditions_4_5_skipped_when_data_absent():
+    """Обратная совместимость: без workflow/доменов условия 4–5 не выполняются."""
+    res = check_consistency(None, None, _GOOD_LATTICE, run_hermit=False)
+    assert res.details["cond4"] == "skipped" and res.details["cond5"] == "skipped"
 
 
 def test_alg3_structural_checks_run_in_declared_order():

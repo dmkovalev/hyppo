@@ -1,52 +1,60 @@
-"""Worst-case regime of Lemma 1: structures GROW with |H| (|E_i|=|V_i|=k=alpha*|H|).
-With variable-disjoint complete structures and a full DAG, every pair-union is
-complete, so Theta(|H|^2) transitive closures run, each O(k^2)=O(|H|^2) for sparse
-equations -> total O(|H|^4). Measures the build-time exponent; expect a~4.
+"""Worst-case regime of Lemma 1 for the theory-faithful build: structures GROW
+with |H| (k = alpha*|H| equations and ~k inputs each, so s_max, v_max = Theta(|H|))
+over a FULL workflow DAG (every ordered pair comparable, Theta(|H|^2) pairs).
+
+Algorithm 1 decides each edge by the cheap Out(h_i) & In(h_j) test -- now costing
+O(v_max)=O(|H|) because In(h) is Theta(|H|) -- with NO per-pair transitive closure.
+Hence build costs Theta(|H|^2 * v_max) + reachability = Theta(|H|^3): the leading
+worst-case term of Lemma 1 (v_max=Theta(|H|)). Expect a~3 (NOT the a~4 of the old
+per-pair-closure implementation). Only ``build`` is timed; generation and the
+per-hypothesis У0 matching are untimed setup.
 
 Pure stdlib (causal core only). Run on a clean interpreter (no numpy):
-  PYTHONPATH=<hyppo-ref> python examples/research/planning/scripts/dm_worstcase.py
+  <hyppo-ref>/.venv/Scripts/python.exe examples/research/planning/scripts/dm_worstcase.py
 """
 import json
 import math
 import random
 import sys
+import time
 from pathlib import Path
 
 from hyppo.coa import HypothesisGraph
 
-import time
 
-
-def gen_disjoint_complete(n_h, k, rng):
-    """n_h variable-disjoint structures, each k complete equations over its own k
-    variables, with sparse internal dependencies (each eq references its own var
-    plus 1-2 others from the same structure)."""
-    structs = []
+def gen_growing(n_h, k, rng):
+    """n_h structures of k equations each; outputs globally unique, inputs sampled
+    from earlier outputs so In(h) has Theta(k) entries overlapping earlier Out(h),
+    making the Out&In test genuine O(v_max)=O(|H|) work. |E|=k, |V|=k+|In|."""
+    produced = []
+    hyps = []
     for h in range(n_h):
-        names = [f"y{h}_{j}" for j in range(k)]
+        outs = [f"y{h}_{j}" for j in range(k)]
+        cap = min(k, len(produced))
+        ins = rng.sample(produced, cap) if cap else []
         eqs = []
         for i in range(k):
-            others = (rng.sample([names[j] for j in range(k) if j != i],
-                                 min(2, k - 1)) if k > 1 else [])
-            eqs.append(frozenset([names[i], *others]))
-        structs.append(eqs)
-    return structs
+            eq = [outs[i]]
+            if k > 1:
+                eq.append(outs[(i + 1) % k])          # one sibling: keeps matchable
+            if ins:
+                eq.append(ins[i % len(ins)])          # spread inputs -> In(h)=Theta(k)
+            eqs.append(frozenset(eq))
+        hyps.append(eqs)
+        produced.extend(outs)
+    return hyps
 
 
-def build_cost(n_h, alpha, rng):
-    """Full DAG via the library: every i reaches every j>i, so each pair-union
-    (disjoint, complete) triggers a DM transitive closure inside
-    HypothesisGraph.build(). With k=alpha*|H| growing structures this realises the
-    O(|H|^4) worst case of Lemma 1."""
+def make_graph(n_h, alpha, rng):
+    """Setup only (untimed): growing structures + a FULL DAG (every i<j)."""
     k = max(2, int(round(alpha * n_h)))
-    hyps = gen_disjoint_complete(n_h, k, rng)
     g = HypothesisGraph()
-    for h in hyps:
-        g.add(h)
+    for h in gen_growing(n_h, k, rng):
+        g.add(h)                                      # one У0 matching each
     for i in range(n_h):
         for j in range(i + 1, n_h):
             g.connect(i, j)
-    g.build()
+    return g
 
 
 def slope(xs, ys):
@@ -58,7 +66,7 @@ def slope(xs, ys):
 
 def main():
     alpha = float(sys.argv[1]) if len(sys.argv) > 1 else 1.0
-    grid = [8, 12, 16, 20, 28, 40, 56]
+    grid = [10, 16, 24, 36, 54, 80, 120]
     n_reps = 8
     medians = []
     print(f"alpha={alpha}  (k = round(alpha*|H|))")
@@ -66,9 +74,9 @@ def main():
     for n_h in grid:
         ts = []
         for rep in range(n_reps):
-            rng = random.Random(42 + rep)
+            g = make_graph(n_h, alpha, random.Random(42 + rep))   # setup: untimed
             t0 = time.perf_counter()
-            build_cost(n_h, alpha, rng)
+            g.build()                                             # timed
             ts.append((time.perf_counter() - t0) * 1000.0)
         ts.sort()
         med = ts[len(ts) // 2]

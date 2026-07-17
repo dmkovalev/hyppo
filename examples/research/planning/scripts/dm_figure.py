@@ -56,7 +56,7 @@ def main():
             label=rf"fit $T\propto|H|^{{{a:.2f}}}$ (95% CI [{ci[0]:.2f}, {ci[1]:.2f}])")
     ax.set_xscale("log"); ax.set_yscale("log")
     ax.set_xlabel(r"$|H|$"); ax.set_ylabel(r"Build time $T$, ms")
-    ax.set_title(r"Построение графа гипотез (DM-ядро, ER $p=0{,}3$)")
+    ax.set_title(r"Построение графа гипотез ($\mathrm{Out}\cap\mathrm{In}$, разреженный $W$)")
     ax.legend(fontsize=8, loc="upper left"); ax.grid(True, which="both", alpha=0.3)
     fig.tight_layout(); fig.savefig(IMG / "asymp_build_lattice.pdf"); plt.close(fig)
     print(f"saved asymp_build_lattice.pdf (a={a:.3f})")
@@ -116,11 +116,11 @@ def main():
                label=r"$\propto|H|$")
         _guide(hs[0], med[0], 2, hs[0], hs[-1], ls=":", color="C0", alpha=0.6,
                label=r"$\propto|H|^2$")
-        _guide(wh[0], wt[0], 4, wh[0], wh[-1], ls=":", color="C3", alpha=0.6,
-               label=r"$\propto|H|^4$")
+        _guide(wh[0], wt[0], 3, wh[0], wh[-1], ls=":", color="C3", alpha=0.6,
+               label=r"$\propto|H|^3$")
         ax.set_xscale("log"); ax.set_yscale("log")
         ax.set_xlabel(r"$|H|$"); ax.set_ylabel("время, мс")
-        ax.set_title(r"Ландшафт сложности: $O(|H|)$, $O(|H|^2)$, $O(|H|^4)$")
+        ax.set_title(r"Ландшафт сложности: $O(|H|)$, $O(|H|^2)$, $O(|H|^3)$")
         ax.legend(fontsize=7.5, loc="upper left", ncol=2); ax.grid(True, which="both", alpha=0.3)
         fig.tight_layout(); fig.savefig(IMG / "asymp_complexity.pdf"); plt.close(fig)
         print(f"saved asymp_complexity.pdf (worst a={wc['a']:.2f})")
@@ -143,10 +143,10 @@ def main():
         axL.plot(wh, wt, "^-", color="C3", lw=1.4, ms=6, label=r"построение, худший (Алг.1)")
         _g(axL, hs[0], add_t[0], 1, hs[0], hs[-1], ls=":", color="C1", alpha=0.6, label=r"$\propto|H|$")
         _g(axL, hs[0], med[0], 2, hs[0], hs[-1], ls=":", color="C0", alpha=0.6, label=r"$\propto|H|^2$")
-        _g(axL, wh[0], wt[0], 4, wh[0], wh[-1], ls=":", color="C3", alpha=0.6, label=r"$\propto|H|^4$")
+        _g(axL, wh[0], wt[0], 3, wh[0], wh[-1], ls=":", color="C3", alpha=0.6, label=r"$\propto|H|^3$")
         axL.set_xscale("log"); axL.set_yscale("log")
         axL.set_xlabel(r"$|H|$"); axL.set_ylabel("время, мс")
-        axL.set_title(r"(а) сложность: $O(|H|)/O(|H|^2)/O(|H|^4)$", fontsize=9)
+        axL.set_title(r"(а) сложность: $O(|H|)/O(|H|^2)/O(|H|^3)$", fontsize=9)
         axL.legend(fontsize=7, loc="upper left", ncol=2); axL.grid(True, which="both", alpha=0.3)
 
         axR.plot(hs, sx, "^-", color="C2", lw=1.5, ms=6)

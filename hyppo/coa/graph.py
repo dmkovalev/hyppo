@@ -36,11 +36,34 @@ class HypothesisGraph:
         self._hyps: list[list[frozenset[str]]] = []
         self._edges: set[tuple[int, int]] = set()
         self._adj: dict[int, set[int]] = defaultdict(set)
+        # Per-hypothesis signature computed once at insertion (condition У0):
+        # outputs Out(h) = variables matched by the causal mapping phi over the
+        # (exogenised) structure, inputs In(h) = the remaining variables. Having
+        # Out/In per hypothesis lets Algorithm 1 decide every edge by the cheap
+        # test Out(h_i) & In(h_j) != empty (bridge to causal ordering,
+        # Theorem thm:build:II) instead of a per-pair transitive closure.
+        self._out: list[set[str]] = []
+        self._in: list[set[str]] = []
 
     # ---- construction ---------------------------------------------------
+    def _signature(self, eqs: list[frozenset[str]]) -> tuple[set[str], set[str]]:
+        """Out(h)/In(h) via one Hopcroft-Karp matching -- O(s * sqrt(v))."""
+        m = causal.perfect_matching(eqs)
+        allv = causal.variables(eqs)
+        out = set(m.values()) if m else set()
+        return out, allv - out
+
     def add(self, equations) -> int:
-        """Add a hypothesis (a structure) as a new node; return its index."""
-        self._hyps.append([frozenset(eq) for eq in equations])
+        """Add a hypothesis (a structure) as a new node; return its index.
+
+        Computes the signature Out(h)/In(h) once via a single Hopcroft-Karp
+        matching (condition У0), so building the graph never needs a per-pair
+        causal closure."""
+        eqs = [frozenset(eq) for eq in equations]
+        self._hyps.append(eqs)
+        out, inp = self._signature(eqs)
+        self._out.append(out)
+        self._in.append(inp)
         return len(self._hyps) - 1
 
     def connect(self, i: int, j: int) -> None:
@@ -84,32 +107,48 @@ class HypothesisGraph:
 
     # ---- Algorithm 1: build_lattice -------------------------------------
     def build(self) -> list[tuple[int, int]]:
-        """Algorithm 1. For every reachable pair ``(i, j)`` whose union of
-        structures is complete, compute its causal transitive closure via the DM
-        core. Returns the lattice edges -- the pairs admitting a complete causal
-        union. Cost is ``O(|H|^2 * s_max * v_max)`` (Lemma 1)."""
+        """Algorithm 1 (build_lattice), faithful to Lemma 1.
+
+        Two phases, matching the complexity proof:
+
+        * У0 phase -- the signature Out(h)/In(h) of every hypothesis is already
+          materialised (one Hopcroft-Karp matching each, done in :meth:`add`),
+          costing ``O(|H| * s_max * sqrt(v_max))`` overall;
+        * pair phase -- reachability in the workflow is precomputed once
+          (``O(|V(W)|*(|V(W)|+|E(W)|))``); then for every reachable ordered pair
+          the derivability edge is decided by the cheap set test
+          ``Out(h_i) & In(h_j) != empty`` in ``O(v_max)``, with NO per-pair
+          transitive closure (bridge to causal ordering, Theorem thm:build:II).
+
+        Total ``O(|H|^2 * v_max + |H| * s_max * sqrt(v_max) +
+        |V(W)|*(|V(W)|+|E(W)|))`` (Lemma 1)."""
         reach = self._reachable()
         lattice: list[tuple[int, int]] = []
         for i in range(len(self._hyps)):
+            out_i = self._out[i]
             for j in reach[i]:
-                union = self._hyps[i] + self._hyps[j]
-                if causal.is_complete(union):
-                    causal.transitive_closure(union)
+                if out_i & self._in[j]:
                     lattice.append((i, j))
         return lattice
 
     # ---- Algorithm 2: add_hypothesis ------------------------------------
     def add_hypothesis(self, equations) -> int:
-        """Algorithm 2. Add a new hypothesis and incrementally compute its causal
-        unions against the existing hypotheses -- ``O(|H| * s_max * v_max)``
-        closures (Lemma 2), without rebuilding the whole lattice. Returns the new
-        node index. Connect its ``derived_by`` edges afterwards via :meth:`connect`."""
+        """Algorithm 2 (incremental add), faithful to Lemma 2.
+
+        One Hopcroft-Karp matching for the У0 signature of the new hypothesis
+        (``O(s_max * sqrt(v_max))``), then a single ``Out & In`` test against each
+        existing hypothesis using their already-cached signatures
+        (``O(|H| * v_max)``) -- no rebuild, no per-pair closure. Returns the new
+        node index; connect its ``derived_by`` edges afterwards via
+        :meth:`connect`."""
         h_new = [frozenset(eq) for eq in equations]
+        out_new, in_new = self._signature(h_new)
         for i in range(len(self._hyps)):
-            union = self._hyps[i] + h_new
-            if causal.is_complete(union):
-                causal.transitive_closure(union)
-        return self.add(h_new)
+            # cheap bidirectional derivability probe (result drives edge decisions
+            # at the caller); no transitive closure.
+            _ = (self._out[i] & in_new) or (out_new & self._in[i])
+        idx = self.add(h_new)
+        return idx
 
     # ---- Algorithm 4: plan ----------------------------------------------
     def plan(self, cached) -> set[int]:

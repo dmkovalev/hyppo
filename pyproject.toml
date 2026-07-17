@@ -78,7 +78,10 @@ hyppo = ["personas/*.md", "py.typed"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
-markers = ["reasoner: slow tests that launch the HermiT reasoner (Java)"]
+markers = [
+    "reasoner: slow tests that launch the HermiT reasoner (Java)",
+    "slow: интеграционные тесты, запускаемые по тегу/nightly (подгонка CRM и т.п.), а не на каждый push",
+]
 
 [tool.ruff]
 target-version = "py311"

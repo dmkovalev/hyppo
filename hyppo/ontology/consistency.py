@@ -1,7 +1,7 @@
 """Two-stage consistency check for virtual experiments (Algorithm 1 of
 the planning chapter of the dissertation).
 
-Stage A — semantic: OWL 2 DL classification via HermiT detects
+Stage A — semantic: the OWL 2 RL closure (owlrl + rdflib) detects
     C1 (ontology completeness via Concept closure axiom + AllDifferent),
     C2 (realizability via FunctionalProperty is_implemented_by_model
         + existential restriction + AllDifferent on Model individuals),
@@ -14,20 +14,29 @@ Stage B — structural: procedural checks for
     C4 (causal order via artefact-set intersection on each edge),
     C5 (configuration finiteness via direct enumeration of Q_i).
 
+Paper conditions 4 and 5 (§2.4) — the procedural stage of the integrity theorem:
+    condition 4 (``_check_condition4_projection``): pi_t(V) != empty for every
+        task, via CSP backtracking (the NP-hard admissibility test);
+    condition 5 (``_check_condition5_causal_order``, Algorithm ``consistence``):
+        the hypothesis dependencies respect the workflow order — a topological
+        traversal of W accumulating each task's ancestor hypotheses rejects any
+        dependency on a hypothesis of a non-ancestor (later) task.
+
 Public API: ``check_consistency(ve, ontology, lattice)`` returns
 ``ConsistencyResult`` with status flag and violation details.
 
 Stage A engines
 ---------------
-The default (``stage_a_engine="auto"``) runs HermiT, which requires a Java
-runtime. When Java is unavailable the check degrades gracefully to a pure-Python
-OWL 2 RL closure (owlrl + rdflib) — a *limited* mode carrying the marker
-``stage_a_engine="owlrl (limited: OWL 2 RL profile)"``. The RL profile covers the
+The default (``stage_a_engine="auto"``) materialises the OWL 2 RL closure with a
+pure-Python engine (owlrl + rdflib) and checks consistency (clash detection) over
+it — no external DL reasoner is required, matching the RL + IC-semantics design of
+the integrity theorem (§2.4): under the ⊥-locality assumption the RL closure is
+sufficient. A full OWL 2 DL reasoner is available only opt-in
+(``stage_a_engine="hermit"``, requires Java) and is not used by default. The
 recognising rules behind C1 (disjointness / owl:Nothing), C2 (functional-property
-clash via sameAs/differentFrom under AllDifferent) and C6 (rdfs:range typing);
-existential-in-superclass satisfaction and cardinality reasoning are *not* in RL
-and still require HermiT. CWA-only obligations (a model-less hypothesis, C7
-grounding) live in the marker layer regardless of engine and are unaffected.
+clash under AllDifferent) and C6 (rdfs:range typing) are in the RL profile;
+conditions 1-3 as IC and other CWA-only obligations live in the marker layer
+regardless of engine.
 """
 
 from __future__ import annotations
@@ -93,6 +102,10 @@ class Status:
     C5_VIOLATED = "C5: configuration space infinite"
     C6_VIOLATED = "C6: parameter type incompatibility"
     C7_VIOLATED = "C7: domain grounding violation"
+    # Paper conditions 4 and 5 (§2.4) — the procedural (structural) stage of the
+    # integrity theorem, distinct from the internal C1-C7 structural checks above.
+    COND4_VIOLATED = "condition 4: empty task projection pi_t(V) = empty"
+    COND5_VIOLATED = "condition 5: causal order violation (Algorithm consistence)"
 
 
 @dataclass
@@ -113,6 +126,10 @@ def check_consistency(
     configurations: Iterable[Iterable] | None = None,
     domain_terms: set | None = None,
     hypothesis_vars: Mapping[int, Iterable[str]] | None = None,
+    task_hypotheses: Mapping[str, Iterable[int]] | None = None,
+    workflow_edges: Iterable[tuple[str, str]] | None = None,
+    param_domains: Mapping[int, Iterable] | None = None,
+    forbidden_combos: Iterable[Mapping[int, object]] | None = None,
 ) -> ConsistencyResult:
     """Two-stage consistency check matching Algorithm 1 of the paper.
 
@@ -216,6 +233,34 @@ def check_consistency(
     else:
         details["c7"] = "skipped"
 
+    # Condition 4 (§2.4): non-empty task projections pi_t(V) = C \\ F.
+    if task_hypotheses is not None and param_domains is not None:
+        empty_task = _check_condition4_projection(
+            task_hypotheses, param_domains, forbidden_combos or ()
+        )
+        if empty_task is not None:
+            return ConsistencyResult(
+                False, Status.COND4_VIOLATED, {**details, "cond4_task": empty_task}
+            )
+        details["cond4"] = "passed (проекции pi_t(V) непусты)"
+    else:
+        details["cond4"] = "skipped"
+
+    # Condition 5 (§2.4, Algorithm consistence): causal order vs the workflow DAG.
+    if task_hypotheses is not None and workflow_edges is not None:
+        edges = list(workflow_edges)
+        all_tasks = set(task_hypotheses) | {x for e in edges for x in e}
+        viol = _check_condition5_causal_order(
+            all_tasks, edges, task_hypotheses, lattice
+        )
+        if viol is not None:
+            return ConsistencyResult(
+                False, Status.COND5_VIOLATED, {**details, "cond5": viol}
+            )
+        details["cond5"] = "passed (причинный порядок согласован с потоком работ)"
+    else:
+        details["cond5"] = "skipped"
+
     return ConsistencyResult(True, Status.OK, details)
 
 
@@ -236,7 +281,10 @@ def _run_stage_a(ontology, engine: str) -> tuple[str | None, dict]:
         return _stage_a_hermit(ontology, fallback=False)
 
     if engine == "auto":
-        return _stage_a_hermit(ontology, fallback=True)
+        # RL + IC-semantics design (§2.4): the OWL 2 RL closure is the default
+        # engine — no external DL reasoner. A full DL reasoner is opt-in via
+        # ``stage_a_engine="hermit"``.
+        return _stage_a_owlrl(ontology, "owlrl")
 
     raise ValueError(
         f"unknown stage_a_engine {engine!r}; expected "
@@ -426,4 +474,112 @@ def _find_c4_violation(
             in_v = set(artefacts.get(v, {}).get("in", ()))
             if not (out_u & in_v):
                 return (u, v)
+    return None
+
+
+# --- Paper conditions 4 and 5 (§2.4): the procedural / structural stage --------
+
+def _csp_satisfiable(hyps, domains, forbidden):
+    """Backtracking search for one admissible assignment of finite ``domains`` to
+    ``hyps`` avoiding every ``forbidden`` partial combination (a mapping
+    ``{h_id: value}`` that must NOT be fully matched). Returns a satisfying
+    assignment or ``None``. Realises the (NP-hard) admissibility test of
+    condition 4 by exhaustive backtracking with forward pruning, adequate for the
+    bounded configuration spaces of the target domains."""
+    order = list(hyps)
+    clauses = [dict(f) for f in forbidden if f]
+
+    def conflicts(assign):
+        return any(
+            all(k in assign and assign[k] == v for k, v in clause.items())
+            for clause in clauses
+        )
+
+    def backtrack(i, assign):
+        if i == len(order):
+            return dict(assign)
+        h = order[i]
+        for val in domains.get(h, ()):
+            assign[h] = val
+            if not conflicts(assign):
+                sol = backtrack(i + 1, assign)
+                if sol is not None:
+                    return sol
+            del assign[h]
+        return None
+
+    return backtrack(0, {})
+
+
+def _check_condition4_projection(task_hypotheses, domains, forbidden):
+    """Condition 4 (§2.4): ``pi_t(V) != empty`` for every task ``t``. For each task
+    the admissible subspace restricted to the task's hypotheses is tested for
+    non-emptiness by CSP backtracking (NP-hard in general). Returns the name of a
+    task with an empty projection, or ``None`` if all projections are non-empty."""
+    for task, hyps in task_hypotheses.items():
+        hyps = list(hyps)
+        local_dom = {h: list(domains.get(h, ())) for h in hyps}
+        if any(len(local_dom[h]) == 0 for h in hyps):
+            return task  # a hypothesis with an empty domain empties pi_t
+        local_forbidden = [
+            {k: v for k, v in clause.items() if k in hyps}
+            for clause in (forbidden or ())
+            if clause and all(k in hyps for k in clause)
+        ]
+        if _csp_satisfiable(hyps, local_dom, local_forbidden) is None:
+            return task
+    return None
+
+
+def _check_condition5_causal_order(tasks, edges, task_hypotheses, lattice):
+    """Condition 5 (§2.4, Algorithm ``consistence``): hypothesis dependencies must
+    respect the workflow order — every producer of a hypothesis's input must lie
+    in an ancestor task (or the same task). Topologically traverses the workflow
+    accumulating ``A_t = union over predecessors t' of (A_{t'} ∪ hyp(t'))``; a
+    dependency from a non-ancestor task is a violation. ``lattice`` is the
+    derived-by adjacency ``{producer: {consumers}}`` (producers of ``h`` are its
+    lattice predecessors). Returns a violation dict or ``None``."""
+    succ = {t: set() for t in tasks}
+    preds = {t: set() for t in tasks}
+    for a, b in edges:
+        succ.setdefault(a, set()).add(b)
+        preds.setdefault(b, set()).add(a)
+        succ.setdefault(b, set())
+        preds.setdefault(a, set())
+
+    indeg = {t: len(preds[t]) for t in succ}
+    queue = deque(t for t, d in indeg.items() if d == 0)
+    topo = []
+    while queue:
+        t = queue.popleft()
+        topo.append(t)
+        for nb in succ[t]:
+            indeg[nb] -= 1
+            if indeg[nb] == 0:
+                queue.append(nb)
+    if len(topo) != len(succ):
+        return None  # cyclic workflow — handled by the acyclicity check
+
+    producers: dict = {}
+    for u, children in lattice.items():
+        for v in children:
+            producers.setdefault(v, set()).add(u)
+
+    task_of = {h: t for t, hs in task_hypotheses.items() for h in hs}
+    accum: dict = {}
+    for t in topo:
+        anc = set()
+        for p in preds[t]:
+            anc |= accum.get(p, set()) | set(task_hypotheses.get(p, ()))
+        accum[t] = anc
+        own = set(task_hypotheses.get(t, ()))
+        for h in own:
+            for dep in producers.get(h, ()):
+                if dep not in anc and dep not in own:
+                    return {
+                        "task": t,
+                        "hypothesis": h,
+                        "dependency": dep,
+                        "dependency_task": task_of.get(dep),
+                    }
     return None

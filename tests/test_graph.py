@@ -45,30 +45,31 @@ def test_connect_out_of_range_raises():
 # --------------------------------------------------------------------------
 
 
-def test_build_links_complete_union():
-    """Two complete, variable-disjoint structures -> their union is complete,
-    so the reachable pair appears as a lattice edge."""
+def test_build_links_dependency_via_out_in():
+    """h1 declares h0's output as its input (Out(h0) ∩ In(h1) ≠ ∅) -> edge,
+    decided without a per-pair transitive closure (bridge, Theorem thm:build)."""
     g = HypothesisGraph()
-    g.add([frozenset({"a", "b"}), frozenset({"b"})])  # complete: 2 eq, vars {a,b}
-    g.add([frozenset({"c", "d"}), frozenset({"d"})])  # complete: 2 eq, vars {c,d}
+    g.add([frozenset({"cd"})])            # h0: Out={cd}, In={}
+    g.add([frozenset({"aa", "cd"})])      # h1: Out={aa}, In={cd} (=h0's output)
     g.connect(0, 1)
     assert g.build() == [(0, 1)]
 
 
-def test_build_skips_incomplete_union():
-    """Variable-overlapping structures whose union is not complete -> no edge."""
+def test_build_skips_when_no_out_in_overlap():
+    """h1's inputs contain no output of h0 -> no derivability edge."""
     g = HypothesisGraph()
-    g.add([frozenset({"a", "b"}), frozenset({"b"})])
-    g.add([frozenset({"a", "c"}), frozenset({"c"})])  # union has 4 eq, 3 vars
+    g.add([frozenset({"cd"})])            # Out={cd}
+    g.add([frozenset({"aa", "bb"})])      # Out={aa}, In={bb}; bb != cd
     g.connect(0, 1)
     assert g.build() == []
 
 
 def test_build_only_reachable_pairs():
-    """No edges -> nothing reachable -> empty lattice even if unions complete."""
+    """No workflow edges -> nothing reachable -> empty lattice even if Out/In
+    would overlap."""
     g = HypothesisGraph()
-    g.add([frozenset({"a", "b"}), frozenset({"b"})])
-    g.add([frozenset({"c", "d"}), frozenset({"d"})])
+    g.add([frozenset({"cd"})])
+    g.add([frozenset({"aa", "cd"})])      # would link if reachable, but no connect
     assert g.build() == []
 
 

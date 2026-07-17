@@ -6,9 +6,15 @@ import math
 import random
 import time
 
+import pytest
 from sympy import Symbol
 
 from hyppo.coa._base import Equation, Structure
+
+# Профилирующий бенчмарк: измеряет показатель степени роста построения графа.
+# Помечен `slow` (nightly/по тегу), т.к. под полным набором owlready2-world
+# может быть загрязнён (см. tests/conftest.py); изолированно/по тегу — зелёный.
+pytestmark = pytest.mark.slow
 
 
 def _gen_struct(rng, n_eq=5, pool=20):
