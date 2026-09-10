@@ -132,28 +132,30 @@ def main():
         sx = [d["speedup"][str(h)]["speedup_x"] for h in hs]
         wh = [int(x) for x in wc["grid"]]
         wt = list(wc["medians_ms"])
-        fig, (axL, axR) = plt.subplots(1, 2, figsize=(9.5, 3.8))
+        with plt.rc_context({"font.size": 19, "axes.titlesize": 18, "axes.labelsize": 18,
+                         "xtick.labelsize": 16, "ytick.labelsize": 16, "legend.fontsize": 15}):
+            fig, (axL, axR) = plt.subplots(1, 2, figsize=(9.5, 5.0))
 
-        def _g(ax, h0, t0, slope, lo, hgh, **kw):
-            xx = np.linspace(lo, hgh, 50)
-            ax.plot(xx, t0 * (xx / h0) ** slope, **kw)
+            def _g(ax, h0, t0, slope, lo, hgh, **kw):
+                xx = np.linspace(lo, hgh, 50)
+                ax.plot(xx, t0 * (xx / h0) ** slope, **kw)
 
-        axL.plot(hs, add_t, "s-", color="C1", lw=1.4, ms=5, label=r"добавление (Алг.2)")
-        axL.plot(hs, med, "o-", color="C0", lw=1.4, ms=5, label=r"построение, средний (Алг.1)")
-        axL.plot(wh, wt, "^-", color="C3", lw=1.4, ms=6, label=r"построение, худший (Алг.1)")
-        _g(axL, hs[0], add_t[0], 1, hs[0], hs[-1], ls=":", color="C1", alpha=0.6, label=r"$\propto|H|$")
-        _g(axL, hs[0], med[0], 2, hs[0], hs[-1], ls=":", color="C0", alpha=0.6, label=r"$\propto|H|^2$")
-        _g(axL, wh[0], wt[0], 3, wh[0], wh[-1], ls=":", color="C3", alpha=0.6, label=r"$\propto|H|^3$")
-        axL.set_xscale("log"); axL.set_yscale("log")
-        axL.set_xlabel(r"$|H|$"); axL.set_ylabel("время, мс")
-        axL.set_title(r"(а) сложность: $O(|H|)/O(|H|^2)/O(|H|^3)$", fontsize=9)
-        axL.legend(fontsize=7, loc="upper left", ncol=2); axL.grid(True, which="both", alpha=0.3)
+            axL.plot(hs, add_t, "s-", color="C1", lw=1.4, ms=5, label=r"добавление (Алг.2)")
+            axL.plot(hs, med, "o-", color="C0", lw=1.4, ms=5, label=r"средний (Алг.1)")
+            axL.plot(wh, wt, "^-", color="C3", lw=1.4, ms=6, label=r"худший (Алг.1)")
+            _g(axL, hs[0], add_t[0], 1, hs[0], hs[-1], ls=":", color="C1", alpha=0.6, label=r"$\propto|H|$")
+            _g(axL, hs[0], med[0], 2, hs[0], hs[-1], ls=":", color="C0", alpha=0.6, label=r"$\propto|H|^2$")
+            _g(axL, wh[0], wt[0], 3, wh[0], wh[-1], ls=":", color="C3", alpha=0.6, label=r"$\propto|H|^3$")
+            axL.set_xscale("log"); axL.set_yscale("log")
+            axL.set_xlabel(r"$|H|$"); axL.set_ylabel("время, мс")
+            axL.set_title(r"(а) сложность: $O(|H|)/O(|H|^2)/O(|H|^3)$")
+            axL.legend(loc="upper center", bbox_to_anchor=(0.5, -0.22), ncol=3, fontsize=13, frameon=False, columnspacing=1.1, handletextpad=0.5); axL.grid(True, which="both", alpha=0.3)
 
-        axR.plot(hs, sx, "^-", color="C2", lw=1.5, ms=6)
-        axR.set_xscale("log"); axR.set_xlabel(r"$|H|$"); axR.set_ylabel(r"ускорение $k$")
-        axR.set_title(r"(б) ускорение Алг.2 vs перестройки", fontsize=9)
-        axR.grid(True, which="both", alpha=0.3)
-        fig.tight_layout(); fig.savefig(IMG / "asymp_synopsis.pdf"); plt.close(fig)
+            axR.plot(hs, sx, "^-", color="C2", lw=1.5, ms=6)
+            axR.set_xscale("log"); axR.set_xlabel(r"$|H|$"); axR.set_ylabel(r"ускорение $k$")
+            axR.set_title(r"(б) ускорение Алг.2")
+            axR.grid(True, which="both", alpha=0.3)
+            fig.tight_layout(); fig.savefig(IMG / "asymp_synopsis.pdf", bbox_inches="tight"); plt.close(fig)
         print("saved asymp_synopsis.pdf")
 
 
