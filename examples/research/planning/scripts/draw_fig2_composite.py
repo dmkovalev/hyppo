@@ -210,7 +210,7 @@ def _parse_wfformat(path):
 
 
 def _compute_wfcommons_sweep(r_grid, n_runs=30):
-    """Для каждой из 157 трасс WfCommons считает ρ при каждом r из r_grid.
+    """Для каждой трассы корпуса WfCommons считает ρ при каждом r из r_grid.
     Результат: {label: {family, rhos: [ρ_r1, ρ_r2, …]}}. Кешируется в JSON."""
     if WFCOMMONS_SWEEP_CACHE.exists():
         cached = json.loads(WFCOMMONS_SWEEP_CACHE.read_text(encoding="utf-8"))
@@ -302,7 +302,7 @@ def draw_sensitivity(ax, data):
                 bbox=dict(boxstyle="round,pad=0.25",
                           facecolor="white", edgecolor="none", alpha=0.75),
                 zorder=10)
-    # 157 трасс WfCommons: ρ при каждом r из R_GRID (сетка по всему диапазону)
+    # трассы корпуса WfCommons: ρ при каждом r из R_GRID (сетка по всему диапазону)
     wf_sweep = _compute_wfcommons_sweep(R_GRID, n_runs=30)
     wf_xs, wf_ys = [], []
     rng_jitter = np.random.default_rng(42)
