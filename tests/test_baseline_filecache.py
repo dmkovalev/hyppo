@@ -1,4 +1,4 @@
-from examples.research.baseline_filecache import config, dag
+from examples.research.baseline_filecache import config, dag, hyppo_side
 from examples.research.baseline_filecache.config import SMALL_GRID, GRID
 
 
@@ -50,3 +50,25 @@ def test_wrong_set_propagates_through_files():
     assert dag.wrong_set(g, S, E) == {"hyb/uto_1.npy", "opr/uto_1_2_2.json"}
     # всё пересчитано -> ничего неверного
     assert dag.wrong_set(g, S, S) == set()
+
+
+def _descendant_jobs(grid, roots_rule_filter):
+    return {j for j in dag.jobs(grid) if roots_rule_filter(j)}
+
+
+def test_plan_matches_expected_cascade_small_grid():
+    g = SMALL_GRID
+    model = hyppo_side.build(g)
+    hyb = {j for j in dag.jobs(g) if j.startswith("hyb/")}
+    opr = {j for j in dag.jobs(g) if j.startswith("opr/")}
+    wct = {j for j in dag.jobs(g) if j.startswith("wct/")}
+    assert hyppo_side.plan_jobs(model, "gains") == hyb | opr
+    assert hyppo_side.plan_jobs(model, "tau") == hyb | opr
+    assert hyppo_side.plan_jobs(model, "well_status") == hyb | opr
+    assert hyppo_side.plan_jobs(model, "corey_ref") == wct | opr
+    assert hyppo_side.plan_jobs(model, "ridge") == hyb | opr
+
+
+def test_no_manual_dependency_records():
+    model = hyppo_side.build(SMALL_GRID)
+    assert model.extra_declarations == 0
