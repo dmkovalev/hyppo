@@ -1,6 +1,6 @@
 import numpy as np
 
-from examples.research.baseline_filecache import config, dag, hyppo_side, metastore
+from examples.research.baseline_filecache import config, dag, experiment, hyppo_side, metastore
 from examples.research.baseline_filecache.config import SMALL_GRID, GRID
 
 
@@ -98,3 +98,36 @@ def test_metastore_roundtrip_and_revise(tmp_path):
     metastore.revise(db, "tau")
     _, t = metastore.read(db, "tau", "uto")
     assert np.all(t == 2.0)
+
+
+def test_summarize_and_checks_with_stub():
+    g = SMALL_GRID
+    hyb = {j for j in dag.jobs(g) if j.startswith("hyb/")}
+    opr = {j for j in dag.jobs(g) if j.startswith("opr/")}
+    wct = {j for j in dag.jobs(g) if j.startswith("wct/")}
+    truth = {"gains": hyb | opr, "tau": hyb | opr, "well_status": hyb | opr,
+             "corey_ref": wct | opr, "ridge": hyb | opr}
+    model = hyppo_side.build(g)
+
+    def stub_e(declared, revision):
+        # файловый кэш: пересчитывает прямых потребителей объявленных пар + файловых потомков
+        if revision == "ridge":
+            return hyb | opr
+        direct = {"fit_liq": hyb, "fit_wct": wct, "fit_opr": opr}
+        hit = set()
+        for ent, rule in declared:
+            if ent == revision:
+                hit |= direct[rule]
+        if hit & hyb:
+            hit |= opr
+        if hit & wct:
+            hit |= opr
+        return hit
+
+    from examples.research.baseline_filecache.config import PAIRS
+    trials = experiment.run_trials(g, truth, model, stub_e, subsets=[(0.0, ()), (1.0, tuple(PAIRS))])
+    experiment.self_checks(trials)                 # не должно падать
+    summ = experiment.summarize(trials)
+    assert summ[1.0]["snakemake_missed_mean"] == 0
+    assert summ[0.0]["snakemake_missed_mean"] > 0
+    assert all(v["hyppo_missed_max"] == 0 for v in summ.values())
