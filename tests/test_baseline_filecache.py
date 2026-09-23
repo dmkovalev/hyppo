@@ -1,4 +1,6 @@
-from examples.research.baseline_filecache import config, dag, hyppo_side
+import numpy as np
+
+from examples.research.baseline_filecache import config, dag, hyppo_side, metastore
 from examples.research.baseline_filecache.config import SMALL_GRID, GRID
 
 
@@ -72,3 +74,27 @@ def test_plan_matches_expected_cascade_small_grid():
 def test_no_manual_dependency_records():
     model = hyppo_side.build(SMALL_GRID)
     assert model.extra_declarations == 0
+
+
+def test_metastore_roundtrip_and_revise(tmp_path):
+    db = tmp_path / "meta.sqlite"
+    g = np.array([[0.2, 0.9], [0.4, 0.1]])
+    metastore.write(db, "gains", "pos", g)
+    metastore.write(db, "gains", "uto", g * 0.5)
+    metastore.write(db, "tau", "pos", np.ones((2, 2)))
+    metastore.write(db, "tau", "uto", np.ones((2, 2)))
+    metastore.write(db, "corey_ref", "*", np.array([0.25, 0.25]))
+    metastore.write(db, "well_status", "*", np.ones(2))
+    assert metastore.version(db, "gains", "pos") == "v1"
+    metastore.revise(db, "gains")
+    v, g2 = metastore.read(db, "gains", "pos")
+    assert v == "v2" and g2[0, 1] == 0.9 * 1.5 and g2[1, 0] == 0.4
+    metastore.revise(db, "well_status")
+    _, st = metastore.read(db, "well_status", "*")
+    assert st.tolist() == [1.0, 0.0]          # скважина с наибольшим суммарным gain (pos)
+    metastore.revise(db, "corey_ref")
+    _, cr = metastore.read(db, "corey_ref", "*")
+    assert cr.tolist() == [0.25, 0.30]
+    metastore.revise(db, "tau")
+    _, t = metastore.read(db, "tau", "uto")
+    assert np.all(t == 2.0)
