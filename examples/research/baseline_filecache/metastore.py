@@ -78,7 +78,7 @@ def revise(db, entity: str) -> dict:
         return {"entity": "tau", "factor": 2.0}
     if entity == "well_status":
         _, ref = read(db, "gains", "pos")
-        j = int(np.argmax(ref.sum(axis=0)))
+        j = int(np.argmax(ref.sum(axis=1)))
         v, st = read(db, "well_status", "*")
         st[j] = 0.0
         write(db, "well_status", "*", st, _bump(v))

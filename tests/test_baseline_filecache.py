@@ -91,7 +91,7 @@ def test_metastore_roundtrip_and_revise(tmp_path):
     assert v == "v2" and g2[0, 1] == 0.9 * 1.5 and g2[1, 0] == 0.4
     metastore.revise(db, "well_status")
     _, st = metastore.read(db, "well_status", "*")
-    assert st.tolist() == [1.0, 0.0]          # скважина с наибольшим суммарным gain (pos)
+    assert st.tolist() == [0.0, 1.0]  # продюсер с наибольшим суммарным gain по строке; строки = продюсеры
     metastore.revise(db, "corey_ref")
     _, cr = metastore.read(db, "corey_ref", "*")
     assert cr.tolist() == [0.25, 0.30]
