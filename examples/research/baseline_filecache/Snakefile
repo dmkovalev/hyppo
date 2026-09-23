@@ -1,0 +1,96 @@
+# examples/research/baseline_filecache/Snakefile
+"""Конвейер Brugge с общим хранилищем метаинформации.
+
+config: meta=<путь к sqlite>, declared=<pair,pair,...> (например gains:fit_liq),
+        ridge=<множитель штрафа>, grid=full|small.
+Объявленная пара: в params правила-потребителя — живая версия сущности.
+Необъявленная пара: в params — постоянная "v1" (файловый кэш изменения не видит).
+Запуск: snakemake --rerun-triggers mtime params ...
+"""
+import os, sqlite3, sys
+HERE = os.path.dirname(os.path.abspath(workflow.snakefile))
+sys.path.insert(0, os.path.abspath(os.path.join(HERE, "..", "..", "..")))
+# config.py не импортирует numpy — безопасно для интерпретатора .venv-cache
+from examples.research.baseline_filecache.config import GRID, SMALL_GRID, HYPPO_PY
+
+PY = str(HYPPO_PY)
+WORKERS = os.path.join(HERE, "workers.py")
+META = config["meta"]
+DECLARED = set(filter(None, str(config.get("declared", "")).split(",")))
+RIDGE = str(config.get("ridge", "1"))
+G = SMALL_GRID if config.get("grid") == "small" else GRID
+
+
+def _version(entity, token):
+    """Версия сущности в хранилище (чистый sqlite3, без numpy)."""
+    if not os.path.exists(META):
+        return "missing"
+    con = sqlite3.connect(META, timeout=60)
+    try:
+        row = con.execute("SELECT version FROM meta WHERE entity=? AND token=?",
+                          (entity, token)).fetchone()
+    except sqlite3.OperationalError:
+        row = None
+    finally:
+        con.close()
+    return row[0] if row else "missing"
+
+
+def ver(entity, rule, token):
+    def f(wildcards):
+        if f"{entity}:{rule}" not in DECLARED:
+            return "v1"
+        return _version(entity, wildcards.c if token == "c" else "*")
+    return f
+
+
+rule all:
+    input:
+        expand("opr/{c}_{a}_{no}_{nw}.json", c=G["cons"], a=G["alphas"], no=G["corey"], nw=G["corey"])
+
+
+rule crm_fit:
+    output:
+        "p1/{c}.npy"
+    shell:
+        "\"{PY}\" \"{WORKERS}\" crm_fit --constraints {wildcards.c} "
+        "--p1 \"{output}\" --meta \"{META}\""
+
+
+rule fit_liq:
+    input:
+        "p1/{c}.npy"
+    output:
+        "hyb/{c}_{a}.npy"
+    params:
+        v_gains=ver("gains", "fit_liq", "c"),
+        v_tau=ver("tau", "fit_liq", "c"),
+        v_status=ver("well_status", "fit_liq", "*"),
+        ridge=RIDGE,
+    shell:
+        "\"{PY}\" \"{WORKERS}\" fit_liq --constraints {wildcards.c} --alpha {wildcards.a} "
+        "--ridge {params.ridge} --p1 \"{input}\" --meta \"{META}\" --out \"{output}\""
+
+
+rule fit_wct:
+    output:
+        "wct/{no}_{nw}.npy"
+    params:
+        v_corey=ver("corey_ref", "fit_wct", "*"),
+    shell:
+        "\"{PY}\" \"{WORKERS}\" fit_wct --no {wildcards.no} --nw {wildcards.nw} "
+        "--meta \"{META}\" --out \"{output}\""
+
+
+rule fit_opr:
+    input:
+        hyb="hyb/{c}_{a}.npy",
+        wct="wct/{no}_{nw}.npy",
+    output:
+        "opr/{c}_{a}_{no}_{nw}.json"
+    params:
+        v_status=ver("well_status", "fit_opr", "*"),
+        v_corey=ver("corey_ref", "fit_opr", "*"),
+    shell:
+        "\"{PY}\" \"{WORKERS}\" fit_opr --hyb \"{input.hyb}\" --wct \"{input.wct}\" "
+        "--meta \"{META}\" --out \"{output}\""

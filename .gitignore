@@ -51,3 +51,5 @@ webui/tsconfig.tsbuildinfo
 docs/superpowers/
 docs/specs/
 docs/rid/
+
+examples/research/baseline_filecache/work/
