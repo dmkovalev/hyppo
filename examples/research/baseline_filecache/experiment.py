@@ -62,6 +62,11 @@ def base_run(root: Path, grid: dict, grid_name: str, cores: int) -> tuple[Path, 
     shutil.rmtree(root / "base", ignore_errors=True)
     subprocess.run([str(HYPPO_PY), str(WORKERS), "seed", "--meta", str(meta)], check=True)
     _snk(work, meta, grid_name, PAIRS, "1", ["--cores", str(cores)])
+    # Предпосылка «замороженной версии»: без правки кэш свеж при любой полноте
+    # объявлений (иначе необъявленная пара дала бы ложный пересчёт).
+    for declared in ((), PAIRS):
+        extra = _dry_run_jobs(_snk(work, meta, grid_name, declared, "1", ["-n", "--cores", "1"]), grid)
+        assert not extra, f"базовый кэш не свеж при declared={len(declared)}: {sorted(extra)}"
     return work, meta
 
 
