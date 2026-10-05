@@ -33,7 +33,11 @@ DATA.mkdir(parents=True, exist_ok=True)
 
 OUT_FILE = OUT / "fig2_composite.pdf"
 SENSITIVITY_JSON = DATA / "rho_vs_r_sweep.json"
-HAND_CURATED = DATA / "hand_curated_hypothesis_graphs.json"
+import os
+# Корпус hand-curated графов можно переключить переменной окружения:
+# HAND_CURATED_JSON=..._26.json python draw_fig2_composite.py
+HAND_CURATED = DATA / os.environ.get(
+    "HAND_CURATED_JSON", "hand_curated_hypothesis_graphs.json")
 WFCOMMONS_VALIDATION = DATA / "wfcommons_validation_results.json"
 WFCOMMONS_CACHE_DIR = CACHE / "wfcommons"
 WFCOMMONS_SWEEP_CACHE = DATA / "wfcommons_per_workflow_sweep.json"
