@@ -44,24 +44,52 @@ class HypothesisGraph:
         # Theorem thm:build:II) instead of a per-pair transitive closure.
         self._out: list[set[str]] = []
         self._in: list[set[str]] = []
+        # Pairs found by the last :meth:`build` that violate condition У3 and
+        # therefore get NO derivability edge: output collisions (competes, a
+        # legitimate rivalry resolved by re-evaluation) and counter-supplies
+        # (order conflicts, a specification error).
+        self.competes_pairs: list[tuple[int, int]] = []
+        self.order_conflicts: list[tuple[int, int]] = []
 
     # ---- construction ---------------------------------------------------
-    def _signature(self, eqs: list[frozenset[str]]) -> tuple[set[str], set[str]]:
-        """Out(h)/In(h) via one Hopcroft-Karp matching -- O(s * sqrt(v))."""
-        m = causal.perfect_matching(eqs)
-        allv = causal.variables(eqs)
-        out = set(m.values()) if m else set()
-        return out, allv - out
+    def _signature(
+        self, eqs: list[frozenset[str]], inputs=None
+    ) -> tuple[set[str], set[str]]:
+        """Out(h)/In(h) and the У0 check -- one Hopcroft-Karp matching, O(s * sqrt(v)).
 
-    def add(self, equations) -> int:
+        With declared inputs (condition У2, the model's signature) the split is
+        the dissertation's: ``In(h)`` as declared, ``Out(h) = V_h \\ In(h)``,
+        independent of the matching; the matching only certifies У0
+        (``|E_h| + |In(h)| = |V_h|`` and every equation maps to a distinct
+        output). Without declared inputs the outputs fall back to the variables
+        saturated by a deterministic matching -- adequate for complete structures
+        (``|E| = |V|``, then ``In = ∅``), but the choice is matching-dependent
+        when ``|E| < |V|``, so callers should declare inputs in that case."""
+        allv = causal.variables(eqs)
+        if inputs is None:
+            m = causal.perfect_matching(eqs)
+            out = set(m.values()) if m else set()
+            return out, allv - out
+        inp = set(inputs)
+        if not inp <= allv:
+            raise ValueError(f"declared inputs not in the structure: {sorted(inp - allv)}")
+        out = allv - inp
+        if len(eqs) != len(out):
+            raise ValueError("condition У0 violated: |E| + |In| != |V|")
+        if eqs and causal.perfect_matching([eq - inp for eq in eqs]) is None:
+            raise ValueError("condition У0 violated: no complete causal mapping onto Out(h)")
+        return out, inp
+
+    def add(self, equations, inputs=None) -> int:
         """Add a hypothesis (a structure) as a new node; return its index.
 
-        Computes the signature Out(h)/In(h) once via a single Hopcroft-Karp
-        matching (condition У0), so building the graph never needs a per-pair
-        causal closure."""
+        ``inputs`` -- the declared input variables In(h) of the implementing
+        model (condition У2). Computes the signature Out(h)/In(h) once and checks
+        condition У0 with a single Hopcroft-Karp matching, so building the graph
+        never needs a per-pair causal closure."""
         eqs = [frozenset(eq) for eq in equations]
+        out, inp = self._signature(eqs, inputs)
         self._hyps.append(eqs)
-        out, inp = self._signature(eqs)
         self._out.append(out)
         self._in.append(inp)
         return len(self._hyps) - 1
@@ -124,15 +152,28 @@ class HypothesisGraph:
         |V(W)|*(|V(W)|+|E(W)|))`` (Lemma 1)."""
         reach = self._reachable()
         lattice: list[tuple[int, int]] = []
+        self.competes_pairs = []
+        self.order_conflicts = []
+        ins = list(self._in)  # snapshot; the pair loop reads In(h_j) once per pair
         for i in range(len(self._hyps)):
-            out_i = self._out[i]
+            out_i, in_i = self._out[i], ins[i]
             for j in reach[i]:
-                if out_i & self._in[j]:
+                if j == i:
+                    continue
+                in_j = self._in[j]
+                # condition У3 has priority: a violating pair gets no edge
+                collision = bool(out_i & self._out[j])
+                counter = bool(in_i & self._out[j])
+                if collision:
+                    self.competes_pairs.append((i, j))
+                if counter:
+                    self.order_conflicts.append((i, j))
+                if not (collision or counter) and out_i & in_j:
                     lattice.append((i, j))
         return lattice
 
     # ---- Algorithm 2: add_hypothesis ------------------------------------
-    def add_hypothesis(self, equations) -> int:
+    def add_hypothesis(self, equations, inputs=None) -> int:
         """Algorithm 2 (incremental add), faithful to Lemma 2.
 
         One Hopcroft-Karp matching for the У0 signature of the new hypothesis
@@ -142,12 +183,12 @@ class HypothesisGraph:
         node index; connect its ``derived_by`` edges afterwards via
         :meth:`connect`."""
         h_new = [frozenset(eq) for eq in equations]
-        out_new, in_new = self._signature(h_new)
+        out_new, in_new = self._signature(h_new, inputs)
         for i in range(len(self._hyps)):
             # cheap bidirectional derivability probe (result drives edge decisions
             # at the caller); no transitive closure.
             _ = (self._out[i] & in_new) or (out_new & self._in[i])
-        idx = self.add(h_new)
+        idx = self.add(h_new, inputs)
         return idx
 
     # ---- Algorithm 4: plan ----------------------------------------------

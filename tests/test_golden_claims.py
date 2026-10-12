@@ -31,8 +31,11 @@ NORNE_HYPS = [
     ("H2", "q_f = a_f*q_f_prev + b_f*I_agg"),
     ("H3", "q_s = a_s*q_s_prev + b_s*I_agg"),
     ("H4", "q_c = w_f*q_f + (1-w_f)*q_s"),
-    ("H5", "q_liq_phys = J*q_c + q_prim"),
+    # Поток работ упорядочен по поставке: H6 (q_prim) и GRP (J) исполняются
+    # раньше потребителя H5 (опр. выводимости требует tau(h_a) < tau(h_b)).
     ("H6", "q_prim = q_prev*exp(-dt*taup)"),
+    ("GRP", "J = J0 + dJ_grp"),
+    ("H5", "q_liq_phys = J*q_c + q_prim"),
     ("H7", "l_ml = MLP(x_hist)"),
     ("H8", "l = g*q_liq_phys + (1-g)*l_ml"),
     # Материальный баланс связан с прогнозом жидкости H8 (выход l), а не с сырым
@@ -43,7 +46,6 @@ NORNE_HYPS = [
     ("H13", "fw = 1/(1 + kro*muw/(krw*muo))"),
     ("H14", "o_p = 1 - fw"),
     ("H15", "o = gw*o_p + (1-gw)*o_m"),
-    ("GRP", "J = J0 + dJ_grp"),
     ("H19", "q_oil = l * o"),
 ]
 

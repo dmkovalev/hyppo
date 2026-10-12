@@ -55,15 +55,17 @@ TASKS: list[list[str]] = [
     ["H1"],
     ["H2", "H3"],
     ["H4"],
-    ["H5", "H6"],
+    ["H6"],
+    ["GRP"],
+    ["H5"],
     ["H7"],
     ["H8"],
     ["H11"],
     ["H12", "H12b"],
     ["H13"],
-    ["H14", "H15"],
+    ["H14"],
+    ["H15"],
     ["H19"],
-    ["GRP"],
 ]
 
 # Ontology O: the domain vocabulary the OWL layer reasons over.

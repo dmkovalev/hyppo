@@ -66,20 +66,6 @@
    "match": true
   },
   {
-   "source": "H5",
-   "stale": [
-    "H11",
-    "H12",
-    "H12b",
-    "H13",
-    "H14",
-    "H15",
-    "H19",
-    "H8"
-   ],
-   "match": true
-  },
-  {
    "source": "H6",
    "stale": [
     "H11",
@@ -90,6 +76,35 @@
     "H15",
     "H19",
     "H5",
+    "H8"
+   ],
+   "match": true
+  },
+  {
+   "source": "GRP",
+   "stale": [
+    "H11",
+    "H12",
+    "H12b",
+    "H13",
+    "H14",
+    "H15",
+    "H19",
+    "H5",
+    "H8"
+   ],
+   "match": true
+  },
+  {
+   "source": "H5",
+   "stale": [
+    "H11",
+    "H12",
+    "H12b",
+    "H13",
+    "H14",
+    "H15",
+    "H19",
     "H8"
    ],
    "match": true
@@ -178,21 +193,6 @@
    "match": true
   },
   {
-   "source": "GRP",
-   "stale": [
-    "H11",
-    "H12",
-    "H12b",
-    "H13",
-    "H14",
-    "H15",
-    "H19",
-    "H5",
-    "H8"
-   ],
-   "match": true
-  },
-  {
    "source": "H19",
    "stale": [],
    "match": true
@@ -229,17 +229,24 @@
   },
   {
    "run_uses": "H5",
-   "invalid": "H5",
-   "derived_stale": false,
-   "expected": false,
-   "verdict": "TN"
-  },
-  {
-   "run_uses": "H5",
    "invalid": "H6",
    "derived_stale": true,
    "expected": true,
    "verdict": "TP"
+  },
+  {
+   "run_uses": "H5",
+   "invalid": "GRP",
+   "derived_stale": true,
+   "expected": true,
+   "verdict": "TP"
+  },
+  {
+   "run_uses": "H5",
+   "invalid": "H5",
+   "derived_stale": false,
+   "expected": false,
+   "verdict": "TN"
   },
   {
    "run_uses": "H5",
@@ -296,13 +303,6 @@
    "derived_stale": false,
    "expected": false,
    "verdict": "TN"
-  },
-  {
-   "run_uses": "H5",
-   "invalid": "GRP",
-   "derived_stale": true,
-   "expected": true,
-   "verdict": "TP"
   },
   {
    "run_uses": "H5",
@@ -341,14 +341,21 @@
   },
   {
    "run_uses": "H8",
-   "invalid": "H5",
+   "invalid": "H6",
    "derived_stale": true,
    "expected": true,
    "verdict": "TP"
   },
   {
    "run_uses": "H8",
-   "invalid": "H6",
+   "invalid": "GRP",
+   "derived_stale": true,
+   "expected": true,
+   "verdict": "TP"
+  },
+  {
+   "run_uses": "H8",
+   "invalid": "H5",
    "derived_stale": true,
    "expected": true,
    "verdict": "TP"
@@ -408,13 +415,6 @@
    "derived_stale": false,
    "expected": false,
    "verdict": "TN"
-  },
-  {
-   "run_uses": "H8",
-   "invalid": "GRP",
-   "derived_stale": true,
-   "expected": true,
-   "verdict": "TP"
   },
   {
    "run_uses": "H8",
@@ -453,14 +453,21 @@
   },
   {
    "run_uses": "H15",
-   "invalid": "H5",
+   "invalid": "H6",
    "derived_stale": true,
    "expected": true,
    "verdict": "TP"
   },
   {
    "run_uses": "H15",
-   "invalid": "H6",
+   "invalid": "GRP",
+   "derived_stale": true,
+   "expected": true,
+   "verdict": "TP"
+  },
+  {
+   "run_uses": "H15",
+   "invalid": "H5",
    "derived_stale": true,
    "expected": true,
    "verdict": "TP"
@@ -520,13 +527,6 @@
    "derived_stale": false,
    "expected": false,
    "verdict": "TN"
-  },
-  {
-   "run_uses": "H15",
-   "invalid": "GRP",
-   "derived_stale": true,
-   "expected": true,
-   "verdict": "TP"
   },
   {
    "run_uses": "H15",
@@ -565,14 +565,21 @@
   },
   {
    "run_uses": "H19",
-   "invalid": "H5",
+   "invalid": "H6",
    "derived_stale": true,
    "expected": true,
    "verdict": "TP"
   },
   {
    "run_uses": "H19",
-   "invalid": "H6",
+   "invalid": "GRP",
+   "derived_stale": true,
+   "expected": true,
+   "verdict": "TP"
+  },
+  {
+   "run_uses": "H19",
+   "invalid": "H5",
    "derived_stale": true,
    "expected": true,
    "verdict": "TP"
@@ -629,13 +636,6 @@
   {
    "run_uses": "H19",
    "invalid": "H15",
-   "derived_stale": true,
-   "expected": true,
-   "verdict": "TP"
-  },
-  {
-   "run_uses": "H19",
-   "invalid": "GRP",
    "derived_stale": true,
    "expected": true,
    "verdict": "TP"
@@ -729,6 +729,6 @@
   "rule7_tn": 21,
   "rule7_errors": 0,
   "trials": 80,
-  "wall_seconds": 247.0
+  "wall_seconds": 58.4
  }
 }

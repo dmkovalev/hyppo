@@ -45,7 +45,7 @@ def gen_hyps(n_h, rng, n_out=N_OUT, n_in_max=N_IN_MAX):
             others = [v for v in outs if v != outs[k]]
             extra = rng.sample(others, rng.randint(0, min(2, len(others))))
             eqs.append(frozenset([outs[k], *extra, *ins]))
-        hyps.append(eqs)
+        hyps.append((eqs, set(ins)))
         produced.extend(outs)
     return hyps
 
@@ -65,8 +65,8 @@ def make_graph(n_h, rng):
     """Setup only (untimed): build the hypotheses (one У0 matching each) and the
     workflow edges. Returns a graph ready for :meth:`build`."""
     g = HypothesisGraph()
-    for eqs in gen_hyps(n_h, rng):
-        g.add(eqs)
+    for eqs, ins in gen_hyps(n_h, rng):
+        g.add(eqs, inputs=ins)  # declared In(h) (У2): Out = V \ In
     for u, v in gen_workflow(n_h, rng):
         g.connect(u, v)
     return g

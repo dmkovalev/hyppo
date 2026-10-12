@@ -42,15 +42,17 @@ TASKS = [
     ["H1"],                    # t1: parse injection
     ["H2", "H3"],              # t2: CRM channels
     ["H4"],                    # t3: mixing
-    ["H5", "H6"],              # t4: productivity + decline
+    ["H6"],                    # t4a: primary decline
+    ["GRP"],                   # t4b: GTM modulation (feeds H5)
+    ["H5"],                    # t4c: productivity
     ["H7"],                    # t5: ML correction
     ["H8"],                    # t6: LPR fusion
     ["H11"],                   # t7: material balance
     ["H12", "H12b"],           # t8: Corey rel perms
     ["H13"],                   # t9: fractional flow
-    ["H14", "H15"],            # t10: WCT
+    ["H14"],                   # t10a: WCT anchor
+    ["H15"],                   # t10b: WCT fusion (consumes o_p)
     ["H19"],                   # t11: oil forecast
-    ["GRP"],                   # t12: GTM modulation
 ]
 
 class Workflow:
@@ -75,7 +77,7 @@ print(f"DAG: {nx.is_directed_acyclic_graph(G)}")
 
 # Show edges
 print("\nEdges (derived_by: h_i -> h_j = h_j depends on h_i):")
-for u, v in sorted(G.edges()):
+for u, v in sorted(G.edges(), key=lambda e: (str(e[0]), str(e[1]))):
     print(f"  {u} -> {v}")
 
 # Compare with our COA variable-flow graph
@@ -91,10 +93,11 @@ for n, _, _ in HYPS:
             G_coa.add_edge(n, b)
 print(f"COA graph: {G_coa.number_of_nodes()} nodes, {G_coa.number_of_edges()} edges")
 print(f"Algorithm 1 graph: {G.number_of_nodes()} nodes, {G.number_of_edges()} edges")
-print(f"Edges match: {set(G.edges()) == set(G_coa.edges())}")
-if set(G.edges()) != set(G_coa.edges()):
-    only_alg1 = set(G.edges()) - set(G_coa.edges())
-    only_coa = set(G_coa.edges()) - set(G.edges())
+alg1_named = {(str(u), str(v)) for u, v in G.edges()}
+print(f"Edges match: {alg1_named == set(G_coa.edges())}")
+if alg1_named != set(G_coa.edges()):
+    only_alg1 = alg1_named - set(G_coa.edges())
+    only_coa = set(G_coa.edges()) - alg1_named
     if only_alg1: print(f"  Only in Alg1: {sorted(only_alg1)}")
     if only_coa: print(f"  Only in COA: {sorted(only_coa)}")
 

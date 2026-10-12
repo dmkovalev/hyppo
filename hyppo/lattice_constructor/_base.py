@@ -98,6 +98,11 @@ with virtual_experiment_onto:
             hypothesis with several output variables (``|Out| > 1``) feeds
             every consumer of any of them.
             """
+            # Only pairs with τ(h_i) ≺ τ(h_j) (the workflow routes h_i before
+            # h_j) are considered, and condition У3 has priority: an output
+            # collision (competes) or a counter-supply (order conflict) gives
+            # NO edge -- definition def:derived / Algorithm 1.
+            precedes = self._tau_precedes()
             dependencies = []
             for h_i in self.hypotheses:
                 if not hasattr(h_i, "structure") or not h_i.structure.equations:
@@ -105,14 +110,51 @@ with virtual_experiment_onto:
                 out_i = self._output_variables(h_i)
                 if not out_i:
                     continue
+                in_i = self._input_variables(h_i)
                 for h_j in self.hypotheses:
-                    if h_i is h_j:
+                    if h_i is h_j or not hasattr(h_j, "structure"):
                         continue
-                    if not hasattr(h_j, "structure"):
+                    if not precedes(h_i, h_j):
+                        continue
+                    out_j = self._output_variables(h_j)
+                    if out_i & out_j or in_i & out_j:
                         continue
                     if out_i & self._input_variables(h_j):
                         dependencies.append((h_i, h_j))
             return dependencies
+
+        def _tau_precedes(self):
+            """Return a predicate ``precedes(h_a, h_b)`` for τ(h_a) ≺ τ(h_b).
+
+            The task of h_b must be reachable from the (different) task of h_a.
+            If the workflow exposes task edges (``get_task_edges()`` returning
+            ``(i, j)`` index pairs over ``get_tasks()``), reachability over that
+            DAG is used; otherwise the ordered task list is a chain, so a task
+            precedes every later one. Hypotheses outside the workflow precede
+            nothing."""
+            tasks = []
+            try:
+                tasks = list(self.workflow.get_tasks())
+            except Exception:
+                pass
+            task_of = {}
+            for idx, task in enumerate(tasks):
+                for h in task:
+                    task_of.setdefault(id(h), idx)
+            get_edges = getattr(self.workflow, "get_task_edges", None)
+            if callable(get_edges):
+                g = nx.DiGraph()
+                g.add_nodes_from(range(len(tasks)))
+                g.add_edges_from(get_edges())
+                later = {t: nx.descendants(g, t) for t in g.nodes}
+            else:
+                later = {t: set(range(t + 1, len(tasks))) for t in range(len(tasks))}
+
+            def precedes(h_a, h_b):
+                ta, tb = task_of.get(id(h_a)), task_of.get(id(h_b))
+                return ta is not None and tb is not None and tb in later[ta]
+
+            return precedes
 
         @staticmethod
         def _var_name(v):
@@ -237,7 +279,7 @@ with virtual_experiment_onto:
             precedes h_b in the workflow order τ (h_a needs a quantity that h_b
             only produces later). Returns a set of ``(h_a, h_b)`` tuples.
             """
-            positions = self._tau_positions()
+            precedes = self._tau_precedes()
             conflicts = set()
             for h_a in self.hypotheses:
                 if not hasattr(h_a, "structure"):
@@ -245,14 +287,14 @@ with virtual_experiment_onto:
                 in_a = self._input_variables(h_a)
                 if not in_a:
                     continue
-                pos_a = positions.get(id(h_a))
                 for h_b in self.hypotheses:
                     if h_a is h_b or not hasattr(h_b, "structure"):
                         continue
                     if not (in_a & self._output_variables(h_b)):
                         continue
-                    pos_b = positions.get(id(h_b))
-                    if pos_a is not None and pos_b is not None and pos_a < pos_b:
+                    # reachability, not list position: parallel (incomparable)
+                    # tasks never form an order conflict
+                    if precedes(h_a, h_b):
                         conflicts.add((h_a, h_b))
             return conflicts
 
