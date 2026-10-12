@@ -43,10 +43,12 @@ class Manager:
             raise ValueError(f"plan_mode must be 'cascade' or 'safe', got {plan_mode!r}")
         self.plan_mode = plan_mode
         self.repository = MetadataRepository(db_path=db_path)
-        # hypotheses made stale by REFUTED/SUPERSEDED ancestors in an earlier run
-        self.pending_stale: set[str] = set()
+        # hypotheses made stale by REFUTED/SUPERSEDED ancestors in an earlier run;
+        # both sets are persisted in the repository, so a new Manager on the same
+        # database keeps the marks that were not worked off yet
+        self.pending_stale: set[str] = self.repository.load_marks("pending_stale")
         # hypotheses REFUTED/SUPERSEDED as of the last run (cascade fires on change)
-        self.invalid_seen: set[str] = set()
+        self.invalid_seen: set[str] = self.repository.load_marks("invalid_seen")
         self.r2_threshold = r2_threshold
         self.runner = Runner(
             repository=self.repository, max_retries=max_retries, max_workers=max_workers
@@ -150,6 +152,8 @@ class Manager:
         newly_invalid = invalid - self.invalid_seen
         self.invalid_seen = invalid
         self.pending_stale |= self._cascade(hyp_graph, newly_invalid, individuals, ontology)
+        self.repository.save_marks("pending_stale", self.pending_stale)
+        self.repository.save_marks("invalid_seen", self.invalid_seen)
         return results
 
     def _cascade(self, hyp_graph, invalid, individuals=None, ontology=None) -> set[str]:
@@ -173,12 +177,12 @@ class Manager:
             reach = set().union(*(nx.descendants(hyp_graph, h) for h in invalid if h in hyp_graph))
             return {
                 h for h, ind in individuals.items()
-                if StaleHypothesis in ind.is_a and h not in invalid and h in reach
+                if StaleHypothesis in ind.is_a and h in reach
             }
         out: set[str] = set()
         for h in invalid:
             out |= nx.descendants(hyp_graph, h)
-        return out - invalid
+        return out  # a descendant of another invalidated hypothesis is stale too
 
     @staticmethod
     def cache_keys(
@@ -230,20 +234,28 @@ class Manager:
         pne: set[str] = set()
         pe: set[str] = set()
         pruned: set[str] = set()
+        # One topological pass, O(|V| + |E|) (proposition prop:plan_lower): a
+        # hypothesis inherits the cascade from a recomputed parent ("cascade"
+        # mode) and the cut from a pruned parent, else it is checked on its own.
+        cascade = self.plan_mode == "cascade"
         for h in topo_order:
-            if h in pne or h in pruned:
+            parents = list(hyp_graph.predecessors(h))
+            forced_ne = cascade and any(g in pne for g in parents)
+            forced_cut = any(g in pruned for g in parents)
+            if forced_ne or forced_cut:
+                if forced_ne:
+                    pne.add(h)
+                if forced_cut:
+                    pruned.add(h)
                 continue
             cfg_h = config.get(h, {})
             if h in stale or not self.repository.has_result(h, cfg_h):
                 pne.add(h)
-                if self.plan_mode == "cascade":
-                    pne.update(nx.descendants(hyp_graph, h))
             else:
                 cached = self.repository.load_result(h, cfg_h)
                 r2 = cached.get("metrics", {}).get("r2") if cached is not None else None
                 if r2 is not None and r2 < self.r2_threshold:
                     pruned.add(h)
-                    pruned.update(nx.descendants(hyp_graph, h))
                 else:
                     pe.add(h)
         p_ne = [h for h in topo_order if h in pne]

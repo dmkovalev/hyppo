@@ -13,11 +13,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   `Out(h_a) ∩ In(h_b) ≠ ∅` is still built; only a counter-supply (order
   conflict) gives no edge. Before, a rival that reads the other rival's
   output was left out of the cascade and kept a stale cached result.
+- Marking completeness (prop:marking): `_cascade` no longer subtracts the
+  set of newly invalidated hypotheses, so a hypothesis superseded in the same
+  run as its source is still marked stale and recomputed.
+- `pending_stale` / `invalid_seen` are persisted in the repository (table
+  `marks`): a new Manager on the same database keeps unprocessed marks.
+- `Manager._partition` is a single topological pass, O(|V| + |E|)
+  (prop:plan_lower), instead of a descendants walk per cache miss.
 - `Manager.orchestrate(structures=...)` accepts declared inputs
   (`{"equations": [...], "inputs": {...}}`, condition У2).
 
 ### Added
 
+- `Manager(plan_mode="safe")` recomputes exactly N (thm:safe);
+  `MetadataRepository.evict`. Experiment
+  `examples/research/planning/scripts/eviction_safe_vs_cascade.py`.
+- `hyppo.planner.mincost.plan_min_cost`: minimum-cost safe plan with read
+  costs and a target set via a minimum s-t cut (thm:safe_cost).
+- Tests of the plan theorems: `test_safe_plan_theorem`, `test_safe_plan_minimax`
+  (worst-case optimality among adaptive plans), `test_planner_mincost`,
+  `test_marking_completeness`.
 - Level-parallel execution of P_ne: `Runner(max_workers=k)` /
   `Manager(max_workers=k)` runs the hypotheses of one topological level in a
   thread pool; the next level starts after the whole level has finished.

@@ -44,6 +44,11 @@ class MetadataRepository:
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
                 PRIMARY KEY (hypothesis_id, config_hash)
             );
+            CREATE TABLE IF NOT EXISTS marks (
+                kind TEXT NOT NULL,
+                hypothesis_id TEXT NOT NULL,
+                PRIMARY KEY (kind, hypothesis_id)
+            );
             CREATE TABLE IF NOT EXISTS graphs (
                 graph_id TEXT PRIMARY KEY,
                 nodes_json TEXT NOT NULL,
@@ -94,6 +99,22 @@ class MetadataRepository:
             "status": row["status"],
             "timestamp": row["timestamp"],
         }
+
+    def load_marks(self, kind: str) -> set[str]:
+        """Hypothesis ids stored under ``kind`` (e.g. pending stale marks)."""
+        rows = self._conn.execute(
+            "SELECT hypothesis_id FROM marks WHERE kind = ?", (kind,)
+        ).fetchall()
+        return {r["hypothesis_id"] for r in rows}
+
+    def save_marks(self, kind: str, ids: set[str]) -> None:
+        """Replace the set of hypothesis ids stored under ``kind``."""
+        self._conn.execute("DELETE FROM marks WHERE kind = ?", (kind,))
+        self._conn.executemany(
+            "INSERT INTO marks (kind, hypothesis_id) VALUES (?, ?)",
+            [(kind, h) for h in sorted(ids)],
+        )
+        self._conn.commit()
 
     def evict(self, hypothesis_id: str, config: dict) -> bool:
         """Remove the stored result of ``hypothesis_id`` under ``config`` (cache
