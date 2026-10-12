@@ -11,6 +11,12 @@ Hyppo (build_optimal_plan) и кэш SharedCache. Для серии правок
 Запуск:
     cd hyppo-ref
     uv run --extra data python examples/brugge_reuse_timing.py
+
+Результат: examples/research/safe_recompute/data/timing_<поле>.json, в т.ч. ключ
+per_component_ms --- время (мс) базового прогона по компонентам CRM, ML, FUS, MB,
+COREY, BL, WCTF, GTM, OPR. Времена накапливаются в run_components из имеющихся
+таймеров: время подгонки гибрида делится поровну между ML и FUS; время подгонки WCT
+--- поровну между MB, COREY, BL, WCTF; GTM = 0.001 мс (отдельного вычисления нет).
 """
 from __future__ import annotations
 import os, sys, time, json
@@ -160,38 +166,50 @@ def build_graph():
     g = nx.DiGraph(); g.add_nodes_from(NODES); g.add_edges_from(EDGES); return g
 
 # ───────────────────── timed execution of a component set ─────────────────────
-def run_components(comps, data, cache):
+def run_components(comps, data, cache, per_component_ms=None):
     """Реально исполняет компоненты из множества comps, переиспользуя кэш."""
     LIQ, WIN, t, oil, wat, s0, hi = data
     T, Np = LIQ.shape
     mval = (LIQ > 1).copy(); mval[:s0] = False
     t_total = 0.0
     r2 = {}
+    pc = per_component_ms if per_component_ms is not None else {}
+    pc.update({k: 0.0 for k in ("CRM", "ML", "FUS", "MB", "COREY", "BL", "WCTF", "GTM", "OPR")})
+    pc["GTM"] = 0.001
     if "CRM" in comps:
         ts = time.perf_counter()
         c, p1 = fit_crm(LIQ, WIN, t, s0, hi)
         cache["p1"] = p1
-        t_total += time.perf_counter() - ts
+        dt = time.perf_counter() - ts
+        t_total += dt
+        pc["CRM"] += dt * 1000
         r2["CRM"] = r2a(p1, LIQ, mval)
     p1 = cache["p1"]
     if "ML" in comps or "FUS" in comps:
         ts = time.perf_counter()
         hyb, r2h = fit_hybrid(p1, LIQ, WIN, s0, hi, Np)
         cache["hyb"] = hyb
-        t_total += time.perf_counter() - ts
+        dt = time.perf_counter() - ts
+        t_total += dt
+        pc["ML"] += dt * 500; pc["FUS"] += dt * 500
         r2["Hybrid"] = r2h
     hyb = cache.get("hyb")
     if {"MB", "COREY", "BL", "WCTF"} & comps:
         ts = time.perf_counter()
         wct_pred, r2w = fit_wct(LIQ, wat, oil)
         cache["wct"] = wct_pred
-        t_total += time.perf_counter() - ts
+        dt = time.perf_counter() - ts
+        t_total += dt
+        for k in ("MB", "COREY", "BL", "WCTF"):
+            pc[k] += dt * 250
         r2["WCT"] = r2w
     wct_pred = cache.get("wct")
     if "OPR" in comps and hyb is not None and wct_pred is not None:
         ts = time.perf_counter()
         _, r2o = fit_opr(hyb, wct_pred, oil)
-        t_total += time.perf_counter() - ts
+        dt = time.perf_counter() - ts
+        t_total += dt
+        pc["OPR"] += dt * 1000
         r2["OPR"] = r2o
     return t_total, r2
 
@@ -209,7 +227,8 @@ def main():
     # 1) базовый прогон: исполнить ВСЕ компоненты, заполнить кэш
     all_comps = {"CRM", "ML", "FUS", "MB", "COREY", "BL", "WCTF", "OPR"}
     cache = {}
-    t_full, r2_full = run_components(all_comps, data, cache)
+    per_component_ms = {}
+    t_full, r2_full = run_components(all_comps, data, cache, per_component_ms)
     print("Базовый прогон (все компоненты) --- R²:")
     for k, v in r2_full.items():
         print(f"    {k:8s} R² = {v:.3f}")
@@ -261,11 +280,16 @@ def main():
 
     out = {"field": field, "full_ms": t_full * 1000,
            "r2": {k: round(v, 3) for k, v in r2_full.items()},
+           "per_component_ms": per_component_ms,
            "scenarios": [{"edit": r[1], "pne_size": r[2], "components": r[3],
                           "incr_ms": r[4] * 1000, "speedup": round(r[5], 1)} for r in results]}
-    with open("/tmp/brugge_reuse_timing.json", "w") as f:
+    from pathlib import Path
+    dest = (Path(__file__).resolve().parent / "research" / "safe_recompute" / "data"
+            / f"timing_{field.lower()}.json")
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    with open(dest, "w", encoding="utf-8") as f:
         json.dump(out, f, indent=2, ensure_ascii=False)
-    print("\nJSON сохранён: /tmp/brugge_reuse_timing.json")
+    print(f"\nJSON saved: {dest}")
 
 if __name__ == "__main__":
     main()
