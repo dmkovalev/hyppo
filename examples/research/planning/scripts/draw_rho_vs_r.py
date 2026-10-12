@@ -161,10 +161,10 @@ def sweep_curated():
 def main():
     print("Computing sweeps... (may take a few minutes)")
     n_synth = 200  # размер графа для synthetic
-    # matched-density ER: p* = 2·d_bar/(n-1) с d_bar=1.5
+    # matched-density ER: p* = 2·d_bar/(n-1) с d_bar=2 (как у BA с m=2)
     # (для i<j ER-DAG: E[d_bar_ER] = p(n-1)/2, R11/A04-G1 fix)
     # (медианная средняя степень в WfCommons, см. cascade_models таблицу)
-    p_er = min(1.0, 2.0 * 1.5 / (n_synth - 1))
+    p_er = min(1.0, 2.0 * 2.0 / (n_synth - 1))
     er_med = sweep_synthetic(er_dag, (n_synth, p_er), n_graphs=20)
     ba_med = sweep_synthetic(ba_dag, (n_synth, 2), n_graphs=20)
     # real — полная выборка
@@ -206,7 +206,7 @@ def main():
         "BA": [ba_med[r] for r in R_GRID],
         "curated_individual": cur_individual,
         "__meta__": {
-            "fix_note": "R11/A04-G1: ER uses p* = 2*d_bar/(n-1) with d_bar=1.5",
+            "fix_note": "ER density matched to BA(m=2): p* = 2*d_bar/(n-1) with d_bar=2",
             "n_synth": n_synth,
             "p_er": p_er,
         },
