@@ -363,6 +363,18 @@ def _run_owlrl_stage_a(world) -> tuple[bool, list[str]]:
     RL closure. Returns ``(consistent, error_messages)``; a non-empty error list
     means an inconsistency was derived.
     """
+    graph, errors = rl_materialize(world)
+    return (not errors), errors
+
+
+def rl_materialize(world):
+    """OWL 2 RL closure of an owlready2 world as a fresh ``rdflib.Graph``.
+
+    The live bridge graph is left unmutated; ``owl:AllDifferent`` is expanded
+    first (see :func:`_expand_all_different`). Returns ``(graph, errors)``;
+    a non-empty error list means an inconsistency (clash) was derived. Shared by
+    Stage A and by the cascade materialisation (:func:`hyppo.ontology.core_rules.
+    materialize_cascade`), so the cascade is always derived, never hand-coded."""
     import owlrl
     from rdflib import Graph
 
@@ -376,7 +388,7 @@ def _run_owlrl_stage_a(world) -> tuple[bool, list[str]]:
     sem = owlrl.OWLRL_Semantics(graph, axioms=True, daxioms=True, rdfs=False)
     sem.closure()
     errors = [str(e) for e in (getattr(sem, "error_messages", None) or [])]
-    return (not errors), errors
+    return graph, errors
 
 
 def _expand_all_different(graph) -> int:

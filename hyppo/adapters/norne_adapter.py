@@ -385,24 +385,15 @@ def run_oil_experiment_demo() -> dict[str, Any]:
     h_crm = hyps["h_CRM"]
     h_crm.is_a.append(ns.InvalidHypothesis)
 
-    # Structurally mark downstream hypotheses as stale via derived_by chain
-    stale_names: list[str] = []
-    visited: set[str] = set()
-    queue = ["h_CRM"]
-    while queue:
-        current_name = queue.pop(0)
-        if current_name in visited:
-            continue
-        visited.add(current_name)
-        for name, h in hyps.items():
-            if name in visited:
-                continue
-            deps = h.derived_by if hasattr(h, "derived_by") and h.derived_by else []
-            for dep in deps:
-                if dep is hyps.get(current_name):
-                    stale_names.append(name)
-                    h.is_a.append(ns.StaleHypothesis)
-                    queue.append(name)
+    # Cascade (rule 4) DERIVED by OWL 2 RL materialisation over the transitive
+    # derived_by -- the single source of StaleHypothesis (thm:integrity (IV)).
+    from hyppo.ontology.core_rules import materialize_cascade
+
+    onto_obj = getattr(h_crm, "namespace", None)
+    onto_obj = getattr(onto_obj, "ontology", onto_obj)
+    marked = materialize_cascade(onto_obj)
+    by_ind = {id(h): name for name, h in hyps.items()}
+    stale_names: list[str] = [by_ind[id(i)] for i in marked if id(i) in by_ind]
 
     results["stale_after_invalidation"] = stale_names
 

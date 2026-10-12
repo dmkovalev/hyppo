@@ -181,7 +181,12 @@ def define_rules(onto, ns):
             the positive marker class for manual assertion.
             """
 
-        AllDisjoint([ValidHypothesis, StaleHypothesis, UncomputedHypothesis])
+        # Stale is NOT disjoint with the manual markers: the cascade must stay
+        # non-terminal (theorem thm:integrity (IV)) -- a derived StaleHypothesis
+        # on a hypothesis carrying a stale manual ValidHypothesis marker would
+        # otherwise clash and reject the whole experiment. ValidHypothesis is
+        # assigned only after the cascade (see assign_valid).
+        AllDisjoint([ValidHypothesis, UncomputedHypothesis])
 
         # ── Rule 5: acyclicity of ns.derived_by ────────────────────────────────
         # OWL 2 DL simplicity constraint forbids IrreflexiveProperty and
@@ -253,3 +258,45 @@ StaleHypothesis = _ns.StaleHypothesis
 UncomputedHypothesis = _ns.UncomputedHypothesis
 OilDomainOntology = _ns.OilDomainOntology
 NeuroDomainOntology = _ns.NeuroDomainOntology
+
+
+def materialize_cascade(onto) -> list:
+    """Derive the cascade (rule 4) by OWL 2 RL materialisation and write the
+    inferred ``StaleHypothesis`` types back to the owlready2 individuals.
+
+    The single source of the StaleHypothesis marker is the RL rule over the
+    transitive ``derived_by`` (theorem thm:integrity (IV)); no hand-coded
+    traversal. Returns the individuals newly marked stale."""
+    from rdflib import RDF, URIRef
+
+    from hyppo.ontology.consistency import rl_materialize
+
+    world = getattr(onto, "world", None) or onto
+    graph, _errors = rl_materialize(world)
+    stale_uri = URIRef(StaleHypothesis.iri)
+    marked = []
+    for subj in graph.subjects(RDF.type, stale_uri):
+        ind = world[str(subj)]
+        if ind is not None and StaleHypothesis not in ind.is_a:
+            ind.is_a.append(StaleHypothesis)
+            marked.append(ind)
+    return marked
+
+
+def assign_valid(hypotheses) -> list:
+    """Assign the closed-world marker ``ValidHypothesis`` AFTER the cascade:
+    the complement of ``StaleHypothesis`` among the given hypotheses that are
+    neither ``UncomputedHypothesis`` nor ``InvalidHypothesis``; a stale hypothesis loses a stale ValidHypothesis
+    marker. Returns the hypotheses marked valid."""
+    valid = []
+    for h in hypotheses:
+        if StaleHypothesis in h.is_a:
+            if ValidHypothesis in h.is_a:
+                h.is_a.remove(ValidHypothesis)
+            continue
+        if UncomputedHypothesis in h.is_a or InvalidHypothesis in h.is_a:
+            continue
+        if ValidHypothesis not in h.is_a:
+            h.is_a.append(ValidHypothesis)
+        valid.append(h)
+    return valid
