@@ -609,7 +609,7 @@ def _supply_cycles(producers, artefacts):
     the non-trivial strongly connected components of the supply graph
     ``producer -> consumer``. Each is a candidate to merge into ONE composite
     hypothesis whose equations are solved jointly as a block; the suggested
-    merged signature is ``Out = ∪ Out``, ``In = ∪ In \ ∪ Out``.
+    merged signature is ``Out = ∪ Out``, ``In = (∪ In) minus (∪ Out)``.
     Linear in the size of the supply graph (Tarjan)."""
     from hyppo.coa.causal import strongly_connected_components
 
