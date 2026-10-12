@@ -44,10 +44,11 @@ class HypothesisGraph:
         # Theorem thm:build:II) instead of a per-pair transitive closure.
         self._out: list[set[str]] = []
         self._in: list[set[str]] = []
-        # Pairs found by the last :meth:`build` that violate condition У3 and
-        # therefore get NO derivability edge: output collisions (competes, a
-        # legitimate rivalry resolved by re-evaluation) and counter-supplies
-        # (order conflicts, a specification error).
+        # Pairs found by the last :meth:`build` that violate condition У3:
+        # output collisions (competes, a legitimate rivalry resolved by
+        # re-evaluation; the derivability edge is still built if one rival reads
+        # the other's output) and counter-supplies (order conflicts, a
+        # specification error; no edge).
         self.competes_pairs: list[tuple[int, int]] = []
         self.order_conflicts: list[tuple[int, int]] = []
 
@@ -168,9 +169,11 @@ class HypothesisGraph:
     def _pair(self, i, j, out_i, in_i, in_j) -> bool:
         """Decide the ordered pair (i, j), tau(i) < tau(j), by definition def:derived.
 
-        Condition У3 has priority: an output collision (competes) or a
-        counter-supply (order conflict) is recorded and gives NO edge; otherwise
-        the edge exists iff ``Out(i) & In(j) != empty``. O(v_max)."""
+        An output collision is recorded as competes and does NOT suppress the
+        edge (the rivals may still depend on each other through another
+        variable); a counter-supply is recorded as an order conflict and gives
+        no edge. Otherwise the edge exists iff ``Out(i) & In(j) != empty``.
+        O(v_max)."""
         out_j = self._out[j]
         collision = bool(out_i & out_j)
         counter = bool(in_i & out_j)
@@ -178,7 +181,7 @@ class HypothesisGraph:
             self.competes_pairs.append((i, j))
         if counter:
             self.order_conflicts.append((i, j))
-        return not (collision or counter) and bool(out_i & in_j)
+        return not counter and bool(out_i & in_j)
 
     def _reach_from(self, s: int, adj) -> set[int]:
         seen: set[int] = set()

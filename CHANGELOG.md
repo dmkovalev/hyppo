@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Rivalry no longer suppresses dependency (definition def:derived): an output
+  collision is recorded as `competes`, but the derivability edge
+  `Out(h_a) ∩ In(h_b) ≠ ∅` is still built; only a counter-supply (order
+  conflict) gives no edge. Before, a rival that reads the other rival's
+  output was left out of the cascade and kept a stale cached result.
+- `Manager.orchestrate(structures=...)` accepts declared inputs
+  (`{"equations": [...], "inputs": {...}}`, condition У2).
+
 ### Added
 
 - Level-parallel execution of P_ne: `Runner(max_workers=k)` /

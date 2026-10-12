@@ -61,6 +61,8 @@ class Manager:
             models: {hypothesis_id: callable(config) -> {"r2": float, ...}}
             config: {hypothesis_id: param_dict}
             structures: hypothesis structures for graph construction (optional)
+                (a list of equations, or {"equations": [...], "inputs": {...}}
+                with the declared inputs In(h) of the model, condition У2)
             model_ids: model identifiers for the chained cache keys (def:12)
             stale: hypotheses marked StaleHypothesis by the ontology layer
             competes: {h: competitors} -- for the SUPERSEDED status (Delta AIC)
@@ -90,7 +92,11 @@ class Manager:
             idx = {h: i for i, h in enumerate(hypotheses)}
             graph = HypothesisGraph()
             for h in hypotheses:
-                graph.add(structures.get(h, []))
+                spec = structures.get(h, [])
+                if isinstance(spec, dict):  # {"equations": [...], "inputs": {...}} (condition У2)
+                    graph.add(spec.get("equations", []), spec.get("inputs"))
+                else:
+                    graph.add(spec)
             for u, v in workflow_edges:
                 graph.connect(idx[u], idx[v])
             graph_edges = [(hypotheses[i], hypotheses[j]) for i, j in graph.build()]

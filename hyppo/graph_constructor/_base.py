@@ -98,8 +98,8 @@ with virtual_experiment_onto:
                     out_b = self._output_variables(h)
                 else:
                     continue
-                if not out_a or out_a & out_b or in_a & out_b:
-                    continue  # condition У3 has priority: no edge
+                if not out_a or in_a & out_b:
+                    continue  # counter-supply (order conflict): no edge
                 if out_a & in_b:
                     self.hyp_graph.add_edge(a, b)
 
@@ -119,9 +119,9 @@ with virtual_experiment_onto:
             every consumer of any of them.
             """
             # Only pairs with τ(h_i) ≺ τ(h_j) (the workflow routes h_i before
-            # h_j) are considered, and condition У3 has priority: an output
-            # collision (competes) or a counter-supply (order conflict) gives
-            # NO edge -- definition def:derived / Algorithm 1.
+            # h_j) are considered. A counter-supply (order conflict) gives NO
+            # edge; an output collision (competes) does not suppress the edge
+            # -- definition def:derived / Algorithm 1.
             precedes = self._tau_precedes()
             dependencies = []
             for h_i in self.hypotheses:
@@ -137,7 +137,7 @@ with virtual_experiment_onto:
                     if not precedes(h_i, h_j):
                         continue
                     out_j = self._output_variables(h_j)
-                    if out_i & out_j or in_i & out_j:
+                    if in_i & out_j:
                         continue
                     if out_i & self._input_variables(h_j):
                         dependencies.append((h_i, h_j))
