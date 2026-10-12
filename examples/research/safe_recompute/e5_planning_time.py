@@ -44,6 +44,9 @@ def _direct(g, before_ctx, params2):
     return {h for h in g.nodes if before_ctx[h] != after[h]}
 
 
+DIRECT_CAP = 3000
+
+
 def main(sizes=(100, 300, 1000, 3000, 10000), reps=5, out=None):
     sizes = list(sizes)
     res = {k: {"sizes": [], "times": []} for k in ("chained", "direct")}
@@ -55,7 +58,6 @@ def main(sizes=(100, 300, 1000, 3000, 10000), reps=5, out=None):
         before = chained_keys(range(n), edges, cfg1, {h: "m" for h in range(n)})
         g = nx.DiGraph(edges)
         g.add_nodes_from(range(n))
-        before_ctx = _contexts(g, params)  # сохранённые записи, вне замера
         tc, td = [], []
         for _ in range(reps):
             t = time.perf_counter()
@@ -63,17 +65,22 @@ def main(sizes=(100, 300, 1000, 3000, 10000), reps=5, out=None):
             tc.append(time.perf_counter() - t)
         res["chained"]["sizes"].append(n)
         res["chained"]["times"].append(statistics.median(tc))
-        for _ in range(reps):
-            t = time.perf_counter()
-            nd = _direct(g, before_ctx, params2)
-            td.append(time.perf_counter() - t)
-        assert nc == nd, (n, len(nc), len(nd))
-        res["direct"]["sizes"].append(n)
-        res["direct"]["times"].append(statistics.median(td))
+        if n <= DIRECT_CAP:
+            before_ctx = _contexts(g, params)  # сохранённые записи, вне замера
+            for _ in range(reps):
+                t = time.perf_counter()
+                nd = _direct(g, before_ctx, params2)
+                td.append(time.perf_counter() - t)
+            assert nc == nd, (n, len(nc), len(nd))
+            res["direct"]["sizes"].append(n)
+            res["direct"]["times"].append(statistics.median(td))
         print(n, res["chained"]["times"][-1], res["direct"]["times"][-1:], len(nc), flush=True)
     for k in res:
         s, t = res[k]["sizes"], res[k]["times"]
         res[k]["slope"] = float(np.polyfit(np.log(s), np.log(t), 1)[0])
+    if len(res["direct"]["sizes"]) < len(sizes):
+        res["direct_sizes_capped"] = True
+        res["direct_cap_reason"] = "memory pressure at 1e4 (stored contexts ~5e7 tuples)"
     path = Path(out) if out else Path(__file__).resolve().parent / "data" / "e5_planning_time.json"
     save_json(res, path)
     return res
