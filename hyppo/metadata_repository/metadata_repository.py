@@ -95,6 +95,18 @@ class MetadataRepository:
             "timestamp": row["timestamp"],
         }
 
+    def evict(self, hypothesis_id: str, config: dict) -> bool:
+        """Remove the stored result of ``hypothesis_id`` under ``config`` (cache
+        eviction). Returns True if a record was removed. After evicting a source
+        while keeping its dependents the repository is no longer closed under
+        sources (theorem thm:safe (iv))."""
+        cur = self._conn.execute(
+            "DELETE FROM results WHERE hypothesis_id = ? AND config_hash = ?",
+            (hypothesis_id, self._config_hash(config)),
+        )
+        self._conn.commit()
+        return cur.rowcount > 0
+
     def has_result(self, hypothesis_id: str, config: dict) -> bool:
         return self.load_result(hypothesis_id, config) is not None
 

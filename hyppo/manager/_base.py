@@ -27,9 +27,21 @@ class Manager:
         r2_threshold: float = 0.7,
         max_retries: int = 3,
         max_workers: int = 1,
+        plan_mode: str = "cascade",
     ) -> None:
         """``max_workers`` > 1 runs each topological level of P_ne in parallel
-        (see :class:`hyppo.runner.Runner`); 1 keeps sequential execution."""
+        (see :class:`hyppo.runner.Runner`); 1 keeps sequential execution.
+
+        ``plan_mode``: ``"cascade"`` (default) recomputes Cl(N), every hypothesis
+        without an actual result together with all its descendants (Algorithm 4,
+        theorem thm:1); ``"safe"`` recomputes exactly N (theorem thm:safe). Both
+        are safe; they coincide when the repository is closed under sources, and
+        ``"safe"`` is strictly smaller after records of sources were evicted.
+        ``"safe"`` relies on the chained keys: a changed model or parameter of a
+        source already makes every descendant miss the cache."""
+        if plan_mode not in ("cascade", "safe"):
+            raise ValueError(f"plan_mode must be 'cascade' or 'safe', got {plan_mode!r}")
+        self.plan_mode = plan_mode
         self.repository = MetadataRepository(db_path=db_path)
         # hypotheses made stale by REFUTED/SUPERSEDED ancestors in an earlier run
         self.pending_stale: set[str] = set()
@@ -200,6 +212,8 @@ class Manager:
         ``derived_by`` graph DAG:
 
         - cache miss => the hypothesis and ALL its descendants need recompute
+          (plan_mode "cascade"; in plan_mode "safe" only the hypothesis itself,
+          its descendants are settled by their own chained keys)
           (into P_ne, the cascade effect);
         - cached but R2 < threshold => the hypothesis and ALL its descendants
           are pruned from BOTH P_ne and P_e (low-quality branch cut);
@@ -222,7 +236,8 @@ class Manager:
             cfg_h = config.get(h, {})
             if h in stale or not self.repository.has_result(h, cfg_h):
                 pne.add(h)
-                pne.update(nx.descendants(hyp_graph, h))
+                if self.plan_mode == "cascade":
+                    pne.update(nx.descendants(hyp_graph, h))
             else:
                 cached = self.repository.load_result(h, cfg_h)
                 r2 = cached.get("metrics", {}).get("r2") if cached is not None else None
