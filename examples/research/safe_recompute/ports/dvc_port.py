@@ -18,7 +18,10 @@
 
 События:
   param  -- запись нового `ridge` в `params.yaml`;
-  evict  -- удаление файла выхода И объекта кэша `.dvc/cache/files/md5/..` по
+  evict  -- сначала нативный вариант: удаление только файла выхода и
+            `dvc repro` (DVC восстанавливает выход из кэша без запуска стадии;
+            итог в `res["native_evict"]`: выполненные стадии и восстановлен ли
+            тот же выход). Затем удаление файла выхода И объекта кэша `.dvc/cache/files/md5/..` по
             md5 из `dvc.lock`; иначе `dvc repro` не пересчитывает стадию, а
             восстанавливает выход из кэша ("is cached - skipping run, checking
             out outputs");
@@ -111,14 +114,19 @@ def _repro(repo: Path, grid: dict, meta: Path, ridge: str) -> set[str]:
 
 
 def _evict(repo: Path, job: str) -> None:
+    """Удалить выход и его объект кэша (иначе DVC восстановит выход из кэша)."""
     import yaml
     lock = yaml.safe_load((repo / "dvc.lock").read_text(encoding="utf-8"))
-    md5 = next(o["md5"] for o in lock["stages"][stage_name(job)]["outs"] if o["path"] == job)
-    (repo / job).unlink()
+    outs = lock.get("stages", {}).get(stage_name(job), {}).get("outs", [])
+    md5 = next((o["md5"] for o in outs if o["path"] == job), None)
+    if md5 is None:
+        raise RuntimeError(f"выход {job} стадии {stage_name(job)} не найден в dvc.lock")
     obj = repo / ".dvc" / "cache" / "files" / "md5" / md5[:2] / md5[2:]
-    if obj.exists():
-        os.chmod(obj, stat.S_IWRITE)  # объекты кэша DVC только для чтения
-        obj.unlink()
+    if not obj.exists():
+        raise RuntimeError(f"объект кэша {obj} для {job} не найден")
+    (repo / job).unlink()
+    os.chmod(obj, stat.S_IWRITE)  # объекты кэша DVC только для чтения
+    obj.unlink()
 
 
 def run_workload(workdir: Path, grid: dict, events: list[tuple], declared) -> dict:
@@ -135,11 +143,18 @@ def run_workload(workdir: Path, grid: dict, events: list[tuple], declared) -> di
     _dump(repo / "dvc.yaml", dvc_yaml(grid, meta, declared))
     seed(meta)
     ridge = "1"
-    res = {"initial": _repro(repo, grid, meta, ridge), "after": [], "outputs": [output_digests(repo, grid)]}
+    res = {"initial": _repro(repo, grid, meta, ridge), "after": [], "native_evict": [],
+           "outputs": [output_digests(repo, grid)]}
     for ev in events:
         if ev[0] == "param":
             ridge = str(ev[2])
         elif ev[0] == "evict":
+            # нативный вариант: удалён только файл, объект кэша на месте
+            before = output_digests(repo, grid)[ev[1]]
+            (repo / ev[1]).unlink()
+            native = _repro(repo, grid, meta, ridge)
+            restored = output_digests(repo, grid)[ev[1]]
+            res["native_evict"].append({"executed": native, "restored": restored == before})
             _evict(repo, ev[1])
         else:
             revise(meta, ev[1])

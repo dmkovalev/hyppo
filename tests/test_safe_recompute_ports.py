@@ -142,6 +142,9 @@ def test_evict_recomputes_evicted_job(workload):
         # хэш выхода тот же -> обрыв каскада (early cutoff)
         assert ev == {"hyb/uto_1.npy"}
     assert res["outputs"][2]["hyb/uto_1.npy"] == res["outputs"][1]["hyb/uto_1.npy"]
+    if name == "dvc":
+        # удалён только файл: DVC восстанавливает его из кэша, 0 запусков
+        assert res["native_evict"] == [{"executed": set(), "restored": True}]
     if name == "dagster":
         # Dagster не видит удаления файла: актив FRESH, пересчёт -- ручной (force)
         assert res["rounds"][2][0]["status"]["hyb/uto_1.npy"] == "FRESH"

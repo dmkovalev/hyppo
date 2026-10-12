@@ -18,6 +18,15 @@ import subprocess
 import sys
 from pathlib import Path
 
+import dagster
+
+# Ниже используются приватные модули dagster._core (разрешение устаревания);
+# их API между версиями не стабилен, поэтому версия закреплена.
+DAGSTER_PINNED = "1.13.26"
+if dagster.__version__ != DAGSTER_PINNED:
+    raise SystemExit(f"_dagster_runner: нужен dagster=={DAGSTER_PINNED} (приватный API "
+                     f"CachingStaleStatusResolver/AssetGraphView), найден {dagster.__version__}")
+
 from dagster import (AssetKey, DagsterInstance, DataVersion, MaterializeResult, asset, materialize,
                      observable_source_asset)
 from dagster._core.definitions.assets.graph.asset_graph import AssetGraph
@@ -28,6 +37,7 @@ from dagster._time import get_current_datetime
 
 
 def _store_version(meta: str, entity: str, token: str) -> str:
+    """Как ports.store_version: не созданная ещё сущность -- "v1" (см. docstring там)."""
     if not Path(meta).exists():
         return "v1"
     con = sqlite3.connect(meta, timeout=60)

@@ -143,7 +143,12 @@ def param_key(entity: str, token: str) -> str:
 
 
 def store_version(meta: Path | str, entity: str, token: str) -> str:
-    """Версия сущности в хранилище (чистый sqlite3); не созданная ещё -- 'v1'."""
+    """Версия сущности в хранилище (чистый sqlite3); не созданная ещё -- 'v1'.
+
+    "v1" вместо "missing" наблюдаемой разницы не даёт: до первого прогона ни одна
+    система ещё не записала значение параметра/источника, так что выбор метки
+    влияет лишь на то, будет ли после crm_fit ложная смена "missing" -> "v1".
+    """
     if not Path(meta).exists():
         return "v1"
     con = sqlite3.connect(str(meta), timeout=60)
