@@ -4,7 +4,30 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [1.3.0] - 2026-10-12
+
+Release used for the numbers of the dissertation (chapters 3-4).
+
+### Added
+
+- Algorithm 2 (`HypothesisGraph.add_hypothesis`) is incremental and faithful
+  to thm:build (III): reachability check in both directions, fallback to a
+  full rebuild when the new task opens new paths.
+- Actuality of stored results per definition def:12: chained cache keys
+  (`hyppo.planner.actuality`, `Manager.cache_keys`, `cache_keys_for`) and
+  StaleHypothesis markers in the plan.
+- Bridge epistemic status -> `InvalidHypothesis` -> RL cascade -> next plan
+  (`apply_epistemic_status`, `Manager.pending_stale`); the cascade fires on
+  a status change. Witness test of hidden staleness (prop:hidden_stale).
+- Condition 5 as a supply map; supply cycles reported as merge candidates.
+- Non-terminal derived cascade (thm:integrity IV); baseline experiment
+  against a file cache (`examples/research/baseline_filecache`).
+
+### Changed
+
+- Algorithm 1 follows the dissertation's derivability (edge only along the
+  task order, condition У3 has priority).
+- Planning benchmarks use declared inputs; ER density matched to BA(m=2).
 
 ### Changed (breaking)
 
