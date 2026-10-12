@@ -24,14 +24,14 @@ from hyppo.planner._base import build_optimal_plan
 
 
 class _Lat:
-    """Minimal HypothesisLattice-like wrapper around a DiGraph (str nodes)."""
+    """Minimal GraphConstructor-like wrapper around a DiGraph (str nodes)."""
 
     def __init__(self, graph: nx.DiGraph):
-        self.lattice = graph
+        self.hyp_graph = graph
         self.hypotheses = list(graph.nodes())
 
 
-def _lattice(nodes: list[str], edges: list[tuple[str, str]]) -> nx.DiGraph:
+def _graph(nodes: list[str], edges: list[tuple[str, str]]) -> nx.DiGraph:
     g = nx.DiGraph()
     g.add_nodes_from(nodes)
     g.add_edges_from(edges)
@@ -41,7 +41,7 @@ def _lattice(nodes: list[str], edges: list[tuple[str, str]]) -> nx.DiGraph:
 def _planner_pne(nodes, edges, cache_content, tmp_path_factory=None):
     from hyppo.planner._base import cache_keys_for
 
-    g = _lattice(nodes, edges)
+    g = _graph(nodes, edges)
     cache = SharedCache(":memory:")
     try:
         keys = cache_keys_for(_Lat(g), None, {n: {} for n in nodes})
@@ -62,7 +62,7 @@ def _planner_pne(nodes, edges, cache_content, tmp_path_factory=None):
 def _manager_pne(nodes, edges, cache_content, db_path):
     mgr = Manager(db_path=db_path, r2_threshold=0.7)
     try:
-        lat = _lattice(nodes, edges)
+        lat = _graph(nodes, edges)
         keys = Manager.cache_keys(lat)
         for h, metrics in cache_content.items():
             mgr.repository.save_result(h, keys[h], metrics)
@@ -143,7 +143,7 @@ def test_plan_cascade_matches_reachability_oracle():
 
     result = plan_cascade(nodes, edges, cached)
 
-    g = _lattice(nodes, edges)
+    g = _graph(nodes, edges)
     non_cached = set(nodes) - cached
     oracle = set(non_cached)
     for n in non_cached:

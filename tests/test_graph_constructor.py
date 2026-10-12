@@ -1,11 +1,11 @@
-"""Tests for hypothesis lattice construction."""
+"""Tests for hypothesis graph construction."""
 
 import networkx as nx
 import pytest
 
 
 class FakeStructure:
-    """Minimal stand-in for COA Structure, used to test lattice logic."""
+    """Minimal stand-in for COA Structure, used to test graph logic."""
 
     def __init__(self, equations=None, vars_set=None, complete=False, tc=None):
         self.equations = equations or []
@@ -75,9 +75,9 @@ class FakeWorkflow:
         return list(self._tasks)
 
 
-def test_build_lattice_no_complete_union():
-    """When no union is complete, lattice should have no edges."""
-    from hyppo.lattice_constructor._base import HypothesisLattice
+def test_build_graph_no_complete_union():
+    """When no union is complete, graph should have no edges."""
+    from hyppo.graph_constructor._base import GraphConstructor
 
     s1 = FakeStructure(vars_set={"x"}, complete=False)
     s2 = FakeStructure(vars_set={"y"}, complete=False)
@@ -85,14 +85,14 @@ def test_build_lattice_no_complete_union():
     h2 = FakeHypothesis("h2", s2)
     wf = FakeWorkflow([[h1], [h2]])
 
-    hl = HypothesisLattice(hypotheses=[h1, h2], workflow=wf)
-    assert isinstance(hl.lattice, nx.DiGraph)
-    assert hl.lattice.number_of_edges() == 0
+    hl = GraphConstructor(hypotheses=[h1, h2], workflow=wf)
+    assert isinstance(hl.hyp_graph, nx.DiGraph)
+    assert hl.hyp_graph.number_of_edges() == 0
 
 
-def test_build_lattice_with_complete_union():
-    """When h1's output feeds h2's equation, build_lattice adds edge (h1, h2)."""
-    from hyppo.lattice_constructor._base import HypothesisLattice
+def test_build_graph_with_complete_union():
+    """When h1's output feeds h2's equation, build_graph adds edge (h1, h2)."""
+    from hyppo.graph_constructor._base import GraphConstructor
 
     # h1 produces "a" (from equation over {a, x}); h2 consumes "a" as an input
     # of its {a, b} equation while producing "b" (a is exogenous in h2).
@@ -108,23 +108,23 @@ def test_build_lattice_with_complete_union():
     h2 = FakeHypothesis("h2", s2)
     wf = FakeWorkflow([[h1], [h2]])
 
-    hl = HypothesisLattice(hypotheses=[h1, h2], workflow=wf)
-    assert isinstance(hl.lattice, nx.DiGraph)
+    hl = GraphConstructor(hypotheses=[h1, h2], workflow=wf)
+    assert isinstance(hl.hyp_graph, nx.DiGraph)
     # h1's output "a" appears among h2's inputs → derived_by edge (h1, h2)
-    assert hl.lattice.number_of_edges() > 0
-    assert (h1, h2) in hl.lattice.edges
+    assert hl.hyp_graph.number_of_edges() > 0
+    assert (h1, h2) in hl.hyp_graph.edges
 
 
 def test_add_hypothesis_increases_edges():
-    """add_hypothesis should be able to add new edges to an existing lattice."""
-    from hyppo.lattice_constructor._base import HypothesisLattice
+    """add_hypothesis should be able to add new edges to an existing graph."""
+    from hyppo.graph_constructor._base import GraphConstructor
 
     s1 = FakeStructure(vars_set={"x"}, complete=False)
     h1 = FakeHypothesis("h1", s1)
     wf = FakeWorkflow([[h1]])
 
-    hl = HypothesisLattice(hypotheses=[h1], workflow=wf)
-    edges_before = hl.lattice.number_of_edges()
+    hl = GraphConstructor(hypotheses=[h1], workflow=wf)
+    edges_before = hl.hyp_graph.number_of_edges()
 
     tc = {"a": {"b"}, "b": set()}
     s_new = FakeStructure(vars_set={"a", "b"}, complete=True, tc=tc)
@@ -135,12 +135,12 @@ def test_add_hypothesis_increases_edges():
 
     hl.add_hypothesis(h_new)
     # At minimum, the method should not raise
-    assert hl.lattice.number_of_edges() >= edges_before
+    assert hl.hyp_graph.number_of_edges() >= edges_before
 
 
 def test_is_correct_validates_hypotheses():
     """_is_correct returns True only if all hypotheses appear in some task."""
-    from hyppo.lattice_constructor._base import HypothesisLattice
+    from hyppo.graph_constructor._base import GraphConstructor
 
     s1 = FakeStructure(vars_set={"x"}, complete=False)
     h1 = FakeHypothesis("h1", s1)
@@ -148,34 +148,34 @@ def test_is_correct_validates_hypotheses():
     wf = FakeWorkflow([[h1]])
 
     with pytest.raises(Exception, match="not found"):
-        HypothesisLattice(hypotheses=[h1, h_missing], workflow=wf)
+        GraphConstructor(hypotheses=[h1, h_missing], workflow=wf)
 
 
 def test_derived_by_empty_for_unknown():
-    """derived_by returns empty set for a hypothesis not in the lattice."""
-    from hyppo.lattice_constructor._base import HypothesisLattice
+    """derived_by returns empty set for a hypothesis not in the graph."""
+    from hyppo.graph_constructor._base import GraphConstructor
 
     s1 = FakeStructure(vars_set={"x"}, complete=False)
     h1 = FakeHypothesis("h1", s1)
     wf = FakeWorkflow([[h1]])
 
-    hl = HypothesisLattice(hypotheses=[h1], workflow=wf)
+    hl = GraphConstructor(hypotheses=[h1], workflow=wf)
     h_unknown = FakeHypothesis("unknown", s1)
     assert hl.derived_by(h_unknown) == set()
 
 
 def test_remove_hypothesis():
     """remove_hypothesis should remove from both the list and the graph."""
-    from hyppo.lattice_constructor._base import HypothesisLattice
+    from hyppo.graph_constructor._base import GraphConstructor
 
     s1 = FakeStructure(vars_set={"x"}, complete=False)
     h1 = FakeHypothesis("h1", s1)
     h2 = FakeHypothesis("h2", s1)
     wf = FakeWorkflow([[h1, h2]])
 
-    hl = HypothesisLattice(hypotheses=[h1, h2], workflow=wf)
+    hl = GraphConstructor(hypotheses=[h1, h2], workflow=wf)
     # Manually add h1 as a node so removal works
-    hl.lattice.add_node(h1)
+    hl.hyp_graph.add_node(h1)
     hl.remove_hypothesis(h1)
     assert h1 not in hl.hypotheses
-    assert h1 not in hl.lattice.nodes
+    assert h1 not in hl.hyp_graph.nodes

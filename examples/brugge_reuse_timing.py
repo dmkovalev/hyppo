@@ -154,7 +154,7 @@ COMPONENT_DESC = {"CRM": "подгонка CRM (pywaterflood)", "ML": "ML-кор
                   "OPR": "прогноз нефти"}
 
 class _Lat:
-    def __init__(self, g): self.lattice = g; self.hypotheses = list(g.nodes())
+    def __init__(self, g): self.hyp_graph = g; self.hypotheses = list(g.nodes())
 
 def build_graph():
     g = nx.DiGraph(); g.add_nodes_from(NODES); g.add_edges_from(EDGES); return g

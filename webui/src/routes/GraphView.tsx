@@ -24,7 +24,7 @@ export function GraphView({ real, field, setField }: { real: RealData; field: st
         <h1>Граф гипотез гибридной модели заводнения</h1>
         <p className="lead">
           Единый граф модели (16 гипотез H1–H16), построенный настоящим алгоритмом 1
-          (<span className="formula">HypothesisLattice</span>) из уравнений: ребро h→h′ — когда выход
+          (<span className="formula">GraphConstructor</span>) из уравнений: ребро h→h′ — когда выход
           уравнения h входит в уравнение h′. Структура одна для обоих месторождений; цвет вершины —
           эпистемический статус на выбранных данных. Нажмите «Построить граф» — вывод по шагам; клик — каскад.
         </p>

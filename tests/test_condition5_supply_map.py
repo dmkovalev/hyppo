@@ -6,9 +6,9 @@ the execution order and allow cross-hypothesis cycles (lemma lem:acyclic)."""
 from hyppo.ontology.consistency import Status, check_consistency
 
 
-def _check(tasks, wf_edges, sigs, lattice=None):
+def _check(tasks, wf_edges, sigs, hyp_graph=None):
     return check_consistency(
-        None, None, lattice or {}, run_hermit=False,
+        None, None, hyp_graph or {}, run_hermit=False,
         task_hypotheses=tasks, workflow_edges=wf_edges, artefacts=sigs,
     )
 

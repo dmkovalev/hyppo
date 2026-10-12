@@ -11,7 +11,7 @@ reproducible from `hyppo` itself:
 
 | Paper | Library entry point |
 |---|---|
-| Algorithm 1 — `build_lattice` | `hyppo.coa.HypothesisGraph.build()` |
+| Algorithm 1 — `build_graph` | `hyppo.coa.HypothesisGraph.build()` |
 | Algorithm 2 — `add_hypothesis` | `hyppo.coa.HypothesisGraph.add_hypothesis()` |
 | Algorithm 4 — `plan` (cascade) | `hyppo.coa.HypothesisGraph.plan()` |
 
@@ -29,7 +29,7 @@ been removed; the scripts below are thin measurement harnesses over the library.
 | `scripts/dm_bench_one.py` | Subprocess worker: warms up, then times **one** `HypothesisGraph.build` for a given `|H|`/seed. Prints one JSON line. |
 | `scripts/dm_speedup_planning.py` | **Section 5.2 + 5.4** — Algorithm 2 speedup (incremental `add_hypothesis` is `O(|H|)`; full-rebuild baseline taken from `er_build`) and Algorithm 4 planning cascade (`|P_ne|/|H|` vs cache rate `r`, via `HypothesisGraph.plan`). Merges `speedup` + `planning` into `asymptotic_results_dm.json`. Light allocation → stable in one process. |
 | `scripts/dm_worstcase.py` | Worst-case regime of Lemma 1: structures **grow** with `|H|` (`k = α·|H|`), variable-disjoint, full DAG → every pair-union complete → `O(|H|⁴)`. Measures the build exponent (expect `a ≈ 4`). Writes `data/worstcase_dm.json`. |
-| `scripts/dm_figure.py` | Regenerates `asymp_build_lattice.pdf`, `asymp_add_hypothesis.pdf`, `asymp_planning_cache.pdf` (into `../../thesis/images/`) from `asymptotic_results_dm.json`. Needs matplotlib. |
+| `scripts/dm_figure.py` | Regenerates `asymp_build_graph.pdf`, `asymp_add_hypothesis.pdf`, `asymp_planning_cache.pdf` (into `../../thesis/images/`) from `asymptotic_results_dm.json`. Needs matplotlib. |
 | `scripts/wfcommons_validation.py` | **Section 5.3** — cascade-effect experiment on 171 real workflow execution traces from [WfCommons](https://wfcommons.org) (Nextflow nf-core, Snakemake RASflow/rna-seq-star-deseq2/varlociraptor, Pegasus). Writes `data/wfcommons_validation_results.json`. |
 | `scripts/algorithm1_bench.py` | OWL 2 DL consistency-check timing (HermiT Stage A + Stage B C3/C4/C5) — separate "Algorithm 1" of the ontology section; needs Java 11+. |
 | `data/asymptotic_results_dm.json` | DM measurements: build power law `a ≈ 2.11` (`R² ≈ 0.9999`), Algorithm 2 speedup, Algorithm 4 planning. |
@@ -94,7 +94,7 @@ Absolute millisecond timings depend on the host machine; the **power-law
 exponent** `a` and **speedup ratios** are far more stable. On the reference
 Windows 11 / x86-64 host expect:
 
-- ER `build_lattice` (Algorithm 1): `T ≈ a₀ · |H|^2.11` (`R² ≈ 0.9999`),
+- ER `build_graph` (Algorithm 1): `T ≈ a₀ · |H|^2.11` (`R² ≈ 0.9999`),
   consistent with Lemma 1's `O(|H|²)` at fixed structure size.
 - Worst case (structures growing as `k = |H|`): `a ≈ 3.7–4.0` (finite-size
   approach to the `O(|H|⁴)` bound of Lemma 1).

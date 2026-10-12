@@ -33,20 +33,20 @@ def _has_java() -> bool:
     return shutil.which("java") is not None
 
 
-def _build_synthetic_lattice(
+def _build_synthetic_graph(
     n: int, mean_deg: float, rng: np.random.Generator
 ) -> dict[int, set[int]]:
     """Erdős-Rényi DAG with avg out-degree ≈ mean_deg."""
     p = mean_deg / max(n - 1, 1)
-    lattice: dict[int, set[int]] = {i: set() for i in range(n)}
+    hyp_graph: dict[int, set[int]] = {i: set() for i in range(n)}
     for i in range(n):
         for j in range(i + 1, n):
             if rng.random() < p:
-                lattice[i].add(j)
-    return lattice
+                hyp_graph[i].add(j)
+    return hyp_graph
 
 
-def _build_synthetic_ontology(n: int, lattice: dict[int, set[int]]):
+def _build_synthetic_ontology(n: int, hyp_graph: dict[int, set[int]]):
     """Programmatically build a Hyppo-compatible ontology with n hypotheses,
     n models, and the given derived_by edges."""
     from owlready2 import get_ontology
@@ -90,7 +90,7 @@ def _build_synthetic_ontology(n: int, lattice: dict[int, set[int]]):
 
             h.is_implemented_by_model = [m]
 
-        for u, succ in lattice.items():
+        for u, succ in hyp_graph.items():
             for v in succ:
                 hyps[v].derived_by.append(hyps[u])
 
@@ -116,22 +116,22 @@ def benchmark(
     if run_hermit:
         print("Warming up JVM (1 pre-run)...", flush=True)
         try:
-            _warmup_lattice = _build_synthetic_lattice(sizes[0], mean_deg, rng)
-            _warmup_onto, _, _ = _build_synthetic_ontology(sizes[0], _warmup_lattice)
+            _warmup_graph = _build_synthetic_graph(sizes[0], mean_deg, rng)
+            _warmup_onto, _, _ = _build_synthetic_ontology(sizes[0], _warmup_graph)
             check_consistency(
-                None, _warmup_onto, _warmup_lattice, stage_a_engine="hermit"
+                None, _warmup_onto, _warmup_graph, stage_a_engine="hermit"
             )
         except Exception as exc:  # pragma: no cover
             print(f"  warmup failed (non-fatal): {exc}", file=sys.stderr)
 
     for n in sizes:
         for rep in range(n_reps):
-            lattice = _build_synthetic_lattice(n, mean_deg, rng)
-            n_edges = sum(len(s) for s in lattice.values())
+            hyp_graph = _build_synthetic_graph(n, mean_deg, rng)
+            n_edges = sum(len(s) for s in hyp_graph.values())
 
             t0 = time.perf_counter()
             try:
-                onto, _hyps, _mods = _build_synthetic_ontology(n, lattice)
+                onto, _hyps, _mods = _build_synthetic_ontology(n, hyp_graph)
             except Exception as exc:  # pragma: no cover
                 print(f"  build failed n={n} rep={rep}: {exc}", file=sys.stderr)
                 continue
@@ -151,13 +151,13 @@ def benchmark(
                     # so the subtraction t_ab - t_b correctly isolates HermiT.
                     t_ab_start = time.perf_counter()
                     res = check_consistency(
-                        ve, onto, lattice, stage_a_engine="hermit"
+                        ve, onto, hyp_graph, stage_a_engine="hermit"
                     )
                     t_ab = time.perf_counter() - t_ab_start
 
                     t_b_start = time.perf_counter()
                     res_b = check_consistency(
-                        ve, onto, lattice, run_hermit=False
+                        ve, onto, hyp_graph, run_hermit=False
                     )
                     t_b = time.perf_counter() - t_b_start
 
@@ -168,7 +168,7 @@ def benchmark(
                 else:
                     t_b_start = time.perf_counter()
                     res = check_consistency(
-                        ve, onto, lattice, run_hermit=False
+                        ve, onto, hyp_graph, run_hermit=False
                     )
                     t_b = time.perf_counter() - t_b_start
                     status = res.status

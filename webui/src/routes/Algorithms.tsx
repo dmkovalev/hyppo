@@ -23,7 +23,7 @@ export function Algorithms({ real }: { real: RealData; field?: string }) {
       <div className="panel">
         <div className="label">Алгоритм 1 — построение графа гипотез</div>
         <p style={{ marginTop: 0 }}>
-          Настоящим алгоритмом 1 (<span className="formula">HypothesisLattice</span>) выведено{" "}
+          Настоящим алгоритмом 1 (<span className="formula">GraphConstructor</span>) выведено{" "}
           <b>{g.edges.length} рёбер</b> derived_by для <b>{g.nodes.length} гипотез</b> (DAG глубины {c.depth}).
           Пошаговое построение — в разделе «Граф гипотез».
         </p>

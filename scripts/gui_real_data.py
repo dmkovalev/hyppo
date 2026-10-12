@@ -119,7 +119,7 @@ def plan_cascade(nodes, edges, changed):
 # ───────── ontology (draw as ontology: classes + subclass + prop domain→range) ─
 CORE_CLASSES = ["Artefact", "Hypothesis", "Model", "VirtualExperiment", "Configuration",
                 "Workflow", "Structure", "FullStructure", "Equation", "Variable",
-                "FullCausalMapping", "DependencySet", "TransitiveClosure", "ResearchLattice"]
+                "FullCausalMapping", "DependencySet", "TransitiveClosure", "ResearchGraph"]
 
 
 def extract_ontology():
@@ -459,7 +459,7 @@ def run_field(name):
 
 
 # ───────── conceptual HybridCRM graph via the REAL Algorithm 1 ───────────────
-# Per CLAUDE.md: the derived_by graph is built ONLY by HypothesisLattice
+# Per CLAUDE.md: the derived_by graph is built ONLY by GraphConstructor
 # (platform Algorithm 1), not a local reimplementation. 16 hypotheses,
 # article continuous numbering H1–H16 (liquid H1–H8, watercut H9–H14,
 # ГРП=H15, oil=H16). Correctness: 16 nodes, 17 edges, DAG depth 5.
@@ -642,11 +642,11 @@ def _models_for(cid, branch):
     return [_mk(cid, "bl", "Buckley–Leverett"), _mk(cid, "wor", "Log-WOR")]
 
 
-def build_conceptual_lattice():
+def build_conceptual_graph():
     """Build the conceptual HybridCRM graph with the REAL platform Algorithm 1."""
     import networkx as nx
     from hyppo.coa._base import Equation, Structure
-    from hyppo.lattice_constructor._base import HypothesisLattice
+    from hyppo.graph_constructor._base import GraphConstructor
 
     class Hyp:
         def __init__(self, name, formula):
@@ -664,7 +664,7 @@ def build_conceptual_lattice():
         def __init__(self, tasks): self._t = [[hm[h] for h in hs] for _, _, hs in tasks]
         def get_tasks(self): return self._t
 
-    G = HypothesisLattice([hm[n] for n, *_ in _CONCEPT_OLD], WF(_CONCEPT_TASKS)).lattice
+    G = GraphConstructor([hm[n] for n, *_ in _CONCEPT_OLD], WF(_CONCEPT_TASKS)).hyp_graph
     edges_old = [(u.name, v.name) for u, v in G.edges()]
 
     R = _RENUM
@@ -743,7 +743,7 @@ def build_conceptual_lattice():
             "is_dag": bool(nx.is_directed_acyclic_graph(G)), "depth": int(depth),
             "note": f"16 гипотез (сплошная нумерация статьи H1–H16), {len(edges)} рёбер "
                     f"derived_by, DAG глубины {depth}. Построено настоящим алгоритмом 1 "
-                    f"(HypothesisLattice) из уравнений; ветви LPR (H1–H8) и WCT (H9–H14) "
+                    f"(GraphConstructor) из уравнений; ветви LPR (H1–H8) и WCT (H9–H14) "
                     f"параллельны, сходятся в H16."}
 
 
@@ -754,7 +754,7 @@ def build_algorithm_demos():
     from hyppo.coa import causal
     from hyppo.coa._base import Equation, Structure
     from hyppo.coa.graph import HypothesisGraph
-    from hyppo.lattice_constructor._base import HypothesisLattice
+    from hyppo.graph_constructor._base import GraphConstructor
     from hyppo.ontology.consistency import Status, check_consistency, _find_cycle_via_kahn
 
     class Hyp:
@@ -772,10 +772,10 @@ def build_algorithm_demos():
     hm = {n: Hyp(n, f) for n, f, o, lab, br in _CONCEPT_OLD}
     order = [n for n, *_ in _CONCEPT_OLD]
     wf = WF([[hm[n]] for n in order])
-    lat = HypothesisLattice([hm[n] for n in order[:-1]], wf)   # без H19
-    before = {(u.name, v.name) for u, v in lat.lattice.edges()}
+    lat = GraphConstructor([hm[n] for n in order[:-1]], wf)   # без H19
+    before = {(u.name, v.name) for u, v in lat.hyp_graph.edges()}
     lat.add_hypothesis(hm[order[-1]])                          # + H19 инкрементально
-    after = {(u.name, v.name) for u, v in lat.lattice.edges()}
+    after = {(u.name, v.name) for u, v in lat.hyp_graph.edges()}
     new_edges = [[R[a], R[b]] for a, b in sorted(after - before)]
     alg2 = {"added": R[order[-1]], "new_edges": new_edges,
             "note": "Добавление одной гипотезы даёт тот же граф, что полная перестройка "
@@ -785,7 +785,7 @@ def build_algorithm_demos():
     cids = [R[n] for n in order]
     idx = {cid: i for i, cid in enumerate(cids)}
     edges_int = [(idx[R[a]], idx[R[b]]) for a, b in
-                 [(u.name, v.name) for u, v in HypothesisLattice([hm[n] for n in order], wf).lattice.edges()]]
+                 [(u.name, v.name) for u, v in GraphConstructor([hm[n] for n in order], wf).hyp_graph.edges()]]
     hg = HypothesisGraph.from_edges(len(cids), edges_int)
 
     def plan_for(changed_cid):
@@ -914,10 +914,10 @@ def architecture():
     """Программная архитектура комплекса Hyppo (реальные модули + глава 3)."""
     comps = [
         ("gui", "GUI (React + FastAPI)", "Интерфейс", "hyppo/gui", "Наш веб-интерфейс: демонстрация всех методов.", ["manager", "metadata_repository"]),
-        ("manager", "Manager", "Оркестрация", "hyppo/manager", "Координирует жизненный цикл ВЭ (4 этапа, разд. 3.1.2).", ["lattice_constructor", "planner", "runner", "metadata_repository"]),
+        ("manager", "Manager", "Оркестрация", "hyppo/manager", "Координирует жизненный цикл ВЭ (4 этапа, разд. 3.1.2).", ["graph_constructor", "planner", "runner", "metadata_repository"]),
         ("core", "Ядро (онтология ВЭ)", "Оркестрация", "hyppo/core", "Классы кортежа ⟨O,H,M,R,W,C⟩ на owlready2 (разд. 3.1.1).", []),
         ("coa", "COAConstructor", "Методы (гл. 2)", "hyppo/coa", "Причинное упорядочение: структуры, транзитивное замыкание (разд. 3.1.4).", ["core"]),
-        ("lattice_constructor", "LatticesConstructor", "Методы (гл. 2)", "hyppo/lattice_constructor", "Алгоритмы 1–2: построение и добавление в граф гипотез (разд. 3.1.5).", ["coa"]),
+        ("graph_constructor", "GraphConstructor", "Методы (гл. 2)", "hyppo/graph_constructor", "Алгоритмы 1–2: построение и добавление в граф гипотез (разд. 3.1.5).", ["coa"]),
         ("planner", "Planner", "Методы (гл. 2)", "hyppo/planner", "Алгоритм 4: планирование, P_ne/P_e, отсечение маршрутов (разд. 3.1.6).", ["storage", "comparison"]),
         ("comparison", "Comparison", "Методы (гл. 2)", "hyppo/comparison", "Сравнение гипотез: AIC/BIC, знаковый тест, Уилкоксон (разд. 2.6).", []),
         ("generator", "HypothesisGenerator", "Методы (гл. 2)", "hyppo/generator", "Порождение гипотез из данных (GLM + GP, разд. 3.1.3).", ["coa"]),
@@ -948,7 +948,7 @@ def build_cache_demo():
     (Алг.4 — пересчёт только замыкания вниз). Всё на настоящих классах hyppo."""
     import networkx as nx
     from hyppo.coa._base import Equation, Structure
-    from hyppo.lattice_constructor._base import HypothesisLattice
+    from hyppo.graph_constructor._base import GraphConstructor
     from hyppo.metadata_repository import SharedCache
     from hyppo.planner._base import _cfg_dict, build_optimal_plan
 
@@ -962,7 +962,7 @@ def build_cache_demo():
 
     R = _RENUM
     hyps = [Hyp(R[n], f) for n, f, o, lab, br in _CONCEPT_OLD]   # имена = сплошные id статьи
-    lat = HypothesisLattice(hyps, WF([[h] for h in hyps]))
+    lat = GraphConstructor(hyps, WF([[h] for h in hyps]))
     cfg = Cfg()
     N = len(hyps)
 
@@ -984,7 +984,7 @@ def build_cache_demo():
     recompute = sorted((getattr(h, "name", str(h)) for h in p_inv.needs_execution),
                        key=lambda x: int(x[1:]))
     ids = [h.name for h in hyps]
-    edges = [(u.name, v.name) for u, v in lat.lattice.edges()]
+    edges = [(u.name, v.name) for u, v in lat.hyp_graph.edges()]
     Gn = nx.DiGraph(); Gn.add_nodes_from(ids); Gn.add_edges_from(edges)
     desc = nx.descendants(Gn, "H9") | {"H9"}
 
@@ -1082,8 +1082,8 @@ def main():
         "speedup_10k": "9.4×",
     }
 
-    # Conceptual HybridCRM graph via the REAL platform Algorithm 1 (HypothesisLattice).
-    concept = build_conceptual_lattice()
+    # Conceptual HybridCRM graph via the REAL platform Algorithm 1 (GraphConstructor).
+    concept = build_conceptual_graph()
 
     # Per-field epistemic status on the SAME conceptual nodes (only data differs).
     for name, fr in fields.items():

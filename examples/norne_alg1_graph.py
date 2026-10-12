@@ -1,9 +1,9 @@
-"""Run the ACTUAL Algorithm 1 (HypothesisLattice.build_lattice) on Norne data."""
+"""Run the ACTUAL Algorithm 1 (GraphConstructor.build_graph) on Norne data."""
 import os, sys
 sys.path.insert(0, r"F:\git-repos\diss\hyppo-ref")
 import networkx as nx
 from hyppo.coa._base import Equation, Structure
-from hyppo.lattice_constructor._base import HypothesisLattice
+from hyppo.graph_constructor._base import GraphConstructor
 
 # --- 1. Define hypotheses with their equation structures ---
 # Each hypothesis: (name, equation_formula, output_var)
@@ -65,12 +65,12 @@ wf = Workflow(TASKS, hyp_objs)
 all_hyps = [hyp_objs[name] for name, _, _ in HYPS]
 
 # --- 3. Run Algorithm 1 ---
-print("=== Algorithm 1: build_lattice (HypothesisLattice) ===")
+print("=== Algorithm 1: build_graph (GraphConstructor) ===")
 print(f"Hypotheses: {len(all_hyps)}, Tasks: {len(TASKS)}")
 print(f"Task pairs to check: {len(TASKs) if False else len(TASKS)*(len(TASKS)-1)//2}")
 
-lattice_obj = HypothesisLattice(all_hyps, wf)
-G = lattice_obj.lattice
+graph_obj = GraphConstructor(all_hyps, wf)
+G = graph_obj.hyp_graph
 
 print(f"\nResult: {G.number_of_nodes()} nodes, {G.number_of_edges()} edges")
 print(f"DAG: {nx.is_directed_acyclic_graph(G)}")
@@ -102,17 +102,17 @@ if alg1_named != set(G_coa.edges()):
     if only_coa: print(f"  Only in COA: {sorted(only_coa)}")
 
 # Test derived_by and impacts
-print("\n=== Lattice queries ===")
+print("\n=== Graph queries ===")
 for h_name in ["H1", "H8", "H19"]:
     h = hyp_objs[h_name]
-    deps = lattice_obj.derived_by(h)
-    impacts = lattice_obj.impacts(h)
+    deps = graph_obj.derived_by(h)
+    impacts = graph_obj.impacts(h)
     print(f"  {h_name}: derived_by (predecessors) = {sorted(d.name for d in deps)}")
     print(f"       impacts (descendants) = {sorted(d.name for d in impacts)}")
 
 # Add hypothesis (Algorithm 2)
 print("\n=== Algorithm 2: add_hypothesis ===")
 new_hyp = Hyp("H20", "q_water = q_oil * fw / (1 - fw)")
-lattice_obj.add_hypothesis(new_hyp)
-print(f"After adding H20: {lattice_obj.lattice.number_of_nodes()} nodes, {lattice_obj.lattice.number_of_edges()} edges")
-print(f"H20 derived_by: {sorted(d.name for d in lattice_obj.derived_by(new_hyp))}")
+graph_obj.add_hypothesis(new_hyp)
+print(f"After adding H20: {graph_obj.hyp_graph.number_of_nodes()} nodes, {graph_obj.hyp_graph.number_of_edges()} edges")
+print(f"H20 derived_by: {sorted(d.name for d in graph_obj.derived_by(new_hyp))}")

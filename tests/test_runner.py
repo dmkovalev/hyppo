@@ -47,7 +47,7 @@ def test_runner_cascade_skip(tmp_path):
     results = runner.execute(
         plan={"p_ne": ["h1", "h2"], "p_e": set()},
         models={"h1": fail_always, "h2": lambda c: {"r2": 0.9}},
-        lattice_edges=[("h1", "h2")],
+        graph_edges=[("h1", "h2")],
     )
     assert results["h1"]["status"] == "FAILED"
     assert results["h2"]["status"] == "SKIPPED"

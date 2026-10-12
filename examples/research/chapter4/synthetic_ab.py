@@ -323,7 +323,7 @@ def plot_forecast_comparison(baseline: dict, treatment: dict, field: dict):
 
 
 def plot_hypothesis_cascade():
-    """Figure 4.2: hypothesis lattice with cascade propagation."""
+    """Figure 4.2: hypothesis graph with cascade propagation."""
     try:
         import matplotlib
         matplotlib.use("Agg")
@@ -374,7 +374,7 @@ def plot_hypothesis_cascade():
         ax.add_patch(circle)
         ax.text(x, y, labels[name], ha="center", va="center", fontsize=7, fontweight="bold")
 
-    ax.set_title("Hypothesis Lattice — WaterBreakthrough invalidates h_WCT (leaf node)",
+    ax.set_title("Hypothesis Graph — WaterBreakthrough invalidates h_WCT (leaf node)",
                  fontsize=10, fontweight="bold")
 
     legend_elements = [

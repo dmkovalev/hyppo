@@ -77,7 +77,7 @@ class Runner:
         plan: dict,  # {"p_ne": set[str], "p_e": set[str]}
         models: dict[str, Callable[[dict], Metrics]],
         configs: dict[str, dict] | None = None,
-        lattice_edges: list[tuple[str, str]] | None = None,
+        graph_edges: list[tuple[str, str]] | None = None,
         competes: dict[str, set[str]] | None = None,
         theta_sup: float = 0.7,
         theta_aic: float = 10.0,
@@ -89,7 +89,7 @@ class Runner:
             plan: {"p_ne": IDs to compute, "p_e": IDs to load from cache}
             models: {hypothesis_id: callable(config) -> {"r2": float, "aic": ...}}
             configs: {hypothesis_id: config_dict}
-            lattice_edges: list of (parent, child) derived_by edges
+            graph_edges: list of (parent, child) derived_by edges
             competes: {hypothesis_id: set of competing hypothesis IDs} -- used to
                 assign the SUPERSEDED epistemic status via Delta AIC.
             theta_sup: R^2 support threshold for SUPPORTED/REFUTED (default 0.7).
@@ -112,8 +112,8 @@ class Runner:
 
         # Build dependency graph for cascade
         dependents: dict[str, set[str]] = {}
-        if lattice_edges:
-            for parent, child in lattice_edges:
+        if graph_edges:
+            for parent, child in graph_edges:
                 dependents.setdefault(parent, set()).add(child)
 
         # Load cached results for P_e

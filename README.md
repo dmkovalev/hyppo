@@ -7,7 +7,7 @@
 > 🇷🇺 [Русская версия](README.ru.md)
 
 > gedanken — a platform for virtual (thought) experiments over hypothesis
-> lattices
+> graphs
 
 Reference implementation of the virtual experiment management platform
 described in the dissertation. The distribution is published as
@@ -21,7 +21,7 @@ published once the `mkdocs` deployment workflow ships).
 Scientific and engineering models are usually explored as competing
 families of hypotheses — alternative equations for the same phenomenon,
 each with its own assumptions and cost to (re)compute. `gedanken` builds a
-dependency lattice over such hypotheses (Algorithm 1), plans the minimal
+dependency graph over such hypotheses (Algorithm 1), plans the minimal
 set of models that must be recomputed after a change (Algorithm 4), runs
 and caches results, and tracks each hypothesis's epistemic status
 (competing, superseded, corroborated) as evidence accumulates.
@@ -45,7 +45,7 @@ extras (`gui`, `mcp`, `coa`, `gp`, `data`, `docs`, `dev`).
 
 ```python
 from hyppo.coa._base import Equation, Structure
-from hyppo.lattice_constructor._base import HypothesisLattice
+from hyppo.graph_constructor._base import GraphConstructor
 from hyppo.planner._base import Planner
 from hyppo.storage._base import Database
 
@@ -68,12 +68,12 @@ h1 = Hypothesis("H1", "q = a*p")     # q is the output of H1
 h2 = Hypothesis("H2", "wct = q*2")   # wct depends on q -> H2 derived_by H1
 
 workflow = Workflow([[h1], [h2]])
-lattice = HypothesisLattice([h1, h2], workflow)
-G = lattice.lattice
+graph = GraphConstructor([h1, h2], workflow)
+G = graph.graph
 print(G.number_of_nodes(), G.number_of_edges())  # 2 1
 
 Database.set_root(".hyppo_demo_db")
-plan = Planner(db=Database).plan(configuration={}, lattice=lattice)
+plan = Planner(db=Database).plan(configuration={}, graph=graph)
 print(sorted(h.name for h in plan.needs_execution))  # ['H1', 'H2']
 ```
 
@@ -104,7 +104,7 @@ lifecycle: define hypotheses -> graph -> plan -> run -> compare -> iterate.
 | Manager | `hyppo.manager` | Lifecycle orchestration of virtual experiments |
 | HypothesisGenerator | `hyppo.generator` | Baseline hypothesis generation (linear regression + optional genetic programming) |
 | COAConstructor | `hyppo.coa` | Causal ordering of equation systems |
-| LatticesConstructor | `hyppo.lattice_constructor` | Algorithm 1 — hypothesis lattice |
+| GraphConstructor | `hyppo.graph_constructor` | Algorithm 1 — hypothesis graph |
 | Planner | `hyppo.planner` | Minimal recomputation plan (Algorithm 4) |
 | Runner | `hyppo.runner` | Model execution with retries |
 | MetadataRepository | `hyppo.metadata_repository` | Result cache shared by planner and runner |
@@ -115,7 +115,7 @@ lifecycle: define hypotheses -> graph -> plan -> run -> compare -> iterate.
 
 ## MCP server
 
-Hyppo exposes 8 typed actions and a `Lattice Steward` persona via MCP.
+Hyppo exposes 8 typed actions and a `Graph Steward` persona via MCP.
 
 ```bash
 # stdio (Claude Code / Desktop)
@@ -127,7 +127,7 @@ hyppo-mcp --transport http --port 8082
 
 After connecting, clients see tools `mcp__hyppo__BuildVirtualExperiment`,
 `...DiffHypothesisStates`, `...RegisterHypothesisVersion`, etc., and the
-persona resource `hyppo://personas/lattice_steward.md`.
+persona resource `hyppo://personas/graph_steward.md`.
 
 Write actions (`RegisterHypothesisVersion`, `MarkRunWithVersion`) persist
 to an embedded SQLite store (aiosqlite, file `hyppo_versions.db` in the

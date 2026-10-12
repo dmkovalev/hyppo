@@ -4,6 +4,26 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Changed (breaking)
+
+- "Lattice" terminology removed: the hypothesis structure is a graph
+  (derivability arcs form a DAG), not an algebraic lattice.
+  - package `hyppo.lattice_constructor` -> `hyppo.graph_constructor`;
+    class `HypothesisLattice` -> `GraphConstructor`; `build_lattice()` ->
+    `build_graph()`; attribute `.lattice` -> `.hyp_graph`;
+  - `MetadataRepository.save_lattice` / `find_nearest_lattice` ->
+    `save_graph` / `find_nearest_graph`; SQLite table `lattices` -> `graphs`
+    (`lattice_id` -> `graph_id`);
+  - action `GetHypothesisLattice` -> `GetHypothesisGraph`
+    (`get_hypothesis_graph`, `GetHypothesisGraphInput`, `GraphPayload`,
+    `GraphEdge`); MCP persona `lattice_steward` -> `graph_steward`;
+  - ontology `ResearchLattice` -> `ResearchGraph`,
+    `has_for_lattice_hypothesis` -> `has_for_graph_hypothesis`;
+  - keyword arguments and dict keys `lattice` -> `hyp_graph`,
+    `lattice_edges` -> `graph_edges`.
+
 ## [1.1.1] - 2026-07-09
 
 Audit-fix release: closes five structural defects found by an adversarial

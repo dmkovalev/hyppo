@@ -39,7 +39,7 @@ class DiffHypothesisStatesInput(BaseModel):
     base_snapshot: HypothesisSnapshot | None = Field(
         default=None,
         description="Reserved; currently ignored. Future extension: supply "
-        "a snapshot whose lattice replaces the hardcoded "
+        "a snapshot whose graph replaces the hardcoded "
         "oil_waterflood edges. Until then this field is a no-op.",
     )
 

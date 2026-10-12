@@ -32,7 +32,7 @@ The example will output:
 ### norne_primer.py — end-to-end walkthrough
 
 The full virtual-experiment lifecycle on the Norne HybridCRM case in one
-readable script: the Definition 1 tuple <O,H,M,R,W,C>, Algorithm 1 (lattice:
+readable script: the Definition 1 tuple <O,H,M,R,W,C>, Algorithm 1 (graph:
 16 nodes / 18 edges / depth 10), Algorithm 2 incremental update (Lemma 2),
 Algorithm 4 recompute plan with a Theorem 1 correctness/minimality check,
 Runner execution with epistemic statuses, and statistical comparison of
@@ -52,7 +52,7 @@ Expected tail: `PRIMER OK` (exit 0).
 - `all_rules_16.py`: All 17 rules on the 16-node formula-derived (COA) HybridCRM graph; demonstrates a staleness cascade restricted to the liquid branch.
 - `benchmark_341.py`: Scalability benchmark — all 17 rules via HermiT on a synthetic 341-node per-pair/per-well graph.
 - `brugge_demo.py`: Brugge integrity-control demo — real HermiT run of rule 4 (cascade) and rule 7 (hidden staleness).
-- `norne_alg1_lattice.py`: Runs the actual Algorithm 1 (`HypothesisLattice.build_lattice`) on Norne data; reference for the 16-node/18-edge golden lattice.
+- `norne_alg1_graph.py`: Runs the actual Algorithm 1 (`GraphConstructor.build_graph`) on Norne data; reference for the 16-node/18-edge golden graph.
 - `norne_markers_real.py`: Layer 2 (markers) procedural rule run on a real Norne ABox.
 - `three_layers_v2.py`: Fits `pywaterflood` CRM per-well on real Brugge/Norne production data.
 - `volve_run.py`: Real Volve field-level CRM fit + integrity-control demo.

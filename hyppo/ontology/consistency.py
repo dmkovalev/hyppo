@@ -22,7 +22,7 @@ Paper conditions 4 and 5 (§2.4) — the procedural stage of the integrity theor
         traversal of W accumulating each task's ancestor hypotheses rejects any
         dependency on a hypothesis of a non-ancestor (later) task.
 
-Public API: ``check_consistency(ve, ontology, lattice)`` returns
+Public API: ``check_consistency(ve, ontology, graph)`` returns
 ``ConsistencyResult`` with status flag and violation details.
 
 Stage A engines
@@ -118,7 +118,7 @@ class ConsistencyResult:
 def check_consistency(
     ve,
     ontology,
-    lattice: Mapping[int, Iterable[int]],
+    hyp_graph: Mapping[int, Iterable[int]],
     *,
     run_hermit: bool = True,
     stage_a_engine: str = "auto",
@@ -139,7 +139,7 @@ def check_consistency(
         VirtualExperiment instance (carries Hypothesis/Model individuals).
     ontology
         owlready2 ontology object — passed to HermiT for Stage A.
-    lattice
+    graph
         Hypothesis graph as adjacency: ``{h_id: {dependent_h_ids, ...}}``.
         Edges are interpreted parent -> child (impacts-direction in code,
         corresponds to ``\\derived`` in the paper).
@@ -172,7 +172,7 @@ def check_consistency(
     if stage_a_status is not None:
         return ConsistencyResult(False, stage_a_status, details)
 
-    cycle = _find_cycle_via_kahn(lattice)
+    cycle = _find_cycle_via_kahn(hyp_graph)
     if cycle is not None:
         return ConsistencyResult(
             False,
@@ -182,7 +182,7 @@ def check_consistency(
     details["c3"] = "passed"
 
     if artefacts is not None:
-        offending = _find_c4_violation(lattice, artefacts)
+        offending = _find_c4_violation(hyp_graph, artefacts)
         if offending is not None:
             return ConsistencyResult(
                 False,
@@ -251,7 +251,7 @@ def check_consistency(
         edges = list(workflow_edges)
         all_tasks = set(task_hypotheses) | {x for e in edges for x in e}
         viol = _check_condition5_causal_order(
-            all_tasks, edges, task_hypotheses, lattice, artefacts
+            all_tasks, edges, task_hypotheses, hyp_graph, artefacts
         )
         if viol is not None:
             return ConsistencyResult(
@@ -442,10 +442,10 @@ def _classify_dl_inconsistency(exc: Exception) -> str:
     return Status.C1_VIOLATED
 
 
-def _find_cycle_via_kahn(lattice: Mapping[int, Iterable[int]]) -> list | None:
+def _find_cycle_via_kahn(hyp_graph: Mapping[int, Iterable[int]]) -> list | None:
     """Kahn's topological sort; returns None if acyclic, else a witness list."""
     in_deg: dict[int, int] = {}
-    for u, succ in lattice.items():
+    for u, succ in hyp_graph.items():
         in_deg.setdefault(u, 0)
         for v in succ:
             in_deg[v] = in_deg.get(v, 0) + 1
@@ -454,7 +454,7 @@ def _find_cycle_via_kahn(lattice: Mapping[int, Iterable[int]]) -> list | None:
     while queue:
         u = queue.popleft()
         visited += 1
-        for v in lattice.get(u, ()):
+        for v in hyp_graph.get(u, ()):
             in_deg[v] -= 1
             if in_deg[v] == 0:
                 queue.append(v)
@@ -477,10 +477,10 @@ def _find_c7_violation(
 
 
 def _find_c4_violation(
-    lattice: Mapping[int, Iterable[int]],
+    hyp_graph: Mapping[int, Iterable[int]],
     artefacts: Mapping[int, dict],
 ) -> tuple[int, int] | None:
-    for u, succ in lattice.items():
+    for u, succ in hyp_graph.items():
         for v in succ:
             out_u = set(artefacts.get(u, {}).get("out", ()))
             in_v = set(artefacts.get(v, {}).get("in", ()))
@@ -543,7 +543,7 @@ def _check_condition4_projection(task_hypotheses, domains, forbidden):
     return None
 
 
-def _check_condition5_causal_order(tasks, edges, task_hypotheses, lattice, artefacts=None):
+def _check_condition5_causal_order(tasks, edges, task_hypotheses, hyp_graph, artefacts=None):
     """Condition 5 (§2.4, Algorithm ``consistence``) as a *supply map*: every
     producer of an input of a hypothesis must lie in a STRICT ancestor task --
     supplies inside one task, between parallel (incomparable) tasks or against
@@ -553,7 +553,7 @@ def _check_condition5_causal_order(tasks, edges, task_hypotheses, lattice, artef
     Producers of ``h`` are (a) every hypothesis ``g`` with ``Out(g) ∩ In(h) ≠ ∅``
     when signatures ``artefacts = {h: {"in": .., "out": ..}}`` are given (the
     supply map, O(|H|·v_max) through a variable->producers index), and (b) the
-    lattice predecessors of ``h`` (``lattice`` is ``{producer: {consumers}}``),
+    graph predecessors of ``h`` (``graph`` is ``{producer: {consumers}}``),
     so an externally supplied graph is checked as well. Returns a violation dict
     or ``None``."""
     succ = {t: set() for t in tasks}
@@ -578,7 +578,7 @@ def _check_condition5_causal_order(tasks, edges, task_hypotheses, lattice, artef
         return None  # cyclic workflow — handled by the acyclicity check
 
     producers: dict = {}
-    for u, children in lattice.items():
+    for u, children in hyp_graph.items():
         for v in children:
             producers.setdefault(v, set()).add(u)
     if artefacts:

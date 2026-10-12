@@ -13,7 +13,7 @@ import pytest
 from hyppo.ontology import consistency as C
 from hyppo.ontology.consistency import Status, check_consistency
 
-_GOOD_LATTICE = {0: {1}, 1: {2}, 2: set()}
+_GOOD_GRAPH = {0: {1}, 1: {2}, 2: set()}
 
 
 def _fresh_world(two_models: bool):
@@ -59,7 +59,7 @@ def test_owlrl_detects_functional_violation_c2():
     """C2 via owlrl: a functional property bound to two distinct models is
     inconsistent, classified into the C2 status — matching HermiT's verdict."""
     _w, onto = _fresh_world(two_models=True)
-    res = check_consistency(None, onto, _GOOD_LATTICE, stage_a_engine="owlrl")
+    res = check_consistency(None, onto, _GOOD_GRAPH, stage_a_engine="owlrl")
     assert not res.ok
     assert res.status == Status.C2_VIOLATED
     assert res.details["stage_a"] == "inconsistent"
@@ -73,7 +73,7 @@ def test_owlrl_owa_keeps_modelless_hypothesis_consistent():
     res = check_consistency(
         None,
         onto,
-        _GOOD_LATTICE,
+        _GOOD_GRAPH,
         stage_a_engine="owlrl",
         artefacts={0: {"out": {"a"}}, 1: {"in": {"a"}, "out": {"b"}}, 2: {"in": {"b"}}},
     )
@@ -90,7 +90,7 @@ def test_forced_owlrl_runs_without_java(monkeypatch):
 
     monkeypatch.setattr(C, "sync_reasoner_hermit", _boom)
     _w, onto = _fresh_world(two_models=True)
-    res = check_consistency(None, onto, _GOOD_LATTICE, stage_a_engine="owlrl")
+    res = check_consistency(None, onto, _GOOD_GRAPH, stage_a_engine="owlrl")
     assert not res.ok and res.status == Status.C2_VIOLATED
 
 
@@ -98,7 +98,7 @@ def test_auto_uses_owlrl_by_default():
     """auto: the OWL 2 RL closure is the default engine (RL + IC design, §2.4) —
     no Java / DL reasoner required; a functional-property clash is still caught."""
     _w, onto = _fresh_world(two_models=True)
-    res = check_consistency(None, onto, _GOOD_LATTICE, stage_a_engine="auto")
+    res = check_consistency(None, onto, _GOOD_GRAPH, stage_a_engine="auto")
     assert not res.ok and res.status == Status.C2_VIOLATED
     assert res.details["stage_a_engine"] == "owlrl"
 
@@ -106,7 +106,7 @@ def test_auto_uses_owlrl_by_default():
 def test_auto_owlrl_stays_consistent_for_owa():
     """The RL default preserves the verdict: a model-less hypothesis stays OK."""
     _w, onto = _fresh_world(two_models=False)
-    res = check_consistency(None, onto, _GOOD_LATTICE, stage_a_engine="auto")
+    res = check_consistency(None, onto, _GOOD_GRAPH, stage_a_engine="auto")
     assert res.ok and res.status == Status.OK
     assert res.details["stage_a_engine"] == "owlrl"
 
@@ -148,7 +148,7 @@ def test_all_different_expansion_three_members():
 
 def test_run_hermit_false_still_skips_stage_a():
     """Backward compatibility: run_hermit=False skips Stage A entirely."""
-    res = check_consistency(None, None, _GOOD_LATTICE, run_hermit=False)
+    res = check_consistency(None, None, _GOOD_GRAPH, run_hermit=False)
     assert res.details["stage_a"] == "skipped"
     assert res.details["stage_a_engine"] == "skipped"
 
@@ -169,4 +169,4 @@ def test_owlready2_import_present():
     assert owlready2 is not None
     assert C._OWLRL_AVAILABLE is True
     with pytest.raises(ValueError):
-        check_consistency(None, None, _GOOD_LATTICE, stage_a_engine="bogus")
+        check_consistency(None, None, _GOOD_GRAPH, stage_a_engine="bogus")

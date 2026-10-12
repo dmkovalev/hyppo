@@ -45,41 +45,41 @@ if TYPE_CHECKING:
 
 with virtual_experiment_onto:
 
-    class HypothesisLattice:
+    class GraphConstructor:
         def __init__(self, hypotheses, workflow):
             self.hypotheses = hypotheses
             self.workflow = workflow
-            self.lattice = self.build_lattice()
+            self.hyp_graph = self.build_graph()
 
-        def build_lattice(self):
-            """Algorithm 1: Build hypothesis lattice from hypothesis structures.
+        def build_graph(self):
+            """Algorithm 1: Build hypothesis graph from hypothesis structures.
 
             An edge (h_i, h_j) is derived when the output variable of h_i
             appears among the input variables of h_j's equations (i.e. h_j is
             derived_by h_i); see :meth:`_build_hypothesis_var_mapping`.
             """
-            lattice = nx.DiGraph()
+            hyp_graph = nx.DiGraph()
             # check if all hypotheses are in workflow
             if not self._is_correct():
                 raise Exception("Hypotheses not found in workflow")
 
             for dep in self._build_hypothesis_var_mapping():
-                lattice.add_edge(dep[0], dep[1])
+                hyp_graph.add_edge(dep[0], dep[1])
 
-            return lattice
+            return hyp_graph
 
         def add_hypothesis(self, hypothesis):
-            """Algorithm 2: add a hypothesis to an existing lattice incrementally.
+            """Algorithm 2: add a hypothesis to an existing graph incrementally.
 
             Registers the new hypothesis and decides only the pairs it forms with
             the hypotheses of tasks related to its task by reachability, by the
-            same rule as :meth:`build_lattice` -- O(|H| * v_max), no rebuild.
+            same rule as :meth:`build_graph` -- O(|H| * v_max), no rebuild.
             """
             if hypothesis not in self.hypotheses:
                 self.hypotheses.append(hypothesis)
             if not self._is_correct():
                 raise Exception("Hypotheses not found in workflow")
-            self.lattice.add_node(hypothesis)
+            self.hyp_graph.add_node(hypothesis)
             # Only pairs involving the new hypothesis are decided (Theorem
             # thm:build (III)): reachability between existing tasks is assumed
             # preserved, so all other pairs and their edges are unchanged.
@@ -101,13 +101,13 @@ with virtual_experiment_onto:
                 if not out_a or out_a & out_b or in_a & out_b:
                     continue  # condition У3 has priority: no edge
                 if out_a & in_b:
-                    self.lattice.add_edge(a, b)
+                    self.hyp_graph.add_edge(a, b)
 
         def derived_by(self, hypothesis):
             """Return hypotheses that are derived by the given hypothesis."""
             if hypothesis not in self.hypotheses:
                 return set()
-            return set(self.lattice.predecessors(hypothesis))
+            return set(self.hyp_graph.predecessors(hypothesis))
 
         def _build_hypothesis_var_mapping(self):
             """Derive hypothesis-level edges from equation variables.
@@ -323,13 +323,13 @@ with virtual_experiment_onto:
             if hypothesis not in self.hypotheses:
                 return set()
             # Impacted hypotheses are those that are reachable from this hypothesis
-            return set(nx.descendants(self.lattice, hypothesis))
+            return set(nx.descendants(self.hyp_graph, hypothesis))
 
         def remove_hypothesis(self, hypothesis):
-            """Remove a hypothesis from the lattice."""
+            """Remove a hypothesis from the graph."""
             if hypothesis in self.hypotheses:
                 self.hypotheses.remove(hypothesis)
-                self.lattice.remove_node(hypothesis)
+                self.hyp_graph.remove_node(hypothesis)
 
         def _is_correct(self):
             """Check if all hypotheses are present in the workflow."""

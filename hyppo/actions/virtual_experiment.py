@@ -3,7 +3,7 @@
 Wraps hyppo.adapters.norne_adapter so the dissertation reference code
 stays untouched. Two actions:
 - BuildVirtualExperiment: full snapshot (hypotheses + edges + config space)
-- GetHypothesisLattice: graph-only subset (nodes + edges)
+- GetGraphConstructor: graph-only subset (nodes + edges)
 
 Both are SAFE: no DB I/O, deterministic, side-effect free except for
 the owlready2 individuals created inside `norne_adapter`.
@@ -46,7 +46,7 @@ class HypothesisRef(BaseModel):
     )
 
 
-class LatticeEdge(BaseModel):
+class GraphEdge(BaseModel):
     # serialize_by_alias=True ensures wire format uses "from"/"to", not "from_"/"to".
     model_config = {
         "populate_by_name": True,
@@ -71,22 +71,22 @@ class VirtualExperimentSnapshot(BaseModel):
 
     domain: Domain
     hypotheses: tuple[HypothesisRef, ...]
-    edges: tuple[LatticeEdge, ...]
+    edges: tuple[GraphEdge, ...]
     configuration_space: tuple[ConfigurationAxis, ...]
 
 
-class GetHypothesisLatticeInput(BaseModel):
+class GetGraphConstructorInput(BaseModel):
     model_config = {"frozen": True}
 
     domain: Domain = "oil_waterflood"
 
 
-class LatticeGraph(BaseModel):
+class GraphPayload(BaseModel):
     model_config = {"frozen": True}
 
     domain: Domain
     nodes: tuple[str, ...]
-    edges: tuple[LatticeEdge, ...]
+    edges: tuple[GraphEdge, ...]
 
 
 _OIL_SNAPSHOT_CACHE: VirtualExperimentSnapshot | None = None
@@ -132,8 +132,8 @@ def _build_oil_snapshot() -> VirtualExperimentSnapshot:
             )
         )
 
-    nx_graph = ve["lattice"]
-    edges = [LatticeEdge(**{"from": src, "to": dst}) for src, dst in nx_graph.edges()]
+    nx_graph = ve["hyp_graph"]
+    edges = [GraphEdge(**{"from": src, "to": dst}) for src, dst in nx_graph.edges()]
     cfg = [
         ConfigurationAxis(name=name, section=spec["section"], levels=spec["levels"])
         for name, spec in CONFIGURATION_SPACE.items()
@@ -164,7 +164,7 @@ def _build_oil_snapshot() -> VirtualExperimentSnapshot:
 def build_virtual_experiment(
     payload: BuildVirtualExperimentInput,
 ) -> VirtualExperimentSnapshot:
-    """Return the current VirtualExperiment snapshot (hypotheses + lattice + config).
+    """Return the current VirtualExperiment snapshot (hypotheses + graph + config).
 
     Domain validation runs in :class:`BuildVirtualExperimentInput` via the
     ``Literal`` type — invalid values fail at construction with
@@ -174,10 +174,10 @@ def build_virtual_experiment(
 
 
 @action(
-    kind="GetHypothesisLattice",
+    kind="GetGraphConstructor",
     trust=TrustLevel.SAFE,
-    inputs=GetHypothesisLatticeInput,
-    outputs=LatticeGraph,
+    inputs=GetGraphConstructorInput,
+    outputs=GraphPayload,
     allowed_roles={
         AgentRole.Coordinator,
         AgentRole.ReservoirEngineer,
@@ -187,13 +187,13 @@ def build_virtual_experiment(
         AgentRole.Economist,
     },
 )
-def get_hypothesis_lattice(payload: GetHypothesisLatticeInput) -> LatticeGraph:
+def get_hypothesis_graph(payload: GetGraphConstructorInput) -> GraphPayload:
     """Return only the derived_by graph (nodes + edges) — cheap, for UI.
 
-    Domain validation runs in :class:`GetHypothesisLatticeInput`.
+    Domain validation runs in :class:`GetGraphConstructorInput`.
     """
     snap = _build_oil_snapshot()
-    return LatticeGraph(
+    return GraphPayload(
         domain=snap.domain,
         nodes=tuple(h.kind for h in snap.hypotheses),
         edges=snap.edges,

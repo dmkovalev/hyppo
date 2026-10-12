@@ -2,7 +2,7 @@
 
 EXPECTED_TOOLS = {
     "BuildVirtualExperiment",
-    "GetHypothesisLattice",
+    "GetGraphConstructor",
     "DiffHypothesisStates",
     "RegisterHypothesisVersion",
     "GetHypothesisVersion",

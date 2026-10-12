@@ -1,6 +1,6 @@
 """Tests for hyppo.actions.diff.diff_hypothesis_states.
 
-Lattice (derived_by, src -> dst):
+Graph (derived_by, src -> dst):
     h_CRM -> h_LPR
     h_ML  -> h_LPR
     h_LPR -> h_MB

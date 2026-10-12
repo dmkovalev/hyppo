@@ -46,7 +46,7 @@ uv sync --all-extras
 
 ```python
 from hyppo.coa._base import Equation, Structure
-from hyppo.lattice_constructor._base import HypothesisLattice
+from hyppo.graph_constructor._base import GraphConstructor
 from hyppo.planner._base import Planner
 from hyppo.storage._base import Database
 
@@ -69,12 +69,12 @@ h1 = Hypothesis("H1", "q = a*p")     # q — выход H1
 h2 = Hypothesis("H2", "wct = q*2")   # wct зависит от q -> H2 derived_by H1
 
 workflow = Workflow([[h1], [h2]])
-lattice = HypothesisLattice([h1, h2], workflow)
-G = lattice.lattice
+graph = GraphConstructor([h1, h2], workflow)
+G = graph.graph
 print(G.number_of_nodes(), G.number_of_edges())  # 2 1
 
 Database.set_root(".hyppo_demo_db")
-plan = Planner(db=Database).plan(configuration={}, lattice=lattice)
+plan = Planner(db=Database).plan(configuration={}, graph=graph)
 print(sorted(h.name for h in plan.needs_execution))  # ['H1', 'H2']
 ```
 
@@ -106,7 +106,7 @@ Norne (16 гипотез, заводнение нефтяного пласта).
 | Менеджер | `hyppo.manager` | Оркестрация жизненного цикла виртуальных экспериментов |
 | HypothesisGenerator | `hyppo.generator` | Базовая генерация гипотез (линейная регрессия + опциональное генетическое программирование) |
 | COAConstructor | `hyppo.coa` | Каузальное упорядочивание систем уравнений |
-| LatticesConstructor | `hyppo.lattice_constructor` | Алгоритм 1 — решётка гипотез |
+| GraphConstructor | `hyppo.graph_constructor` | Алгоритм 1 — решётка гипотез |
 | Planner | `hyppo.planner` | Минимальный план пересчёта (Алгоритм 4) |
 | Runner | `hyppo.runner` | Исполнение моделей с повторными попытками |
 | MetadataRepository | `hyppo.metadata_repository` | Кэш результатов, общий для планировщика и исполнителя |
@@ -117,7 +117,7 @@ Norne (16 гипотез, заводнение нефтяного пласта).
 
 ## MCP-сервер
 
-Hyppo предоставляет 8 типизированных действий и персону `Lattice Steward`
+Hyppo предоставляет 8 типизированных действий и персону `Graph Steward`
 через MCP.
 
 ```bash
@@ -131,7 +131,7 @@ hyppo-mcp --transport http --port 8082
 После подключения клиенты видят инструменты
 `mcp__hyppo__BuildVirtualExperiment`, `...DiffHypothesisStates`,
 `...RegisterHypothesisVersion` и т. д., а также ресурс-персону
-`hyppo://personas/lattice_steward.md`.
+`hyppo://personas/graph_steward.md`.
 
 Действия записи (`RegisterHypothesisVersion`, `MarkRunWithVersion`)
 сохраняются во встроенное хранилище SQLite (aiosqlite, по умолчанию

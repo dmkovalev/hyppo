@@ -1,6 +1,6 @@
 """Rebuild the three asymptotic figures from the DM-core measurement
 (asymptotic_results_dm.json) into thesis/images/:
-  asymp_build_lattice.pdf   (Algorithm 1 exponent)
+  asymp_build_graph.pdf   (Algorithm 1 exponent)
   asymp_add_hypothesis.pdf  (Algorithm 2 speedup)
   asymp_planning_cache.pdf  (Algorithm 4 cascade)
 Short matplotlib script (no heavy loop / no owlready). Run on the .venv that has
@@ -42,7 +42,7 @@ def main():
     hs = sorted(int(k) for k in d["er_build"].keys())
     IMG.mkdir(parents=True, exist_ok=True)
 
-    # --- Figure 1: build_lattice asymptotic ---
+    # --- Figure 1: build_graph asymptotic ---
     med = [d["er_build"][str(h)]["median_ms"] for h in hs]
     lo = [d["er_build"][str(h)]["p05_ms"] for h in hs]
     hi = [d["er_build"][str(h)]["p95_ms"] for h in hs]
@@ -61,8 +61,8 @@ def main():
     ax.set_xlabel(r"$|H|$"); ax.set_ylabel(r"Build time $T$, ms")
     ax.set_title(r"Построение графа гипотез ($\mathrm{Out}\cap\mathrm{In}$, разреженный $W$)")
     ax.legend(fontsize=8, loc="upper left"); ax.grid(True, which="both", alpha=0.3)
-    fig.tight_layout(); fig.savefig(IMG / "asymp_build_lattice.pdf"); plt.close(fig)
-    print(f"saved asymp_build_lattice.pdf (a={a:.3f})")
+    fig.tight_layout(); fig.savefig(IMG / "asymp_build_graph.pdf"); plt.close(fig)
+    print(f"saved asymp_build_graph.pdf (a={a:.3f})")
 
     # --- Figure 2: speedup ---
     if "speedup" in d:

@@ -5,7 +5,7 @@ title: gedanken
 version: 1.1.0
 date-released: "2026-07-09"
 abstract: >-
-  A platform for virtual (thought) experiments over hypothesis lattices:
+  A platform for virtual (thought) experiments over hypothesis graphs:
   reference implementation accompanying the dissertation (import path
   stays `hyppo`).
 authors:
@@ -19,5 +19,5 @@ keywords:
   - hypothesis
   - virtual-experiment
   - causal-inference
-  - lattice
+  - hypothesis-graph
   - dissertation

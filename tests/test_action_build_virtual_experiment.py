@@ -67,13 +67,13 @@ def test_build_all_hypotheses_classify_correctly():
         )
 
 
-def test_build_lattice_edge_serializes_as_from_to():
+def test_build_graph_edge_serializes_as_from_to():
     """Wire format must use 'from'/'to' keys, not 'from_'/'to' (alias contract)."""
     snap = build_virtual_experiment(BuildVirtualExperimentInput())
     first_edge = snap.edges[0]
     dumped = first_edge.model_dump()
     assert set(dumped.keys()) == {"from", "to"}, (
-        f"LatticeEdge wire keys must be 'from'/'to', got {set(dumped.keys())}"
+        f"GraphEdge wire keys must be 'from'/'to', got {set(dumped.keys())}"
     )
 
 

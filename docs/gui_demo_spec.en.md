@@ -16,10 +16,10 @@ go in the tooltip.
 ## Demo 1. Algorithm 1 — automatic construction of the hypothesis graph
 
 ```python
-from hyppo.lattice_constructor._base import HypothesisLattice
+from hyppo.graph_constructor._base import GraphConstructor
 from hyppo.coa._base import Equation, Structure
 # 16 formulas of NORNE_HYPS — copy from tests/test_golden_claims.py
-G = HypothesisLattice(hypotheses, workflow).lattice   # networkx.DiGraph
+G = GraphConstructor(hypotheses, workflow).graph   # networkx.DiGraph
 ```
 
 **Golden**: exactly 18 edges `NORNE_GOLDEN_EDGES` (see test
@@ -33,7 +33,7 @@ equation H2". A hypothesis's output = the left-hand side of its formula
 ## Demo 2. Algorithm 2 — incremental addition
 
 ```python
-lat = HypothesisLattice(hypotheses[:-1], workflow)   # without H19
+lat = GraphConstructor(hypotheses[:-1], workflow)   # without H19
 lat.add_hypothesis(h19)                              # incrementally
 ```
 
@@ -48,7 +48,7 @@ and get highlighted; a causal-merge counter shows |H| (not |H|²).
 
 ```python
 from hyppo.ontology.consistency import check_consistency, Status
-res = check_consistency(ve, onto, lattice, run_hermit=..., artefacts=..., configurations=...)
+res = check_consistency(ve, onto, graph, run_hermit=..., artefacts=..., configurations=...)
 ```
 
 Stage B (structural, `run_hermit=False`, instant):

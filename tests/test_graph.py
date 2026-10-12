@@ -1,6 +1,6 @@
 """Tests for hyppo.coa.graph.HypothesisGraph (Algorithms 1, 2, 4 of the paper).
 
-Covers construction, the build lattice (Alg 1), incremental add (Alg 2), the
+Covers construction, the build graph (Alg 1), incremental add (Alg 2), the
 cascade-aware plan (Alg 4), and a polynomial-scaling smoke test for build.
 """
 
@@ -65,7 +65,7 @@ def test_build_skips_when_no_out_in_overlap():
 
 
 def test_build_only_reachable_pairs():
-    """No workflow edges -> nothing reachable -> empty lattice even if Out/In
+    """No workflow edges -> nothing reachable -> empty graph even if Out/In
     would overlap."""
     g = HypothesisGraph()
     g.add([frozenset({"cd"})])

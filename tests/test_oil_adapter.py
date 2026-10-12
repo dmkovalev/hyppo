@@ -1,6 +1,6 @@
 """Tests for the Norne/Brugge oil waterflood adapter.
 
-Structural tests (no Pellet required) verify hypothesis creation, lattice
+Structural tests (no Pellet required) verify hypothesis creation, graph
 topology, parameter mapping, and cascade invalidation.  Reasoning tests
 (marked ``needs_pellet``) verify OWL auto-classification via Pellet.
 
@@ -104,18 +104,18 @@ class TestBuildOilExperiment:
         expected = {"h_CRM", "h_ML", "h_LPR", "h_MB", "h_BL", "h_WCT"}
         assert set(ve_data["hypotheses_map"].keys()) == expected
 
-    def test_lattice_has_6_edges(self, ve_data):
-        """Lattice DAG must have exactly 6 directed edges."""
-        lattice = ve_data["lattice"]
-        assert lattice.number_of_edges() == 6
+    def test_graph_has_6_edges(self, ve_data):
+        """Graph DAG must have exactly 6 directed edges."""
+        hyp_graph = ve_data["hyp_graph"]
+        assert hyp_graph.number_of_edges() == 6
 
-    def test_lattice_has_6_nodes(self, ve_data):
-        """Lattice DAG must have exactly 6 nodes."""
-        lattice = ve_data["lattice"]
-        assert lattice.number_of_nodes() == 6
+    def test_graph_has_6_nodes(self, ve_data):
+        """Graph DAG must have exactly 6 nodes."""
+        hyp_graph = ve_data["hyp_graph"]
+        assert hyp_graph.number_of_nodes() == 6
 
-    def test_lattice_edges_match_derived_by(self, ve_data):
-        """Each lattice edge must correspond to a derived_by OWL relation."""
+    def test_graph_edges_match_derived_by(self, ve_data):
+        """Each graph edge must correspond to a derived_by OWL relation."""
         expected_edges = {
             ("h_CRM", "h_LPR"),
             ("h_ML", "h_LPR"),
@@ -124,14 +124,14 @@ class TestBuildOilExperiment:
             ("h_BL", "h_WCT"),
             ("h_ML", "h_WCT"),
         }
-        actual_edges = set(ve_data["lattice"].edges())
+        actual_edges = set(ve_data["hyp_graph"].edges())
         assert actual_edges == expected_edges
 
-    def test_lattice_is_dag(self, ve_data):
-        """Lattice must be a directed acyclic graph."""
+    def test_graph_is_dag(self, ve_data):
+        """Graph must be a directed acyclic graph."""
         import networkx as nx
 
-        assert nx.is_directed_acyclic_graph(ve_data["lattice"])
+        assert nx.is_directed_acyclic_graph(ve_data["hyp_graph"])
 
     def test_configuration_space_has_17_axes(self, ve_data):
         """Configuration space mirrors the 17 axes from default_space.yaml."""

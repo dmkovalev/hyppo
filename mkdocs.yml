@@ -1,5 +1,5 @@
 site_name: gedanken
-site_description: A platform for virtual (thought) experiments over hypothesis lattices
+site_description: A platform for virtual (thought) experiments over hypothesis graphs
 repo_url: https://github.com/dmkovalev/hyppo-ref
 repo_name: dmkovalev/hyppo-ref
 
@@ -46,7 +46,7 @@ plugins:
             Архитектура: Architecture
             Справочник API: API Reference
             Ядро: Core
-            Конструктор решётки: Lattice Constructor
+            Конструктор решётки: Graph Constructor
             Планировщик: Planner
             Исполнитель: Runner
             Менеджер: Manager
@@ -78,7 +78,7 @@ nav:
   - Справочник API:
       - Ядро: api/core.md
       - COA: api/coa.md
-      - Конструктор решётки: api/lattice_constructor.md
+      - Конструктор решётки: api/graph_constructor.md
       - Планировщик: api/planner.md
       - Исполнитель: api/runner.md
       - Менеджер: api/manager.md

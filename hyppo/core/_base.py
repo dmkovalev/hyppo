@@ -3,8 +3,8 @@
 Defines the ``virtual_experiment_onto`` OWL ontology (owlready2) that carries
 the formal artefacts of a virtual experiment: hypotheses, models, the
 workflow, and the causal structure (equations/variables) that a hypothesis
-is built from. ``derived_by``/``impacts`` encode the lattice edges consumed
-by :class:`hyppo.lattice_constructor._base.HypothesisLattice` (Algorithm 1).
+is built from. ``derived_by``/``impacts`` encode the graph edges consumed
+by :class:`hyppo.graph_constructor._base.GraphConstructor` (Algorithm 1).
 """
 
 import datetime
@@ -97,8 +97,8 @@ def define_ve_schema(onto):
         class Hypothesis(Artefact):
             """OWL individual for a hypothesis h in H (Definition 1).
 
-            Node type of the hypothesis lattice built by Algorithm 1
-            (:class:`hyppo.lattice_constructor._base.HypothesisLattice`); linked
+            Node type of the hypothesis graph built by Algorithm 1
+            (:class:`hyppo.graph_constructor._base.GraphConstructor`); linked
             to its implementing ``Model`` via ``is_implemented_by_model`` and to
             competing/derived hypotheses via ``competes``/``derived_by``.
             """
@@ -143,7 +143,7 @@ def define_ve_schema(onto):
             the runner's Delta-AIC SUPERSEDED check)."""
 
         class derived_by(Hypothesis >> Hypothesis, TransitiveProperty):
-            """Transitive object property: lattice edge h_j derived_by h_i, i.e.
+            """Transitive object property: graph edge h_j derived_by h_i, i.e.
             h_j depends on h_i's output (Definition 1); the edge set is computed
             by Algorithm 1 and incrementally maintained by Algorithm 2."""
 
@@ -250,13 +250,13 @@ def define_ve_schema(onto):
             """A ``DependencySet`` closed under transitivity (all indirect
             dependencies made explicit)."""
 
-        class ResearchLattice(Artefact):
-            """OWL counterpart of the hypothesis lattice built by Algorithm 1
-            (:class:`hyppo.lattice_constructor._base.HypothesisLattice`): the set
-            of hypotheses under study, linked via ``has_for_lattice_hypothesis``."""
+        class ResearchGraph(Artefact):
+            """OWL counterpart of the hypothesis graph built by Algorithm 1
+            (:class:`hyppo.graph_constructor._base.GraphConstructor`): the set
+            of hypotheses under study, linked via ``has_for_graph_hypothesis``."""
 
-        class has_for_lattice_hypothesis(ResearchLattice >> Hypothesis):
-            """Object property: a ``ResearchLattice`` -> its member hypotheses
+        class has_for_graph_hypothesis(ResearchGraph >> Hypothesis):
+            """Object property: a ``ResearchGraph`` -> its member hypotheses
             (some Hypothesis)."""
 
             class_property_type = ["some"]
@@ -327,8 +327,8 @@ def define_ve_schema(onto):
         DependencySet=DependencySet,
         has_for_dependecy_set=has_for_dependecy_set,
         TransitiveClosure=TransitiveClosure,
-        ResearchLattice=ResearchLattice,
-        has_for_lattice_hypothesis=has_for_lattice_hypothesis,
+        ResearchGraph=ResearchGraph,
+        has_for_graph_hypothesis=has_for_graph_hypothesis,
     )
 
 
@@ -367,8 +367,8 @@ has_for_structure = _ns.has_for_structure
 DependencySet = _ns.DependencySet
 has_for_dependecy_set = _ns.has_for_dependecy_set
 TransitiveClosure = _ns.TransitiveClosure
-ResearchLattice = _ns.ResearchLattice
-has_for_lattice_hypothesis = _ns.has_for_lattice_hypothesis
+ResearchGraph = _ns.ResearchGraph
+has_for_graph_hypothesis = _ns.has_for_graph_hypothesis
 
 
 if __name__ == "__main__":

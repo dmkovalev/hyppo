@@ -23,16 +23,16 @@ def test_has_result(tmp_path):
     repo.close()
 
 
-def test_find_nearest_lattice(tmp_path):
+def test_find_nearest_graph(tmp_path):
     from hyppo.metadata_repository import MetadataRepository
 
     repo = MetadataRepository(db_path=tmp_path / "test.db")
-    repo.save_lattice("l1", nodes={"h1", "h2"}, edges={("h1", "h2")})
-    nearest = repo.find_nearest_lattice(
+    repo.save_graph("l1", nodes={"h1", "h2"}, edges={("h1", "h2")})
+    nearest = repo.find_nearest_graph(
         nodes={"h1", "h2", "h3"}, edges={("h1", "h2"), ("h2", "h3")}
     )
     assert nearest is not None
-    assert nearest["lattice_id"] == "l1"
+    assert nearest["graph_id"] == "l1"
     assert nearest["distance"] == 2  # 1 extra node + 1 extra edge
     repo.close()
 

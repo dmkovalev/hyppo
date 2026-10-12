@@ -22,8 +22,8 @@ from hyppo.core import create_ve_world, virtual_experiment_onto
 from hyppo.core._base import Hypothesis as GlobalHypothesis
 from hyppo.ontology.consistency import Status, check_consistency
 
-_GOOD_LATTICE = {0: {1}, 1: {2}, 2: set()}
-_CYCLIC_LATTICE = {0: {1}, 1: {0}}
+_GOOD_GRAPH = {0: {1}, 1: {2}, 2: set()}
+_CYCLIC_GRAPH = {0: {1}, 1: {0}}
 
 
 def test_double_build_no_integrity_error():
@@ -42,10 +42,10 @@ def test_two_worlds_independent_stage_b_verdicts():
     ve2 = build_oil_virtual_experiment()
 
     r1 = check_consistency(
-        ve1["virtual_experiment"], ve1["onto"], _GOOD_LATTICE, stage_a_engine="owlrl"
+        ve1["virtual_experiment"], ve1["onto"], _GOOD_GRAPH, stage_a_engine="owlrl"
     )
     r2 = check_consistency(
-        ve2["virtual_experiment"], ve2["onto"], _CYCLIC_LATTICE, stage_a_engine="owlrl"
+        ve2["virtual_experiment"], ve2["onto"], _CYCLIC_GRAPH, stage_a_engine="owlrl"
     )
 
     assert r1.ok is True and r1.status == Status.OK
@@ -57,7 +57,7 @@ def test_create_ve_world_stage_b_independent_of_global():
     independently of the module-global default world."""
     world, onto, _ns = create_ve_world()
 
-    res = check_consistency(None, onto, _GOOD_LATTICE, stage_a_engine="owlrl")
+    res = check_consistency(None, onto, _GOOD_GRAPH, stage_a_engine="owlrl")
 
     assert res.ok is True and res.status == Status.OK
     assert onto.world is world

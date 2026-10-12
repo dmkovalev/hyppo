@@ -8,7 +8,7 @@ to the OWL domain ontology.
 gui / mcp
     -> manager
         -> runner / planner
-            -> lattice_constructor / coa
+            -> graph_constructor / coa
                 -> core (OWL ontology, Definition 1)
 ```
 
@@ -39,12 +39,12 @@ markers is left for a separate iteration.
 Causal-ordering algorithms (COA constructor). A pure Dulmage-Mendelsohn
 core (`hyppo.coa.causal`: matching, strongly-connected components,
 transitive closure) importable without sympy/owlready, plus the
-`Structure`/`Equation` data model consumed by the lattice constructor.
+`Structure`/`Equation` data model consumed by the graph constructor.
 
-### `hyppo.lattice_constructor`
+### `hyppo.graph_constructor`
 
 Algorithm 1 (and its incremental variant, Algorithm 2): builds the
-hypothesis dependency graph (`HypothesisLattice`) from a set of hypotheses'
+hypothesis dependency graph (`GraphConstructor`) from a set of hypotheses'
 equations. The output variable of a hypothesis is the left-hand side of
 its formula; edges `h_i -> h_j` mean `h_j` depends on `h_i`. This is the
 only place graph edges are derived — no component re-implements Algorithm 1.
@@ -52,13 +52,13 @@ only place graph edges are derived — no component re-implements Algorithm 1.
 ### `hyppo.planner`
 
 Algorithm 4: builds an `ExecutionPlan` as a cascaded closure over the
-lattice, proven correct and ⊆-minimal (Theorem 1). The pure two-way
+graph, proven correct and ⊆-minimal (Theorem 1). The pure two-way
 cascade (no R² awareness) exists exactly once in the system —
 `hyppo.coa.HypothesisGraph.plan`, also exposed as the string-keyed façade
 `hyppo.coa.plan_cascade`, which the GUI's plan-preview (`hyppo.gui`)
 delegates to directly. The two-way cascade cannot express the three-way
 R² exclusion (recompute / cached / pruned from the plan entirely), so
-`hyppo.planner` and `hyppo.manager` each walk the lattice with that
+`hyppo.planner` and `hyppo.manager` each walk the graph with that
 semantics (using `nx.descendants` as a library primitive rather than
 re-implementing Algorithm 4) — the two traversals are kept identical to
 each other.
@@ -70,7 +70,7 @@ epistemic status, cascades skips to dependents when a prerequisite fails.
 
 ### `hyppo.manager`
 
-Top-level orchestrator (`Manager`) coordinating generator, lattice
+Top-level orchestrator (`Manager`) coordinating generator, graph
 constructor, planner and runner into one virtual-experiment lifecycle.
 
 ### `hyppo.generator`
@@ -140,7 +140,7 @@ virtual-experiment lifecycle. Entry point: `hyppo-gui`.
 ### `hyppo.mcp`
 
 MCP server package (stdio and streamable-HTTP transports) exposing
-`hyppo.actions` as typed MCP tools and a `Lattice Steward` persona
+`hyppo.actions` as typed MCP tools and a `Graph Steward` persona
 resource. Entry point: `hyppo-mcp`.
 
 ## Golden-test contract

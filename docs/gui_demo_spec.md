@@ -15,10 +15,10 @@
 ## Демо 1. Алгоритм 1 — автоматическое построение графа гипотез
 
 ```python
-from hyppo.lattice_constructor._base import HypothesisLattice
+from hyppo.graph_constructor._base import GraphConstructor
 from hyppo.coa._base import Equation, Structure
 # 16 формул NORNE_HYPS — скопировать из tests/test_golden_claims.py
-G = HypothesisLattice(hypotheses, workflow).lattice   # networkx.DiGraph
+G = GraphConstructor(hypotheses, workflow).graph   # networkx.DiGraph
 ```
 
 **Golden**: ровно 18 рёбер `NORNE_GOLDEN_EDGES` (см. тест
@@ -31,7 +31,7 @@ G = HypothesisLattice(hypotheses, workflow).lattice   # networkx.DiGraph
 ## Демо 2. Алгоритм 2 — инкрементальное добавление
 
 ```python
-lat = HypothesisLattice(hypotheses[:-1], workflow)   # без H19
+lat = GraphConstructor(hypotheses[:-1], workflow)   # без H19
 lat.add_hypothesis(h19)                              # инкрементально
 ```
 
@@ -46,7 +46,7 @@ lat.add_hypothesis(h19)                              # инкременталь�
 
 ```python
 from hyppo.ontology.consistency import check_consistency, Status
-res = check_consistency(ve, onto, lattice, run_hermit=..., artefacts=..., configurations=...)
+res = check_consistency(ve, onto, graph, run_hermit=..., artefacts=..., configurations=...)
 ```
 
 Стадия B (структурная, `run_hermit=False`, мгновенно):

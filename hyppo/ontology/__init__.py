@@ -6,7 +6,7 @@ the base ontology defined in ``hyppo.core._base``.  Rules cover:
 - Core classification and structural axioms (rules 1-6)
 - Provenance and versioning (rules 7-8)
 - Workflow validation (rules 9-10)
-- Quality gates for hypothesis lattice pruning (rules 11-12)
+- Quality gates for hypothesis graph pruning (rules 11-12)
 - Multi-experiment sharing detection (rule 13)
 - Model compatibility and data-format checks (rules 14-15)
 - Lifecycle state management (rule 16)

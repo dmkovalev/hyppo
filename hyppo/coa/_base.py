@@ -97,7 +97,7 @@ class Structure:
         """{variable Symbol: set of transitively dependent variable Symbols}.
 
         Returns {} when the structure is incomplete OR structurally singular
-        (no perfect matching). This is deliberate: lattice construction calls
+        (no perfect matching). This is deliberate: graph construction calls
         this over many candidate unions, some legitimately unsolvable, and must
         not raise. (build_full_causal_mapping, a direct query, raises instead.)
         """

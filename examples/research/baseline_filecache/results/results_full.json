@@ -16,7 +16,7 @@
   "corey_ref": 144,
   "ridge": 136
  },
- "lattice_build_s": 7.903114500004449,
+ "graph_build_s": 7.903114500004449,
  "t_plan_median_s": 0.0008073999924818054,
  "t_snakemake_dry_median_s": 1.0495822000084445,
  "summary": {

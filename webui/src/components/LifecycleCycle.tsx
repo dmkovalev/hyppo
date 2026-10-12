@@ -36,7 +36,7 @@ export function LifecycleCycle({ real }: { real: RealData }) {
   const detail = [
     <>Определён кортеж <span className="formula">⟨O, H, M, R, W, 𝒞⟩</span>: {c.nodes.length} гипотез,
        {" "}{real.ve.models.length} моделей, {real.ve.configuration.length} осей конфигурации.</>,
-    <>Алгоритм 1 (<span className="formula">HypothesisLattice</span>) построил граф: <b>{c.nodes.length} гипотез,
+    <>Алгоритм 1 (<span className="formula">GraphConstructor</span>) построил граф: <b>{c.nodes.length} гипотез,
        {" "}{c.edges.length} рёбер</b> derived_by, DAG глубины {c.depth}.</>,
     <>Планировщик разбил на <span className="formula">P_ne</span> (пересчёт) и <span className="formula">P_e</span> (кэш).
        При изменении H1 пересчёту подлежат <b>{plan?.p_ne.length ?? 0} из {c.nodes.length}</b>.</>,

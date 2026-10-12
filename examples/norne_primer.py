@@ -1,7 +1,7 @@
 """Norne primer: an end-to-end walkthrough of one virtual experiment.
 
 Runs the complete lifecycle of the Norne HybridCRM virtual experiment
-(Definition 1 tuple -> Algorithm 1 lattice -> Algorithm 2 incremental
+(Definition 1 tuple -> Algorithm 1 graph -> Algorithm 2 incremental
 update -> Algorithm 4 recompute plan + Theorem 1 -> execution ->
 hypothesis comparison -> golden self-check).
 
@@ -24,7 +24,7 @@ import numpy as np
 from hyppo.coa._base import Equation, Structure
 from hyppo.coa.graph import HypothesisGraph
 from hyppo.comparison.compare import compute_aic, gaussian_log_likelihood, sign_test
-from hyppo.lattice_constructor._base import HypothesisLattice
+from hyppo.graph_constructor._base import GraphConstructor
 from hyppo.runner import Runner
 
 # --- Norne HybridCRM data (paper [SVD], fig. 3; same case as the GUI demo) ---
@@ -154,11 +154,11 @@ def act_1_tuple() -> None:
     _pause()
 
 
-def act_2_algorithm1() -> tuple[HypothesisLattice, nx.DiGraph]:
-    """Algorithm 1: build the hypothesis lattice from equations + workflow."""
+def act_2_algorithm1() -> tuple[GraphConstructor, nx.DiGraph]:
+    """Algorithm 1: build the hypothesis graph from equations + workflow."""
     _act(2, "Algorithm 1 — automatic hypothesis-graph construction")
-    lattice = HypothesisLattice(ALL_HYPS, WF)
-    g = lattice.lattice
+    hyp_graph = GraphConstructor(ALL_HYPS, WF)
+    g = hyp_graph.hyp_graph
     print("\nDerived_by edges (h_i -> h_j means h_j consumes the output of h_i):")
     edges = sorted(
         g.edges(),
@@ -176,20 +176,20 @@ def act_2_algorithm1() -> tuple[HypothesisLattice, nx.DiGraph]:
     )
     print("Golden (paper [SVD], fig. 3): 16 nodes, 18 edges, depth 10.")
     _pause()
-    return lattice, g
+    return hyp_graph, g
 
 
 def act_3_algorithm2(g_full: nx.DiGraph) -> None:
     """Algorithm 2: incremental add is equivalent to a full rebuild (Lemma 2)."""
     _act(3, "Algorithm 2 — incremental addition (Lemma 2)")
-    partial = HypothesisLattice(ALL_HYPS[:-1], WF)  # without H19 (paper H16)
-    before = partial.lattice.number_of_edges()
-    before_edges = {(str(u), str(v)) for u, v in partial.lattice.edges()}
+    partial = GraphConstructor(ALL_HYPS[:-1], WF)  # without H19 (paper H16)
+    before = partial.hyp_graph.number_of_edges()
+    before_edges = {(str(u), str(v)) for u, v in partial.hyp_graph.edges()}
     partial.add_hypothesis(HYP_OBJS["H19"])  # incremental, O(|H|) merges
-    after_edges = {(str(u), str(v)) for u, v in partial.lattice.edges()}
+    after_edges = {(str(u), str(v)) for u, v in partial.hyp_graph.edges()}
     full_edges = {(str(u), str(v)) for u, v in g_full.edges()}
     new = sorted(after_edges - before_edges)
-    print(f"\nLattice without H16: {before} edges.")
+    print(f"\nGraph without H16: {before} edges.")
     print(
         "add_hypothesis(H16) added edges: "
         f"{[f'{PAPER[u]}->{PAPER[v]}' for u, v in new]}"
@@ -269,7 +269,7 @@ def act_5_run(g: nx.DiGraph, p_ne: set[str]) -> None:
     results = runner.execute(
         plan,
         models,
-        lattice_edges=[(str(u), str(v)) for u, v in g.edges()],
+        graph_edges=[(str(u), str(v)) for u, v in g.edges()],
         competes={"H5": {"H7"}, "H7": {"H5"}},
     )
     print(
@@ -315,7 +315,7 @@ def act_6_compare() -> None:
     if not (p < 0.05 and aic_phys < aic_ml):
         raise SystemExit("ACT 6 VERDICT CHECK FAILED")
     print("Verdict: H5 preferred on both criteria; H8 fuses the two, which is")
-    print("why the paper keeps BOTH in the lattice instead of discarding H7.")
+    print("why the paper keeps BOTH in the graph instead of discarding H7.")
     _pause()
 
 
@@ -342,7 +342,7 @@ def main() -> None:
     )
     PAUSE = parser.parse_args().pause
     act_1_tuple()
-    _lattice, g = act_2_algorithm1()
+    _graph, g = act_2_algorithm1()
     act_3_algorithm2(g)
     p_ne = act_4_plan_theorem1(g)
     act_5_run(g, p_ne)

@@ -1,6 +1,6 @@
 # examples/research/baseline_filecache/hyppo_side.py
 """Сторона комплекса: гипотезы со структурами (формулы «выход = f(входы)»),
-граф алгоритмом 1 (HypothesisLattice), план алгоритмом 4 (plan_cascade).
+граф алгоритмом 1 (GraphConstructor), план алгоритмом 4 (plan_cascade).
 
 Сущности хранилища — отдельные гипотезы-хранилища (store_*), выход которых
 (gains_uto, corey, wstatus, ...) входит в уравнения потребителей. Ревизия сущности
@@ -13,7 +13,7 @@ from dataclasses import dataclass, field
 
 from hyppo.coa._base import Equation, Structure
 from hyppo.coa.graph import plan_cascade
-from hyppo.lattice_constructor._base import HypothesisLattice
+from hyppo.graph_constructor._base import GraphConstructor
 
 from .config import tok
 
@@ -89,11 +89,11 @@ def _hypotheses(grid: dict) -> tuple[list[_Hyp], dict[str, str], dict[str, set[s
 def build(grid: dict) -> Model:
     hyps, node_job, store = _hypotheses(grid)
     t0 = time.perf_counter()
-    lattice = HypothesisLattice(hyps, _Workflow(hyps)).lattice
+    hyp_graph = GraphConstructor(hyps, _Workflow(hyps)).hyp_graph
     dt = time.perf_counter() - t0
     return Model(
         nodes=[h.name for h in hyps],
-        edges=[(u.name, v.name) for u, v in lattice.edges()],
+        edges=[(u.name, v.name) for u, v in hyp_graph.edges()],
         node_job=node_job,
         build_seconds=dt,
         store_nodes=store,

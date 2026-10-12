@@ -6,7 +6,7 @@ import pytest
 from hyppo.planner._base import Planner, build_optimal_plan
 
 # ---------------------------------------------------------------------------
-# Helpers: lightweight fakes for lattice, configuration, and Database
+# Helpers: lightweight fakes for graph, configuration, and Database
 # ---------------------------------------------------------------------------
 
 
@@ -30,11 +30,11 @@ class FakeConfiguration:
         self.parameters = [tag]
 
 
-class FakeLattice:
-    """Wraps a networkx DiGraph as a HypothesisLattice-like object."""
+class FakeGraph:
+    """Wraps a networkx DiGraph as a GraphConstructor-like object."""
 
     def __init__(self, graph: nx.DiGraph):
-        self.lattice = graph
+        self.hyp_graph = graph
         self.hypotheses = list(graph.nodes())
 
 
@@ -50,7 +50,7 @@ class FakeDatabase:
 
     def __init__(self):
         self._results: dict[str, object] = {}
-        self._lattices: list = []
+        self._graphs: list = []
 
     # --- results storage ---
     def load(self, key: str, storage: str = "") -> object | None:
@@ -60,7 +60,7 @@ class FakeDatabase:
         self._results[f"{storage}/{key}"] = _FakePickled(obj)
 
     def load_all(self, storage: str = "") -> list:
-        return self._lattices
+        return self._graphs
 
     # --- convenience for tests ---
     def put_result(
@@ -87,11 +87,11 @@ def test_plan_all_new():
     g.add_node(h2)
     g.add_edge(h1, h2)
 
-    lattice = FakeLattice(g)
+    hyp_graph = FakeGraph(g)
     db = FakeDatabase()
     config = FakeConfiguration()
 
-    plan = build_optimal_plan(config, lattice, db)
+    plan = build_optimal_plan(config, hyp_graph, db)
 
     assert h1 in plan.needs_execution
     assert h2 in plan.needs_execution
@@ -108,7 +108,7 @@ def test_plan_with_cache():
     # h1 -> h2 dependency
     g.add_edge(h1, h2)
 
-    lattice = FakeLattice(g)
+    hyp_graph = FakeGraph(g)
     db = FakeDatabase()
     config = FakeConfiguration()
 
@@ -116,7 +116,7 @@ def test_plan_with_cache():
     db.put_result(h1, config, {"r2": 0.9})
     db.put_result(h2, config, {"r2": 0.85})
 
-    plan = build_optimal_plan(config, lattice, db)
+    plan = build_optimal_plan(config, hyp_graph, db)
 
     assert h1 in plan.cached
     assert h2 in plan.cached
@@ -133,7 +133,7 @@ def test_plan_prune_low_r2():
     g.add_edge(h1, h2)
     g.add_edge(h2, h3)
 
-    lattice = FakeLattice(g)
+    hyp_graph = FakeGraph(g)
     db = FakeDatabase()
     config = FakeConfiguration()
 
@@ -142,7 +142,7 @@ def test_plan_prune_low_r2():
     db.put_result(h2, config, {"r2": 0.5})
     db.put_result(h3, config, {"r2": 0.95})
 
-    plan = build_optimal_plan(config, lattice, db, r2_threshold=0.7)
+    plan = build_optimal_plan(config, hyp_graph, db, r2_threshold=0.7)
 
     assert h1 in plan.cached
     # h2 pruned (R2=0.5 < 0.7), h3 pruned as dependent
@@ -158,25 +158,25 @@ def test_planner_class_delegates():
     g = nx.DiGraph()
     g.add_node(h1)
 
-    lattice = FakeLattice(g)
+    hyp_graph = FakeGraph(g)
     db = FakeDatabase()
     config = FakeConfiguration()
 
     planner = Planner(db=db, r2_threshold=0.7)
-    plan = planner.plan(config, lattice)
+    plan = planner.plan(config, hyp_graph)
 
     # No cache -> h1 in needs_execution
     assert h1 in plan.needs_execution
 
 
-def test_plan_empty_lattice():
-    """Empty lattice produces empty plan."""
+def test_plan_empty_graph():
+    """Empty graph produces empty plan."""
     g = nx.DiGraph()
-    lattice = FakeLattice(g)
+    hyp_graph = FakeGraph(g)
     db = FakeDatabase()
     config = FakeConfiguration()
 
-    plan = build_optimal_plan(config, lattice, db)
+    plan = build_optimal_plan(config, hyp_graph, db)
 
     assert len(plan.needs_execution) == 0
     assert len(plan.cached) == 0
@@ -190,12 +190,12 @@ def test_shared_cache_planner_sees_runner_saves():
     h1, h2 = FakeHypothesis("h1"), FakeHypothesis("h2")
     g = nx.DiGraph()
     g.add_edge(h1, h2)
-    lattice = FakeLattice(g)
+    hyp_graph = FakeGraph(g)
     config = FakeConfiguration()
     cache = SharedCache(":memory:")
 
     # холодный план: кэш пуст → обе в needs_execution
-    p0 = build_optimal_plan(config, lattice, cache)
+    p0 = build_optimal_plan(config, hyp_graph, cache)
     assert h1 in p0.needs_execution and h2 in p0.needs_execution and not p0.cached
 
     # runner «вычислил» и записал результаты по тем же цепочным ключам, что видит
@@ -205,12 +205,12 @@ def test_shared_cache_planner_sees_runner_saves():
     cache.save_result("h2", keys[h2], {"r2": 0.88})
 
     # тёплый план: планировщик видит записи раннера как кэш
-    p1 = build_optimal_plan(config, lattice, cache)
+    p1 = build_optimal_plan(config, hyp_graph, cache)
     assert h1 in p1.cached and h2 in p1.cached and not p1.needs_execution
 
     # низкий R² из кэша раннера → отсечение ветви планировщиком
     cache.save_result("h2", keys[h2], {"r2": 0.4})
-    p2 = build_optimal_plan(config, lattice, cache, r2_threshold=0.7)
+    p2 = build_optimal_plan(config, hyp_graph, cache, r2_threshold=0.7)
     assert h1 in p2.cached and h2 not in p2.cached and h2 not in p2.needs_execution
 
 
@@ -223,24 +223,24 @@ def test_per_hypothesis_config_invalidates_single_branch():
     g = nx.DiGraph()
     g.add_edge(h1, h2)
     g.add_edge(h2, h3)
-    lattice = FakeLattice(g)
+    hyp_graph = FakeGraph(g)
     cache = SharedCache(":memory:")
 
     base = {"v": 1}
     per = {"h1": base, "h2": base, "h3": base}
     from hyppo.planner._base import cache_keys_for
 
-    keys = cache_keys_for(lattice, None, per)  # ключи, по которым пишет раннер
+    keys = cache_keys_for(hyp_graph, None, per)  # ключи, по которым пишет раннер
     for h in (h1, h2, h3):
         cache.save_result(h.name, keys[h], {"r2": 0.9})
 
     # всё в кэше → пусто на пересчёт
-    p0 = build_optimal_plan(None, lattice, cache, per_hypothesis_configs=per)
+    p0 = build_optimal_plan(None, hyp_graph, cache, per_hypothesis_configs=per)
     assert {h1, h2, h3} == p0.cached and not p0.needs_execution
 
     # меняем конфигурацию ТОЛЬКО h2 → промах по h2, пересчёт h2 и потомка h3
     per2 = {"h1": base, "h2": {"v": 2}, "h3": base}
-    p1 = build_optimal_plan(None, lattice, cache, per_hypothesis_configs=per2)
+    p1 = build_optimal_plan(None, hyp_graph, cache, per_hypothesis_configs=per2)
     assert p1.needs_execution == {h2, h3}
     assert p1.cached == {h1}
 
@@ -256,9 +256,9 @@ def test_plan_rejects_cyclic_graph():
     g.add_edge(h2, h3)
     g.add_edge(h3, h1)  # cycle: h1 -> h2 -> h3 -> h1
 
-    lattice = FakeLattice(g)
+    hyp_graph = FakeGraph(g)
     db = FakeDatabase()
     config = FakeConfiguration()
 
     with pytest.raises(ValueError, match="cycle"):
-        build_optimal_plan(config, lattice, db)
+        build_optimal_plan(config, hyp_graph, db)

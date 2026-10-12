@@ -9,10 +9,10 @@ from mcp.types import Resource
 
 _FILE_RESOURCES: list[tuple[str, str, str, str]] = [
     (
-        "hyppo://personas/lattice_steward.md",
-        "Lattice Steward agent persona prompt",
+        "hyppo://personas/graph_steward.md",
+        "Graph Steward agent persona prompt",
         "text/markdown",
-        "hyppo.personas/lattice_steward.md",
+        "hyppo.personas/graph_steward.md",
     ),
 ]
 

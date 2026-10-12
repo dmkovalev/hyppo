@@ -70,7 +70,7 @@
           "group": "platform"
         },
         {
-          "name": "ResearchLattice",
+          "name": "ResearchGraph",
           "parent": "Artefact",
           "group": "platform"
         },
@@ -794,8 +794,8 @@
           "range": "DependencySet"
         },
         {
-          "property": "has_for_lattice_hypothesis",
-          "domain": "ResearchLattice",
+          "property": "has_for_graph_hypothesis",
+          "domain": "ResearchGraph",
           "range": "Hypothesis"
         },
         {
@@ -2932,7 +2932,7 @@
     "formal_text": "# HybridCRM workflow — ОАГ задач (CWL-подобный формат)\n# join: AND (все входы обязательны); ветви LPR и WCT параллельны\ncwlVersion: v1.2\nclass: Workflow\nsteps:\n  T1:  # Парсинг закачки\n    in: [source]\n    run: [H1]\n  T2:  # CRM-каналы\n    in: [T1]\n    run: [H2, H3]\n  T3:  # Смешение\n    in: [T2]\n    run: [H4]\n  T4:  # Продуктивность и спад\n    in: [T12, T3]\n    run: [H5, H6]\n  join: all-required  # AND\n  T5:  # ML-коррекция\n    in: [source]\n    run: [H7]\n  T6:  # Слияние жидкости\n    in: [T4, T5]\n    run: [H8]\n  join: all-required  # AND\n  T7:  # Материальный баланс\n    in: [T6]\n    run: [H9]\n  T8:  # Фазовые проницаемости\n    in: [T7]\n    run: [H10, H11]\n  T9:  # Фракционный поток\n    in: [T8]\n    run: [H12]\n  T10:  # Обводнённость\n    in: [T9]\n    run: [H13, H14]\n  T11:  # Прогноз нефти\n    in: [T10, T6]\n    run: [H16]\n  join: all-required  # AND\n  T12:  # ГТМ-модуляция\n    in: [source]\n    run: [H15]",
     "is_dag": true,
     "depth": 10,
-    "note": "16 гипотез (сплошная нумерация статьи H1–H16), 18 рёбер derived_by, DAG глубины 10. Построено настоящим алгоритмом 1 (HypothesisLattice) из уравнений; ветви LPR (H1–H8) и WCT (H9–H14) параллельны, сходятся в H16."
+    "note": "16 гипотез (сплошная нумерация статьи H1–H16), 18 рёбер derived_by, DAG глубины 10. Построено настоящим алгоритмом 1 (GraphConstructor) из уравнений; ветви LPR (H1–H8) и WCT (H9–H14) параллельны, сходятся в H16."
   },
   "algorithm4": {
     "change_H1": {
@@ -4025,7 +4025,7 @@
         "module": "hyppo/manager",
         "desc": "Координирует жизненный цикл ВЭ (4 этапа, разд. 3.1.2).",
         "deps": [
-          "lattice_constructor",
+          "graph_constructor",
           "planner",
           "runner",
           "metadata_repository"
@@ -4050,10 +4050,10 @@
         ]
       },
       {
-        "id": "lattice_constructor",
-        "name": "LatticesConstructor",
+        "id": "graph_constructor",
+        "name": "GraphConstructor",
         "layer": "Методы (гл. 2)",
-        "module": "hyppo/lattice_constructor",
+        "module": "hyppo/graph_constructor",
         "desc": "Алгоритмы 1–2: построение и добавление в граф гипотез (разд. 3.1.5).",
         "deps": [
           "coa"

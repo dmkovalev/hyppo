@@ -1,7 +1,7 @@
 # gedanken
 
 > gedanken — a platform for virtual (thought) experiments over hypothesis
-> lattices
+> graphs
 
 Reference implementation of the virtual experiment management platform
 described in Chapter 3 of the dissertation. The distribution is published

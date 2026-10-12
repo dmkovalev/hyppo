@@ -30,7 +30,7 @@ from hyppo.coa import HypothesisGraph
 HERE = Path(__file__).resolve().parent
 RESULTS = HERE / "results"
 
-# --- BGM stellar-birthrate hypothesis graph (Section 4.2, fig:mass_lattice) ---
+# --- BGM stellar-birthrate hypothesis graph (Section 4.2, fig:mass_graph) ---
 # 10 hypotheses (nodes): 4 input parameters + 6 derived quantities.
 # A derived_by edge u -> v means "v is computed from u".
 # Birthrate b(m,t) ~ f(SFR(i), rho(i, SFR(i))) * IMF(m)  (Eq. in part4.tex);
@@ -110,7 +110,7 @@ def main() -> None:
     for rank, (name, chi2) in enumerate(imf_ranked, 1):
         print(f"  {rank}. {name}: chi^2 = {chi2:.0f}")
 
-    # method claims of Section 4.2 (10-node graph, fig:mass_lattice)
+    # method claims of Section 4.2 (10-node graph, fig:mass_graph)
     cascade_tail = {"star_birthrate", "local_luminosity", "dynamical_self_consistency"}
     assert set(change_sfr) == {"SFR"} | cascade_tail, change_sfr
     assert len(change_sfr) == 4 and len(change_sfr) / n == 0.4

@@ -20,7 +20,7 @@ import pytest
 from hyppo.coa import causal
 from hyppo.coa._base import Equation, Structure
 from hyppo.coa.graph import HypothesisGraph
-from hyppo.lattice_constructor._base import HypothesisLattice
+from hyppo.graph_constructor._base import GraphConstructor
 
 # ---------------------------------------------------------------------------
 # Fixtures: the Norne HybridCRM hypothesis set (formulas as in [SVD] §3.9)
@@ -91,9 +91,9 @@ class _Workflow:
         return self._tasks
 
 
-def _build_lattice(hyps: list[_Hyp]) -> nx.DiGraph:
+def _build_graph(hyps: list[_Hyp]) -> nx.DiGraph:
     wf = _Workflow([[h] for h in hyps])
-    return HypothesisLattice(list(hyps), wf).lattice
+    return GraphConstructor(list(hyps), wf).hyp_graph
 
 
 def _named_edges(g: nx.DiGraph) -> set[tuple[str, str]]:
@@ -101,7 +101,7 @@ def _named_edges(g: nx.DiGraph) -> set[tuple[str, str]]:
 
 
 # ---------------------------------------------------------------------------
-# Algorithm 1 — build_lattice  [SVD §3.9, рис. 3]
+# Algorithm 1 — build_graph  [SVD §3.9, рис. 3]
 # ---------------------------------------------------------------------------
 
 
@@ -109,7 +109,7 @@ def test_alg1_norne_graph_matches_figure():
     """[SVD] «16 гипотез и 18 рёбер зависимостей (глубина графа 10)»,
     «рёбра выведены автоматически из потока переменных уравнений»."""
     hyps = [_Hyp(n, f) for n, f in NORNE_HYPS]
-    g = _build_lattice(hyps)
+    g = _build_graph(hyps)
     assert _named_edges(g) == NORNE_GOLDEN_EDGES
     assert g.number_of_nodes() == 16
     assert g.number_of_edges() == 18
@@ -135,16 +135,16 @@ def _random_formula_hyps(rng: random.Random, n: int) -> list[_Hyp]:
 @pytest.mark.parametrize("seed", [0, 1, 2, 3, 4])
 def test_alg2_incremental_equals_full_rebuild(seed):
     """Adding the last hypothesis incrementally must yield the same edge set
-    as rebuilding the lattice from scratch."""
+    as rebuilding the graph from scratch."""
     rng = random.Random(seed)
     hyps = _random_formula_hyps(rng, 12)
 
-    full = _named_edges(_build_lattice(hyps))
+    full = _named_edges(_build_graph(hyps))
 
     wf = _Workflow([[h] for h in hyps])
-    lat = HypothesisLattice(list(hyps[:-1]), wf)
+    lat = GraphConstructor(list(hyps[:-1]), wf)
     lat.add_hypothesis(hyps[-1])
-    incremental = _named_edges(lat.lattice)
+    incremental = _named_edges(lat.hyp_graph)
 
     assert incremental == full
 
@@ -269,7 +269,7 @@ def test_alg2_complexity_linear_in_hypotheses():
     and the incremental result equals the full rebuild (thm:build (III))."""
     for n in (10, 20, 40):
         g = _chain_graph(n)
-        g.build()  # setup: the existing lattice
+        g.build()  # setup: the existing graph
         calls = [0]
         orig = g._pair
 
@@ -283,7 +283,7 @@ def test_alg2_complexity_linear_in_hypotheses():
         full = _chain_graph(n)
         full.add([{f"x{n}", f"x{n - 1}"}], inputs={f"x{n - 1}"})
         full.connect(n - 1, n)
-        assert set(full.build()) == g.lattice
+        assert set(full.build()) == g.hyp_graph
 
 
 class _CountingSet(set):
@@ -344,7 +344,7 @@ class _FiniteQ:
         self.values = values
 
 
-_GOOD_LATTICE = {0: {1}, 1: {2}, 2: set()}
+_GOOD_GRAPH = {0: {1}, 1: {2}, 2: set()}
 _GOOD_ARTEFACTS = {
     0: {"in": {"raw"}, "out": {"a"}},
     1: {"in": {"a"}, "out": {"b"}},
@@ -356,7 +356,7 @@ def test_alg3_stage_b_accepts_correct_experiment():
     res = check_consistency(
         None,
         None,
-        _GOOD_LATTICE,
+        _GOOD_GRAPH,
         run_hermit=False,
         artefacts=_GOOD_ARTEFACTS,
         configurations=[_FiniteQ([1, 2])],
@@ -381,7 +381,7 @@ def test_alg3_c4_rejects_edge_without_artefact_flow():
     res = check_consistency(
         None,
         None,
-        _GOOD_LATTICE,
+        _GOOD_GRAPH,
         run_hermit=False,
         artefacts=bad,
     )
@@ -396,7 +396,7 @@ def test_alg3_c5_rejects_undeclared_infinite_domain():
     res = check_consistency(
         None,
         None,
-        _GOOD_LATTICE,
+        _GOOD_GRAPH,
         run_hermit=False,
         artefacts=_GOOD_ARTEFACTS,
         configurations=[_FiniteQ([1]), _NoFlag()],
@@ -412,7 +412,7 @@ def test_c7_accepts_grounded_and_rejects_ungrounded_variable():
     ok = check_consistency(
         None,
         None,
-        _GOOD_LATTICE,
+        _GOOD_GRAPH,
         run_hermit=False,
         domain_terms=vocab,
         hypothesis_vars={0: {"Sw", "Winj", "l"}, 1: {"fw", "muw"}},
@@ -422,7 +422,7 @@ def test_c7_accepts_grounded_and_rejects_ungrounded_variable():
     bad = check_consistency(
         None,
         None,
-        _GOOD_LATTICE,
+        _GOOD_GRAPH,
         run_hermit=False,
         domain_terms=vocab,
         hypothesis_vars={0: {"Sw"}, 1: {"fw", "phi_unknown"}},
@@ -432,13 +432,13 @@ def test_c7_accepts_grounded_and_rejects_ungrounded_variable():
     assert bad.details["c7_ungrounded"] == ["phi_unknown"]
 
     # без словаря C7 не выполняется (обратная совместимость)
-    skip = check_consistency(None, None, _GOOD_LATTICE, run_hermit=False)
+    skip = check_consistency(None, None, _GOOD_GRAPH, run_hermit=False)
     assert skip.details["c7"] == "skipped"
 
 
 # --- Paper conditions 4 and 5 (§2.4): projectile example ----------------------
 # ids: h1a=0,h1b=1,h1=2, h2^0=3,h2^1=4,h2^2=5, h3=6,h4=7,h5=8,h6=9
-_PROJ_LATTICE = {0: {2}, 1: {2}, 2: {3, 4, 5}, 3: {6, 7, 8}, 4: {6, 7, 8},
+_PROJ_GRAPH = {0: {2}, 1: {2}, 2: {3, 4, 5}, 3: {6, 7, 8}, 4: {6, 7, 8},
                  5: {6, 7, 8}, 6: {9}, 7: set(), 8: set(), 9: set()}
 _PROJ_TASKS = {"t1": [0, 1], "t2": [2], "t3": [3, 4, 5],
                "t4": [6], "t5": [7], "t6": [8], "t7": [9]}
@@ -447,9 +447,9 @@ _PROJ_WF = [("t1", "t2"), ("t2", "t3"), ("t3", "t4"),
 _PROJ_DOM = {i: [0, 1] for i in range(10)}
 
 
-def _proj(lattice=None, forbidden=None):
+def _proj(hyp_graph=None, forbidden=None):
     return check_consistency(
-        None, None, lattice or _PROJ_LATTICE, run_hermit=False,
+        None, None, hyp_graph or _PROJ_GRAPH, run_hermit=False,
         task_hypotheses=_PROJ_TASKS, workflow_edges=_PROJ_WF,
         param_domains=_PROJ_DOM, forbidden_combos=forbidden or [],
     )
@@ -460,10 +460,10 @@ def test_condition5_accepts_correct_and_rejects_backward_dependency():
     ok = _proj()
     assert ok.ok and ok.details["cond5"].startswith("passed")
     # h3 (задача t4) зависит от h6 (задача t7, потомок t4) — встречная поставка
-    bad_lat = {k: set(v) for k, v in _PROJ_LATTICE.items()}
+    bad_lat = {k: set(v) for k, v in _PROJ_GRAPH.items()}
     bad_lat[6] = set()      # убираем h3->h6, чтобы не было 2-цикла
     bad_lat[9] = {6}        # h6->h3: h3 зависит от h6 из более поздней задачи
-    bad = _proj(lattice=bad_lat)
+    bad = _proj(hyp_graph=bad_lat)
     assert not bad.ok and bad.status == Status.COND5_VIOLATED
     assert bad.details["cond5"]["task"] == "t4"
     assert bad.details["cond5"]["dependency_task"] == "t7"
@@ -484,7 +484,7 @@ def test_condition4_accepts_nonempty_and_rejects_empty_projection():
 
 def test_conditions_4_5_skipped_when_data_absent():
     """Обратная совместимость: без workflow/доменов условия 4–5 не выполняются."""
-    res = check_consistency(None, None, _GOOD_LATTICE, run_hermit=False)
+    res = check_consistency(None, None, _GOOD_GRAPH, run_hermit=False)
     assert res.details["cond4"] == "skipped" and res.details["cond5"] == "skipped"
 
 

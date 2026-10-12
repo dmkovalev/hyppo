@@ -53,7 +53,7 @@ def test_incremental_equals_full_rebuild(seed):
     inc.build()
     inc.add_hypothesis(hyps[-1][0], inputs=hyps[-1][1], preds=preds)
     assert not inc.last_add_was_rebuild
-    assert inc.lattice == expected
+    assert inc.hyp_graph == expected
     assert set(inc.competes_pairs) == set(full.competes_pairs)
     assert set(inc.order_conflicts) == set(full.order_conflicts)
 
@@ -65,7 +65,7 @@ def test_new_paths_trigger_full_rebuild():
     a = g.add([{"x"}], inputs=set())
     b = g.add([{"x2", "x"}], inputs={"x"})  # consumes x, but a and b unrelated
     g.build()
-    assert g.lattice == set()
+    assert g.hyp_graph == set()
     g.add_hypothesis([{"m"}], inputs=set(), preds=[a], succs=[b])
     assert g.last_add_was_rebuild
-    assert (a, b) in g.lattice
+    assert (a, b) in g.hyp_graph

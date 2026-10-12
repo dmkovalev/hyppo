@@ -17,14 +17,14 @@ def test_orchestrate_end_to_end(tmp_path):
     manager.close()
 
 
-def test_orchestrate_builds_lattice_from_structures(tmp_path):
+def test_orchestrate_builds_graph_from_structures(tmp_path):
     """When causal structures are supplied, Stage 2 runs Algorithm 1
     (HypothesisGraph.build) instead of using the workflow edges verbatim."""
     from hyppo.manager import Manager
 
     manager = Manager(db_path=tmp_path / "test.db")
     # two variable-disjoint complete structures -> their union is complete,
-    # so build() yields the reachable lattice edge and execution succeeds.
+    # so build() yields the reachable graph edge and execution succeeds.
     structures = {
         "h1": [frozenset({"a", "b"}), frozenset({"b"})],
         "h2": [frozenset({"c", "d"}), frozenset({"d"})],

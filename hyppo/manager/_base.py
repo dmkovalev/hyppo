@@ -16,7 +16,7 @@ class Manager:
 
     Four stages:
     1. Initialization — create experiment, save to repository
-    2. Build lattice — construct hypothesis lattice from structures
+    2. Build graph — construct hypothesis graph from structures
     3. Planning — determine P_ne/P_e with caching
     4. Execution — run models, save results
     """
@@ -55,14 +55,14 @@ class Manager:
             workflow_edges: DAG edges (parent, child)
             models: {hypothesis_id: callable(config) -> {"r2": float, ...}}
             config: {hypothesis_id: param_dict}
-            structures: hypothesis structures for lattice construction (optional)
+            structures: hypothesis structures for graph construction (optional)
             model_ids: model identifiers for the chained cache keys (def:12)
             stale: hypotheses marked StaleHypothesis by the ontology layer
             competes: {h: competitors} -- for the SUPERSEDED status (Delta AIC)
             individuals, ontology: optional OWL individuals {h: individual} and
                 their ontology; if given, REFUTED/SUPERSEDED statuses are written
                 as InvalidHypothesis and the cascade is derived by RL
-                materialisation, else it follows the lattice descendants
+                materialisation, else it follows the graph descendants
 
         Stale hypotheses found after this run (descendants of hypotheses that
         became REFUTED or SUPERSEDED) are kept in :attr:`pending_stale` and are
@@ -74,11 +74,11 @@ class Manager:
         config = config or {h: {} for h in hypotheses}
 
         # Stage 1: Initialize
-        # Stage 2: Build lattice (Algorithm 1). When causal structures are
-        # supplied, run HypothesisGraph.build() to derive the lattice edges from
+        # Stage 2: Build graph (Algorithm 1). When causal structures are
+        # supplied, run HypothesisGraph.build() to derive the graph edges from
         # complete causal unions over the workflow-reachable pairs; otherwise fall
         # back to the workflow DAG itself.
-        lattice_edges = list(workflow_edges)
+        graph_edges = list(workflow_edges)
         if structures:
             from hyppo.coa import HypothesisGraph
 
@@ -88,26 +88,26 @@ class Manager:
                 graph.add(structures.get(h, []))
             for u, v in workflow_edges:
                 graph.connect(idx[u], idx[v])
-            lattice_edges = [(hypotheses[i], hypotheses[j]) for i, j in graph.build()]
+            graph_edges = [(hypotheses[i], hypotheses[j]) for i, j in graph.build()]
 
-        lattice = nx.DiGraph()
-        lattice.add_nodes_from(hypotheses)
-        lattice.add_edges_from(lattice_edges)
+        hyp_graph = nx.DiGraph()
+        hyp_graph.add_nodes_from(hypotheses)
+        hyp_graph.add_edges_from(graph_edges)
 
         # Stage 3: Plan — determine P_ne (needs execution) and P_e (cached).
         # Actuality (def:12): chained cache keys cover models/parameters of the
         # hypothesis and all its sources; `stale` (StaleHypothesis markers of
         # the ontology layer) covers revisions that touch neither.
-        keys = self.cache_keys(lattice, models, config, model_ids)
+        keys = self.cache_keys(hyp_graph, models, config, model_ids)
         stale_now = set(stale or set()) | set(self.pending_stale)
-        p_ne, p_e = self._partition(lattice, keys, stale_now)
+        p_ne, p_e = self._partition(hyp_graph, keys, stale_now)
 
         # Stage 4: Execute
         results = self.runner.execute(
             plan={"p_ne": p_ne, "p_e": p_e},
             models=models,
             configs=config,
-            lattice_edges=lattice_edges,
+            graph_edges=graph_edges,
             cache_configs=keys,
             competes=competes,
         )
@@ -126,13 +126,13 @@ class Manager:
         # every run in which the status persists
         newly_invalid = invalid - self.invalid_seen
         self.invalid_seen = invalid
-        self.pending_stale |= self._cascade(lattice, newly_invalid, individuals, ontology)
+        self.pending_stale |= self._cascade(hyp_graph, newly_invalid, individuals, ontology)
         return results
 
-    def _cascade(self, lattice, invalid, individuals=None, ontology=None) -> set[str]:
+    def _cascade(self, hyp_graph, invalid, individuals=None, ontology=None) -> set[str]:
         """Descendants of the invalidated hypotheses. With OWL individuals the
         status is bridged to InvalidHypothesis and the cascade is DERIVED by RL
-        materialisation (rule 4); otherwise lattice reachability is used (the same
+        materialisation (rule 4); otherwise graph reachability is used (the same
         set, by theorem thm:integrity (IV))."""
         if not invalid:
             return set()
@@ -147,25 +147,25 @@ class Manager:
                 if h in individuals:
                     apply_epistemic_status(individuals[h], "SUPERSEDED")
             materialize_cascade(ontology)
-            reach = set().union(*(nx.descendants(lattice, h) for h in invalid if h in lattice))
+            reach = set().union(*(nx.descendants(hyp_graph, h) for h in invalid if h in hyp_graph))
             return {
                 h for h, ind in individuals.items()
                 if StaleHypothesis in ind.is_a and h not in invalid and h in reach
             }
         out: set[str] = set()
         for h in invalid:
-            out |= nx.descendants(lattice, h)
+            out |= nx.descendants(hyp_graph, h)
         return out - invalid
 
     @staticmethod
     def cache_keys(
-        lattice: nx.DiGraph,
+        hyp_graph: nx.DiGraph,
         models: dict[str, Callable] | None = None,
         config: dict[str, dict] | None = None,
         model_ids: dict[str, str] | None = None,
     ) -> dict[str, dict]:
         """Chained cache keys (definition def:12, conditions (1)-(3)) for every
-        hypothesis of ``lattice``: own config, model identifier (explicit
+        hypothesis of ``graph``: own config, model identifier (explicit
         ``model_ids`` or the model callable's qualified name) and the keys of the
         direct predecessors. The runner saves and the planner looks up results by
         these keys, so a change of a source's model or parameters misses the
@@ -177,16 +177,16 @@ class Manager:
                 h: f"{getattr(fn, '__module__', '')}.{getattr(fn, '__qualname__', repr(fn))}"
                 for h, fn in (models or {}).items()
             }
-        topo = list(nx.topological_sort(lattice))
-        return chained_keys(topo, lattice.edges(), config or {}, model_ids)
+        topo = list(nx.topological_sort(hyp_graph))
+        return chained_keys(topo, hyp_graph.edges(), config or {}, model_ids)
 
     def _partition(
-        self, lattice: nx.DiGraph, config: dict[str, dict], stale: set[str] = frozenset()
+        self, hyp_graph: nx.DiGraph, config: dict[str, dict], stale: set[str] = frozenset()
     ) -> tuple[list[str], set[str]]:
-        """Three-way cascading partition of the lattice (Section 3.1.6.2).
+        """Three-way cascading partition of the graph (Section 3.1.6.2).
 
         Mirrors ``planner.build_optimal_plan`` semantics exactly, over the
-        ``derived_by`` lattice DAG:
+        ``derived_by`` graph DAG:
 
         - cache miss => the hypothesis and ALL its descendants need recompute
           (into P_ne, the cascade effect);
@@ -201,7 +201,7 @@ class Manager:
         Returns ``(p_ne, p_e)`` where ``p_ne`` is a topologically ordered list
         (the runner cascades SKIPPED in order) and ``p_e`` is a set.
         """
-        topo_order = list(nx.topological_sort(lattice))
+        topo_order = list(nx.topological_sort(hyp_graph))
         pne: set[str] = set()
         pe: set[str] = set()
         pruned: set[str] = set()
@@ -211,13 +211,13 @@ class Manager:
             cfg_h = config.get(h, {})
             if h in stale or not self.repository.has_result(h, cfg_h):
                 pne.add(h)
-                pne.update(nx.descendants(lattice, h))
+                pne.update(nx.descendants(hyp_graph, h))
             else:
                 cached = self.repository.load_result(h, cfg_h)
                 r2 = cached.get("metrics", {}).get("r2") if cached is not None else None
                 if r2 is not None and r2 < self.r2_threshold:
                     pruned.add(h)
-                    pruned.update(nx.descendants(lattice, h))
+                    pruned.update(nx.descendants(hyp_graph, h))
                 else:
                     pe.add(h)
         p_ne = [h for h in topo_order if h in pne]

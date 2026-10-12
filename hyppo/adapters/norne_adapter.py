@@ -221,7 +221,7 @@ def _build_hypotheses(ns: Any) -> dict[str, Hypothesis]:
     h_BL.is_implemented_by_model = m_phys_bl
     h_WCT.is_implemented_by_model = m_hybrid_wct
 
-    # -- Lattice edges (derived_by) --
+    # -- Graph edges (derived_by) --
     # h_CRM -> h_LPR   (physics feeds fusion)
     # h_ML  -> h_LPR   (ML feeds fusion)
     # h_LPR -> h_MB    (prediction feeds material balance)
@@ -243,7 +243,7 @@ def _build_hypotheses(ns: Any) -> dict[str, Hypothesis]:
     }
 
 
-def _build_lattice_graph(hyps: dict[str, Hypothesis]) -> Any:
+def _build_hyp_graph(hyps: dict[str, Hypothesis]) -> Any:
     """Build a networkx DiGraph mirroring the derived_by edges."""
     import networkx as nx
 
@@ -286,7 +286,7 @@ def build_oil_virtual_experiment(world: World | None = None) -> dict[str, Any]:
     - ``models``: list of Model individuals attached to hypotheses
     - ``workflow``: Workflow OWL individual
     - ``configuration_space``: dict from CONFIGURATION_SPACE
-    - ``lattice``: networkx DiGraph with 6 nodes and 6 edges
+    - ``graph``: networkx DiGraph with 6 nodes and 6 edges
     - ``virtual_experiment``: the VirtualExperiment individual
     - ``world``: the owlready2 World the VE lives in
     - ``onto``: the owlready2 Ontology carrying the schema + ABox
@@ -302,7 +302,7 @@ def build_oil_virtual_experiment(world: World | None = None) -> dict[str, Any]:
         "HybridCRM waterflood domain ontology",
     )
     hyps = _build_hypotheses(ns)
-    lattice = _build_lattice_graph(hyps)
+    hyp_graph = _build_hyp_graph(hyps)
 
     # Collect all models from hypotheses (Functional property: single value each).
     models: list[Model] = []
@@ -342,7 +342,7 @@ def build_oil_virtual_experiment(world: World | None = None) -> dict[str, Any]:
         "models": models,
         "workflow": workflow,
         "configuration_space": CONFIGURATION_SPACE,
-        "lattice": lattice,
+        "hyp_graph": hyp_graph,
         "virtual_experiment": ve,
         "world": world,
         "onto": onto,
@@ -418,7 +418,7 @@ def run_oil_experiment_demo() -> dict[str, Any]:
     # -- Step 5: print summary --
     print("=== Oil Virtual Experiment Demo ===")
     print(f"Hypotheses: {list(hyps.keys())}")
-    print(f"Lattice edges: {ve_data['lattice'].number_of_edges()}")
+    print(f"Graph edges: {ve_data['hyp_graph'].number_of_edges()}")
     print(f"Configuration axes: {len(ve_data['configuration_space'])}")
     print()
     print("Hypothesis classifications:")

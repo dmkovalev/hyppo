@@ -27,7 +27,7 @@ class HypothesisGraph:
     ``i -> j`` mean *j is derived_by i*. The graph exposes the three algorithms
     of the paper:
 
-    * :meth:`build` -- Algorithm 1 (build the hypothesis lattice),
+    * :meth:`build` -- Algorithm 1 (build the hypothesis graph),
     * :meth:`add_hypothesis` -- Algorithm 2 (incremental add),
     * :meth:`plan` -- Algorithm 4 (cascade-aware recompute planning).
     """
@@ -133,9 +133,9 @@ class HypothesisGraph:
             out[s] = seen
         return out
 
-    # ---- Algorithm 1: build_lattice -------------------------------------
+    # ---- Algorithm 1: build_graph -------------------------------------
     def build(self) -> list[tuple[int, int]]:
-        """Algorithm 1 (build_lattice), faithful to Lemma 1.
+        """Algorithm 1 (build_graph), faithful to Lemma 1.
 
         Two phases, matching the complexity proof:
 
@@ -151,7 +151,7 @@ class HypothesisGraph:
         Total ``O(|H|^2 * v_max + |H| * s_max * sqrt(v_max) +
         |V(W)|*(|V(W)|+|E(W)|))`` (Lemma 1)."""
         reach = self._reachable()
-        lattice: list[tuple[int, int]] = []
+        hyp_graph: list[tuple[int, int]] = []
         self.competes_pairs = []
         self.order_conflicts = []
         ins = list(self._in)  # snapshot; the pair loop reads In(h_j) once per pair
@@ -161,9 +161,9 @@ class HypothesisGraph:
                 if j == i:
                     continue
                 if self._pair(i, j, out_i, in_i, self._in[j]):
-                    lattice.append((i, j))
-        self.lattice = set(lattice)
-        return lattice
+                    hyp_graph.append((i, j))
+        self.hyp_graph = set(hyp_graph)
+        return hyp_graph
 
     def _pair(self, i, j, out_i, in_i, in_j) -> bool:
         """Decide the ordered pair (i, j), tau(i) < tau(j), by definition def:derived.
@@ -201,7 +201,7 @@ class HypothesisGraph:
         reachability in either direction with two traversals
         (``O(|V(W)| + |E(W)|)``), and decides only the pairs involving the new
         hypothesis by the same rule as :meth:`build` (``O(|H| * v_max)``). The
-        new derivability edges are added to :attr:`lattice` and returned in
+        new derivability edges are added to :attr:`graph` and returned in
         :attr:`last_added`.
 
         Precondition of thm:build (III): reachability between the existing nodes
@@ -209,7 +209,7 @@ class HypothesisGraph:
         previously unrelated nodes, the incremental result would be incomplete,
         so the graph is rebuilt in full (and :attr:`last_add_was_rebuild` is set).
         Returns the new node index."""
-        if not hasattr(self, "lattice"):
+        if not hasattr(self, "hyp_graph"):
             self.build()
         new_paths = False
         if preds and succs:
@@ -225,9 +225,9 @@ class HypothesisGraph:
             self.connect(idx, snode)
         self.last_add_was_rebuild = new_paths
         if new_paths:
-            before = set(self.lattice)
+            before = set(self.hyp_graph)
             self.build()
-            self.last_added = sorted(self.lattice - before)
+            self.last_added = sorted(self.hyp_graph - before)
             return idx
         radj: dict = {}
         for u, v in self._edges:
@@ -242,7 +242,7 @@ class HypothesisGraph:
         for b in descendants:
             if self._pair(idx, b, out_n, in_n, self._in[b]):
                 added.append((idx, b))
-        self.lattice |= set(added)
+        self.hyp_graph |= set(added)
         self.last_added = sorted(added)
         return idx
 

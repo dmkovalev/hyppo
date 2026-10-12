@@ -208,7 +208,7 @@ def main():
     res = {
         "grid": a.grid, "jobs": len(dag.jobs(grid)), "pairs": [pair_id(p) for p in PAIRS],
         "truth_sizes": {k: len(v) for k, v in truth.items()},
-        "lattice_build_s": model.build_seconds,
+        "graph_build_s": model.build_seconds,
         "t_plan_median_s": st.median(t["t_plan_s"] for t in trials),
         "t_snakemake_dry_median_s": st.median(e_fn.timings),
         "summary": {str(k): v for k, v in summary.items()},

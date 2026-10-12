@@ -2,7 +2,7 @@
 
 Legacy example applying hypothesis-driven virtual experiments to brain
 functional-connectivity analysis on Human Connectome Project (HCP) data.
-It predates the current `hyppo.coa`/`hyppo.lattice_constructor` platform
+It predates the current `hyppo.coa`/`hyppo.graph_constructor` platform
 API and is kept for reference, not exercised by CI.
 
 ## Contents

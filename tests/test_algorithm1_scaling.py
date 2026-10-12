@@ -1,4 +1,4 @@
-"""Algorithm 1 (lattice build) scales polynomially in |H| with the polynomial
+"""Algorithm 1 (graph build) scales polynomially in |H| with the polynomial
 core. Runs the real library on Python 3.13; asserts the fitted log-log exponent
 is well below the old exponential blow-up and consistent with ~quadratic."""
 

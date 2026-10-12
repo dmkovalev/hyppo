@@ -15,7 +15,7 @@ Pins the four points where the implementation must follow the theory:
 import pytest
 
 from hyppo.coa import HypothesisGraph
-from hyppo.lattice_constructor._base import HypothesisLattice
+from hyppo.graph_constructor._base import GraphConstructor
 
 
 class _Eq:
@@ -59,32 +59,32 @@ class _Dag(_Chain):
 
 
 def _edges(hl):
-    return {(u.name, v.name) for u, v in hl.lattice.edges()}
+    return {(u.name, v.name) for u, v in hl.hyp_graph.edges()}
 
 
 # ---- C1: tau-order ---------------------------------------------------------
 def test_no_edge_against_the_workflow():
     a, b = _Hyp("a", "x = c0"), _Hyp("b", "y = x + 1")
-    hl = HypothesisLattice([a, b], _Chain([[b], [a]]))  # consumer scheduled first
+    hl = GraphConstructor([a, b], _Chain([[b], [a]]))  # consumer scheduled first
     assert _edges(hl) == set()
 
 
 def test_no_edge_inside_one_task():
     a, b = _Hyp("a", "x = c0"), _Hyp("b", "y = x + 1")
-    hl = HypothesisLattice([a, b], _Chain([[a, b]]))
+    hl = GraphConstructor([a, b], _Chain([[a, b]]))
     assert _edges(hl) == set()
 
 
 def test_no_edge_between_parallel_tasks():
     a, b = _Hyp("a", "x = c0"), _Hyp("b", "y = x + 1")
     # tasks 0 and 1 are incomparable in the DAG (no path between them)
-    hl = HypothesisLattice([a, b], _Dag([[a], [b]], edges=[]))
+    hl = GraphConstructor([a, b], _Dag([[a], [b]], edges=[]))
     assert _edges(hl) == set()
 
 
 def test_edge_along_the_workflow():
     a, b = _Hyp("a", "x = c0"), _Hyp("b", "y = x + 1")
-    hl = HypothesisLattice([a, b], _Dag([[a], [b]], edges=[(0, 1)]))
+    hl = GraphConstructor([a, b], _Dag([[a], [b]], edges=[(0, 1)]))
     assert _edges(hl) == {("a", "b")}
 
 
@@ -93,7 +93,7 @@ def test_output_collision_gives_no_edge_but_competes():
     a = _Hyp("a", "x = c0")
     b = _Hyp("b", "x = y + 1")  # also produces x, and uses nothing of a
     c = _Hyp("c", "y = x + 2")  # consumes x
-    hl = HypothesisLattice([a, c, b], _Chain([[a], [c], [b]]))
+    hl = GraphConstructor([a, c, b], _Chain([[a], [c], [b]]))
     assert ("a", "b") not in _edges(hl)
     assert b in hl.competes(a)
 
@@ -101,7 +101,7 @@ def test_output_collision_gives_no_edge_but_competes():
 def test_counter_supply_gives_no_edge_but_order_conflict():
     a = _Hyp("a", "x = z + 1")   # needs z ...
     b = _Hyp("b", "z = x * 2")   # ... which b produces later, and b uses x
-    hl = HypothesisLattice([a, b], _Chain([[a], [b]]))
+    hl = GraphConstructor([a, b], _Chain([[a], [b]]))
     assert _edges(hl) == set()
     assert (a, b) in hl.order_conflicts()
 
@@ -110,7 +110,7 @@ def test_counter_supply_gives_no_edge_but_order_conflict():
 def test_parallel_tasks_are_not_an_order_conflict():
     a = _Hyp("a", "x = z + 1")
     b = _Hyp("b", "z = c0")
-    hl = HypothesisLattice([a, b], _Dag([[a], [b]], edges=[]))
+    hl = GraphConstructor([a, b], _Dag([[a], [b]], edges=[]))
     assert hl.order_conflicts() == set()
 
 

@@ -11,15 +11,15 @@ def handlers():
     return register_resources(create_server())
 
 
-async def test_list_resources_includes_lattice_steward(handlers):
+async def test_list_resources_includes_graph_steward(handlers):
     resources = await handlers["resources/list"]()
     uris = {str(r.uri) for r in resources}
-    assert "hyppo://personas/lattice_steward.md" in uris
+    assert "hyppo://personas/graph_steward.md" in uris
 
 
 async def test_read_persona_returns_markdown(handlers):
-    text = await handlers["resources/read"]("hyppo://personas/lattice_steward.md")
-    assert text.strip().startswith("# Lattice Steward")
+    text = await handlers["resources/read"]("hyppo://personas/graph_steward.md")
+    assert text.strip().startswith("# Graph Steward")
     assert "BuildVirtualExperiment" in text
 
 

@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING, Mapping, Optional, Set
 import networkx as nx
 
 if TYPE_CHECKING:
-    from hyppo.lattice_constructor._base import HypothesisLattice
+    from hyppo.graph_constructor._base import GraphConstructor
     from hyppo.storage._base import Database
 
 logger = logging.getLogger(__name__)
@@ -36,28 +36,28 @@ class ExecutionPlan:
     cache_keys: dict = field(default_factory=dict)
 
 
-def _find_nearest_lattice(
-    lattice: "HypothesisLattice",
+def _find_nearest_graph(
+    hyp_graph: "GraphConstructor",
     db: "Database",
-) -> Optional["HypothesisLattice"]:
+) -> Optional["GraphConstructor"]:
     """Поиск ближайшей ранее вычисленной решетки в репозитории метаинформации.
 
     Ближайшей считается решетка, имеющая наибольшее пересечение
     множества гипотез с текущей решеткой.
 
     Args:
-        lattice: Текущая решетка гипотез.
+        graph: Текущая решетка гипотез.
         db: Экземпляр базы данных (репозиторий метаинформации).
 
     Returns:
         Ближайшая решетка из репозитория или None, если репозиторий пуст.
     """
-    stored_objects = db.load_all(storage="lattices")
+    stored_objects = db.load_all(storage="graphs")
     if not stored_objects:
         return None
 
-    current_hypotheses = set(lattice.hypotheses)
-    best_lattice = None
+    current_hypotheses = set(hyp_graph.hypotheses)
+    best_graph = None
     best_overlap = -1
 
     for pickled in stored_objects:
@@ -68,9 +68,9 @@ def _find_nearest_lattice(
         overlap = len(current_hypotheses & candidate_hypotheses)
         if overlap > best_overlap:
             best_overlap = overlap
-            best_lattice = candidate
+            best_graph = candidate
 
-    return best_lattice
+    return best_graph
 
 
 from hyppo.planner.actuality import _digest, is_marked_stale  # noqa: E402
@@ -220,15 +220,15 @@ def _get_cached_r2(
     return None
 
 
-def cache_keys_for(lattice, configuration, per_hypothesis_configs=None) -> dict:
-    """Chained cache keys of all hypotheses of the lattice (definition def:12,
+def cache_keys_for(hyp_graph, configuration, per_hypothesis_configs=None) -> dict:
+    """Chained cache keys of all hypotheses of the graph (definition def:12,
     conditions (1)-(3)): own configuration, the hypothesis's models and the keys
     of its direct predecessors, in one topological pass, O(|V| + |E|).
 
     The SAME keys must be used when results are saved (runner) and looked up
     (build_optimal_plan), so a change of a source's model or parameters misses
     the cache for the source and every descendant."""
-    graph: nx.DiGraph = lattice.lattice
+    graph: nx.DiGraph = hyp_graph.hyp_graph
     keys: dict = {}
     for h in nx.topological_sort(graph):
         cfg_h = _config_for(h, configuration, per_hypothesis_configs)
@@ -246,7 +246,7 @@ def cache_keys_for(lattice, configuration, per_hypothesis_configs=None) -> dict:
 
 def build_optimal_plan(
     configuration,
-    lattice: "HypothesisLattice",
+    hyp_graph: "GraphConstructor",
     db: "Database",
     r2_threshold: float = 0.7,
     *,
@@ -273,7 +273,7 @@ def build_optimal_plan(
 
     Args:
         configuration: Конфигурация эксперимента (C) -- набор параметров.
-        lattice: Решетка гипотез (L) -- объект HypothesisLattice с графом
+        graph: Решетка гипотез (L) -- объект GraphConstructor с графом
             зависимостей между гипотезами.
         db: Экземпляр базы данных (репозиторий метаинформации) для поиска
             ранее вычисленных результатов.
@@ -294,21 +294,21 @@ def build_optimal_plan(
     plan = ExecutionPlan()
 
     # Шаг 1: Поиск ближайшей ранее вычисленной решетки в репозитории
-    nearest_lattice = _find_nearest_lattice(lattice, db)
+    nearest_graph = _find_nearest_graph(hyp_graph, db)
 
     # Строим рабочий граф на основе ТЕКУЩЕЙ решетки (чтобы гарантировать
     # полноту: Pne U Pe = V(L)).  Ближайшая решетка используется только
-    # для обогащения кеша -- гипотезы, присутствующие в nearest_lattice,
+    # для обогащения кеша -- гипотезы, присутствующие в nearest_graph,
     # с большей вероятностью имеют кешированные результаты, но сам обход
     # всегда идёт по текущей решетке.
-    graph: nx.DiGraph = lattice.lattice
+    graph: nx.DiGraph = hyp_graph.hyp_graph
 
     # Множество гипотез из ближайшей решетки (для возможной дополнительной
     # логики; на данный момент кеш-проверка через _has_cached_result уже
     # обращается к репозиторию напрямую).
     _nearest_hypotheses: Set = set()
-    if nearest_lattice is not None:
-        _nearest_hypotheses = set(nearest_lattice.hypotheses)
+    if nearest_graph is not None:
+        _nearest_hypotheses = set(nearest_graph.hypotheses)
 
     # Шаг 2: Инициализация множеств
     # Pne -- гипотезы, требующие пересчета
@@ -327,7 +327,7 @@ def build_optimal_plan(
             "Run check_consistency() before build_optimal_plan()."
         )
     keys: dict = (
-        cache_keys_for(lattice, configuration, per_hypothesis_configs) if chain_keys else {}
+        cache_keys_for(hyp_graph, configuration, per_hypothesis_configs) if chain_keys else {}
     )
 
     # Шаг 3: Множество необработанных вершин V(L)
@@ -415,7 +415,7 @@ class Planner:
     Пример::
 
         planner = Planner(db=my_db, r2_threshold=0.8)
-        plan = planner.plan(configuration, lattice)
+        plan = planner.plan(configuration, graph)
     """
 
     def __init__(self, db: "Database", r2_threshold: float = 0.7) -> None:
@@ -425,7 +425,7 @@ class Planner:
     def plan(
         self,
         configuration,
-        lattice: "HypothesisLattice",
+        hyp_graph: "GraphConstructor",
         r2_threshold: float | None = None,
         per_hypothesis_configs: "Mapping | None" = None,
     ) -> ExecutionPlan:
@@ -433,7 +433,7 @@ class Planner:
 
         Args:
             configuration: Конфигурация эксперимента.
-            lattice: Решетка гипотез.
+            graph: Решетка гипотез.
             r2_threshold: Порог R² для отсечения (переопределяет значение из __init__).
             per_hypothesis_configs: Необязательное отображение id гипотезы →
                 конфигурация (см. build_optimal_plan).
@@ -444,7 +444,7 @@ class Planner:
         threshold = r2_threshold if r2_threshold is not None else self.r2_threshold
         return build_optimal_plan(
             configuration,
-            lattice,
+            hyp_graph,
             self.db,
             r2_threshold=threshold,
             per_hypothesis_configs=per_hypothesis_configs,

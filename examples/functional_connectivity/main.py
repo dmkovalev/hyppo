@@ -58,8 +58,8 @@ if __name__ == '__main__':
     ve._add_relation('gender_hypothesis', 'gender_model_men')
     ve._add_relation('gender_hypothesis', 'gender_model_women')
 
-    lattice = construct_lattice(ve)
-    add(ve, 'lattice', lattice)
+    hyp_graph = construct_graph(ve)
+    add(ve, 'hyp_graph', hyp_graph)
 
     run_virtual_experiment(ve)
 

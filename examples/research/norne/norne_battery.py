@@ -7,7 +7,7 @@ Rule 7: 4 runs (using H5, H8, H15, H19) x 16 invalidation candidates --
     DerivedStaleRun must fire iff the candidate is a strict ancestor of
     the hypothesis used by the run.
 
-Edges are derived by Algorithm 1 (HypothesisLattice) from the equations;
+Edges are derived by Algorithm 1 (GraphConstructor) from the equations;
 the oracle is plain graph reachability (networkx). Every trial launches
 the real HermiT reasoner. Results are written to norne_battery_results.json.
 """
@@ -24,7 +24,7 @@ from owlready2 import destroy_entity, sync_reasoner
 
 from hyppo.coa._base import Equation, Structure
 from hyppo.core._base import virtual_experiment_onto as onto
-from hyppo.lattice_constructor._base import HypothesisLattice
+from hyppo.graph_constructor._base import GraphConstructor
 import hyppo.ontology.core_rules as cr
 import hyppo.ontology.provenance as pv
 
@@ -69,7 +69,7 @@ class _WF:
 
 def derive_edges():
     hyps = [_Hyp(n, f) for n, f in NORNE]
-    g = HypothesisLattice(hyps, _WF(hyps)).lattice
+    g = GraphConstructor(hyps, _WF(hyps)).hyp_graph
     return sorted((u.name, v.name) for u, v in g.edges())
 
 

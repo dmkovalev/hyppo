@@ -42,12 +42,12 @@ def define_rules(onto, ns):
         class hasDescendant(
             ns.Hypothesis >> ns.Hypothesis, ObjectProperty, TransitiveProperty
         ):
-            """Transitive descendant relation in the hypothesis lattice."""
+            """Transitive descendant relation in the hypothesis graph."""
 
         class hasAncestor(
             ns.Hypothesis >> ns.Hypothesis, ObjectProperty, TransitiveProperty
         ):
-            """Transitive ancestor relation in the hypothesis lattice."""
+            """Transitive ancestor relation in the hypothesis graph."""
 
             inverse_property = hasDescendant
 

@@ -44,8 +44,8 @@ class MetadataRepository:
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
                 PRIMARY KEY (hypothesis_id, config_hash)
             );
-            CREATE TABLE IF NOT EXISTS lattices (
-                lattice_id TEXT PRIMARY KEY,
+            CREATE TABLE IF NOT EXISTS graphs (
+                graph_id TEXT PRIMARY KEY,
                 nodes_json TEXT NOT NULL,
                 edges_json TEXT NOT NULL,
                 created DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -98,25 +98,25 @@ class MetadataRepository:
     def has_result(self, hypothesis_id: str, config: dict) -> bool:
         return self.load_result(hypothesis_id, config) is not None
 
-    def save_lattice(
-        self, lattice_id: str, nodes: set[str], edges: set[tuple[str, str]]
+    def save_graph(
+        self, graph_id: str, nodes: set[str], edges: set[tuple[str, str]]
     ) -> None:
         self._conn.execute(
-            "INSERT OR REPLACE INTO lattices "
-            "(lattice_id, nodes_json, edges_json) VALUES (?, ?, ?)",
+            "INSERT OR REPLACE INTO graphs "
+            "(graph_id, nodes_json, edges_json) VALUES (?, ?, ?)",
             (
-                lattice_id,
+                graph_id,
                 json.dumps(sorted(nodes)),
                 json.dumps(sorted([list(e) for e in edges])),
             ),
         )
         self._conn.commit()
 
-    def find_nearest_lattice(
+    def find_nearest_graph(
         self, nodes: set[str], edges: set[tuple[str, str]]
     ) -> dict | None:
-        """Find nearest lattice by Definition 12: d(L, L_j) = |V△V_j| + |E△E_j|."""
-        rows = self._conn.execute("SELECT * FROM lattices").fetchall()
+        """Find nearest graph by Definition 12: d(L, L_j) = |V△V_j| + |E△E_j|."""
+        rows = self._conn.execute("SELECT * FROM graphs").fetchall()
         if not rows:
             return None
         best, best_dist = None, float("inf")
@@ -129,7 +129,7 @@ class MetadataRepository:
         if best is None:
             return None
         return {
-            "lattice_id": best["lattice_id"],
+            "graph_id": best["graph_id"],
             "nodes": set(json.loads(best["nodes_json"])),
             "edges": {tuple(e) for e in json.loads(best["edges_json"])},
             "distance": best_dist,

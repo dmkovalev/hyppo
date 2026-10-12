@@ -66,7 +66,7 @@ def gen_workflow(n, rng):
 
 def add_time_ms(n_h, rng):
     """Algorithm 2: time ONLY add_hypothesis of the (n_h+1)-th hypothesis on a
-    pre-built lattice of n_h hypotheses over the same sparse workflow as the
+    pre-built graph of n_h hypotheses over the same sparse workflow as the
     full-rebuild run (setup untimed). Timed: one У0 matching, two reachability
     traversals (O(|V(W)|+|E(W)|)) and the pairs with the new node, decided with
     condition У3 (O(|H| * v_max)) -> O(|H|)."""

@@ -74,7 +74,7 @@ def test_planner_chained_keys_and_stale_marker():
 
     class _Lat:
         def __init__(self, g):
-            self.lattice = g
+            self.hyp_graph = g
             self.hypotheses = list(g.nodes())
 
     a, b, c = _H("a", "crm@v1"), _H("b", "ml"), _H("c", "opr")
