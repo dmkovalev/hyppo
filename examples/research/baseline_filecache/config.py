@@ -10,7 +10,8 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 DIAG = Path(os.environ.get("HYPPO_DIAG_ROOT", HERE.parents[3]))  # F:/git-repos/diss
 SNAKEMAKE_PY = DIAG / ".venv-cache" / "Scripts" / "python.exe"
-HYPPO_PY = HERE.parents[2] / ".venv" / "Scripts" / "python.exe"
+# HYPPO_PY из окружения -- для git worktree, где <repo>/.venv нет
+HYPPO_PY = Path(os.environ.get("HYPPO_PY", HERE.parents[2] / ".venv" / "Scripts" / "python.exe"))
 
 # Сетка конвейера Brugge (как в scripts/filecache_control): 2*4*4*4 = 128 OPR.
 GRID = {
