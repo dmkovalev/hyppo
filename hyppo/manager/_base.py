@@ -26,14 +26,19 @@ class Manager:
         db_path: str | Path = ":memory:",
         r2_threshold: float = 0.7,
         max_retries: int = 3,
+        max_workers: int = 1,
     ) -> None:
+        """``max_workers`` > 1 runs each topological level of P_ne in parallel
+        (see :class:`hyppo.runner.Runner`); 1 keeps sequential execution."""
         self.repository = MetadataRepository(db_path=db_path)
         # hypotheses made stale by REFUTED/SUPERSEDED ancestors in an earlier run
         self.pending_stale: set[str] = set()
         # hypotheses REFUTED/SUPERSEDED as of the last run (cascade fires on change)
         self.invalid_seen: set[str] = set()
         self.r2_threshold = r2_threshold
-        self.runner = Runner(repository=self.repository, max_retries=max_retries)
+        self.runner = Runner(
+            repository=self.repository, max_retries=max_retries, max_workers=max_workers
+        )
 
     def orchestrate(
         self,

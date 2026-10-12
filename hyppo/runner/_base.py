@@ -2,13 +2,17 @@
 
 Implements the runner described in Section 3.1.7 of the dissertation.
 Executes models in topological order, retries on failure (k=3),
-cascades SKIPPED status to dependent hypotheses.
+cascades SKIPPED status to dependent hypotheses. With ``max_workers > 1`` the
+hypotheses of one topological level (independent of each other) run
+concurrently in a thread pool; the next level starts after the whole level
+has finished, so every hypothesis still runs after all its sources.
 """
 
 from __future__ import annotations
 
 import logging
 from collections.abc import Callable
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from enum import Enum
 
@@ -58,9 +62,14 @@ class Runner:
     - Retry up to max_retries times on failure
     - If still fails: mark FAILED, cascade SKIPPED to dependents
     - Save results to repository
+
+    ``max_workers`` (default 1, sequential) > 1 runs each topological level of
+    P_ne in a thread pool. Model functions must then be thread-safe. Results
+    are saved to the repository from the calling thread, so the repository
+    connection is never shared between threads.
     """
 
-    def __init__(self, repository=None, max_retries: int = 3) -> None:
+    def __init__(self, repository=None, max_retries: int = 3, max_workers: int = 1) -> None:
         """Initialize the runner.
 
         Args:
@@ -68,9 +77,12 @@ class Runner:
                 ``has_result``/``load_result``/``save_result``; None disables
                 caching of P_e results.
             max_retries: Number of attempts before a hypothesis is marked FAILED.
+            max_workers: Number of threads for one topological level of P_ne;
+                1 keeps the sequential execution in the order given by the caller.
         """
         self.repository = repository
         self.max_retries = max_retries
+        self.max_workers = max(1, int(max_workers))
 
     def execute(
         self,
@@ -127,58 +139,98 @@ class Runner:
             else:
                 results[h_id] = {"status": Status.SUCCESS.value, "metrics": {}}
 
-        # Execute P_ne in order (caller should provide topological order)
-        for h_id in p_ne:
-            # Check if ancestor failed
-            if h_id in failed_ancestors:
-                results[h_id] = {"status": Status.SKIPPED.value, "metrics": {}}
-                # Cascade SKIPPED to dependents
-                self._cascade_skip(h_id, dependents, failed_ancestors)
-                logger.info(f"Skipped {h_id} (ancestor failed)")
-                continue
-
-            # Try to execute with retries
-            config = configs.get(h_id, {})
-            model_fn = models.get(h_id)
-            if model_fn is None:
-                results[h_id] = {
-                    "status": Status.FAILED.value,
-                    "metrics": {},
-                    "error": "No model function",
-                }
-                self._cascade_skip(h_id, dependents, failed_ancestors)
-                continue
-
-            success = False
-            last_error = None
-            for attempt in range(1, self.max_retries + 1):
-                try:
-                    metrics = model_fn(config)
-                    results[h_id] = {"status": Status.SUCCESS.value, "metrics": metrics}
-                    # Save to repository
-                    if self.repository:
-                        self.repository.save_result(
-                            h_id, key_of(h_id), metrics, Status.SUCCESS.value
-                        )
-                    success = True
-                    break
-                except Exception as e:
-                    last_error = str(e)
-                    logger.warning(
-                        f"Attempt {attempt}/{self.max_retries} failed for {h_id}: {e}"
-                    )
-
-            if not success:
-                results[h_id] = {
-                    "status": Status.FAILED.value,
-                    "metrics": {},
-                    "error": last_error,
-                }
-                self._cascade_skip(h_id, dependents, failed_ancestors)
-                logger.error(f"Failed {h_id} after {self.max_retries} attempts")
+        # Execute P_ne level by level. Sequential mode: one hypothesis per batch
+        # in the caller's (topological) order. Parallel mode: the batches are the
+        # topological generations of P_ne under graph_edges.
+        batches = (
+            [[h] for h in p_ne]
+            if self.max_workers == 1
+            else self._levels(list(p_ne), graph_edges or [])
+        )
+        pool = ThreadPoolExecutor(self.max_workers) if self.max_workers > 1 else None
+        try:
+            for batch in batches:
+                ready = []
+                for h_id in batch:
+                    if h_id in failed_ancestors:
+                        results[h_id] = {"status": Status.SKIPPED.value, "metrics": {}}
+                        self._cascade_skip(h_id, dependents, failed_ancestors)
+                        logger.info(f"Skipped {h_id} (ancestor failed)")
+                    elif models.get(h_id) is None:
+                        results[h_id] = {
+                            "status": Status.FAILED.value,
+                            "metrics": {},
+                            "error": "No model function",
+                        }
+                        self._cascade_skip(h_id, dependents, failed_ancestors)
+                    else:
+                        ready.append(h_id)
+                calls = [(h, models[h], configs.get(h, {})) for h in ready]
+                outcomes = (
+                    list(pool.map(lambda c: self._attempt(*c), calls))
+                    if pool and len(calls) > 1
+                    else [self._attempt(*c) for c in calls]
+                )
+                # results and repository writes happen in this thread, in order
+                for h_id, (metrics, error) in zip(ready, outcomes):
+                    if error is None:
+                        results[h_id] = {"status": Status.SUCCESS.value, "metrics": metrics}
+                        if self.repository:
+                            self.repository.save_result(
+                                h_id, key_of(h_id), metrics, Status.SUCCESS.value
+                            )
+                    else:
+                        results[h_id] = {
+                            "status": Status.FAILED.value,
+                            "metrics": {},
+                            "error": error,
+                        }
+                        self._cascade_skip(h_id, dependents, failed_ancestors)
+                        logger.error(f"Failed {h_id} after {self.max_retries} attempts")
+        finally:
+            if pool:
+                pool.shutdown(wait=True)
 
         self._assign_epistemic_status(results, competes or {}, theta_sup, theta_aic)
         return results
+
+    def _attempt(self, h_id: str, model_fn, config: dict):
+        """Run one model with retries. Returns ``(metrics, None)`` on success or
+        ``(None, last_error)``. Touches no shared state, so it may run in a worker
+        thread."""
+        last_error = None
+        for attempt in range(1, self.max_retries + 1):
+            try:
+                return model_fn(config), None
+            except Exception as e:
+                last_error = str(e)
+                logger.warning(f"Attempt {attempt}/{self.max_retries} failed for {h_id}: {e}")
+        return None, last_error
+
+    @staticmethod
+    def _levels(p_ne: list[str], graph_edges) -> list[list[str]]:
+        """Topological generations of P_ne: a hypothesis is in level k if its
+        longest chain of sources inside P_ne has length k. Hypotheses of one
+        level do not depend on each other. Inside a level the caller's order is
+        kept. Raises ValueError on a cycle."""
+        members = set(p_ne)
+        preds: dict[str, set[str]] = {h: set() for h in p_ne}
+        for u, v in graph_edges:
+            if u in members and v in members:
+                preds[v].add(u)
+        level: dict[str, int] = {}
+        remaining = list(p_ne)
+        while remaining:
+            progressed = [h for h in remaining if all(u in level for u in preds[h])]
+            if not progressed:
+                raise ValueError("cycle among hypotheses of P_ne: " + ", ".join(remaining))
+            for h in progressed:
+                level[h] = 1 + max((level[u] for u in preds[h]), default=-1)
+            remaining = [h for h in remaining if h not in level]
+        out: list[list[str]] = [[] for _ in range(1 + max(level.values(), default=-1))]
+        for h in p_ne:
+            out[level[h]].append(h)
+        return out
 
     def _assign_epistemic_status(
         self,

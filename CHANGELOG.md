@@ -4,6 +4,16 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+
+- Level-parallel execution of P_ne: `Runner(max_workers=k)` /
+  `Manager(max_workers=k)` runs the hypotheses of one topological level in a
+  thread pool; the next level starts after the whole level has finished.
+  Repository writes stay in the calling thread. Default `max_workers=1`
+  keeps sequential execution (and the timings of the dissertation).
+
 ## [1.3.0] - 2026-10-12
 
 Release used for the numbers of the dissertation (chapters 3-4).
