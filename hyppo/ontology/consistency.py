@@ -581,6 +581,7 @@ def _check_condition5_causal_order(tasks, edges, task_hypotheses, lattice, artef
                         producers.setdefault(h, set()).add(g)
 
     task_of = {h: t for t, hs in task_hypotheses.items() for h in hs}
+    supply_cycles = _supply_cycles(producers, artefacts)
     accum: dict = {}
     for t in topo:
         anc = set()
@@ -591,10 +592,41 @@ def _check_condition5_causal_order(tasks, edges, task_hypotheses, lattice, artef
         for h in own:
             for dep in producers.get(h, ()):
                 if dep not in anc:  # strict ancestor task required
-                    return {
+                    viol = {
                         "task": t,
                         "hypothesis": h,
                         "dependency": dep,
                         "dependency_task": task_of.get(dep),
                     }
+                    if supply_cycles:
+                        viol["supply_cycles"] = supply_cycles
+                    return viol
     return None
+
+
+def _supply_cycles(producers, artefacts):
+    """Cycles of mutual supply between hypotheses (lemma lem:acyclic remark):
+    the non-trivial strongly connected components of the supply graph
+    ``producer -> consumer``. Each is a candidate to merge into ONE composite
+    hypothesis whose equations are solved jointly as a block; the suggested
+    merged signature is ``Out = ∪ Out``, ``In = ∪ In \ ∪ Out``.
+    Linear in the size of the supply graph (Tarjan)."""
+    from hyppo.coa.causal import strongly_connected_components
+
+    adj: dict = {}
+    for h, deps in producers.items():
+        adj.setdefault(h, set())
+        for g in deps:
+            adj.setdefault(g, set()).add(h)
+    out = []
+    for comp in strongly_connected_components(adj):
+        if len(comp) < 2:
+            continue
+        members = sorted(comp, key=str)
+        entry = {"hypotheses": members}
+        if artefacts:
+            outs = set().union(*(set(artefacts.get(h, {}).get("out", ())) for h in members))
+            ins = set().union(*(set(artefacts.get(h, {}).get("in", ())) for h in members))
+            entry["merged_signature"] = {"in": sorted(ins - outs), "out": sorted(outs)}
+        out.append(entry)
+    return out

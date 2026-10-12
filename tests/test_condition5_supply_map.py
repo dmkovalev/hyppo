@@ -50,3 +50,14 @@ def test_projectile_h3bad_is_rejected():
     res = _check(tasks, wf, sigs)
     assert not res.ok and res.status == Status.COND5_VIOLATED
     assert res.details["cond5"]["dependency_task"] == "t7"
+
+
+def test_mutual_supply_reports_merge_candidate():
+    """A data cycle between two hypotheses of parallel tasks is reported as a
+    strongly connected component to merge into one composite hypothesis."""
+    sigs = {0: {"in": {"y", "p"}, "out": {"x"}}, 1: {"in": {"x"}, "out": {"y"}}}
+    res = _check({"t0": [], "t1": [0], "t2": [1]}, [("t0", "t1"), ("t0", "t2")], sigs)
+    assert not res.ok and res.status == Status.COND5_VIOLATED
+    cyc = res.details["cond5"]["supply_cycles"]
+    assert cyc == [{"hypotheses": [0, 1],
+                    "merged_signature": {"in": ["p"], "out": ["x", "y"]}}]
