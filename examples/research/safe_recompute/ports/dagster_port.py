@@ -46,6 +46,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+import time
 from functools import lru_cache
 from pathlib import Path
 
@@ -123,8 +124,10 @@ def run_workload(workdir: Path, grid: dict, events: list[tuple], declared) -> di
     seed(meta)
     ridge = "1"
     params_file.write_text(json.dumps({"ridge": ridge}))
+    t0 = time.perf_counter()
     executed, rounds = _step(root, spec(work, grid, meta, params_file, declared, ridge), grid)
-    res = {"initial": executed, "after": [], "rounds": [rounds], "outputs": [output_digests(work, grid)]}
+    res = {"initial": executed, "after": [], "rounds": [rounds], "outputs": [output_digests(work, grid)],
+           "seconds": [time.perf_counter() - t0]}
     for ev in events:
         force = []
         if ev[0] == "param":
@@ -135,7 +138,9 @@ def run_workload(workdir: Path, grid: dict, events: list[tuple], declared) -> di
             force = [job_name(ev[1])]
         else:
             revise(meta, ev[1])
+        t0 = time.perf_counter()
         executed, rounds = _step(root, spec(work, grid, meta, params_file, declared, ridge, force), grid)
+        res["seconds"].append(time.perf_counter() - t0)
         res["after"].append(executed)
         res["rounds"].append(rounds)
         res["outputs"].append(output_digests(work, grid))

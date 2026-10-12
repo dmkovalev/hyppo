@@ -36,6 +36,7 @@ import shlex
 import shutil
 import stat
 import subprocess
+import time
 from pathlib import Path
 
 from examples.research.baseline_filecache import dag
@@ -143,8 +144,10 @@ def run_workload(workdir: Path, grid: dict, events: list[tuple], declared) -> di
     _dump(repo / "dvc.yaml", dvc_yaml(grid, meta, declared))
     seed(meta)
     ridge = "1"
+    t0 = time.perf_counter()
     res = {"initial": _repro(repo, grid, meta, ridge), "after": [], "native_evict": [],
            "outputs": [output_digests(repo, grid)]}
+    res["seconds"] = [time.perf_counter() - t0]
     for ev in events:
         if ev[0] == "param":
             ridge = str(ev[2])
@@ -158,6 +161,8 @@ def run_workload(workdir: Path, grid: dict, events: list[tuple], declared) -> di
             _evict(repo, ev[1])
         else:
             revise(meta, ev[1])
+        t0 = time.perf_counter()
         res["after"].append(_repro(repo, grid, meta, ridge))
+        res["seconds"].append(time.perf_counter() - t0)
         res["outputs"].append(output_digests(repo, grid))
     return res

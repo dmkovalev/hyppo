@@ -18,6 +18,7 @@
 """
 from __future__ import annotations
 
+import time
 from pathlib import Path
 
 from examples.research.baseline_filecache import experiment
@@ -53,7 +54,9 @@ def run_workload(workdir: Path, grid: dict, events: list[tuple], declared) -> di
         out = experiment._snk(work, meta, gname, pairs, ridge, list(extra))
         return experiment._dry_run_jobs(out, grid)
 
+    t0 = time.perf_counter()
     res = {"initial": run(), "after": [], "native_evict": [], "outputs": [output_digests(work, grid)]}
+    res["seconds"] = [time.perf_counter() - t0]
     for ev in events:
         extra = ("--cores", "1")
         if ev[0] == "param":
@@ -64,6 +67,8 @@ def run_workload(workdir: Path, grid: dict, events: list[tuple], declared) -> di
             extra = ("--cores", "1", "all", ev[1])
         else:
             revise(meta, ev[1])
+        t0 = time.perf_counter()
         res["after"].append(run(extra))
+        res["seconds"].append(time.perf_counter() - t0)
         res["outputs"].append(output_digests(work, grid))
     return res
