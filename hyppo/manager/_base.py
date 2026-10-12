@@ -28,6 +28,10 @@ class Manager:
         max_retries: int = 3,
     ) -> None:
         self.repository = MetadataRepository(db_path=db_path)
+        # hypotheses made stale by REFUTED/SUPERSEDED ancestors in an earlier run
+        self.pending_stale: set[str] = set()
+        # hypotheses REFUTED/SUPERSEDED as of the last run (cascade fires on change)
+        self.invalid_seen: set[str] = set()
         self.r2_threshold = r2_threshold
         self.runner = Runner(repository=self.repository, max_retries=max_retries)
 
@@ -40,6 +44,9 @@ class Manager:
         structures: dict | None = None,
         model_ids: dict[str, str] | None = None,
         stale: set[str] | None = None,
+        competes: dict[str, set[str]] | None = None,
+        individuals: dict | None = None,
+        ontology=None,
     ) -> dict[str, dict]:
         """Run full virtual experiment lifecycle.
 
@@ -49,6 +56,17 @@ class Manager:
             models: {hypothesis_id: callable(config) -> {"r2": float, ...}}
             config: {hypothesis_id: param_dict}
             structures: hypothesis structures for lattice construction (optional)
+            model_ids: model identifiers for the chained cache keys (def:12)
+            stale: hypotheses marked StaleHypothesis by the ontology layer
+            competes: {h: competitors} -- for the SUPERSEDED status (Delta AIC)
+            individuals, ontology: optional OWL individuals {h: individual} and
+                their ontology; if given, REFUTED/SUPERSEDED statuses are written
+                as InvalidHypothesis and the cascade is derived by RL
+                materialisation, else it follows the lattice descendants
+
+        Stale hypotheses found after this run (descendants of hypotheses that
+        became REFUTED or SUPERSEDED) are kept in :attr:`pending_stale` and are
+        recomputed by the next ``orchestrate`` call (definition def:12 (4)).
 
         Returns:
             {hypothesis_id: {"status": str, "metrics": dict}}
@@ -81,7 +99,8 @@ class Manager:
         # hypothesis and all its sources; `stale` (StaleHypothesis markers of
         # the ontology layer) covers revisions that touch neither.
         keys = self.cache_keys(lattice, models, config, model_ids)
-        p_ne, p_e = self._partition(lattice, keys, stale or set())
+        stale_now = set(stale or set()) | set(self.pending_stale)
+        p_ne, p_e = self._partition(lattice, keys, stale_now)
 
         # Stage 4: Execute
         results = self.runner.execute(
@@ -90,9 +109,53 @@ class Manager:
             configs=config,
             lattice_edges=lattice_edges,
             cache_configs=keys,
+            competes=competes,
         )
 
+        # recomputed hypotheses are fresh again
+        self.pending_stale -= {
+            h for h, r in results.items() if h in p_ne and r.get("status") == "SUCCESS"
+        }
+        # Stage 4 -> cascade: a REFUTED / SUPERSEDED hypothesis invalidates its
+        # descendants (hidden staleness: files, models and configs unchanged)
+        invalid = {
+            h for h, r in results.items()
+            if r.get("epistemic_status") in ("REFUTED", "SUPERSEDED")
+        }
+        # the cascade fires on the invalidation EVENT (status change), not on
+        # every run in which the status persists
+        newly_invalid = invalid - self.invalid_seen
+        self.invalid_seen = invalid
+        self.pending_stale |= self._cascade(lattice, newly_invalid, individuals, ontology)
         return results
+
+    def _cascade(self, lattice, invalid, individuals=None, ontology=None) -> set[str]:
+        """Descendants of the invalidated hypotheses. With OWL individuals the
+        status is bridged to InvalidHypothesis and the cascade is DERIVED by RL
+        materialisation (rule 4); otherwise lattice reachability is used (the same
+        set, by theorem thm:integrity (IV))."""
+        if not invalid:
+            return set()
+        if individuals is not None and ontology is not None:
+            from hyppo.ontology.core_rules import (
+                StaleHypothesis,
+                apply_epistemic_status,
+                materialize_cascade,
+            )
+
+            for h in invalid:
+                if h in individuals:
+                    apply_epistemic_status(individuals[h], "SUPERSEDED")
+            materialize_cascade(ontology)
+            reach = set().union(*(nx.descendants(lattice, h) for h in invalid if h in lattice))
+            return {
+                h for h, ind in individuals.items()
+                if StaleHypothesis in ind.is_a and h not in invalid and h in reach
+            }
+        out: set[str] = set()
+        for h in invalid:
+            out |= nx.descendants(lattice, h)
+        return out - invalid
 
     @staticmethod
     def cache_keys(

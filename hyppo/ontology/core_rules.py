@@ -300,3 +300,20 @@ def assign_valid(hypotheses) -> list:
             h.is_a.append(ValidHypothesis)
         valid.append(h)
     return valid
+
+
+INVALIDATING_STATUSES = frozenset({"REFUTED", "SUPERSEDED"})
+
+
+def apply_epistemic_status(individual, status) -> bool:
+    """Bridge epistemic status -> ontology (Section 2, «Эпистемический статус»).
+
+    A REFUTED or SUPERSEDED hypothesis gets the marker ``InvalidHypothesis``,
+    which the RL cascade (rule 4) propagates to all its descendants by the
+    transitive ``derived_by``. Returns True if the marker was added."""
+    value = getattr(status, "value", status)
+    if value in INVALIDATING_STATUSES and InvalidHypothesis not in individual.is_a:
+        individual.is_a.append(InvalidHypothesis)
+        return True
+    return False
+
