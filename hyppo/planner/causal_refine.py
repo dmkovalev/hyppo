@@ -145,7 +145,7 @@ def affected_variables(structure: Structure, edited_equations: set[str], inputs:
     digraph of ``structure`` from the outputs matched to the edited equations.
 
     The closure is computed with the matching ``phi`` of the OLD structure. For an edit
-    ``S -> S'`` that introduces new variables the caller adds ``V' \ V`` and intersects the
+    ``S -> S'`` that introduces new variables the caller adds ``V' minus V`` and intersects the
     result with ``V'`` (theorem on affected variables). Parameter changes are not handled
     here; they go through :func:`n_caus`.
     """
