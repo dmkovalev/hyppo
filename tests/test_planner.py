@@ -198,17 +198,18 @@ def test_shared_cache_planner_sees_runner_saves():
     p0 = build_optimal_plan(config, lattice, cache)
     assert h1 in p0.needs_execution and h2 in p0.needs_execution and not p0.cached
 
-    # runner «вычислил» и записал результаты (тот же config, что видит planner)
-    cfg_key = {"parameters": ["default"]}
-    cache.save_result("h1", cfg_key, {"r2": 0.9})
-    cache.save_result("h2", cfg_key, {"r2": 0.88})
+    # runner «вычислил» и записал результаты по тем же цепочным ключам, что видит
+    # planner (опр. def:12: ключ = своя конфигурация + модели + ключи предшественников)
+    keys = p0.cache_keys
+    cache.save_result("h1", keys[h1], {"r2": 0.9})
+    cache.save_result("h2", keys[h2], {"r2": 0.88})
 
     # тёплый план: планировщик видит записи раннера как кэш
     p1 = build_optimal_plan(config, lattice, cache)
     assert h1 in p1.cached and h2 in p1.cached and not p1.needs_execution
 
     # низкий R² из кэша раннера → отсечение ветви планировщиком
-    cache.save_result("h2", cfg_key, {"r2": 0.4})
+    cache.save_result("h2", keys[h2], {"r2": 0.4})
     p2 = build_optimal_plan(config, lattice, cache, r2_threshold=0.7)
     assert h1 in p2.cached and h2 not in p2.cached and h2 not in p2.needs_execution
 
@@ -227,8 +228,11 @@ def test_per_hypothesis_config_invalidates_single_branch():
 
     base = {"v": 1}
     per = {"h1": base, "h2": base, "h3": base}
-    for name in ("h1", "h2", "h3"):
-        cache.save_result(name, per[name], {"r2": 0.9})
+    from hyppo.planner._base import cache_keys_for
+
+    keys = cache_keys_for(lattice, None, per)  # ключи, по которым пишет раннер
+    for h in (h1, h2, h3):
+        cache.save_result(h.name, keys[h], {"r2": 0.9})
 
     # всё в кэше → пусто на пересчёт
     p0 = build_optimal_plan(None, lattice, cache, per_hypothesis_configs=per)

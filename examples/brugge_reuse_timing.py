@@ -197,7 +197,7 @@ def run_components(comps, data, cache):
 
 def main():
     field = sys.argv[1] if len(sys.argv) > 1 else "Brugge"
-    from hyppo.planner._base import build_optimal_plan
+    from hyppo.planner._base import build_optimal_plan, cache_keys_for
     from hyppo.metadata_repository import SharedCache
     print("=" * 72)
     print(f"РЕАЛЬНЫЙ БЕНЧМАРК: полный пересчёт vs инкрементальное переиспользование ({field})")
@@ -237,10 +237,11 @@ def main():
         # (его результат инвалидирован правкой). build_optimal_plan строит P_ne
         # каскадом по достижимости (алгоритм 4, теорема 1).
         sc = SharedCache(":memory:")
+        keys = cache_keys_for(_Lat(g), {})  # цепочные ключи (опр. def:12)
         for h in NODES:
             if h == h_edit:
                 continue  # результат этой гипотезы устарел --- нет в кэше
-            sc.save_result(h, {}, {"r2": 0.9})
+            sc.save_result(h, keys[h], {"r2": 0.9})
         plan = build_optimal_plan({}, _Lat(g), sc)
         p_ne = set(plan.needs_execution)
         # отображение гипотез P_ne в исполняемые компоненты модели

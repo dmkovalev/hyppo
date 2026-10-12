@@ -9,6 +9,19 @@ def build_graph(ve: dict) -> dict:
     return {"nodes": nodes, "edges": edges}
 
 
+def cache_keys(ve: dict) -> dict:
+    """Chained cache keys (def:12) the GUI runs use: the same keys the manager
+    computes for the stub models, so previews and reuse counts see the runner's
+    saved results."""
+    import networkx as nx
+
+    nodes = [h["id"] for h in ve["hypotheses"]]
+    g = nx.DiGraph()
+    g.add_nodes_from(nodes)
+    g.add_edges_from(tuple(e) for e in ve.get("workflow_edges", []))
+    return Manager.cache_keys(g, {h: _stub_model(h) for h in nodes})
+
+
 def plan_preview(ve: dict, db_path: str) -> dict:
     """Reproduce Algorithm 4 partitioning against repository cache state.
 
@@ -20,7 +33,8 @@ def plan_preview(ve: dict, db_path: str) -> dict:
     try:
         nodes = [h["id"] for h in ve["hypotheses"]]
         edges = [tuple(e) for e in ve.get("workflow_edges", [])]
-        cached = {h for h in nodes if repo.has_result(h, {})}
+        keys = cache_keys(ve)
+        cached = {h for h in nodes if repo.has_result(h, keys[h])}
         p_ne = plan_cascade(nodes, edges, cached)
         p_e = [h for h in nodes if h not in p_ne]
         return {"p_ne": sorted(p_ne), "p_e": p_e}
@@ -46,7 +60,8 @@ def run_iteration(ve: dict, db_path: str) -> dict:
 
     repo = MetadataRepository(db_path=db_path)
     try:
-        reused = sum(1 for h in nodes if repo.has_result(h, {}))
+        keys = cache_keys(ve)
+        reused = sum(1 for h in nodes if repo.has_result(h, keys[h]))
     finally:
         repo.close()
 

@@ -33,6 +33,7 @@ class ExecutionPlan:
 
     needs_execution: Set = field(default_factory=set)
     cached: Set = field(default_factory=set)
+    cache_keys: dict = field(default_factory=dict)
 
 
 def _find_nearest_lattice(
@@ -70,6 +71,16 @@ def _find_nearest_lattice(
             best_lattice = candidate
 
     return best_lattice
+
+
+from hyppo.planner.actuality import _digest, is_marked_stale  # noqa: E402
+
+
+def _model_names(hypothesis) -> list[str]:
+    """Identifiers of the models implementing the hypothesis (def:12 (2))."""
+    models_attr = getattr(hypothesis, "is_implemented_by_model", None)
+    models = models_attr() if callable(models_attr) else models_attr
+    return sorted(getattr(m, "name", str(m)) for m in (models or []))
 
 
 def _cfg_dict(configuration) -> dict:
@@ -209,6 +220,30 @@ def _get_cached_r2(
     return None
 
 
+def cache_keys_for(lattice, configuration, per_hypothesis_configs=None) -> dict:
+    """Chained cache keys of all hypotheses of the lattice (definition def:12,
+    conditions (1)-(3)): own configuration, the hypothesis's models and the keys
+    of its direct predecessors, in one topological pass, O(|V| + |E|).
+
+    The SAME keys must be used when results are saved (runner) and looked up
+    (build_optimal_plan), so a change of a source's model or parameters misses
+    the cache for the source and every descendant."""
+    graph: nx.DiGraph = lattice.lattice
+    keys: dict = {}
+    for h in nx.topological_sort(graph):
+        cfg_h = _config_for(h, configuration, per_hypothesis_configs)
+        keys[h] = {
+            "cfg": _cfg_dict(cfg_h),
+            "model": _model_names(h),
+            "up": {
+                str(pr): _digest(keys[pr])
+                for pr in sorted(graph.predecessors(h), key=str)
+                if pr in keys
+            },
+        }
+    return keys
+
+
 def build_optimal_plan(
     configuration,
     lattice: "HypothesisLattice",
@@ -216,6 +251,7 @@ def build_optimal_plan(
     r2_threshold: float = 0.7,
     *,
     per_hypothesis_configs: "Mapping | None" = None,
+    chain_keys: bool = True,
 ) -> ExecutionPlan:
     """Построение оптимального плана виртуального эксперимента (Алгоритм 4).
 
@@ -283,6 +319,16 @@ def build_optimal_plan(
     pe: Set = set()
     finished: Set = set()
     pruned: Set = set()
+    if not nx.is_directed_acyclic_graph(graph):
+        raise ValueError(
+            "Hypothesis graph contains a cycle — "
+            "precondition of Algorithm 4 violated "
+            "(Theorem 1 requires a DAG). "
+            "Run check_consistency() before build_optimal_plan()."
+        )
+    keys: dict = (
+        cache_keys_for(lattice, configuration, per_hypothesis_configs) if chain_keys else {}
+    )
 
     # Шаг 3: Множество необработанных вершин V(L)
     remaining = set(graph.nodes())
@@ -322,9 +368,15 @@ def build_optimal_plan(
 
             # Конфигурация именно этой гипотезы (по-гипотезная или общая)
             cfg_h = _config_for(h, configuration, per_hypothesis_configs)
+            if chain_keys and hasattr(db, "has_result"):
+                # цепочный ключ (опр. def:12, условия (1)-(3)) общего кэша
+                # planner<->runner; устаревший Database (load/save по строке)
+                # сохраняет прежний ключ «гипотеза + модель + параметры»
+                cfg_h = keys[h]
 
-            # Проверяем наличие кешированного результата для данной конфигурации
-            if not _has_cached_result(h, cfg_h, db):
+            # Проверяем наличие актуального результата: ключ найден и гипотеза
+            # не помечена онтологическим слоем как устаревшая (условие (4))
+            if is_marked_stale(h) or not _has_cached_result(h, cfg_h, db):
                 # Результата нет: помечаем гипотезу и все зависимые (потомки в графе)
                 # как требующие пересчета
                 dependents = nx.descendants(graph, h)
@@ -352,6 +404,7 @@ def build_optimal_plan(
 
     plan.needs_execution = pne
     plan.cached = pe
+    plan.cache_keys = keys  # ключи, по которым исполнитель сохраняет результаты
 
     return plan
 

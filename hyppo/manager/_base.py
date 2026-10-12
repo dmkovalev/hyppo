@@ -38,6 +38,8 @@ class Manager:
         models: dict[str, Callable],
         config: dict[str, dict] | None = None,
         structures: dict | None = None,
+        model_ids: dict[str, str] | None = None,
+        stale: set[str] | None = None,
     ) -> dict[str, dict]:
         """Run full virtual experiment lifecycle.
 
@@ -74,8 +76,12 @@ class Manager:
         lattice.add_nodes_from(hypotheses)
         lattice.add_edges_from(lattice_edges)
 
-        # Stage 3: Plan — determine P_ne (needs execution) and P_e (cached)
-        p_ne, p_e = self._partition(lattice, config)
+        # Stage 3: Plan — determine P_ne (needs execution) and P_e (cached).
+        # Actuality (def:12): chained cache keys cover models/parameters of the
+        # hypothesis and all its sources; `stale` (StaleHypothesis markers of
+        # the ontology layer) covers revisions that touch neither.
+        keys = self.cache_keys(lattice, models, config, model_ids)
+        p_ne, p_e = self._partition(lattice, keys, stale or set())
 
         # Stage 4: Execute
         results = self.runner.execute(
@@ -83,12 +89,36 @@ class Manager:
             models=models,
             configs=config,
             lattice_edges=lattice_edges,
+            cache_configs=keys,
         )
 
         return results
 
+    @staticmethod
+    def cache_keys(
+        lattice: nx.DiGraph,
+        models: dict[str, Callable] | None = None,
+        config: dict[str, dict] | None = None,
+        model_ids: dict[str, str] | None = None,
+    ) -> dict[str, dict]:
+        """Chained cache keys (definition def:12, conditions (1)-(3)) for every
+        hypothesis of ``lattice``: own config, model identifier (explicit
+        ``model_ids`` or the model callable's qualified name) and the keys of the
+        direct predecessors. The runner saves and the planner looks up results by
+        these keys, so a change of a source's model or parameters misses the
+        cache for the source and all its descendants."""
+        from hyppo.planner.actuality import chained_keys
+
+        if model_ids is None:
+            model_ids = {
+                h: f"{getattr(fn, '__module__', '')}.{getattr(fn, '__qualname__', repr(fn))}"
+                for h, fn in (models or {}).items()
+            }
+        topo = list(nx.topological_sort(lattice))
+        return chained_keys(topo, lattice.edges(), config or {}, model_ids)
+
     def _partition(
-        self, lattice: nx.DiGraph, config: dict[str, dict]
+        self, lattice: nx.DiGraph, config: dict[str, dict], stale: set[str] = frozenset()
     ) -> tuple[list[str], set[str]]:
         """Three-way cascading partition of the lattice (Section 3.1.6.2).
 
@@ -116,7 +146,7 @@ class Manager:
             if h in pne or h in pruned:
                 continue
             cfg_h = config.get(h, {})
-            if not self.repository.has_result(h, cfg_h):
+            if h in stale or not self.repository.has_result(h, cfg_h):
                 pne.add(h)
                 pne.update(nx.descendants(lattice, h))
             else:

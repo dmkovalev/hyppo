@@ -39,11 +39,14 @@ def _lattice(nodes: list[str], edges: list[tuple[str, str]]) -> nx.DiGraph:
 
 
 def _planner_pne(nodes, edges, cache_content, tmp_path_factory=None):
+    from hyppo.planner._base import cache_keys_for
+
     g = _lattice(nodes, edges)
     cache = SharedCache(":memory:")
     try:
+        keys = cache_keys_for(_Lat(g), None, {n: {} for n in nodes})
         for h, metrics in cache_content.items():
-            cache.save_result(h, {}, metrics)
+            cache.save_result(h, keys[h], metrics)
         plan = build_optimal_plan(
             None,
             _Lat(g),
@@ -59,25 +62,30 @@ def _planner_pne(nodes, edges, cache_content, tmp_path_factory=None):
 def _manager_pne(nodes, edges, cache_content, db_path):
     mgr = Manager(db_path=db_path, r2_threshold=0.7)
     try:
+        lat = _lattice(nodes, edges)
+        keys = Manager.cache_keys(lat)
         for h, metrics in cache_content.items():
-            mgr.repository.save_result(h, {}, metrics)
-        p_ne, p_e = mgr._partition(_lattice(nodes, edges), {n: {} for n in nodes})
+            mgr.repository.save_result(h, keys[h], metrics)
+        p_ne, p_e = mgr._partition(lat, keys)
         return set(p_ne), set(p_e)
     finally:
         mgr.close()
 
 
 def _gui_pne(nodes, edges, cache_content, db_path):
-    repo = MetadataRepository(db_path=db_path)
-    try:
-        for h, metrics in cache_content.items():
-            repo.save_result(h, {}, metrics)
-    finally:
-        repo.close()
+    from hyppo.gui.services import cache_keys
+
     ve = {
         "hypotheses": [{"id": n} for n in nodes],
         "workflow_edges": [list(e) for e in edges],
     }
+    keys = cache_keys(ve)
+    repo = MetadataRepository(db_path=db_path)
+    try:
+        for h, metrics in cache_content.items():
+            repo.save_result(h, keys[h], metrics)
+    finally:
+        repo.close()
     return set(plan_preview(ve, db_path)["p_ne"])
 
 

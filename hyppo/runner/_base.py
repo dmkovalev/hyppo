@@ -81,6 +81,7 @@ class Runner:
         competes: dict[str, set[str]] | None = None,
         theta_sup: float = 0.7,
         theta_aic: float = 10.0,
+        cache_configs: dict[str, dict] | None = None,
     ) -> dict[str, dict]:
         """Execute plan and return results.
 
@@ -101,6 +102,12 @@ class Runner:
         p_ne = plan.get("p_ne", set())
         p_e = plan.get("p_e", set())
         configs = configs or {}
+        # cache key of each hypothesis (chained key, def:12); defaults to its config
+        cache_configs = cache_configs or {}
+
+        def key_of(h):
+            return cache_configs.get(h, configs.get(h, {}))
+
         failed_ancestors: set[str] = set()
 
         # Build dependency graph for cascade
@@ -111,10 +118,8 @@ class Runner:
 
         # Load cached results for P_e
         for h_id in p_e:
-            if self.repository and self.repository.has_result(
-                h_id, configs.get(h_id, {})
-            ):
-                cached = self.repository.load_result(h_id, configs.get(h_id, {}))
+            if self.repository and self.repository.has_result(h_id, key_of(h_id)):
+                cached = self.repository.load_result(h_id, key_of(h_id))
                 results[h_id] = {
                     "status": Status.SUCCESS.value,
                     "metrics": cached.get("metrics", {}),
@@ -153,7 +158,7 @@ class Runner:
                     # Save to repository
                     if self.repository:
                         self.repository.save_result(
-                            h_id, config, metrics, Status.SUCCESS.value
+                            h_id, key_of(h_id), metrics, Status.SUCCESS.value
                         )
                     success = True
                     break

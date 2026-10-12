@@ -49,13 +49,18 @@ def test_orchestrate_low_r2_prunes_descendants(tmp_path):
     (R2=0.4) and its descendant h3 must be absent from results entirely."""
     from hyppo.manager import Manager
 
+    import networkx as nx
+
     manager = Manager(db_path=tmp_path / "test.db", r2_threshold=0.7)
-    manager.repository.save_result("h1", {}, {"r2": 0.9})
-    manager.repository.save_result("h2", {}, {"r2": 0.4})
+    models = {h: (lambda c: {"r2": 0.9}) for h in ("h1", "h2", "h3")}
+    lat = nx.DiGraph([("h1", "h2"), ("h2", "h3")])
+    keys = Manager.cache_keys(lat, models)  # the keys the runner saves under
+    manager.repository.save_result("h1", keys["h1"], {"r2": 0.9})
+    manager.repository.save_result("h2", keys["h2"], {"r2": 0.4})
     results = manager.orchestrate(
         hypotheses=["h1", "h2", "h3"],
         workflow_edges=[("h1", "h2"), ("h2", "h3")],
-        models={h: (lambda c: {"r2": 0.9}) for h in ("h1", "h2", "h3")},
+        models=models,
     )
     assert results["h1"]["status"] == "SUCCESS"  # cached, good R2 -> reused
     assert "h2" not in results  # pruned (R2 < threshold)
