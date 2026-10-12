@@ -5,8 +5,8 @@
   N_read             -- план теоремы 1: пересчёт всех неактуальных N + чтение актуальных
                         входов и целей;
   cascade_read       -- N и все их потомки + чтение;
-  N_needed_read      -- пересчёт только N ∩ (T ∪ предки T) + чтение нужных актуальных
-                        входов и целей (оптимум при l = 0 для заданных целей);
+  N_needed_read      -- needed_plan: обратный поиск от T, актуальные вершины читаются,
+                        неактуальные пересчитываются (оптимум при l = 0 для T);
   full               -- пересчёт всех вершин;
   best_simple        -- min(N_needed_read, full) (лучшая простая линия).
 Основной эффект теоремы 3 -- mincost против best_simple.
@@ -64,19 +64,34 @@ def plan_with_reads(g, P, targets, actual):
     return set(P), (needed - set(P)) & set(actual)
 
 
+def needed_plan(g, targets, actual):
+    """Оптимум при l = 0: обратный поиск от целей. Актуальная вершина читается (предки не
+    раскрываются), неактуальная пересчитывается и добавляет всех родителей."""
+    actual = set(actual)
+    P, R, seen, stack = set(), set(), set(targets), list(targets)
+    while stack:
+        h = stack.pop()
+        if h in actual:
+            R.add(h)
+            continue
+        P.add(h)
+        for u in g.predecessors(h):
+            if u not in seen:
+                seen.add(u)
+                stack.append(u)
+    return P, R
+
+
 def one_case(g, w, l, targets, actual):
     nodes = set(g.nodes)
     N = nodes - set(actual)
     casc = set(N)
     for h in N:
         casc |= nx.descendants(g, h)
-    anc = set(targets)
-    for t in targets:
-        anc |= nx.ancestors(g, t)
     plans = {
         "N_read": plan_with_reads(g, N, targets, actual),
         "cascade_read": plan_with_reads(g, casc, targets, actual),
-        "N_needed_read": plan_with_reads(g, N & anc, targets, actual),
+        "N_needed_read": needed_plan(g, targets, actual),
         "full": (nodes, set()),
         "mincost": plan_min_cost(g, set(actual), w, l, set(targets)),
     }

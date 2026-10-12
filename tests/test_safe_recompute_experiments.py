@@ -33,3 +33,11 @@ def test_crm_costs_sum_to_measured_total():
     w = e2_mincost.crm_costs()
     pc = load_json(DATA / "timing_brugge.json")["per_component_ms"]
     assert sum(w.values()) == pytest.approx(sum(pc.values()), rel=1e-6)
+
+
+def test_needed_plan_examples():
+    import networkx as nx
+    g = nx.DiGraph([("a", "b")])
+    assert e2_mincost.needed_plan(g, {"b"}, {"b"}) == (set(), {"b"})
+    g = nx.DiGraph([("a", "b"), ("b", "c")])
+    assert e2_mincost.needed_plan(g, {"c"}, {"b"}) == ({"c"}, {"b"})
