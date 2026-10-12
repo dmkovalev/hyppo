@@ -88,7 +88,18 @@ def _predecessors(hyps, edges) -> dict[str, set[str]]:
 
 def influence_graph(structures: dict[str, Structure], inputs: dict[str, set[str]],
                     edges: list[tuple[str, str]]) -> nx.DiGraph:
-    """Influence graph ``D`` over parameter, data-input and output-variable nodes."""
+    """Influence graph ``D`` over parameter, data-input and output-variable nodes.
+
+    Node kinds: ``("p", h, name)`` parameter, ``("in", h, x)`` data input (supplied by a
+    predecessor), ``("v", h, x)`` output variable. Variant A: every predecessor producing
+    ``x`` supplies the input ``x`` of the consumer (edge ``("v", a, x) -> ("in", h, x)``).
+    Raises ``ValueError`` if ``edges`` mention unknown hypotheses or are not acyclic.
+    """
+    for a, b in edges:
+        if a not in structures or b not in structures:
+            raise ValueError(f"edge ({a!r}, {b!r}) mentions a hypothesis not in structures")
+    if not nx.is_directed_acyclic_graph(nx.DiGraph(list(edges))):
+        raise ValueError("edges of the graph of hypotheses must form a DAG")
     preds = _predecessors(structures, edges)
     outs = {h: _outputs(s, inputs.get(h, set())) for h, s in structures.items()}
     D = nx.DiGraph()
@@ -114,7 +125,8 @@ def influence_graph(structures: dict[str, Structure], inputs: dict[str, set[str]
 
 
 def traces(D: nx.DiGraph, hypotheses: list[str]) -> dict[str, set]:
-    """``Pi(h)``: parameters ``(h', name)`` from which some output of ``h`` is reachable."""
+    """``Pi(h)``: returns ``dict h -> set of (h', name)`` parameter pairs from which some
+    output of ``h`` is reachable in ``D``."""
     out_nodes: dict[str, list] = {h: [] for h in hypotheses}
     for n in D.nodes:
         if n[0] == "v" and n[1] in out_nodes:
@@ -130,7 +142,13 @@ def traces(D: nx.DiGraph, hypotheses: list[str]) -> dict[str, set]:
 
 def affected_variables(structure: Structure, edited_equations: set[str], inputs: set[str]) -> set[str]:
     """Variables affected by an edit of ``edited_equations``: forward closure in the causal
-    digraph of ``structure`` from the outputs matched to the edited equations."""
+    digraph of ``structure`` from the outputs matched to the edited equations.
+
+    The closure is computed with the matching ``phi`` of the OLD structure. For an edit
+    ``S -> S'`` that introduces new variables the caller adds ``V' \ V`` and intersects the
+    result with ``V'`` (theorem on affected variables). Parameter changes are not handled
+    here; they go through :func:`n_caus`.
+    """
     unknown = set(edited_equations) - set(structure)
     if unknown:
         raise ValueError(f"unknown equations: {sorted(unknown)}")
@@ -145,7 +163,19 @@ def affected_variables(structure: Structure, edited_equations: set[str], inputs:
 
 def n_caus(structures: dict[str, Structure], inputs: dict[str, set[str]], edges: list[tuple[str, str]],
            changed_params: set, stale: set[str]) -> set[str]:
-    """Minimal safe plan under structural knowledge."""
+    """Minimal safe plan under structural knowledge.
+
+    ``changed_params`` is a set of ``(h, name)`` pairs. A parameter is an input of ``h`` not
+    supplied by a predecessor; a global exogenous ``x`` read by several hypotheses must be
+    passed as every pair ``(h, x)``. ``stale`` is the set of hypotheses ALREADY marked
+    ``StaleHypothesis``, i.e. the marked set ``H_dep(U)`` of revisions ``U`` (descendants of
+    revised hypotheses). Each marked hypothesis is recomputed together with its descendants.
+    A revised hypothesis ``u`` itself is NOT stale (its own result stays valid): callers pass
+    ``descendants(U)``, not ``U``. Unknown names in ``stale`` raise ``ValueError``.
+    """
+    unknown = set(stale) - set(structures)
+    if unknown:
+        raise ValueError(f"stale hypotheses not in structures: {sorted(unknown)}")
     D = influence_graph(structures, inputs, edges)
     for h, name in changed_params:
         if ("p", h, name) not in D:

@@ -33,9 +33,33 @@ def test_affected_variables_of_edit_is_forward_closure():
     assert cr.affected_variables(st, {"e3"}, inputs={"u", "v"}) == {"w"}
 
 
+def test_converse_two_outputs_all_depend_on_parameter_gives_N():
+    # cyclic block {e1: {x,y,t}, e2: {x,y}}: both outputs depend on the parameter t
+    s = {"a": {"e1": frozenset({"x", "y", "t"}), "e2": frozenset({"x", "y"})},
+         "b": {"e": frozenset({"u", "x"})},
+         "c": {"e": frozenset({"w", "y"})},
+         "d": {"e": frozenset({"z", "w"})}}
+    inputs = {"a": {"t"}, "b": {"x"}, "c": {"y"}, "d": {"w"}}
+    edges = [("a", "b"), ("a", "c"), ("c", "d")]
+    assert cr.n_caus(s, inputs, edges, changed_params={("a", "t")}, stale=set()) == {"a", "b", "c", "d"}
+
+
+def test_validation_errors():
+    import pytest
+    s, inputs, edges = _two_output_pair()
+    with pytest.raises(ValueError):
+        cr.n_caus(s, inputs, edges, changed_params=set(), stale={"zzz"})
+    with pytest.raises(ValueError):
+        cr.n_caus(s, inputs, edges + [("a", "zzz")], changed_params=set(), stale=set())
+    with pytest.raises(ValueError):
+        cr.n_caus(s, inputs, edges + [("b", "a")], changed_params=set(), stale=set())
+
+
 # ───────────── property test: N_caus vs an independent reference (varlevel_check.py) ─────────────
-# The generators and the reference trace below are copied (not imported) from the research
-# script temp/align/varlevel_check.py. The reference builds D block-wise from the
+# The generators, the reference trace and the semantics are copied (not imported) from the
+# research script temp/align/varlevel_check.py: the stale set passed to n_caus is
+# descendants(U) only (revised hypotheses U are not stale), and the expected plan is
+# ref | descendants(U), as in varlevel_check.plan_sets. The reference builds D block-wise from the
 # Dulmage--Mendelsohn decomposition (every variable of a block depends on all of Pre(B) and
 # Theta(B)), with parameters carried by equation subsets and global exogenous parameters X:x;
 # the library builds D edge-wise from a perfect matching over per-hypothesis parameters. The
@@ -252,15 +276,15 @@ def test_n_caus_matches_reference_on_random_instances():
         inst = _gen_instance(rng)
         _, _, _, U = _gen_repo(rng, inst)
         structures, inputs, edges, pmap = _to_library(inst)
-        marked = set(U) | inst.descendants(U)
+        marked = inst.descendants(U)  # H_dep(U), as in varlevel_check.plan_sets
         c0 = {p: 0 for p in inst.params}
         worlds = [_rand_world((it, w)) for w in range(6)]
         base = [inst.evaluate(c0, wf) for wf in worlds]
         for p in sorted(inst.params):
             ref = {h for h in inst.by if p in inst.Pi[h]}
-            for stale in (set(), U):
+            for stale in (set(), marked):
                 got = cr.n_caus(structures, inputs, edges, changed_params=pmap[p], stale=stale)
-                assert got == ref | (marked if stale else set()), (it, p, stale)
+                assert got == ref | stale, (it, p, stale)
                 checks += 1
             owners = {h for h, _ in pmap[p]}
             if ref < owners | inst.descendants(owners):  # strictly below the hypothesis-level N
