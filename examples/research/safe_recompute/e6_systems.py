@@ -67,6 +67,7 @@ EVENTS = [
     ("revise", "well_status"),         # объявлена пара well_status:fit_liq (fit_opr -- нет)
 ]
 DECLARED = ("corey_ref:fit_wct", "well_status:fit_liq")
+P_SENSITIVITY = (0.5, 0.7, 0.9, 1.0)
 REAL_SYSTEMS = ("snakemake", "dvc", "dagster", "hyppo_safe")
 PS = (0.0, 0.5, 1.0)
 WEIGHTS = {"param": 6, "evict": 3, "revise": 1}
@@ -326,6 +327,28 @@ def _sets(x):
     return sorted(x)
 
 
+def derive_fields(rec: dict) -> dict:
+    """Производные поля прогона системы: wrong_at_end -- неверные результаты после
+    последнего события; miss_spans -- для каждой группы пропущенных (событие
+    появления, событие исправления): сколько событий результат оставался неверным
+    (repaired_at_event=None -- не исправлен до конца последовательности)."""
+    evs = rec["events"]
+    rec["wrong_at_end"] = len(evs[-1]["wrong"]) if evs else 0
+    spans: dict = {}
+    for k, e in enumerate(evs):
+        for j in e["missed"]:
+            to = next((t for t in range(k + 1, len(evs)) if j not in evs[t]["wrong"]), None)
+            spans[(k, to)] = spans.get((k, to), 0) + 1
+    rec["miss_spans"] = [{"from_event": k, "repaired_at_event": to,
+                          "events_wrong": (to - k) if to is not None else len(evs) - k, "jobs": n}
+                         for (k, to), n in sorted(spans.items(), key=lambda x: (x[0][0], x[0][1] is None, x[0][1] or 0))]
+    for nv in rec.get("native_evict", []):
+        if nv["event"][1] in nv["executed"]:  # пересчёт в нативном плане -- не «отсутствует»
+            nv["absent"] = []
+        nv.setdefault("absent_source", "measured" if ("restored" in nv or nv.get("same_as_forced")) else "inferred")
+    return rec
+
+
 def _record(name: str, res: dict, gold: dict, grid: dict, events) -> dict:
     jobs = set(dag.jobs(grid))
     init_wrong = {j for j in jobs if res["outputs"][0][j] != gold["digests"][0][j]}
@@ -342,24 +365,43 @@ def _record(name: str, res: dict, gold: dict, grid: dict, events) -> dict:
     ev_idx = [k for k, ev in enumerate(events) if ev[0] == "evict"]
     native = []
     if name == "snakemake":
-        for k, ex in zip(ev_idx, res["native_evict"]):
+        measured = res.get("native_absent") or [None] * len(ev_idx)
+        for k, ex, ab in zip(ev_idx, res["native_evict"], measured):
+            # сухой прогон файл не создаёт: отсутствует = нет на диске и не в плане
+            if ab is None:  # старые прогоны: файл не проверялся
+                ab, src = events[k][1] not in ex, "inferred"
+            else:
+                ab, src = ab and events[k][1] not in ex, "measured"
             native.append({"event": list(events[k]), "executed": _sets(ex),
-                           "absent": [] if events[k][1] in ex else [events[k][1]]})
+                           "absent": [events[k][1]] if ab else [], "absent_source": src})
+        if res.get("trigger_check"):
+            rec["trigger_check"] = [{"event": list(ev), "mtime_params": _sets(t["mtime_params"]),
+                                     "default": _sets(t["default"]),
+                                     "same": set(t["mtime_params"]) == set(t["default"])}
+                                    for ev, t in zip(events, res["trigger_check"])]
     elif name == "dvc":
         for k, nv in zip(ev_idx, res["native_evict"]):
             native.append({"event": list(events[k]), "executed": _sets(nv["executed"]),
-                           "absent": [] if nv["restored"] else [events[k][1]], "restored": nv["restored"]})
-    elif name == "dagster":
+                           "absent": [] if nv["restored"] else [events[k][1]], "restored": nv["restored"],
+                           "absent_source": "measured"})
+    elif name == "dagster" and res.get("native_evict"):
+        for k, nv in zip(ev_idx, res["native_evict"]):
+            native.append({"event": list(events[k]), "executed": _sets(nv["executed"]),
+                           "status_evicted": nv["status_evicted"],
+                           "absent": [events[k][1]] if nv["absent"] else [], "absent_source": "measured"})
+    elif name == "dagster":  # без нативного шага: выбор первого раунда forced-шага без force
         for k in ev_idx:
             r0 = res["rounds"][k + 1][0]
             sel = {j for j, s in r0["status"].items() if s in ("STALE", "MISSING")}
             native.append({"event": list(events[k]), "executed": _sets(sel),
-                           "status_evicted": r0["status"][events[k][1]], "absent": [events[k][1]]})
+                           "status_evicted": r0["status"][events[k][1]], "absent": [events[k][1]],
+                           "absent_source": "inferred"})
     else:  # комплекс: удаление записи и есть его нативный evict
         for k in ev_idx:
             native.append({"event": list(events[k]), "executed": rec["events"][k]["executed"],
-                           "absent": [], "same_as_forced": True})
+                           "absent": [], "same_as_forced": True, "absent_source": "measured"})
     rec["native_evict"] = native
+    derive_fields(rec)
     rec["seconds_events"] = sum(res["seconds"][1:])
     rec["executed_total"] = sum(e["n_executed"] for e in rec["events"])
     rec["missed_total"] = sum(len(e["missed"]) for e in rec["events"])
@@ -370,11 +412,34 @@ def _record(name: str, res: dict, gold: dict, grid: dict, events) -> dict:
     return rec
 
 
-def real_runs(grid_name: str = "small", out=None, root=None, systems=REAL_SYSTEMS, threads: int = 4) -> dict:
+def _rmtree(path: Path) -> None:
+    import os
+    import stat
+
+    def onerror(func, q, _):  # объекты кэша DVC только для чтения
+        os.chmod(q, stat.S_IWRITE)
+        func(q)
+    shutil.rmtree(path, onerror=onerror)
+
+
+def real_runs(grid_name: str = "small", out=None, root=None, systems=REAL_SYSTEMS, threads: int = 4,
+              native_checks: bool = True) -> dict:
+    """native_checks: Snakemake -- перед каждым шагом сухие прогоны с триггерами
+    `mtime params` и по умолчанию; Dagster -- отдельный нативный шаг при evict
+    (файл проверяется на диске). Временный каталог (root=None) удаляется."""
     grid = grid_of(grid_name)
     if not (ports.brugge_run_dir() / "brugge_perwell.npz").exists():
         raise RuntimeError("нет данных Brugge (HYPPO_BRUGGE_RUN)")
+    tmp = root is None
     root = Path(root) if root else Path(tempfile.mkdtemp(prefix=f"e6_{grid_name}_"))
+    try:
+        return _real_runs(grid_name, grid, root, out, systems, threads, native_checks)
+    finally:
+        if tmp:
+            _rmtree(root)
+
+
+def _real_runs(grid_name, grid, root, out, systems, threads, native_checks) -> dict:
     root.mkdir(parents=True, exist_ok=True)
     print(f"[e6] {grid_name}: каталог {root}", flush=True)
     gold = gold_runs(root / "gold", grid, EVENTS, threads)
@@ -398,7 +463,12 @@ def real_runs(grid_name: str = "small", out=None, root=None, systems=REAL_SYSTEM
             mod = _port(name)
             if not mod.tools_available():
                 raise RuntimeError(f"{name}: инструмент недоступен")
-            res = mod.run_workload(wd, grid, EVENTS, set(DECLARED))
+            kw = {}
+            if native_checks and name == "snakemake":
+                kw["trigger_check"] = True
+            if native_checks and name == "dagster":
+                kw["native_step"] = True
+            res = mod.run_workload(wd, grid, EVENTS, set(DECLARED), **kw)
         raw[name] = res
         result["systems"][name] = _record(name, res, gold, grid, EVENTS)
         result["systems"][name]["seconds_total_wall"] = time.perf_counter() - t0
@@ -409,6 +479,10 @@ def real_runs(grid_name: str = "small", out=None, root=None, systems=REAL_SYSTEM
         last_ridge = [e[2] for e in EVENTS if e[0] == "param"][-1]
         result["snakemake_triggers_check"] = _snk_triggers_check(
             root / "snakemake" / "work", root / "snakemake" / "meta.sqlite", grid_name, grid, last_ridge)
+    if "snakemake" in systems:
+        tc = result["systems"]["snakemake"].get("trigger_check")
+        if tc:
+            result["snakemake_triggers_per_event"] = {"checked": len(tc), "same": sum(t["same"] for t in tc)}
     if out is not None:
         save_json(result, Path(out))
     return result
@@ -437,16 +511,20 @@ def validate_simulators(real: dict) -> dict:
             rows.append(row)
         n_ok = sum(r["executed_match"] and r["wrong_match"] for r in rows)
         nat_rows = []
-        for nv in rec["native_evict"]:
+        ev_idx = [k for k, ev in enumerate(events) if ev[0] == "evict"]
+        if len(ev_idx) != len(rec["native_evict"]):
+            raise ValueError(f"{name}: число нативных evict не совпадает с событиями")
+        for k, nv in zip(ev_idx, rec["native_evict"]):
+            if tuple(nv["event"]) != events[k]:
+                raise ValueError(f"{name}: нативный evict {nv['event']} не на месте события {k}")
             node = nv["event"][1]
             ns = sim.native_evict(name, node, g)
             if ns is None:  # нативный = forced
-                k = events.index(tuple(nv["event"]))
                 ns = sims[k]
                 ok = set(nv["executed"]) == ns.recomputed
             else:
                 ok = set(nv["executed"]) == ns.recomputed and set(nv["absent"]) == ns.absent
-            nat_rows.append({"event": nv["event"], "match": ok})
+            nat_rows.append({"event": nv["event"], "match": ok, "absent_source": nv.get("absent_source")})
         out[name] = {
             "forced": {"events": len(rows), "matched": n_ok, "share": n_ok / len(rows), "rows": rows},
             "native_evict": {"events": len(nat_rows), "matched": sum(r["match"] for r in nat_rows),
@@ -468,12 +546,12 @@ def corpus_graphs(graphs_limit: int | None = None) -> dict[str, nx.DiGraph]:
     return out
 
 
-def gen_world(name: str, g: nx.DiGraph, n_events: int, seed: int = SEED):
+def gen_world(name: str, g: nx.DiGraph, n_events: int, seed: int = SEED, p_out: float = P_OUTPUT_CHANGED):
     """Генератор (детерминирован по seed и имени графа):
     сущности: m = ceil(|V|/4), у каждой 1..3 потребителя (равномерно, без повторов);
     пары (сущность, потребитель) перемешаны, объявлены первые round(p*|пар|)
     (вложенные множества по p); события: тип param:evict:revise = 6:3:1,
-    param -- равномерный узел, выход меняется с вероятностью 0.7 (тогда
+    param -- равномерный узел, выход меняется с вероятностью p_out (0.7; тогда
     меняются узел и все потомки, иначе ничего); evict -- равномерный узел (мир
     не меняется); revise -- равномерная сущность (меняются все потребители и их
     потомки)."""
@@ -488,7 +566,7 @@ def gen_world(name: str, g: nx.DiGraph, n_events: int, seed: int = SEED):
     for _ in range(n_events):
         k = rng.choices(kinds, weights=[WEIGHTS[x] for x in kinds])[0]
         if k == "param":
-            events.append(sim.Event("param", rng.choice(nodes), rng.random() < P_OUTPUT_CHANGED))
+            events.append(sim.Event("param", rng.choice(nodes), rng.random() < p_out))
         elif k == "evict":
             events.append(sim.Event("evict", rng.choice(nodes), False))
         else:
@@ -501,11 +579,16 @@ def _declared_for(pairs, p: float) -> frozenset:
 
 
 def simulate_corpora(events_per_graph: int = 200, out=None, graphs_limit: int | None = None,
-                     seed: int = SEED, ps=PS, systems=sim.SYSTEMS) -> dict:
+                     seed: int = SEED, ps=PS, systems=sim.SYSTEMS, p_out: float = P_OUTPUT_CHANGED) -> dict:
+    """Корпуса; by_p[p].by_kind -- forced evict, by_kind_native -- нативный evict
+    (param/revise совпадают с forced; evict: выполнено по native_evict, пропусков
+    нет, отсутствующие файлы -- absent)."""
     t0 = time.perf_counter()
     graphs = corpus_graphs(graphs_limit)
     zero = lambda: {"recomputed_total": 0, "missed_total": 0, "events": 0,
-                    "by_kind": {k: {"recomputed": 0, "missed": 0, "events": 0} for k in WEIGHTS}}
+                    "by_kind": {k: {"recomputed": 0, "missed": 0, "events": 0} for k in WEIGHTS},
+                    "by_kind_native": {k: {"recomputed": 0, "missed": 0, "absent": 0, "events": 0}
+                                       for k in WEIGHTS}}
     acc = {s: {str(p): zero() for p in ps} for s in systems}
     native = {s: {"evict_events": 0, "executed": 0, "absent": 0, "restored": 0}
               for s in systems if sim.NATIVE_EVICT.get(s)}
@@ -515,7 +598,7 @@ def simulate_corpora(events_per_graph: int = 200, out=None, graphs_limit: int | 
     sizes = {"graphs": len(graphs), "nodes": 0, "edges": 0, "events": 0}
     for name, g in graphs.items():
         gg = sim._Graph(g)
-        consumers, pairs, events = gen_world(name, g, events_per_graph, seed)
+        consumers, pairs, events = gen_world(name, g, events_per_graph, seed, p_out)
         sizes["nodes"] += g.number_of_nodes()
         sizes["edges"] += g.number_of_edges()
         sizes["events"] += len(events)
@@ -533,6 +616,12 @@ def simulate_corpora(events_per_graph: int = 200, out=None, graphs_limit: int | 
                     bk["recomputed"] += len(r.recomputed)
                     bk["missed"] += len(r.missed)
                     bk["events"] += 1
+                    nr = sim.native_evict(s, ev.node, g) if ev.kind == "evict" else None
+                    bn = a["by_kind_native"][ev.kind]
+                    bn["recomputed"] += len((nr or r).recomputed)
+                    bn["missed"] += len((nr or r).missed)
+                    bn["absent"] += len(nr.absent) if nr else 0
+                    bn["events"] += 1
             if "hyppo_safe" in res:
                 for s in cutoff:
                     f = fav[str(p)][s]
@@ -568,6 +657,10 @@ def simulate_corpora(events_per_graph: int = 200, out=None, graphs_limit: int | 
     res = {
         "meta": {
             "seed": seed, "events_per_graph": events_per_graph, "ps": list(ps), "corpus": sizes,
+            "p_output_changed": p_out, "weights": dict(WEIGHTS), "revise_always_changes_output": True,
+            "entities_per_node": 0.25, "consumers_per_entity": [1, 3],
+            "delta_rule": "closure over descendants (no mid-chain cutoff in corpora; cutoff-tool counts "
+                          "are upper bounds)",
             "generator": " ".join(gen_world.__doc__.split()),
             "state": "events per graph applied in order with persistent state (simulators.run_sequence)",
             "missed": "newly wrong results kept after the event (W' minus W), summed over events",
@@ -593,6 +686,22 @@ def simulate_corpora(events_per_graph: int = 200, out=None, graphs_limit: int | 
     return res
 
 
+def sensitivity(events_per_graph: int = 200, graphs_limit: int | None = None, seed: int = SEED,
+                p_values=P_SENSITIVITY, ps=PS) -> dict:
+    """Чувствительность к P(output_changed): recomputed/missed по системам и p,
+    плюс число благоприятных миров DVC (fewer_safe). Миры при разных P общие
+    (те же случайные числа, меняется только порог)."""
+    out = {"p_output_changed": list(p_values), "by_P": {}}
+    for P in p_values:
+        c = simulate_corpora(events_per_graph, graphs_limit=graphs_limit, seed=seed, ps=ps, p_out=P)
+        out["by_P"][str(P)] = {
+            "per_system": {s: {p: {"recomputed": x["recomputed_total"], "missed": x["missed_total"]}
+                               for p, x in v["by_p"].items()} for s, v in c["per_system"].items()},
+            "dvc_fewer_safe": {p: v["dvc"]["fewer_safe"] for p, v in c["favourable_worlds"]["by_p"].items()},
+        }
+    return out
+
+
 # ---------- CLI ----------
 META = {
     "modes": {
@@ -615,13 +724,37 @@ META = {
         "hyppo_cascade": "planner 'cascade' (Cl(N)); simulator only",
     },
     "not_validated_by_real_run": list(sim.NOT_VALIDATED),
-    "snakemake_triggers": "real runs use --rerun-triggers mtime params; the default (all triggers) gives "
-                          "the same job sets for these events, checked by dry runs in the final state "
-                          "(real.<grid>.snakemake_triggers_check)",
+    "snakemake_triggers": "real runs use --rerun-triggers mtime params. Compared with the default (all "
+                          "triggers) by dry runs: (a) both grids -- two dry runs in the final state, no edit "
+                          "and ridge=7 (real.<grid>.snakemake_triggers_check); (b) small grid -- before each "
+                          "of the 13 steps, dry runs with both settings and the step's targets "
+                          "(real.small.systems.snakemake.trigger_check, summary "
+                          "real.small.snakemake_triggers_per_event). The full grid was not checked per event",
+    "native_evict_absent": "absent_source=measured: file checked on disk after the native step "
+                           "(Snakemake dry run; Dagster separate native step without force; DVC restored "
+                           "flag); inferred: not checked (full grid run before the check was added)",
     "gold": "full recompute from scratch for every world state; wrong = output digest (rounded 1e-9) "
             "differs from gold; simulator deltas = exact sha256 changes of the gold outputs",
     "order": "events applied sequentially with persistent state in both real runs and run_sequence",
+    "scope": "validation covers one designed 13-event sequence per grid (small, full); mid-chain early "
+             "cutoff (a recomputed node whose output is unchanged while its parent changed) is not "
+             "exercised; a return to an earlier parameter value (memoisation by chained key in the "
+             "complex) and Snakemake's --config parsing of equivalent numbers (1e0 = 1.0) are excluded "
+             "by design; the completeness of the complex comes from the modeller's equations "
+             "(baseline_filecache/hyppo_side.py: every store entity read by a model is in its equation)",
 }
+
+
+def refresh(data: dict) -> dict:
+    """Пересчитать производные поля и сверку из записанных реальных прогонов."""
+    for grid, real in data.get("real", {}).items():
+        for rec in real["systems"].values():
+            derive_fields(rec)
+        val = validate_simulators(real)
+        data.setdefault("validation", {})[grid] = {
+            k: {"forced_share": v["forced"]["share"], "native_evict_share": v["native_evict"]["share"], **v}
+            for k, v in val.items()}
+    return data
 
 
 def _load(out: Path) -> dict:
@@ -637,6 +770,7 @@ def main(argv=None) -> None:
     s = sub.add_parser("scale")
     s.add_argument("events", type=int, nargs="?", default=200)
     s.add_argument("--limit", type=int)
+    sub.add_parser("derive")
     ap.add_argument("--out", default=str(OUT))
     a = ap.parse_args(argv)
     out = Path(a.out)
@@ -646,19 +780,18 @@ def main(argv=None) -> None:
         real = real_runs(a.grid, root=a.root)
         val = validate_simulators(real)
         data.setdefault("real", {})[a.grid] = real
-        data.setdefault("validation", {})[a.grid] = {
-            k: {"forced_share": v["forced"]["share"], "native_evict_share": v["native_evict"]["share"], **v}
-            for k, v in val.items()}
         for k, v in val.items():
             print(f"[e6] сверка {a.grid} {k}: forced {v['forced']['matched']}/{v['forced']['events']}, "
                   f"native {v['native_evict']['matched']}/{v['native_evict']['events']}")
-    else:
+    elif a.cmd == "scale":
         corp = simulate_corpora(a.events, graphs_limit=a.limit)
         data["corpus_meta"] = corp["meta"]
         data["per_system"] = corp["per_system"]
         data["favourable_worlds"] = corp["favourable_worlds"]
+        data["sensitivity"] = sensitivity(a.events, graphs_limit=a.limit)
         for k, v in corp["per_system"].items():
             print(k, {p: (x["recomputed_total"], x["missed_total"]) for p, x in v["by_p"].items()})
+    refresh(data)
     save_json(data, out)
 
 

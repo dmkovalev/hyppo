@@ -18,9 +18,11 @@
       "bazel",
       "hyppo_cascade"
     ],
-    "snakemake_triggers": "real runs use --rerun-triggers mtime params; the default (all triggers) gives the same job sets for these events, checked by dry runs in the final state (real.<grid>.snakemake_triggers_check)",
+    "snakemake_triggers": "real runs use --rerun-triggers mtime params. Compared with the default (all triggers) by dry runs: (a) both grids -- two dry runs in the final state, no edit and ridge=7 (real.<grid>.snakemake_triggers_check); (b) small grid -- before each of the 13 steps, dry runs with both settings and the step's targets (real.small.systems.snakemake.trigger_check, summary real.small.snakemake_triggers_per_event). The full grid was not checked per event",
+    "native_evict_absent": "absent_source=measured: file checked on disk after the native step (Snakemake dry run; Dagster separate native step without force; DVC restored flag); inferred: not checked (full grid run before the check was added)",
     "gold": "full recompute from scratch for every world state; wrong = output digest (rounded 1e-9) differs from gold; simulator deltas = exact sha256 changes of the gold outputs",
-    "order": "events applied sequentially with persistent state in both real runs and run_sequence"
+    "order": "events applied sequentially with persistent state in both real runs and run_sequence",
+    "scope": "validation covers one designed 13-event sequence per grid (small, full); mid-chain early cutoff (a recomputed node whose output is unchanged while its parent changed) is not exercised; a return to an earlier parameter value (memoisation by chained key in the complex) and Snakemake's --config parsing of equivalent numbers (1e0 = 1.0) are excluded by design; the completeness of the complex comes from the modeller's equations (baseline_filecache/hyppo_side.py: every store entity read by a model is in its equation)"
   },
   "real": {
     "small": {
@@ -91,7 +93,7 @@
       ],
       "gold": {
         "worlds": 6,
-        "seconds": 20.690166300046258,
+        "seconds": 19.16099550004583,
         "delta_exact": [
           [
             "hyb/pos_1.npy",
@@ -177,7 +179,7 @@
           "initial_executed": 7,
           "initial_all": true,
           "initial_wrong": [],
-          "seconds_initial": 21.394360900041647,
+          "seconds_initial": 20.7746940999059,
           "events": [
             {
               "event": [
@@ -194,7 +196,7 @@
               "n_executed": 4,
               "wrong": [],
               "missed": [],
-              "seconds": 4.476283899974078
+              "seconds": 4.4247376000275835
             },
             {
               "event": [
@@ -209,7 +211,7 @@
               "n_executed": 3,
               "wrong": [],
               "missed": [],
-              "seconds": 11.197017399943434
+              "seconds": 10.87868189997971
             },
             {
               "event": [
@@ -226,7 +228,7 @@
               "n_executed": 4,
               "wrong": [],
               "missed": [],
-              "seconds": 4.5639447999419644
+              "seconds": 4.285447100060992
             },
             {
               "event": [
@@ -240,7 +242,7 @@
               "n_executed": 2,
               "wrong": [],
               "missed": [],
-              "seconds": 3.144484599935822
+              "seconds": 3.0588678000494838
             },
             {
               "event": [
@@ -257,7 +259,7 @@
               "n_executed": 4,
               "wrong": [],
               "missed": [],
-              "seconds": 4.473738600034267
+              "seconds": 4.468419199925847
             },
             {
               "event": [
@@ -272,7 +274,7 @@
               "n_executed": 3,
               "wrong": [],
               "missed": [],
-              "seconds": 3.8512722000014037
+              "seconds": 3.6655125999823213
             },
             {
               "event": [
@@ -287,7 +289,7 @@
               "n_executed": 3,
               "wrong": [],
               "missed": [],
-              "seconds": 3.8903757999651134
+              "seconds": 3.682347199996002
             },
             {
               "event": [
@@ -304,7 +306,7 @@
               "n_executed": 4,
               "wrong": [],
               "missed": [],
-              "seconds": 4.485993799986318
+              "seconds": 4.256376500008628
             },
             {
               "event": [
@@ -317,7 +319,7 @@
               "n_executed": 1,
               "wrong": [],
               "missed": [],
-              "seconds": 2.456434000050649
+              "seconds": 2.4263728000223637
             },
             {
               "event": [
@@ -338,7 +340,7 @@
                 "opr/pos_1_2_2.json",
                 "opr/uto_1_2_2.json"
               ],
-              "seconds": 0.7720550000667572
+              "seconds": 0.7274398000445217
             },
             {
               "event": [
@@ -355,7 +357,7 @@
               "n_executed": 4,
               "wrong": [],
               "missed": [],
-              "seconds": 4.532454700092785
+              "seconds": 4.398187799961306
             },
             {
               "event": [
@@ -369,7 +371,7 @@
               "n_executed": 2,
               "wrong": [],
               "missed": [],
-              "seconds": 3.132929199957289
+              "seconds": 3.0635801000753418
             },
             {
               "event": [
@@ -385,7 +387,231 @@
               "n_executed": 4,
               "wrong": [],
               "missed": [],
-              "seconds": 4.487458599964157
+              "seconds": 4.286524499999359
+            }
+          ],
+          "trigger_check": [
+            {
+              "event": [
+                "param",
+                "ridge",
+                "10"
+              ],
+              "mtime_params": [
+                "hyb/pos_1.npy",
+                "hyb/uto_1.npy",
+                "opr/pos_1_2_2.json",
+                "opr/uto_1_2_2.json"
+              ],
+              "default": [
+                "hyb/pos_1.npy",
+                "hyb/uto_1.npy",
+                "opr/pos_1_2_2.json",
+                "opr/uto_1_2_2.json"
+              ],
+              "same": true
+            },
+            {
+              "event": [
+                "evict",
+                "p1/uto.npy"
+              ],
+              "mtime_params": [
+                "hyb/uto_1.npy",
+                "opr/uto_1_2_2.json",
+                "p1/uto.npy"
+              ],
+              "default": [
+                "hyb/uto_1.npy",
+                "opr/uto_1_2_2.json",
+                "p1/uto.npy"
+              ],
+              "same": true
+            },
+            {
+              "event": [
+                "param",
+                "ridge",
+                "10.0"
+              ],
+              "mtime_params": [
+                "hyb/pos_1.npy",
+                "hyb/uto_1.npy",
+                "opr/pos_1_2_2.json",
+                "opr/uto_1_2_2.json"
+              ],
+              "default": [
+                "hyb/pos_1.npy",
+                "hyb/uto_1.npy",
+                "opr/pos_1_2_2.json",
+                "opr/uto_1_2_2.json"
+              ],
+              "same": true
+            },
+            {
+              "event": [
+                "evict",
+                "hyb/pos_1.npy"
+              ],
+              "mtime_params": [
+                "hyb/pos_1.npy",
+                "opr/pos_1_2_2.json"
+              ],
+              "default": [
+                "hyb/pos_1.npy",
+                "opr/pos_1_2_2.json"
+              ],
+              "same": true
+            },
+            {
+              "event": [
+                "param",
+                "ridge",
+                "3"
+              ],
+              "mtime_params": [
+                "hyb/pos_1.npy",
+                "hyb/uto_1.npy",
+                "opr/pos_1_2_2.json",
+                "opr/uto_1_2_2.json"
+              ],
+              "default": [
+                "hyb/pos_1.npy",
+                "hyb/uto_1.npy",
+                "opr/pos_1_2_2.json",
+                "opr/uto_1_2_2.json"
+              ],
+              "same": true
+            },
+            {
+              "event": [
+                "evict",
+                "wct/2_2.npy"
+              ],
+              "mtime_params": [
+                "opr/pos_1_2_2.json",
+                "opr/uto_1_2_2.json",
+                "wct/2_2.npy"
+              ],
+              "default": [
+                "opr/pos_1_2_2.json",
+                "opr/uto_1_2_2.json",
+                "wct/2_2.npy"
+              ],
+              "same": true
+            },
+            {
+              "event": [
+                "revise",
+                "corey_ref"
+              ],
+              "mtime_params": [
+                "opr/pos_1_2_2.json",
+                "opr/uto_1_2_2.json",
+                "wct/2_2.npy"
+              ],
+              "default": [
+                "opr/pos_1_2_2.json",
+                "opr/uto_1_2_2.json",
+                "wct/2_2.npy"
+              ],
+              "same": true
+            },
+            {
+              "event": [
+                "param",
+                "ridge",
+                "3.0"
+              ],
+              "mtime_params": [
+                "hyb/pos_1.npy",
+                "hyb/uto_1.npy",
+                "opr/pos_1_2_2.json",
+                "opr/uto_1_2_2.json"
+              ],
+              "default": [
+                "hyb/pos_1.npy",
+                "hyb/uto_1.npy",
+                "opr/pos_1_2_2.json",
+                "opr/uto_1_2_2.json"
+              ],
+              "same": true
+            },
+            {
+              "event": [
+                "evict",
+                "opr/uto_1_2_2.json"
+              ],
+              "mtime_params": [
+                "opr/uto_1_2_2.json"
+              ],
+              "default": [
+                "opr/uto_1_2_2.json"
+              ],
+              "same": true
+            },
+            {
+              "event": [
+                "revise",
+                "tau"
+              ],
+              "mtime_params": [],
+              "default": [],
+              "same": true
+            },
+            {
+              "event": [
+                "param",
+                "ridge",
+                "3"
+              ],
+              "mtime_params": [
+                "hyb/pos_1.npy",
+                "hyb/uto_1.npy",
+                "opr/pos_1_2_2.json",
+                "opr/uto_1_2_2.json"
+              ],
+              "default": [
+                "hyb/pos_1.npy",
+                "hyb/uto_1.npy",
+                "opr/pos_1_2_2.json",
+                "opr/uto_1_2_2.json"
+              ],
+              "same": true
+            },
+            {
+              "event": [
+                "evict",
+                "hyb/uto_1.npy"
+              ],
+              "mtime_params": [
+                "hyb/uto_1.npy",
+                "opr/uto_1_2_2.json"
+              ],
+              "default": [
+                "hyb/uto_1.npy",
+                "opr/uto_1_2_2.json"
+              ],
+              "same": true
+            },
+            {
+              "event": [
+                "revise",
+                "well_status"
+              ],
+              "mtime_params": [
+                "hyb/pos_1.npy",
+                "hyb/uto_1.npy",
+                "opr/pos_1_2_2.json",
+                "opr/uto_1_2_2.json"
+              ],
+              "default": [
+                "hyb/pos_1.npy",
+                "hyb/uto_1.npy",
+                "opr/pos_1_2_2.json",
+                "opr/uto_1_2_2.json"
+              ],
+              "same": true
             }
           ],
           "native_evict": [
@@ -397,7 +623,8 @@
               "executed": [],
               "absent": [
                 "p1/uto.npy"
-              ]
+              ],
+              "absent_source": "measured"
             },
             {
               "event": [
@@ -407,7 +634,8 @@
               "executed": [],
               "absent": [
                 "hyb/pos_1.npy"
-              ]
+              ],
+              "absent_source": "measured"
             },
             {
               "event": [
@@ -417,7 +645,8 @@
               "executed": [],
               "absent": [
                 "wct/2_2.npy"
-              ]
+              ],
+              "absent_source": "measured"
             },
             {
               "event": [
@@ -427,7 +656,8 @@
               "executed": [
                 "opr/uto_1_2_2.json"
               ],
-              "absent": []
+              "absent": [],
+              "absent_source": "measured"
             },
             {
               "event": [
@@ -437,19 +667,29 @@
               "executed": [],
               "absent": [
                 "hyb/uto_1.npy"
-              ]
+              ],
+              "absent_source": "measured"
             }
           ],
-          "seconds_events": 55.46444259991404,
+          "wrong_at_end": 0,
+          "miss_spans": [
+            {
+              "from_event": 9,
+              "repaired_at_event": 10,
+              "events_wrong": 1,
+              "jobs": 4
+            }
+          ],
+          "seconds_events": 53.62249490013346,
           "executed_total": 38,
           "missed_total": 4,
-          "seconds_total_wall": 81.71417499997187
+          "seconds_total_wall": 97.79790150001645
         },
         "dvc": {
           "initial_executed": 7,
           "initial_all": true,
           "initial_wrong": [],
-          "seconds_initial": 21.401156999985687,
+          "seconds_initial": 19.980755100026727,
           "events": [
             {
               "event": [
@@ -466,7 +706,7 @@
               "n_executed": 4,
               "wrong": [],
               "missed": [],
-              "seconds": 4.007780999992974
+              "seconds": 3.413414499955252
             },
             {
               "event": [
@@ -479,7 +719,7 @@
               "n_executed": 1,
               "wrong": [],
               "missed": [],
-              "seconds": 9.332481500110589
+              "seconds": 8.682689000037499
             },
             {
               "event": [
@@ -494,7 +734,7 @@
               "n_executed": 2,
               "wrong": [],
               "missed": [],
-              "seconds": 2.1362546000164
+              "seconds": 1.9840665000956506
             },
             {
               "event": [
@@ -507,7 +747,7 @@
               "n_executed": 1,
               "wrong": [],
               "missed": [],
-              "seconds": 1.3630294000031427
+              "seconds": 1.3012598999775946
             },
             {
               "event": [
@@ -524,7 +764,7 @@
               "n_executed": 4,
               "wrong": [],
               "missed": [],
-              "seconds": 3.6714006999973208
+              "seconds": 3.3339276999467984
             },
             {
               "event": [
@@ -537,7 +777,7 @@
               "n_executed": 1,
               "wrong": [],
               "missed": [],
-              "seconds": 1.4212118000723422
+              "seconds": 1.329114899970591
             },
             {
               "event": [
@@ -552,7 +792,7 @@
               "n_executed": 3,
               "wrong": [],
               "missed": [],
-              "seconds": 2.971956199966371
+              "seconds": 2.730044399970211
             },
             {
               "event": [
@@ -567,7 +807,7 @@
               "n_executed": 2,
               "wrong": [],
               "missed": [],
-              "seconds": 2.09123279992491
+              "seconds": 2.201839499990456
             },
             {
               "event": [
@@ -580,7 +820,7 @@
               "n_executed": 1,
               "wrong": [],
               "missed": [],
-              "seconds": 1.3926883999956772
+              "seconds": 1.2911042999476194
             },
             {
               "event": [
@@ -601,7 +841,7 @@
                 "opr/pos_1_2_2.json",
                 "opr/uto_1_2_2.json"
               ],
-              "seconds": 0.6347607000498101
+              "seconds": 0.5931935000699013
             },
             {
               "event": [
@@ -618,7 +858,7 @@
               "n_executed": 4,
               "wrong": [],
               "missed": [],
-              "seconds": 3.570633099996485
+              "seconds": 3.358728599967435
             },
             {
               "event": [
@@ -631,7 +871,7 @@
               "n_executed": 1,
               "wrong": [],
               "missed": [],
-              "seconds": 1.3789169000228867
+              "seconds": 1.2935382999712601
             },
             {
               "event": [
@@ -647,7 +887,7 @@
               "n_executed": 4,
               "wrong": [],
               "missed": [],
-              "seconds": 3.6386100000236183
+              "seconds": 3.373260899912566
             }
           ],
           "native_evict": [
@@ -658,7 +898,8 @@
               ],
               "executed": [],
               "absent": [],
-              "restored": true
+              "restored": true,
+              "absent_source": "measured"
             },
             {
               "event": [
@@ -667,7 +908,8 @@
               ],
               "executed": [],
               "absent": [],
-              "restored": true
+              "restored": true,
+              "absent_source": "measured"
             },
             {
               "event": [
@@ -676,7 +918,8 @@
               ],
               "executed": [],
               "absent": [],
-              "restored": true
+              "restored": true,
+              "absent_source": "measured"
             },
             {
               "event": [
@@ -685,7 +928,8 @@
               ],
               "executed": [],
               "absent": [],
-              "restored": true
+              "restored": true,
+              "absent_source": "measured"
             },
             {
               "event": [
@@ -694,19 +938,29 @@
               ],
               "executed": [],
               "absent": [],
-              "restored": true
+              "restored": true,
+              "absent_source": "measured"
             }
           ],
-          "seconds_events": 37.61095710017253,
+          "wrong_at_end": 0,
+          "miss_spans": [
+            {
+              "from_event": 9,
+              "repaired_at_event": 10,
+              "events_wrong": 1,
+              "jobs": 4
+            }
+          ],
+          "seconds_events": 34.886181999812834,
           "executed_total": 28,
           "missed_total": 4,
-          "seconds_total_wall": 64.71999530005269
+          "seconds_total_wall": 60.01440610003192
         },
         "dagster": {
           "initial_executed": 7,
           "initial_all": true,
           "initial_wrong": [],
-          "seconds_initial": 27.04455569991842,
+          "seconds_initial": 25.316928999964148,
           "events": [
             {
               "event": [
@@ -723,7 +977,7 @@
               "n_executed": 4,
               "wrong": [],
               "missed": [],
-              "seconds": 11.51923259999603
+              "seconds": 10.473259999998845
             },
             {
               "event": [
@@ -736,7 +990,7 @@
               "n_executed": 1,
               "wrong": [],
               "missed": [],
-              "seconds": 14.443409400060773
+              "seconds": 13.579815399949439
             },
             {
               "event": [
@@ -751,7 +1005,7 @@
               "n_executed": 2,
               "wrong": [],
               "missed": [],
-              "seconds": 7.571495600044727
+              "seconds": 6.617454300052486
             },
             {
               "event": [
@@ -764,7 +1018,7 @@
               "n_executed": 1,
               "wrong": [],
               "missed": [],
-              "seconds": 6.669878899934702
+              "seconds": 5.945087800035253
             },
             {
               "event": [
@@ -781,7 +1035,7 @@
               "n_executed": 4,
               "wrong": [],
               "missed": [],
-              "seconds": 11.44754299998749
+              "seconds": 10.849169199937023
             },
             {
               "event": [
@@ -794,7 +1048,7 @@
               "n_executed": 1,
               "wrong": [],
               "missed": [],
-              "seconds": 6.58379269996658
+              "seconds": 6.03609960002359
             },
             {
               "event": [
@@ -809,7 +1063,7 @@
               "n_executed": 3,
               "wrong": [],
               "missed": [],
-              "seconds": 10.53378930001054
+              "seconds": 10.016503000049852
             },
             {
               "event": [
@@ -824,7 +1078,7 @@
               "n_executed": 2,
               "wrong": [],
               "missed": [],
-              "seconds": 7.120367900002748
+              "seconds": 6.755062300013378
             },
             {
               "event": [
@@ -837,7 +1091,7 @@
               "n_executed": 1,
               "wrong": [],
               "missed": [],
-              "seconds": 6.406112199998461
+              "seconds": 5.585200400091708
             },
             {
               "event": [
@@ -858,7 +1112,7 @@
                 "opr/pos_1_2_2.json",
                 "opr/uto_1_2_2.json"
               ],
-              "seconds": 3.1544647999107838
+              "seconds": 2.6919105000561103
             },
             {
               "event": [
@@ -875,7 +1129,7 @@
               "n_executed": 4,
               "wrong": [],
               "missed": [],
-              "seconds": 11.292652199976146
+              "seconds": 11.132305399980396
             },
             {
               "event": [
@@ -888,7 +1142,7 @@
               "n_executed": 1,
               "wrong": [],
               "missed": [],
-              "seconds": 6.5542743999976665
+              "seconds": 5.520360799971968
             },
             {
               "event": [
@@ -904,7 +1158,7 @@
               "n_executed": 4,
               "wrong": [],
               "missed": [],
-              "seconds": 11.275538899935782
+              "seconds": 9.57732110004872
             }
           ],
           "native_evict": [
@@ -917,7 +1171,8 @@
               "status_evicted": "FRESH",
               "absent": [
                 "p1/uto.npy"
-              ]
+              ],
+              "absent_source": "measured"
             },
             {
               "event": [
@@ -928,7 +1183,8 @@
               "status_evicted": "FRESH",
               "absent": [
                 "hyb/pos_1.npy"
-              ]
+              ],
+              "absent_source": "measured"
             },
             {
               "event": [
@@ -939,7 +1195,8 @@
               "status_evicted": "FRESH",
               "absent": [
                 "wct/2_2.npy"
-              ]
+              ],
+              "absent_source": "measured"
             },
             {
               "event": [
@@ -950,7 +1207,8 @@
               "status_evicted": "FRESH",
               "absent": [
                 "opr/uto_1_2_2.json"
-              ]
+              ],
+              "absent_source": "measured"
             },
             {
               "event": [
@@ -961,19 +1219,29 @@
               "status_evicted": "FRESH",
               "absent": [
                 "hyb/uto_1.npy"
-              ]
+              ],
+              "absent_source": "measured"
             }
           ],
-          "seconds_events": 114.57255189982243,
+          "wrong_at_end": 0,
+          "miss_spans": [
+            {
+              "from_event": 9,
+              "repaired_at_event": 10,
+              "events_wrong": 1,
+              "jobs": 4
+            }
+          ],
+          "seconds_events": 104.77954980020877,
           "executed_total": 28,
           "missed_total": 4,
-          "seconds_total_wall": 143.37410140002612
+          "seconds_total_wall": 146.25022960000206
         },
         "hyppo_safe": {
           "initial_executed": 7,
           "initial_all": true,
           "initial_wrong": [],
-          "seconds_initial": 19.802364200004376,
+          "seconds_initial": 17.380488099996,
           "events": [
             {
               "event": [
@@ -990,7 +1258,7 @@
               "n_executed": 4,
               "wrong": [],
               "missed": [],
-              "seconds": 2.690463799983263
+              "seconds": 2.207651100005023
             },
             {
               "event": [
@@ -1003,7 +1271,7 @@
               "n_executed": 1,
               "wrong": [],
               "missed": [],
-              "seconds": 8.224994100048207
+              "seconds": 7.339615200064145
             },
             {
               "event": [
@@ -1020,7 +1288,7 @@
               "n_executed": 4,
               "wrong": [],
               "missed": [],
-              "seconds": 2.5725718999747187
+              "seconds": 2.199842600035481
             },
             {
               "event": [
@@ -1033,7 +1301,7 @@
               "n_executed": 1,
               "wrong": [],
               "missed": [],
-              "seconds": 0.6624895000131801
+              "seconds": 0.547981399926357
             },
             {
               "event": [
@@ -1050,7 +1318,7 @@
               "n_executed": 4,
               "wrong": [],
               "missed": [],
-              "seconds": 2.5656262000557035
+              "seconds": 2.2077929000370204
             },
             {
               "event": [
@@ -1063,7 +1331,7 @@
               "n_executed": 1,
               "wrong": [],
               "missed": [],
-              "seconds": 0.688723300001584
+              "seconds": 0.580294799990952
             },
             {
               "event": [
@@ -1078,7 +1346,7 @@
               "n_executed": 3,
               "wrong": [],
               "missed": [],
-              "seconds": 2.010627400013618
+              "seconds": 1.691090000094846
             },
             {
               "event": [
@@ -1095,7 +1363,7 @@
               "n_executed": 4,
               "wrong": [],
               "missed": [],
-              "seconds": 2.650643900036812
+              "seconds": 2.3351556999841705
             },
             {
               "event": [
@@ -1108,7 +1376,7 @@
               "n_executed": 1,
               "wrong": [],
               "missed": [],
-              "seconds": 0.6640454999869689
+              "seconds": 0.5589838000014424
             },
             {
               "event": [
@@ -1124,7 +1392,7 @@
               "n_executed": 4,
               "wrong": [],
               "missed": [],
-              "seconds": 2.6063247000565752
+              "seconds": 2.3206931999884546
             },
             {
               "event": [
@@ -1141,7 +1409,7 @@
               "n_executed": 4,
               "wrong": [],
               "missed": [],
-              "seconds": 2.6459898999892175
+              "seconds": 2.235944899963215
             },
             {
               "event": [
@@ -1154,7 +1422,7 @@
               "n_executed": 1,
               "wrong": [],
               "missed": [],
-              "seconds": 0.6633195000467822
+              "seconds": 0.5707896000239998
             },
             {
               "event": [
@@ -1170,7 +1438,7 @@
               "n_executed": 4,
               "wrong": [],
               "missed": [],
-              "seconds": 2.720615000114776
+              "seconds": 2.415720400051214
             }
           ],
           "native_evict": [
@@ -1183,7 +1451,8 @@
                 "p1/uto.npy"
               ],
               "absent": [],
-              "same_as_forced": true
+              "same_as_forced": true,
+              "absent_source": "measured"
             },
             {
               "event": [
@@ -1194,7 +1463,8 @@
                 "hyb/pos_1.npy"
               ],
               "absent": [],
-              "same_as_forced": true
+              "same_as_forced": true,
+              "absent_source": "measured"
             },
             {
               "event": [
@@ -1205,7 +1475,8 @@
                 "wct/2_2.npy"
               ],
               "absent": [],
-              "same_as_forced": true
+              "same_as_forced": true,
+              "absent_source": "measured"
             },
             {
               "event": [
@@ -1216,7 +1487,8 @@
                 "opr/uto_1_2_2.json"
               ],
               "absent": [],
-              "same_as_forced": true
+              "same_as_forced": true,
+              "absent_source": "measured"
             },
             {
               "event": [
@@ -1227,10 +1499,13 @@
                 "hyb/uto_1.npy"
               ],
               "absent": [],
-              "same_as_forced": true
+              "same_as_forced": true,
+              "absent_source": "measured"
             }
           ],
-          "seconds_events": 31.366434700321406,
+          "wrong_at_end": 0,
+          "miss_spans": [],
+          "seconds_events": 27.21155560016632,
           "executed_total": 36,
           "missed_total": 0,
           "restored": [
@@ -1250,8 +1525,8 @@
             []
           ],
           "graph_edges": 23,
-          "graph_build_s": 0.02081500005442649,
-          "seconds_total_wall": 52.40976379998028
+          "graph_build_s": 0.0185602999990806,
+          "seconds_total_wall": 45.723593099974096
         }
       },
       "snakemake_triggers_check": {
@@ -1265,6 +1540,10 @@
           "default": 4,
           "same": true
         }
+      },
+      "snakemake_triggers_per_event": {
+        "checked": 13,
+        "same": 13
       }
     },
     "full": {
@@ -4278,7 +4557,8 @@
               "executed": [],
               "absent": [
                 "p1/uto.npy"
-              ]
+              ],
+              "absent_source": "inferred"
             },
             {
               "event": [
@@ -4288,7 +4568,8 @@
               "executed": [],
               "absent": [
                 "hyb/pos_1.npy"
-              ]
+              ],
+              "absent_source": "inferred"
             },
             {
               "event": [
@@ -4298,7 +4579,8 @@
               "executed": [],
               "absent": [
                 "wct/2_2.npy"
-              ]
+              ],
+              "absent_source": "inferred"
             },
             {
               "event": [
@@ -4308,7 +4590,8 @@
               "executed": [
                 "opr/uto_1_2_2.json"
               ],
-              "absent": []
+              "absent": [],
+              "absent_source": "inferred"
             },
             {
               "event": [
@@ -4318,13 +4601,23 @@
               "executed": [],
               "absent": [
                 "hyb/uto_1.npy"
-              ]
+              ],
+              "absent_source": "inferred"
             }
           ],
           "seconds_events": 774.320580999949,
           "executed_total": 1073,
           "missed_total": 136,
-          "seconds_total_wall": 909.773256400018
+          "seconds_total_wall": 909.773256400018,
+          "wrong_at_end": 0,
+          "miss_spans": [
+            {
+              "from_event": 9,
+              "repaired_at_event": 10,
+              "events_wrong": 1,
+              "jobs": 136
+            }
+          ]
         },
         "dvc": {
           "initial_executed": 154,
@@ -5484,7 +5777,8 @@
               ],
               "executed": [],
               "absent": [],
-              "restored": true
+              "restored": true,
+              "absent_source": "measured"
             },
             {
               "event": [
@@ -5493,7 +5787,8 @@
               ],
               "executed": [],
               "absent": [],
-              "restored": true
+              "restored": true,
+              "absent_source": "measured"
             },
             {
               "event": [
@@ -5502,7 +5797,8 @@
               ],
               "executed": [],
               "absent": [],
-              "restored": true
+              "restored": true,
+              "absent_source": "measured"
             },
             {
               "event": [
@@ -5511,7 +5807,8 @@
               ],
               "executed": [],
               "absent": [],
-              "restored": true
+              "restored": true,
+              "absent_source": "measured"
             },
             {
               "event": [
@@ -5520,13 +5817,23 @@
               ],
               "executed": [],
               "absent": [],
-              "restored": true
+              "restored": true,
+              "absent_source": "measured"
             }
           ],
           "seconds_events": 794.9785298999632,
           "executed_total": 709,
           "missed_total": 136,
-          "seconds_total_wall": 966.5210741000483
+          "seconds_total_wall": 966.5210741000483,
+          "wrong_at_end": 0,
+          "miss_spans": [
+            {
+              "from_event": 9,
+              "repaired_at_event": 10,
+              "events_wrong": 1,
+              "jobs": 136
+            }
+          ]
         },
         "dagster": {
           "initial_executed": 154,
@@ -6688,7 +6995,8 @@
               "status_evicted": "FRESH",
               "absent": [
                 "p1/uto.npy"
-              ]
+              ],
+              "absent_source": "inferred"
             },
             {
               "event": [
@@ -6699,7 +7007,8 @@
               "status_evicted": "FRESH",
               "absent": [
                 "hyb/pos_1.npy"
-              ]
+              ],
+              "absent_source": "inferred"
             },
             {
               "event": [
@@ -6710,7 +7019,8 @@
               "status_evicted": "FRESH",
               "absent": [
                 "wct/2_2.npy"
-              ]
+              ],
+              "absent_source": "inferred"
             },
             {
               "event": [
@@ -6721,7 +7031,8 @@
               "status_evicted": "FRESH",
               "absent": [
                 "opr/uto_1_2_2.json"
-              ]
+              ],
+              "absent_source": "inferred"
             },
             {
               "event": [
@@ -6732,13 +7043,23 @@
               "status_evicted": "FRESH",
               "absent": [
                 "hyb/uto_1.npy"
-              ]
+              ],
+              "absent_source": "inferred"
             }
           ],
           "seconds_events": 704.5141967999516,
           "executed_total": 709,
           "missed_total": 136,
-          "seconds_total_wall": 853.0063848000718
+          "seconds_total_wall": 853.0063848000718,
+          "wrong_at_end": 0,
+          "miss_spans": [
+            {
+              "from_event": 9,
+              "repaired_at_event": 10,
+              "events_wrong": 1,
+              "jobs": 136
+            }
+          ]
         },
         "hyppo_safe": {
           "initial_executed": 154,
@@ -8019,7 +8340,8 @@
                 "p1/uto.npy"
               ],
               "absent": [],
-              "same_as_forced": true
+              "same_as_forced": true,
+              "absent_source": "measured"
             },
             {
               "event": [
@@ -8030,7 +8352,8 @@
                 "hyb/pos_1.npy"
               ],
               "absent": [],
-              "same_as_forced": true
+              "same_as_forced": true,
+              "absent_source": "measured"
             },
             {
               "event": [
@@ -8041,7 +8364,8 @@
                 "wct/2_2.npy"
               ],
               "absent": [],
-              "same_as_forced": true
+              "same_as_forced": true,
+              "absent_source": "measured"
             },
             {
               "event": [
@@ -8052,7 +8376,8 @@
                 "opr/uto_1_2_2.json"
               ],
               "absent": [],
-              "same_as_forced": true
+              "same_as_forced": true,
+              "absent_source": "measured"
             },
             {
               "event": [
@@ -8063,7 +8388,8 @@
                 "hyb/uto_1.npy"
               ],
               "absent": [],
-              "same_as_forced": true
+              "same_as_forced": true,
+              "absent_source": "measured"
             }
           ],
           "seconds_events": 732.3230197000084,
@@ -8087,7 +8413,9 @@
           ],
           "graph_edges": 572,
           "graph_build_s": 2.213538200012408,
-          "seconds_total_wall": 852.0253848999273
+          "seconds_total_wall": 852.0253848999273,
+          "wrong_at_end": 0,
+          "miss_spans": []
         }
       },
       "snakemake_triggers_check": {
@@ -8235,35 +8563,40 @@
                 "evict",
                 "p1/uto.npy"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "measured"
             },
             {
               "event": [
                 "evict",
                 "hyb/pos_1.npy"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "measured"
             },
             {
               "event": [
                 "evict",
                 "wct/2_2.npy"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "measured"
             },
             {
               "event": [
                 "evict",
                 "opr/uto_1_2_2.json"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "measured"
             },
             {
               "event": [
                 "evict",
                 "hyb/uto_1.npy"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "measured"
             }
           ]
         },
@@ -8399,35 +8732,40 @@
                 "evict",
                 "p1/uto.npy"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "measured"
             },
             {
               "event": [
                 "evict",
                 "hyb/pos_1.npy"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "measured"
             },
             {
               "event": [
                 "evict",
                 "wct/2_2.npy"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "measured"
             },
             {
               "event": [
                 "evict",
                 "opr/uto_1_2_2.json"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "measured"
             },
             {
               "event": [
                 "evict",
                 "hyb/uto_1.npy"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "measured"
             }
           ]
         },
@@ -8563,35 +8901,40 @@
                 "evict",
                 "p1/uto.npy"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "measured"
             },
             {
               "event": [
                 "evict",
                 "hyb/pos_1.npy"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "measured"
             },
             {
               "event": [
                 "evict",
                 "wct/2_2.npy"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "measured"
             },
             {
               "event": [
                 "evict",
                 "opr/uto_1_2_2.json"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "measured"
             },
             {
               "event": [
                 "evict",
                 "hyb/uto_1.npy"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "measured"
             }
           ]
         },
@@ -8727,35 +9070,40 @@
                 "evict",
                 "p1/uto.npy"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "measured"
             },
             {
               "event": [
                 "evict",
                 "hyb/pos_1.npy"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "measured"
             },
             {
               "event": [
                 "evict",
                 "wct/2_2.npy"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "measured"
             },
             {
               "event": [
                 "evict",
                 "opr/uto_1_2_2.json"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "measured"
             },
             {
               "event": [
                 "evict",
                 "hyb/uto_1.npy"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "measured"
             }
           ]
         },
@@ -8893,35 +9241,40 @@
                 "evict",
                 "p1/uto.npy"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "inferred"
             },
             {
               "event": [
                 "evict",
                 "hyb/pos_1.npy"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "inferred"
             },
             {
               "event": [
                 "evict",
                 "wct/2_2.npy"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "inferred"
             },
             {
               "event": [
                 "evict",
                 "opr/uto_1_2_2.json"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "inferred"
             },
             {
               "event": [
                 "evict",
                 "hyb/uto_1.npy"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "inferred"
             }
           ]
         },
@@ -9057,35 +9410,40 @@
                 "evict",
                 "p1/uto.npy"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "measured"
             },
             {
               "event": [
                 "evict",
                 "hyb/pos_1.npy"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "measured"
             },
             {
               "event": [
                 "evict",
                 "wct/2_2.npy"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "measured"
             },
             {
               "event": [
                 "evict",
                 "opr/uto_1_2_2.json"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "measured"
             },
             {
               "event": [
                 "evict",
                 "hyb/uto_1.npy"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "measured"
             }
           ]
         },
@@ -9221,35 +9579,40 @@
                 "evict",
                 "p1/uto.npy"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "inferred"
             },
             {
               "event": [
                 "evict",
                 "hyb/pos_1.npy"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "inferred"
             },
             {
               "event": [
                 "evict",
                 "wct/2_2.npy"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "inferred"
             },
             {
               "event": [
                 "evict",
                 "opr/uto_1_2_2.json"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "inferred"
             },
             {
               "event": [
                 "evict",
                 "hyb/uto_1.npy"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "inferred"
             }
           ]
         },
@@ -9385,35 +9748,40 @@
                 "evict",
                 "p1/uto.npy"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "measured"
             },
             {
               "event": [
                 "evict",
                 "hyb/pos_1.npy"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "measured"
             },
             {
               "event": [
                 "evict",
                 "wct/2_2.npy"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "measured"
             },
             {
               "event": [
                 "evict",
                 "opr/uto_1_2_2.json"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "measured"
             },
             {
               "event": [
                 "evict",
                 "hyb/uto_1.npy"
               ],
-              "match": true
+              "match": true,
+              "absent_source": "measured"
             }
           ]
         },
@@ -9436,7 +9804,20 @@
       "edges": 206110,
       "events": 39600
     },
-    "generator": "Генератор (детерминирован по seed и имени графа): сущности: m = ceil(|V|/4), у каждой 1..3 потребителя (равномерно, без повторов); пары (сущность, потребитель) перемешаны, объявлены первые round(p*|пар|) (вложенные множества по p); события: тип param:evict:revise = 6:3:1, param -- равномерный узел, выход меняется с вероятностью 0.7 (тогда меняются узел и все потомки, иначе ничего); evict -- равномерный узел (мир не меняется); revise -- равномерная сущность (меняются все потребители и их потомки).",
+    "p_output_changed": 0.7,
+    "weights": {
+      "param": 6,
+      "evict": 3,
+      "revise": 1
+    },
+    "revise_always_changes_output": true,
+    "entities_per_node": 0.25,
+    "consumers_per_entity": [
+      1,
+      3
+    ],
+    "delta_rule": "closure over descendants (no mid-chain cutoff in corpora; cutoff-tool counts are upper bounds)",
+    "generator": "Генератор (детерминирован по seed и имени графа): сущности: m = ceil(|V|/4), у каждой 1..3 потребителя (равномерно, без повторов); пары (сущность, потребитель) перемешаны, объявлены первые round(p*|пар|) (вложенные множества по p); события: тип param:evict:revise = 6:3:1, param -- равномерный узел, выход меняется с вероятностью p_out (0.7; тогда меняются узел и все потомки, иначе ничего); evict -- равномерный узел (мир не меняется); revise -- равномерная сущность (меняются все потребители и их потомки).",
     "state": "events per graph applied in order with persistent state (simulators.run_sequence)",
     "missed": "newly wrong results kept after the event (W' minus W), summed over events",
     "native_evict": "evaluated per evict event; state continues from the forced variant (as in the real runs, where each native step is followed by the forced one)",
@@ -9447,7 +9828,7 @@
       "bazel",
       "hyppo_cascade"
     ],
-    "seconds": 17.14556039997842
+    "seconds": 15.813098600017838
   },
   "per_system": {
     "snakemake": {
@@ -9476,6 +9857,26 @@
               "missed": 28656,
               "events": 3992
             }
+          },
+          "by_kind_native": {
+            "param": {
+              "recomputed": 328436,
+              "missed": 0,
+              "absent": 0,
+              "events": 23762
+            },
+            "evict": {
+              "recomputed": 1261,
+              "missed": 0,
+              "absent": 10585,
+              "events": 11846
+            },
+            "revise": {
+              "recomputed": 0,
+              "missed": 28656,
+              "absent": 0,
+              "events": 3992
+            }
           }
         },
         "0.5": {
@@ -9498,6 +9899,26 @@
               "missed": 20357,
               "events": 3992
             }
+          },
+          "by_kind_native": {
+            "param": {
+              "recomputed": 328436,
+              "missed": 0,
+              "absent": 0,
+              "events": 23762
+            },
+            "evict": {
+              "recomputed": 1261,
+              "missed": 0,
+              "absent": 10585,
+              "events": 11846
+            },
+            "revise": {
+              "recomputed": 42168,
+              "missed": 20357,
+              "absent": 0,
+              "events": 3992
+            }
           }
         },
         "1.0": {
@@ -9518,6 +9939,26 @@
             "revise": {
               "recomputed": 82960,
               "missed": 0,
+              "events": 3992
+            }
+          },
+          "by_kind_native": {
+            "param": {
+              "recomputed": 328436,
+              "missed": 0,
+              "absent": 0,
+              "events": 23762
+            },
+            "evict": {
+              "recomputed": 1261,
+              "missed": 0,
+              "absent": 10585,
+              "events": 11846
+            },
+            "revise": {
+              "recomputed": 82960,
+              "missed": 0,
+              "absent": 0,
               "events": 3992
             }
           }
@@ -9557,6 +9998,26 @@
               "missed": 27075,
               "events": 3992
             }
+          },
+          "by_kind_native": {
+            "param": {
+              "recomputed": 248243,
+              "missed": 0,
+              "absent": 0,
+              "events": 23762
+            },
+            "evict": {
+              "recomputed": 0,
+              "missed": 0,
+              "absent": 0,
+              "events": 11846
+            },
+            "revise": {
+              "recomputed": 0,
+              "missed": 27075,
+              "absent": 0,
+              "events": 3992
+            }
           }
         },
         "0.5": {
@@ -9579,6 +10040,26 @@
               "missed": 19259,
               "events": 3992
             }
+          },
+          "by_kind_native": {
+            "param": {
+              "recomputed": 245131,
+              "missed": 0,
+              "absent": 0,
+              "events": 23762
+            },
+            "evict": {
+              "recomputed": 0,
+              "missed": 0,
+              "absent": 0,
+              "events": 11846
+            },
+            "revise": {
+              "recomputed": 42168,
+              "missed": 19259,
+              "absent": 0,
+              "events": 3992
+            }
           }
         },
         "1.0": {
@@ -9599,6 +10080,26 @@
             "revise": {
               "recomputed": 82960,
               "missed": 0,
+              "events": 3992
+            }
+          },
+          "by_kind_native": {
+            "param": {
+              "recomputed": 239314,
+              "missed": 0,
+              "absent": 0,
+              "events": 23762
+            },
+            "evict": {
+              "recomputed": 0,
+              "missed": 0,
+              "absent": 0,
+              "events": 11846
+            },
+            "revise": {
+              "recomputed": 82960,
+              "missed": 0,
+              "absent": 0,
               "events": 3992
             }
           }
@@ -9638,6 +10139,26 @@
               "missed": 27075,
               "events": 3992
             }
+          },
+          "by_kind_native": {
+            "param": {
+              "recomputed": 248243,
+              "missed": 0,
+              "absent": 0,
+              "events": 23762
+            },
+            "evict": {
+              "recomputed": 0,
+              "missed": 0,
+              "absent": 11846,
+              "events": 11846
+            },
+            "revise": {
+              "recomputed": 0,
+              "missed": 27075,
+              "absent": 0,
+              "events": 3992
+            }
           }
         },
         "0.5": {
@@ -9660,6 +10181,26 @@
               "missed": 19259,
               "events": 3992
             }
+          },
+          "by_kind_native": {
+            "param": {
+              "recomputed": 245131,
+              "missed": 0,
+              "absent": 0,
+              "events": 23762
+            },
+            "evict": {
+              "recomputed": 0,
+              "missed": 0,
+              "absent": 11846,
+              "events": 11846
+            },
+            "revise": {
+              "recomputed": 42168,
+              "missed": 19259,
+              "absent": 0,
+              "events": 3992
+            }
           }
         },
         "1.0": {
@@ -9680,6 +10221,26 @@
             "revise": {
               "recomputed": 82960,
               "missed": 0,
+              "events": 3992
+            }
+          },
+          "by_kind_native": {
+            "param": {
+              "recomputed": 239314,
+              "missed": 0,
+              "absent": 0,
+              "events": 23762
+            },
+            "evict": {
+              "recomputed": 0,
+              "missed": 0,
+              "absent": 11846,
+              "events": 11846
+            },
+            "revise": {
+              "recomputed": 82960,
+              "missed": 0,
+              "absent": 0,
               "events": 3992
             }
           }
@@ -9719,6 +10280,26 @@
               "missed": 28656,
               "events": 3992
             }
+          },
+          "by_kind_native": {
+            "param": {
+              "recomputed": 328436,
+              "missed": 0,
+              "absent": 0,
+              "events": 23762
+            },
+            "evict": {
+              "recomputed": 0,
+              "missed": 0,
+              "absent": 11846,
+              "events": 11846
+            },
+            "revise": {
+              "recomputed": 0,
+              "missed": 28656,
+              "absent": 0,
+              "events": 3992
+            }
           }
         },
         "0.5": {
@@ -9741,6 +10322,26 @@
               "missed": 20357,
               "events": 3992
             }
+          },
+          "by_kind_native": {
+            "param": {
+              "recomputed": 328436,
+              "missed": 0,
+              "absent": 0,
+              "events": 23762
+            },
+            "evict": {
+              "recomputed": 0,
+              "missed": 0,
+              "absent": 11846,
+              "events": 11846
+            },
+            "revise": {
+              "recomputed": 42168,
+              "missed": 20357,
+              "absent": 0,
+              "events": 3992
+            }
           }
         },
         "1.0": {
@@ -9761,6 +10362,26 @@
             "revise": {
               "recomputed": 82960,
               "missed": 0,
+              "events": 3992
+            }
+          },
+          "by_kind_native": {
+            "param": {
+              "recomputed": 328436,
+              "missed": 0,
+              "absent": 0,
+              "events": 23762
+            },
+            "evict": {
+              "recomputed": 0,
+              "missed": 0,
+              "absent": 11846,
+              "events": 11846
+            },
+            "revise": {
+              "recomputed": 82960,
+              "missed": 0,
+              "absent": 0,
               "events": 3992
             }
           }
@@ -9800,6 +10421,26 @@
               "missed": 28656,
               "events": 3992
             }
+          },
+          "by_kind_native": {
+            "param": {
+              "recomputed": 328436,
+              "missed": 0,
+              "absent": 0,
+              "events": 23762
+            },
+            "evict": {
+              "recomputed": 168903,
+              "missed": 0,
+              "absent": 0,
+              "events": 11846
+            },
+            "revise": {
+              "recomputed": 0,
+              "missed": 28656,
+              "absent": 0,
+              "events": 3992
+            }
           }
         },
         "0.5": {
@@ -9822,6 +10463,26 @@
               "missed": 20357,
               "events": 3992
             }
+          },
+          "by_kind_native": {
+            "param": {
+              "recomputed": 328436,
+              "missed": 0,
+              "absent": 0,
+              "events": 23762
+            },
+            "evict": {
+              "recomputed": 168903,
+              "missed": 0,
+              "absent": 0,
+              "events": 11846
+            },
+            "revise": {
+              "recomputed": 42168,
+              "missed": 20357,
+              "absent": 0,
+              "events": 3992
+            }
           }
         },
         "1.0": {
@@ -9842,6 +10503,26 @@
             "revise": {
               "recomputed": 82960,
               "missed": 0,
+              "events": 3992
+            }
+          },
+          "by_kind_native": {
+            "param": {
+              "recomputed": 328436,
+              "missed": 0,
+              "absent": 0,
+              "events": 23762
+            },
+            "evict": {
+              "recomputed": 168903,
+              "missed": 0,
+              "absent": 0,
+              "events": 11846
+            },
+            "revise": {
+              "recomputed": 82960,
+              "missed": 0,
+              "absent": 0,
               "events": 3992
             }
           }
@@ -9875,6 +10556,26 @@
               "missed": 27075,
               "events": 3992
             }
+          },
+          "by_kind_native": {
+            "param": {
+              "recomputed": 248243,
+              "missed": 0,
+              "absent": 0,
+              "events": 23762
+            },
+            "evict": {
+              "recomputed": 27762,
+              "missed": 0,
+              "absent": 0,
+              "events": 11846
+            },
+            "revise": {
+              "recomputed": 0,
+              "missed": 27075,
+              "absent": 0,
+              "events": 3992
+            }
           }
         },
         "0.5": {
@@ -9897,6 +10598,26 @@
               "missed": 19259,
               "events": 3992
             }
+          },
+          "by_kind_native": {
+            "param": {
+              "recomputed": 245131,
+              "missed": 0,
+              "absent": 0,
+              "events": 23762
+            },
+            "evict": {
+              "recomputed": 22226,
+              "missed": 0,
+              "absent": 0,
+              "events": 11846
+            },
+            "revise": {
+              "recomputed": 42168,
+              "missed": 19259,
+              "absent": 0,
+              "events": 3992
+            }
           }
         },
         "1.0": {
@@ -9917,6 +10638,26 @@
             "revise": {
               "recomputed": 82960,
               "missed": 0,
+              "events": 3992
+            }
+          },
+          "by_kind_native": {
+            "param": {
+              "recomputed": 239314,
+              "missed": 0,
+              "absent": 0,
+              "events": 23762
+            },
+            "evict": {
+              "recomputed": 11846,
+              "missed": 0,
+              "absent": 0,
+              "events": 11846
+            },
+            "revise": {
+              "recomputed": 82960,
+              "missed": 0,
+              "absent": 0,
               "events": 3992
             }
           }
@@ -9950,6 +10691,26 @@
               "missed": 27075,
               "events": 3992
             }
+          },
+          "by_kind_native": {
+            "param": {
+              "recomputed": 248243,
+              "missed": 0,
+              "absent": 0,
+              "events": 23762
+            },
+            "evict": {
+              "recomputed": 27762,
+              "missed": 0,
+              "absent": 0,
+              "events": 11846
+            },
+            "revise": {
+              "recomputed": 0,
+              "missed": 27075,
+              "absent": 0,
+              "events": 3992
+            }
           }
         },
         "0.5": {
@@ -9972,6 +10733,26 @@
               "missed": 19259,
               "events": 3992
             }
+          },
+          "by_kind_native": {
+            "param": {
+              "recomputed": 245131,
+              "missed": 0,
+              "absent": 0,
+              "events": 23762
+            },
+            "evict": {
+              "recomputed": 22226,
+              "missed": 0,
+              "absent": 0,
+              "events": 11846
+            },
+            "revise": {
+              "recomputed": 42168,
+              "missed": 19259,
+              "absent": 0,
+              "events": 3992
+            }
           }
         },
         "1.0": {
@@ -9992,6 +10773,26 @@
             "revise": {
               "recomputed": 82960,
               "missed": 0,
+              "events": 3992
+            }
+          },
+          "by_kind_native": {
+            "param": {
+              "recomputed": 239314,
+              "missed": 0,
+              "absent": 0,
+              "events": 23762
+            },
+            "evict": {
+              "recomputed": 11846,
+              "missed": 0,
+              "absent": 0,
+              "events": 11846
+            },
+            "revise": {
+              "recomputed": 82960,
+              "missed": 0,
+              "absent": 0,
               "events": 3992
             }
           }
@@ -10025,6 +10826,26 @@
               "missed": 0,
               "events": 3992
             }
+          },
+          "by_kind_native": {
+            "param": {
+              "recomputed": 328436,
+              "missed": 0,
+              "absent": 0,
+              "events": 23762
+            },
+            "evict": {
+              "recomputed": 168903,
+              "missed": 0,
+              "absent": 0,
+              "events": 11846
+            },
+            "revise": {
+              "recomputed": 82960,
+              "missed": 0,
+              "absent": 0,
+              "events": 3992
+            }
           }
         },
         "0.5": {
@@ -10047,6 +10868,26 @@
               "missed": 0,
               "events": 3992
             }
+          },
+          "by_kind_native": {
+            "param": {
+              "recomputed": 328436,
+              "missed": 0,
+              "absent": 0,
+              "events": 23762
+            },
+            "evict": {
+              "recomputed": 168903,
+              "missed": 0,
+              "absent": 0,
+              "events": 11846
+            },
+            "revise": {
+              "recomputed": 82960,
+              "missed": 0,
+              "absent": 0,
+              "events": 3992
+            }
           }
         },
         "1.0": {
@@ -10067,6 +10908,26 @@
             "revise": {
               "recomputed": 82960,
               "missed": 0,
+              "events": 3992
+            }
+          },
+          "by_kind_native": {
+            "param": {
+              "recomputed": 328436,
+              "missed": 0,
+              "absent": 0,
+              "events": 23762
+            },
+            "evict": {
+              "recomputed": 168903,
+              "missed": 0,
+              "absent": 0,
+              "events": 11846
+            },
+            "revise": {
+              "recomputed": 82960,
+              "missed": 0,
+              "absent": 0,
               "events": 3992
             }
           }
@@ -10100,6 +10961,26 @@
               "missed": 0,
               "events": 3992
             }
+          },
+          "by_kind_native": {
+            "param": {
+              "recomputed": 328436,
+              "missed": 0,
+              "absent": 0,
+              "events": 23762
+            },
+            "evict": {
+              "recomputed": 11846,
+              "missed": 0,
+              "absent": 0,
+              "events": 11846
+            },
+            "revise": {
+              "recomputed": 82960,
+              "missed": 0,
+              "absent": 0,
+              "events": 3992
+            }
           }
         },
         "0.5": {
@@ -10122,6 +11003,26 @@
               "missed": 0,
               "events": 3992
             }
+          },
+          "by_kind_native": {
+            "param": {
+              "recomputed": 328436,
+              "missed": 0,
+              "absent": 0,
+              "events": 23762
+            },
+            "evict": {
+              "recomputed": 11846,
+              "missed": 0,
+              "absent": 0,
+              "events": 11846
+            },
+            "revise": {
+              "recomputed": 82960,
+              "missed": 0,
+              "absent": 0,
+              "events": 3992
+            }
           }
         },
         "1.0": {
@@ -10142,6 +11043,26 @@
             "revise": {
               "recomputed": 82960,
               "missed": 0,
+              "events": 3992
+            }
+          },
+          "by_kind_native": {
+            "param": {
+              "recomputed": 328436,
+              "missed": 0,
+              "absent": 0,
+              "events": 23762
+            },
+            "evict": {
+              "recomputed": 11846,
+              "missed": 0,
+              "absent": 0,
+              "events": 11846
+            },
+            "revise": {
+              "recomputed": 82960,
+              "missed": 0,
+              "absent": 0,
               "events": 3992
             }
           }
@@ -10289,6 +11210,556 @@
             "evict": 0,
             "revise": 0
           }
+        }
+      }
+    }
+  },
+  "sensitivity": {
+    "p_output_changed": [
+      0.5,
+      0.7,
+      0.9,
+      1.0
+    ],
+    "by_P": {
+      "0.5": {
+        "per_system": {
+          "snakemake": {
+            "0.0": {
+              "recomputed": 497339,
+              "missed": 28656
+            },
+            "0.5": {
+              "recomputed": 539507,
+              "missed": 20357
+            },
+            "1.0": {
+              "recomputed": 580299,
+              "missed": 0
+            }
+          },
+          "dvc": {
+            "0.0": {
+              "recomputed": 223901,
+              "missed": 26518
+            },
+            "0.5": {
+              "recomputed": 253677,
+              "missed": 18836
+            },
+            "1.0": {
+              "recomputed": 272644,
+              "missed": 0
+            }
+          },
+          "dagster": {
+            "0.0": {
+              "recomputed": 223901,
+              "missed": 26518
+            },
+            "0.5": {
+              "recomputed": 253677,
+              "missed": 18836
+            },
+            "1.0": {
+              "recomputed": 272644,
+              "missed": 0
+            }
+          },
+          "dagster_eager": {
+            "0.0": {
+              "recomputed": 497339,
+              "missed": 28656
+            },
+            "0.5": {
+              "recomputed": 539507,
+              "missed": 20357
+            },
+            "1.0": {
+              "recomputed": 580299,
+              "missed": 0
+            }
+          },
+          "nextflow": {
+            "0.0": {
+              "recomputed": 497339,
+              "missed": 28656
+            },
+            "0.5": {
+              "recomputed": 539507,
+              "missed": 20357
+            },
+            "1.0": {
+              "recomputed": 580299,
+              "missed": 0
+            }
+          },
+          "nextflow_deep": {
+            "0.0": {
+              "recomputed": 223901,
+              "missed": 26518
+            },
+            "0.5": {
+              "recomputed": 253677,
+              "missed": 18836
+            },
+            "1.0": {
+              "recomputed": 272644,
+              "missed": 0
+            }
+          },
+          "bazel": {
+            "0.0": {
+              "recomputed": 223901,
+              "missed": 26518
+            },
+            "0.5": {
+              "recomputed": 253677,
+              "missed": 18836
+            },
+            "1.0": {
+              "recomputed": 272644,
+              "missed": 0
+            }
+          },
+          "hyppo_cascade": {
+            "0.0": {
+              "recomputed": 580299,
+              "missed": 0
+            },
+            "0.5": {
+              "recomputed": 580299,
+              "missed": 0
+            },
+            "1.0": {
+              "recomputed": 580299,
+              "missed": 0
+            }
+          },
+          "hyppo_safe": {
+            "0.0": {
+              "recomputed": 423242,
+              "missed": 0
+            },
+            "0.5": {
+              "recomputed": 423242,
+              "missed": 0
+            },
+            "1.0": {
+              "recomputed": 423242,
+              "missed": 0
+            }
+          }
+        },
+        "dvc_fewer_safe": {
+          "0.0": 1232,
+          "0.5": 2053,
+          "1.0": 10635
+        }
+      },
+      "0.7": {
+        "per_system": {
+          "snakemake": {
+            "0.0": {
+              "recomputed": 497339,
+              "missed": 28656
+            },
+            "0.5": {
+              "recomputed": 539507,
+              "missed": 20357
+            },
+            "1.0": {
+              "recomputed": 580299,
+              "missed": 0
+            }
+          },
+          "dvc": {
+            "0.0": {
+              "recomputed": 276005,
+              "missed": 27075
+            },
+            "0.5": {
+              "recomputed": 309525,
+              "missed": 19259
+            },
+            "1.0": {
+              "recomputed": 334120,
+              "missed": 0
+            }
+          },
+          "dagster": {
+            "0.0": {
+              "recomputed": 276005,
+              "missed": 27075
+            },
+            "0.5": {
+              "recomputed": 309525,
+              "missed": 19259
+            },
+            "1.0": {
+              "recomputed": 334120,
+              "missed": 0
+            }
+          },
+          "dagster_eager": {
+            "0.0": {
+              "recomputed": 497339,
+              "missed": 28656
+            },
+            "0.5": {
+              "recomputed": 539507,
+              "missed": 20357
+            },
+            "1.0": {
+              "recomputed": 580299,
+              "missed": 0
+            }
+          },
+          "nextflow": {
+            "0.0": {
+              "recomputed": 497339,
+              "missed": 28656
+            },
+            "0.5": {
+              "recomputed": 539507,
+              "missed": 20357
+            },
+            "1.0": {
+              "recomputed": 580299,
+              "missed": 0
+            }
+          },
+          "nextflow_deep": {
+            "0.0": {
+              "recomputed": 276005,
+              "missed": 27075
+            },
+            "0.5": {
+              "recomputed": 309525,
+              "missed": 19259
+            },
+            "1.0": {
+              "recomputed": 334120,
+              "missed": 0
+            }
+          },
+          "bazel": {
+            "0.0": {
+              "recomputed": 276005,
+              "missed": 27075
+            },
+            "0.5": {
+              "recomputed": 309525,
+              "missed": 19259
+            },
+            "1.0": {
+              "recomputed": 334120,
+              "missed": 0
+            }
+          },
+          "hyppo_cascade": {
+            "0.0": {
+              "recomputed": 580299,
+              "missed": 0
+            },
+            "0.5": {
+              "recomputed": 580299,
+              "missed": 0
+            },
+            "1.0": {
+              "recomputed": 580299,
+              "missed": 0
+            }
+          },
+          "hyppo_safe": {
+            "0.0": {
+              "recomputed": 423242,
+              "missed": 0
+            },
+            "0.5": {
+              "recomputed": 423242,
+              "missed": 0
+            },
+            "1.0": {
+              "recomputed": 423242,
+              "missed": 0
+            }
+          }
+        },
+        "dvc_fewer_safe": {
+          "0.0": 789,
+          "0.5": 1317,
+          "1.0": 6357
+        }
+      },
+      "0.9": {
+        "per_system": {
+          "snakemake": {
+            "0.0": {
+              "recomputed": 497339,
+              "missed": 28656
+            },
+            "0.5": {
+              "recomputed": 539507,
+              "missed": 20357
+            },
+            "1.0": {
+              "recomputed": 580299,
+              "missed": 0
+            }
+          },
+          "dvc": {
+            "0.0": {
+              "recomputed": 328428,
+              "missed": 27906
+            },
+            "0.5": {
+              "recomputed": 364650,
+              "missed": 19847
+            },
+            "1.0": {
+              "recomputed": 394484,
+              "missed": 0
+            }
+          },
+          "dagster": {
+            "0.0": {
+              "recomputed": 328428,
+              "missed": 27906
+            },
+            "0.5": {
+              "recomputed": 364650,
+              "missed": 19847
+            },
+            "1.0": {
+              "recomputed": 394484,
+              "missed": 0
+            }
+          },
+          "dagster_eager": {
+            "0.0": {
+              "recomputed": 497339,
+              "missed": 28656
+            },
+            "0.5": {
+              "recomputed": 539507,
+              "missed": 20357
+            },
+            "1.0": {
+              "recomputed": 580299,
+              "missed": 0
+            }
+          },
+          "nextflow": {
+            "0.0": {
+              "recomputed": 497339,
+              "missed": 28656
+            },
+            "0.5": {
+              "recomputed": 539507,
+              "missed": 20357
+            },
+            "1.0": {
+              "recomputed": 580299,
+              "missed": 0
+            }
+          },
+          "nextflow_deep": {
+            "0.0": {
+              "recomputed": 328428,
+              "missed": 27906
+            },
+            "0.5": {
+              "recomputed": 364650,
+              "missed": 19847
+            },
+            "1.0": {
+              "recomputed": 394484,
+              "missed": 0
+            }
+          },
+          "bazel": {
+            "0.0": {
+              "recomputed": 328428,
+              "missed": 27906
+            },
+            "0.5": {
+              "recomputed": 364650,
+              "missed": 19847
+            },
+            "1.0": {
+              "recomputed": 394484,
+              "missed": 0
+            }
+          },
+          "hyppo_cascade": {
+            "0.0": {
+              "recomputed": 580299,
+              "missed": 0
+            },
+            "0.5": {
+              "recomputed": 580299,
+              "missed": 0
+            },
+            "1.0": {
+              "recomputed": 580299,
+              "missed": 0
+            }
+          },
+          "hyppo_safe": {
+            "0.0": {
+              "recomputed": 423242,
+              "missed": 0
+            },
+            "0.5": {
+              "recomputed": 423242,
+              "missed": 0
+            },
+            "1.0": {
+              "recomputed": 423242,
+              "missed": 0
+            }
+          }
+        },
+        "dvc_fewer_safe": {
+          "0.0": 253,
+          "0.5": 441,
+          "1.0": 2178
+        }
+      },
+      "1.0": {
+        "per_system": {
+          "snakemake": {
+            "0.0": {
+              "recomputed": 497339,
+              "missed": 28656
+            },
+            "0.5": {
+              "recomputed": 539507,
+              "missed": 20357
+            },
+            "1.0": {
+              "recomputed": 580299,
+              "missed": 0
+            }
+          },
+          "dvc": {
+            "0.0": {
+              "recomputed": 354117,
+              "missed": 28066
+            },
+            "0.5": {
+              "recomputed": 391287,
+              "missed": 19974
+            },
+            "1.0": {
+              "recomputed": 423242,
+              "missed": 0
+            }
+          },
+          "dagster": {
+            "0.0": {
+              "recomputed": 354117,
+              "missed": 28066
+            },
+            "0.5": {
+              "recomputed": 391287,
+              "missed": 19974
+            },
+            "1.0": {
+              "recomputed": 423242,
+              "missed": 0
+            }
+          },
+          "dagster_eager": {
+            "0.0": {
+              "recomputed": 497339,
+              "missed": 28656
+            },
+            "0.5": {
+              "recomputed": 539507,
+              "missed": 20357
+            },
+            "1.0": {
+              "recomputed": 580299,
+              "missed": 0
+            }
+          },
+          "nextflow": {
+            "0.0": {
+              "recomputed": 497339,
+              "missed": 28656
+            },
+            "0.5": {
+              "recomputed": 539507,
+              "missed": 20357
+            },
+            "1.0": {
+              "recomputed": 580299,
+              "missed": 0
+            }
+          },
+          "nextflow_deep": {
+            "0.0": {
+              "recomputed": 354117,
+              "missed": 28066
+            },
+            "0.5": {
+              "recomputed": 391287,
+              "missed": 19974
+            },
+            "1.0": {
+              "recomputed": 423242,
+              "missed": 0
+            }
+          },
+          "bazel": {
+            "0.0": {
+              "recomputed": 354117,
+              "missed": 28066
+            },
+            "0.5": {
+              "recomputed": 391287,
+              "missed": 19974
+            },
+            "1.0": {
+              "recomputed": 423242,
+              "missed": 0
+            }
+          },
+          "hyppo_cascade": {
+            "0.0": {
+              "recomputed": 580299,
+              "missed": 0
+            },
+            "0.5": {
+              "recomputed": 580299,
+              "missed": 0
+            },
+            "1.0": {
+              "recomputed": 580299,
+              "missed": 0
+            }
+          },
+          "hyppo_safe": {
+            "0.0": {
+              "recomputed": 423242,
+              "missed": 0
+            },
+            "0.5": {
+              "recomputed": 423242,
+              "missed": 0
+            },
+            "1.0": {
+              "recomputed": 423242,
+              "missed": 0
+            }
+          }
+        },
+        "dvc_fewer_safe": {
+          "0.0": 0,
+          "0.5": 0,
+          "1.0": 0
         }
       }
     }

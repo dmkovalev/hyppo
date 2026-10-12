@@ -174,6 +174,16 @@ def test_e6_recorded_real_runs_validate_100pct():
         assert real["systems"]["hyppo_safe"]["missed_total"] == 0
         assert real["systems"]["dvc"]["missed_total"] > 0  # необъявленная tau
         assert real["gold"]["delta_exact_equals_rounded"]
+        for name in e6_systems.REAL_SYSTEMS:
+            rec = real["systems"][name]
+            assert rec["wrong_at_end"] == 0 and "miss_spans" in rec
+    small = data["real"]["small"]
+    assert small["snakemake_triggers_per_event"] == {"checked": 13, "same": 13}
+    for name in ("snakemake", "dagster", "dvc"):
+        assert all(n["absent_source"] == "measured" for n in small["systems"][name]["native_evict"]), name
+    # пропуск tau у инструментов исправлен следующей правкой ridge (одно событие)
+    assert small["systems"]["dvc"]["miss_spans"] == [
+        {"from_event": 9, "repaired_at_event": 10, "events_wrong": 1, "jobs": 4}]
 
 
 def test_e6_corpora_deterministic_and_consistent(tmp_path):
@@ -211,3 +221,57 @@ def test_e6_run_hyppo_small(tmp_path):
     assert len(res["initial"]) == 7
     assert res["after"] == [{"hyb/uto_1.npy"}, hyb | opr, hyb | opr]
     assert res["outputs"][1] == res["outputs"][0]
+
+
+def test_e6_derive_fields_miss_spans():
+    ev = lambda w, m: {"wrong": w, "missed": m}
+    rec = {"events": [ev([], []), ev(["a", "b"], ["a", "b"]), ev(["b"], []), ev(["b", "c"], ["c"])]}
+    e6_systems.derive_fields(rec)
+    assert rec["wrong_at_end"] == 2
+    assert rec["miss_spans"] == [
+        {"from_event": 1, "repaired_at_event": 2, "events_wrong": 1, "jobs": 1},
+        {"from_event": 1, "repaired_at_event": None, "events_wrong": 3, "jobs": 1},
+        {"from_event": 3, "repaired_at_event": None, "events_wrong": 1, "jobs": 1},
+    ]
+
+
+def test_e6_validate_repeated_evict_uses_event_positions():
+    """Повтор одного и того же evict с разным forced-результатом (между ними --
+    необъявленная ревизия, узел устарел): нативная строка системы без нативного
+    режима (bazel) сверяется со своим событием, а не с первым вхождением."""
+    j, o = "hyb/uto_1.npy", "opr/uto_1_2_2.json"
+    hyb_opr = ["hyb/pos_1.npy", j, "opr/pos_1_2_2.json", o]
+    events = [["evict", j], ["revise", "tau"], ["evict", j]]
+    real = {"grid": "small", "events": events, "declared": list(e6_systems.DECLARED),
+            "gold": {"delta_exact": [[], hyb_opr, []]},
+            "systems": {"bazel": {
+                "initial_all": True, "initial_wrong": [],
+                "events": [{"executed": [j], "wrong": []}, {"executed": [], "wrong": hyb_opr},
+                           {"executed": [j, o], "wrong": ["hyb/pos_1.npy", "opr/pos_1_2_2.json"]}],
+                "native_evict": [{"event": events[0], "executed": [j], "absent": []},
+                                 {"event": events[2], "executed": [j, o], "absent": []}]}}}
+    val = e6_systems.validate_simulators(real)["bazel"]
+    assert val["forced"]["share"] == 1.0 and val["native_evict"]["share"] == 1.0
+    real["systems"]["bazel"]["native_evict"][1]["event"] = ["evict", o]
+    with pytest.raises(ValueError):
+        e6_systems.validate_simulators(real)
+
+
+def test_e6_native_by_kind_and_sensitivity(tmp_path):
+    c = e6_systems.simulate_corpora(events_per_graph=30, graphs_limit=3)
+    assert c["meta"]["p_output_changed"] == 0.7 and c["meta"]["weights"] == {"param": 6, "evict": 3, "revise": 1}
+    for s, v in c["per_system"].items():
+        for p, x in v["by_p"].items():
+            f, n = x["by_kind"], x["by_kind_native"]
+            for k in ("param", "revise"):
+                assert (f[k]["recomputed"], f[k]["missed"]) == (n[k]["recomputed"], n[k]["missed"]), (s, p, k)
+            if s == "dvc":
+                assert n["evict"]["recomputed"] == 0 and n["evict"]["absent"] == 0
+            if s == "dagster":
+                assert n["evict"]["absent"] == n["evict"]["events"]
+    sens = e6_systems.sensitivity(events_per_graph=30, graphs_limit=3, p_values=(0.5, 1.0))
+    a, b = sens["by_P"]["0.5"], sens["by_P"]["1.0"]
+    # при P=1 выход всегда меняется: благоприятных миров нет, cutoff = hyppo_safe на param
+    assert b["dvc_fewer_safe"]["1.0"] == 0 and a["dvc_fewer_safe"]["1.0"] > 0
+    for P in (a, b):
+        assert all(x["missed"] == 0 for x in P["per_system"]["hyppo_safe"].values())

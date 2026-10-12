@@ -242,6 +242,13 @@ def run_sequence(system: str, g, events, deltas=None, store: Store | None = None
                 continue
             rec.add(n)
             bad = any(p in new_wrong for p in pred(n))
+            # Правило «W или неверный родитель => выход изменился» консервативно
+            # против cutoff-систем: оно может лишь продолжить их каскад (больше
+            # пересчётов), но не оборвать его, т. е. не занижает их стоимость.
+            # Совпадение нового выхода с записанным/эталонным при неверных входах
+            # (как well_status -- множитель 0/1 и в fit_liq, и в fit_opr) не
+            # моделируется: такой узел считается неверным, что может завысить
+            # пропуски инструментов; поэтому в Э6 объявлена well_status:fit_liq, а не :fit_opr.
             if n in delta or n in wrong or bad:
                 changed.add(n)
             if bad:

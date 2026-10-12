@@ -112,7 +112,9 @@ def _step(root: Path, sp: dict, grid: dict) -> tuple[set[str], dict]:
     return {by_name[n] for n in out["executed"]}, rounds
 
 
-def run_workload(workdir: Path, grid: dict, events: list[tuple], declared) -> dict:
+def run_workload(workdir: Path, grid: dict, events: list[tuple], declared, native_step: bool = False) -> dict:
+    """native_step=True: при evict сначала шаг без force (нативное поведение):
+    выполненные активы и наличие файла на диске -- в `res["native_evict"]`."""
     for ev in events:
         check_event(ev, grid)
     root = Path(workdir)
@@ -127,7 +129,7 @@ def run_workload(workdir: Path, grid: dict, events: list[tuple], declared) -> di
     t0 = time.perf_counter()
     executed, rounds = _step(root, spec(work, grid, meta, params_file, declared, ridge), grid)
     res = {"initial": executed, "after": [], "rounds": [rounds], "outputs": [output_digests(work, grid)],
-           "seconds": [time.perf_counter() - t0]}
+           "seconds": [time.perf_counter() - t0], "native_evict": []}
     for ev in events:
         force = []
         if ev[0] == "param":
@@ -135,6 +137,10 @@ def run_workload(workdir: Path, grid: dict, events: list[tuple], declared) -> di
             params_file.write_text(json.dumps({"ridge": ridge}))
         elif ev[0] == "evict":
             (work / ev[1]).unlink()
+            if native_step:
+                ex, rd = _step(root, spec(work, grid, meta, params_file, declared, ridge), grid)
+                res["native_evict"].append({"executed": ex, "absent": not (work / ev[1]).exists(),
+                                            "status_evicted": rd[0]["status"][ev[1]]})
             force = [job_name(ev[1])]
         else:
             revise(meta, ev[1])
