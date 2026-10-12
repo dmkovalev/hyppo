@@ -166,14 +166,15 @@ def build_graph():
     g = nx.DiGraph(); g.add_nodes_from(NODES); g.add_edges_from(EDGES); return g
 
 # ───────────────────── timed execution of a component set ─────────────────────
-def run_components(comps, data, cache):
+def run_components(comps, data, cache, per_component_ms=None):
     """Реально исполняет компоненты из множества comps, переиспользуя кэш."""
     LIQ, WIN, t, oil, wat, s0, hi = data
     T, Np = LIQ.shape
     mval = (LIQ > 1).copy(); mval[:s0] = False
     t_total = 0.0
     r2 = {}
-    pc = {k: 0.0 for k in ("CRM", "ML", "FUS", "MB", "COREY", "BL", "WCTF", "GTM", "OPR")}
+    pc = per_component_ms if per_component_ms is not None else {}
+    pc.update({k: 0.0 for k in ("CRM", "ML", "FUS", "MB", "COREY", "BL", "WCTF", "GTM", "OPR")})
     pc["GTM"] = 0.001
     if "CRM" in comps:
         ts = time.perf_counter()
@@ -210,7 +211,6 @@ def run_components(comps, data, cache):
         t_total += dt
         pc["OPR"] += dt * 1000
         r2["OPR"] = r2o
-    run_components.last_per_component_ms = pc
     return t_total, r2
 
 def main():
@@ -227,8 +227,8 @@ def main():
     # 1) базовый прогон: исполнить ВСЕ компоненты, заполнить кэш
     all_comps = {"CRM", "ML", "FUS", "MB", "COREY", "BL", "WCTF", "OPR"}
     cache = {}
-    t_full, r2_full = run_components(all_comps, data, cache)
-    per_component_ms = dict(run_components.last_per_component_ms)
+    per_component_ms = {}
+    t_full, r2_full = run_components(all_comps, data, cache, per_component_ms)
     print("Базовый прогон (все компоненты) --- R²:")
     for k, v in r2_full.items():
         print(f"    {k:8s} R² = {v:.3f}")
