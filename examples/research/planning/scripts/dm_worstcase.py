@@ -40,7 +40,7 @@ def gen_growing(n_h, k, rng):
             if ins:
                 eq.append(ins[i % len(ins)])          # spread inputs -> In(h)=Theta(k)
             eqs.append(frozenset(eq))
-        hyps.append(eqs)
+        hyps.append((eqs, set(ins)))
         produced.extend(outs)
     return hyps
 
@@ -49,8 +49,8 @@ def make_graph(n_h, alpha, rng):
     """Setup only (untimed): growing structures + a FULL DAG (every i<j)."""
     k = max(2, int(round(alpha * n_h)))
     g = HypothesisGraph()
-    for h in gen_growing(n_h, k, rng):
-        g.add(h)                                      # one У0 matching each
+    for h, ins in gen_growing(n_h, k, rng):
+        g.add(h, inputs=ins)                          # declared In(h); one У0 matching each
     for i in range(n_h):
         for j in range(i + 1, n_h):
             g.connect(i, j)

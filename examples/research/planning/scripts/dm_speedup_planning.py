@@ -36,7 +36,7 @@ def gen_hyps(n_h, rng, n_out=N_OUT, n_in_max=N_IN_MAX):
             others = [v for v in outs if v != outs[k]]
             extra = rng.sample(others, rng.randint(0, min(2, len(others))))
             eqs.append(frozenset([outs[k], *extra, *ins]))
-        hyps.append(eqs)
+        hyps.append((eqs, set(ins)))
         produced.extend(outs)
     return hyps
 
@@ -59,10 +59,10 @@ def add_time_ms(n_h, rng):
     hypotheses (setup untimed). One У0 matching + O(|H|) Out&In tests -> O(|H|)."""
     g = HypothesisGraph()
     hyps = gen_hyps(n_h + 1, rng)
-    for eqs in hyps[:-1]:
-        g.add(eqs)
+    for eqs, ins in hyps[:-1]:
+        g.add(eqs, inputs=ins)
     t0 = time.perf_counter()
-    g.add_hypothesis(hyps[-1])
+    g.add_hypothesis(hyps[-1][0], inputs=hyps[-1][1])
     return (time.perf_counter() - t0) * 1000.0
 
 
