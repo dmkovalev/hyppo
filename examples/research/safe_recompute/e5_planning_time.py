@@ -31,13 +31,17 @@ def _chained(n, edges, before_keys, params2):
     return {h for h in range(n) if keys[h] != before_keys[h]}
 
 
-def _direct(g, params1, params2):
-    stale = set()
+def _contexts(g, params):
+    out = {}
     for h in g.nodes:
         anc = nx.ancestors(g, h) | {h}
-        if frozenset((a, params1[a]) for a in anc) != frozenset((a, params2[a]) for a in anc):
-            stale.add(h)
-    return stale
+        out[h] = frozenset((a, params[a]) for a in anc)
+    return out
+
+
+def _direct(g, before_ctx, params2):
+    after = _contexts(g, params2)
+    return {h for h in g.nodes if before_ctx[h] != after[h]}
 
 
 def main(sizes=(100, 300, 1000, 3000, 10000), reps=5, out=None):
@@ -51,7 +55,8 @@ def main(sizes=(100, 300, 1000, 3000, 10000), reps=5, out=None):
         before = chained_keys(range(n), edges, cfg1, {h: "m" for h in range(n)})
         g = nx.DiGraph(edges)
         g.add_nodes_from(range(n))
-        tc, td, ref = [], [], None
+        before_ctx = _contexts(g, params)  # сохранённые записи, вне замера
+        tc, td = [], []
         for _ in range(reps):
             t = time.perf_counter()
             nc = _chained(n, edges, before, params2)
@@ -60,7 +65,7 @@ def main(sizes=(100, 300, 1000, 3000, 10000), reps=5, out=None):
         res["chained"]["times"].append(statistics.median(tc))
         for _ in range(reps):
             t = time.perf_counter()
-            nd = _direct(g, params, params2)
+            nd = _direct(g, before_ctx, params2)
             td.append(time.perf_counter() - t)
         assert nc == nd, (n, len(nc), len(nd))
         res["direct"]["sizes"].append(n)
