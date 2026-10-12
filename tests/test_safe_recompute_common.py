@@ -1,4 +1,5 @@
 import networkx as nx
+import pytest
 
 from examples.research.safe_recompute import common
 
@@ -25,3 +26,14 @@ def test_wfcommons_corpus_loads():
 def test_save_json_roundtrip(tmp_path):
     p = common.save_json({"a": 1}, tmp_path / "x.json")
     assert common.load_json(p) == {"a": 1}
+
+
+def test_wfcommons_full_corpus_matches_e2():
+    if not (common.PLANNING_CACHE / "wfcommons").exists():
+        pytest.skip("WfCommons cache missing")
+    gs = common.wfcommons_graphs()
+    assert len(gs) == 171
+    sweep = common.load_json(common.PLANNING_DATA / "wfcommons_per_workflow_sweep.json")["by_workflow"]
+    assert sorted(g.number_of_nodes() for g in gs.values()) == sorted(v["n"] for v in sweep.values())
+    with pytest.raises(ValueError):
+        common.wfcommons_graphs(limit=0)

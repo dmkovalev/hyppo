@@ -9,6 +9,7 @@ import networkx as nx
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT / "data"
 PLANNING_DATA = ROOT.parent / "planning" / "data"
+PLANNING_CACHE = ROOT.parent / "planning" / "cache"
 
 CRM_EDGES = [
     ("H1", "H2"), ("H1", "H3"), ("H2", "H4"), ("H3", "H4"), ("H4", "H5"),
@@ -34,36 +35,28 @@ def nfcore_graphs() -> dict[str, nx.DiGraph]:
         dag = nx.DiGraph()
         dag.add_nodes_from(h["id"] for h in g["hypotheses"])
         dag.add_edges_from((e["src"], e["tgt"]) for e in g["subsumption_edges"] + g["inter_layer_edges"])
-        if nx.is_directed_acyclic_graph(dag):
-            out[name] = dag
+        if not nx.is_directed_acyclic_graph(dag):
+            raise ValueError(f"nf-core graph {name} is cyclic")
+        out[name] = dag
     return out
 
 
 def wfcommons_graphs(limit: int | None = None) -> dict[str, nx.DiGraph]:
-    """Трассы WfCommons как графы гипотез тем же разбором, что в Э2 диссертации
-    (`planning/scripts/cascade_on_hypothesis_graphs.py`, exp_hierarchy): семейства
-    nextflow/snakemake/pegasus, уровень агрегации REC_LEVEL[family], n >= 3.
-    Ключ: «семейство/имя файла»."""
-    from examples.research.planning.scripts import cascade_on_hypothesis_graphs as c
-
+    """Корпус Э2 диссертации: 171 трасса WfCommons на уровне задач (nextflow/snakemake/pegasus).
+    Разбор совпадает с `_parse_wfformat` из `planning/scripts/draw_fig2_composite.py`:
+    узлы -- `t["id"]`, рёбра -- `children`. Ключ: «семейство/имя файла»."""
+    if limit is not None and limit <= 0:
+        raise ValueError("limit must be positive or None")
     out: dict[str, nx.DiGraph] = {}
     for fam in ("nextflow", "snakemake", "pegasus"):
-        d = c.CACHE_DIR / fam
-        if not d.exists():
-            continue
-        for path in sorted(d.rglob("*.json")):
-            parsed = c.parse_workflow_to_hypothesis(path, fam, c.REC_LEVEL.get(fam, 1))
-            if parsed is None:
-                continue
-            n, adj = parsed
-            if n < 3:
-                continue
+        for path in sorted((PLANNING_CACHE / "wfcommons" / fam).rglob("*.json")):
+            tasks = json.loads(path.read_text(encoding="utf-8"))["workflow"]["specification"]["tasks"]
+            ids = {t["id"] for t in tasks}
             dag = nx.DiGraph()
-            dag.add_nodes_from(range(n))
-            dag.add_edges_from((u, v) for u, vs in adj.items() for v in vs)
-            if nx.is_directed_acyclic_graph(dag):
-                out[f"{fam}/{path.stem}"] = dag
-            if limit and len(out) >= limit:
+            dag.add_nodes_from(ids)
+            dag.add_edges_from((t["id"], ch) for t in tasks for ch in t.get("children", []) if ch in ids)
+            out[f"{fam}/{path.stem}"] = dag
+            if limit is not None and len(out) == limit:
                 return out
     return out
 
