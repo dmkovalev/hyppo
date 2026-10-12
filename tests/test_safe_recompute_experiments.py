@@ -41,3 +41,12 @@ def test_needed_plan_examples():
     assert e2_mincost.needed_plan(g, {"b"}, {"b"}) == (set(), {"b"})
     g = nx.DiGraph([("a", "b"), ("b", "c")])
     assert e2_mincost.needed_plan(g, {"c"}, {"b"}) == ({"c"}, {"b"})
+
+
+from examples.research.safe_recompute import e5_planning_time  # noqa: E402
+
+
+def test_e5_smoke(tmp_path):
+    out = e5_planning_time.main(sizes=[50, 100, 200], reps=2, out=tmp_path / "e5.json")
+    assert out["chained"]["slope"] < 1.4
+    assert out["direct"]["slope"] > out["chained"]["slope"]
