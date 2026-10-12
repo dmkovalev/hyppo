@@ -1,8 +1,10 @@
 """Brute-force check of the safe-plan theorem on small DAGs.
 
-World: deterministic f_h(theta_h, inputs) -> {0,1}; old/new versions differ only for u in U.
+World: deterministic f_h(theta_h, inputs) -> {0,1}. A revision of u in U (status/axioms, not
+reflected in models or parameters) changes the functions of the direct consumers of u after the
+records were made; u's own result stays valid (as in def:12 and the cascade of thm:integrity IV).
 Repository: records (h, ctx) with ctx = params of h and all its sources; value computed with OLD f.
-cached(h) <=> record with current ctx exists and h not in U ∪ desc(U).  N = not cached.
+cached(h) <=> record with current ctx exists and h is not a strict descendant of U.  N = not cached.
 Plan P executes: h in P recomputed from inputs (parents in P recomputed, else stored);
 h not in P read from the record with the current ctx (missing -> failure).
 Safe(P) <=> for EVERY world consistent with the metadata, the result equals full recomputation.
@@ -61,6 +63,14 @@ def random_f(n, pa, rng):
         f.append(tbl)
     return f
 
+def flip(tbl):
+    """A revised consumer: some input combination now gives a different value."""
+    t = dict(tbl)
+    k = next(iter(t))
+    t[k] = 1 - t[k]
+    return t
+
+
 def run_plan(n, pa, theta, f_new, store, P, cur_ctx):
     z = {}
     for h in range(n):
@@ -100,7 +110,8 @@ def check(n_max=4, worlds=60, seed=1):
                         old = {g: rng.randint(0, 1) for g in range(n)}
                         recs.add((h, ctx(h, old, anc)))
                 U = {h for h in range(n) if rng.random() < 0.15}
-                DU = desc(n, edges, U)
+                children_U = {k for (j, k) in edges if j in U}
+                DU = desc(n, edges, children_U)  # strict descendants of U
                 N = {h for h in range(n) if (h, cur[h]) not in recs or h in DU}
                 stats['cases'] += 1
 
@@ -118,10 +129,10 @@ def check(n_max=4, worlds=60, seed=1):
                 ok = True
                 for _w in range(worlds):
                     f_old = random_f(n, pa, rng)
-                    f_new = [dict(f_old[h]) if h not in U else random_f(n, pa, rng)[h] for h in range(n)]
+                    f_new = [dict(f_old[h]) if h not in children_U else flip(f_old[h]) for h in range(n)]
                     store = build_store(f_old)
                     truth = evaluate(n, pa, theta, f_new)
-                    for extra in (set(), set(range(n))):
+                    for extra in (set(), set(range(n)), {g for g in range(n) if rng.random() < 0.5}):
                         z = run_plan(n, pa, theta, f_new, store, N | extra, cur)
                         if z != truth:
                             ok = False
@@ -135,7 +146,7 @@ def check(n_max=4, worlds=60, seed=1):
                     found = False
                     for _w in range(400):
                         f_old = random_f(n, pa, rng)
-                        f_new = [dict(f_old[g]) if g not in U else random_f(n, pa, rng)[g] for g in range(n)]
+                        f_new = [dict(f_old[g]) if g not in children_U else random_f(n, pa, rng)[g] for g in range(n)]
                         store = build_store(f_old)
                         truth = evaluate(n, pa, theta, f_new)
                         if run_plan(n, pa, theta, f_new, store, N - {h}, cur) != truth:
