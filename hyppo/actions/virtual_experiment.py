@@ -3,7 +3,7 @@
 Wraps hyppo.adapters.norne_adapter so the dissertation reference code
 stays untouched. Two actions:
 - BuildVirtualExperiment: full snapshot (hypotheses + edges + config space)
-- GetGraphConstructor: graph-only subset (nodes + edges)
+- GetHypothesisGraph: graph-only subset (nodes + edges)
 
 Both are SAFE: no DB I/O, deterministic, side-effect free except for
 the owlready2 individuals created inside `norne_adapter`.
@@ -75,7 +75,7 @@ class VirtualExperimentSnapshot(BaseModel):
     configuration_space: tuple[ConfigurationAxis, ...]
 
 
-class GetGraphConstructorInput(BaseModel):
+class GetHypothesisGraphInput(BaseModel):
     model_config = {"frozen": True}
 
     domain: Domain = "oil_waterflood"
@@ -174,9 +174,9 @@ def build_virtual_experiment(
 
 
 @action(
-    kind="GetGraphConstructor",
+    kind="GetHypothesisGraph",
     trust=TrustLevel.SAFE,
-    inputs=GetGraphConstructorInput,
+    inputs=GetHypothesisGraphInput,
     outputs=GraphPayload,
     allowed_roles={
         AgentRole.Coordinator,
@@ -187,10 +187,10 @@ def build_virtual_experiment(
         AgentRole.Economist,
     },
 )
-def get_hypothesis_graph(payload: GetGraphConstructorInput) -> GraphPayload:
+def get_hypothesis_graph(payload: GetHypothesisGraphInput) -> GraphPayload:
     """Return only the derived_by graph (nodes + edges) — cheap, for UI.
 
-    Domain validation runs in :class:`GetGraphConstructorInput`.
+    Domain validation runs in :class:`GetHypothesisGraphInput`.
     """
     snap = _build_oil_snapshot()
     return GraphPayload(

@@ -46,7 +46,7 @@ plugins:
             Архитектура: Architecture
             Справочник API: API Reference
             Ядро: Core
-            Конструктор решётки: Graph Constructor
+            Конструктор графа: Graph Constructor
             Планировщик: Planner
             Исполнитель: Runner
             Менеджер: Manager
@@ -78,7 +78,7 @@ nav:
   - Справочник API:
       - Ядро: api/core.md
       - COA: api/coa.md
-      - Конструктор решётки: api/graph_constructor.md
+      - Конструктор графа: api/graph_constructor.md
       - Планировщик: api/planner.md
       - Исполнитель: api/runner.md
       - Менеджер: api/manager.md

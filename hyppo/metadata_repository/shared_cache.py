@@ -34,7 +34,7 @@ class SharedCache(MetadataRepository):
 
     def __init__(self, db_path: str | Path = ":memory:") -> None:
         super().__init__(db_path)
-        # generic KV-таблица для протокола Database (решётки, произвольные объекты)
+        # generic KV-таблица для протокола Database (графы, произвольные объекты)
         self._conn.execute(
             "CREATE TABLE IF NOT EXISTS kv (skey TEXT PRIMARY KEY, blob BLOB NOT NULL)"
         )
