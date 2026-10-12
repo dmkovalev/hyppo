@@ -251,7 +251,7 @@ def check_consistency(
         edges = list(workflow_edges)
         all_tasks = set(task_hypotheses) | {x for e in edges for x in e}
         viol = _check_condition5_causal_order(
-            all_tasks, edges, task_hypotheses, lattice
+            all_tasks, edges, task_hypotheses, lattice, artefacts
         )
         if viol is not None:
             return ConsistencyResult(
@@ -531,14 +531,19 @@ def _check_condition4_projection(task_hypotheses, domains, forbidden):
     return None
 
 
-def _check_condition5_causal_order(tasks, edges, task_hypotheses, lattice):
-    """Condition 5 (§2.4, Algorithm ``consistence``): hypothesis dependencies must
-    respect the workflow order — every producer of a hypothesis's input must lie
-    in an ancestor task (or the same task). Topologically traverses the workflow
-    accumulating ``A_t = union over predecessors t' of (A_{t'} ∪ hyp(t'))``; a
-    dependency from a non-ancestor task is a violation. ``lattice`` is the
-    derived-by adjacency ``{producer: {consumers}}`` (producers of ``h`` are its
-    lattice predecessors). Returns a violation dict or ``None``."""
+def _check_condition5_causal_order(tasks, edges, task_hypotheses, lattice, artefacts=None):
+    """Condition 5 (§2.4, Algorithm ``consistence``) as a *supply map*: every
+    producer of an input of a hypothesis must lie in a STRICT ancestor task --
+    supplies inside one task, between parallel (incomparable) tasks or against
+    the workflow (order conflicts) are violations. Topologically traverses the
+    workflow accumulating ``A_t = union over predecessors t' of (A_{t'} ∪ hyp(t'))``.
+
+    Producers of ``h`` are (a) every hypothesis ``g`` with ``Out(g) ∩ In(h) ≠ ∅``
+    when signatures ``artefacts = {h: {"in": .., "out": ..}}`` are given (the
+    supply map, O(|H|·v_max) through a variable->producers index), and (b) the
+    lattice predecessors of ``h`` (``lattice`` is ``{producer: {consumers}}``),
+    so an externally supplied graph is checked as well. Returns a violation dict
+    or ``None``."""
     succ = {t: set() for t in tasks}
     preds = {t: set() for t in tasks}
     for a, b in edges:
@@ -564,6 +569,16 @@ def _check_condition5_causal_order(tasks, edges, task_hypotheses, lattice):
     for u, children in lattice.items():
         for v in children:
             producers.setdefault(v, set()).add(u)
+    if artefacts:
+        made_by: dict = {}
+        for g, sig in artefacts.items():
+            for x in sig.get("out", ()):
+                made_by.setdefault(x, set()).add(g)
+        for h, sig in artefacts.items():
+            for x in sig.get("in", ()):
+                for g in made_by.get(x, ()):
+                    if g != h:
+                        producers.setdefault(h, set()).add(g)
 
     task_of = {h: t for t, hs in task_hypotheses.items() for h in hs}
     accum: dict = {}
@@ -575,7 +590,7 @@ def _check_condition5_causal_order(tasks, edges, task_hypotheses, lattice):
         own = set(task_hypotheses.get(t, ()))
         for h in own:
             for dep in producers.get(h, ()):
-                if dep not in anc and dep not in own:
+                if dep not in anc:  # strict ancestor task required
                     return {
                         "task": t,
                         "hypothesis": h,
