@@ -69,19 +69,39 @@ with virtual_experiment_onto:
             return lattice
 
         def add_hypothesis(self, hypothesis):
-            """Algorithm 2: Add a hypothesis to an existing lattice.
+            """Algorithm 2: add a hypothesis to an existing lattice incrementally.
 
-            Registers the new hypothesis, then rebuilds variable-level
-            transitive closure with it, and maps to hypothesis-level edges.
+            Registers the new hypothesis and decides only the pairs it forms with
+            the hypotheses of tasks related to its task by reachability, by the
+            same rule as :meth:`build_lattice` -- O(|H| * v_max), no rebuild.
             """
-            if not self._is_correct():
-                raise Exception("Hypotheses not found in workflow")
             if hypothesis not in self.hypotheses:
                 self.hypotheses.append(hypothesis)
+            if not self._is_correct():
+                raise Exception("Hypotheses not found in workflow")
             self.lattice.add_node(hypothesis)
-
-            for dep in self._build_hypothesis_var_mapping():
-                self.lattice.add_edge(dep[0], dep[1])
+            # Only pairs involving the new hypothesis are decided (Theorem
+            # thm:build (III)): reachability between existing tasks is assumed
+            # preserved, so all other pairs and their edges are unchanged.
+            precedes = self._tau_precedes()
+            new = hypothesis
+            out_n = self._output_variables(new) if hasattr(new, "structure") else set()
+            in_n = self._input_variables(new) if hasattr(new, "structure") else set()
+            for h in self.hypotheses:
+                if h is new or not hasattr(h, "structure"):
+                    continue
+                if precedes(h, new):
+                    a, b, out_a, in_a, in_b = h, new, self._output_variables(h), self._input_variables(h), in_n
+                    out_b = out_n
+                elif precedes(new, h):
+                    a, b, out_a, in_a, in_b = new, h, out_n, in_n, self._input_variables(h)
+                    out_b = self._output_variables(h)
+                else:
+                    continue
+                if not out_a or out_a & out_b or in_a & out_b:
+                    continue  # condition У3 has priority: no edge
+                if out_a & in_b:
+                    self.lattice.add_edge(a, b)
 
         def derived_by(self, hypothesis):
             """Return hypotheses that are derived by the given hypothesis."""

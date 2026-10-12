@@ -54,15 +54,34 @@ def gen_plan_dag(n, rng, avg_deg=2):
     return edges
 
 
+def gen_workflow(n, rng):
+    """Same sparse workflow as dm_bench_one (the full-rebuild measurement): a
+    spanning chain i->i+1 plus a random forward skip per node."""
+    edges = [(i, i + 1) for i in range(n - 1)]
+    for j in range(2, n):
+        if rng.random() < 0.5:
+            edges.append((rng.randrange(j - 1), j))
+    return edges
+
+
 def add_time_ms(n_h, rng):
-    """Algorithm 2: time ONLY add_hypothesis on a pre-built graph of n_h
-    hypotheses (setup untimed). One У0 matching + O(|H|) Out&In tests -> O(|H|)."""
+    """Algorithm 2: time ONLY add_hypothesis of the (n_h+1)-th hypothesis on a
+    pre-built lattice of n_h hypotheses over the same sparse workflow as the
+    full-rebuild run (setup untimed). Timed: one У0 matching, two reachability
+    traversals (O(|V(W)|+|E(W)|)) and the pairs with the new node, decided with
+    condition У3 (O(|H| * v_max)) -> O(|H|)."""
     g = HypothesisGraph()
     hyps = gen_hyps(n_h + 1, rng)
+    edges = gen_workflow(n_h + 1, rng)
     for eqs, ins in hyps[:-1]:
         g.add(eqs, inputs=ins)
+    for u, v in edges:
+        if v != n_h:
+            g.connect(u, v)
+    g.build()
+    preds = [u for u, v in edges if v == n_h]
     t0 = time.perf_counter()
-    g.add_hypothesis(hyps[-1][0], inputs=hyps[-1][1])
+    g.add_hypothesis(hyps[-1][0], inputs=hyps[-1][1], preds=preds)
     return (time.perf_counter() - t0) * 1000.0
 
 

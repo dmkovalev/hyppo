@@ -30,7 +30,10 @@ plt.rcParams.update({
 
 HERE = Path(__file__).resolve()
 DATA = HERE.parent.parent / "data" / "asymptotic_results_dm.json"
-WORST = HERE.parent.parent / "data" / "worstcase_dm.json"
+# linear-growth regime on the SAME grid/protocol as the typical case
+# (dm_worstcase_full.py: |H| 10..500, 30 runs, bootstrap CI) -- the source of the
+# dissertation's exponent; the old short-grid worstcase_dm.json is not used.
+WORST = HERE.parent.parent / "data" / "worstcase_dm_full.json"
 IMG = HERE.parents[4] / "thesis" / "images"
 
 

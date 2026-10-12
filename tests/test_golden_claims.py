@@ -263,20 +263,27 @@ def test_alg1_complexity_quadratic_pair_enumeration():
 
 
 def test_alg2_complexity_linear_in_hypotheses():
-    """(лемма 2) Algorithm 2 performs exactly |H| Out∩In tests against the
-    existing hypotheses — linear, against |H|^2 for a full rebuild."""
+    """(лемма 2) Algorithm 2 decides exactly the pairs of the new hypothesis with
+    the hypotheses related to it by reachability -- here, appended to a chain of
+    n hypotheses, exactly n pairs (linear), against n(n-1)/2 for a full rebuild;
+    and the incremental result equals the full rebuild (thm:build (III))."""
     for n in (10, 20, 40):
         g = _chain_graph(n)
+        g.build()  # setup: the existing lattice
         calls = [0]
+        orig = g._pair
 
-        class _CountOut(list):
-            def __getitem__(self, i):
-                calls[0] += 1
-                return list.__getitem__(self, i)
+        def counting(*a, **k):
+            calls[0] += 1
+            return orig(*a, **k)
 
-        g._out = _CountOut(g._out)  # count Out(h_i) accesses = existing-hyp probes
-        g.add_hypothesis([{f"x{n}", f"x{n - 1}"}])
+        g._pair = counting
+        g.add_hypothesis([{f"x{n}", f"x{n - 1}"}], inputs={f"x{n - 1}"}, preds=[n - 1])
         assert calls[0] == n
+        full = _chain_graph(n)
+        full.add([{f"x{n}", f"x{n - 1}"}], inputs={f"x{n - 1}"})
+        full.connect(n - 1, n)
+        assert set(full.build()) == g.lattice
 
 
 class _CountingSet(set):

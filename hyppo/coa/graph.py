@@ -160,35 +160,90 @@ class HypothesisGraph:
             for j in reach[i]:
                 if j == i:
                     continue
-                in_j = self._in[j]
-                # condition У3 has priority: a violating pair gets no edge
-                collision = bool(out_i & self._out[j])
-                counter = bool(in_i & self._out[j])
-                if collision:
-                    self.competes_pairs.append((i, j))
-                if counter:
-                    self.order_conflicts.append((i, j))
-                if not (collision or counter) and out_i & in_j:
+                if self._pair(i, j, out_i, in_i, self._in[j]):
                     lattice.append((i, j))
+        self.lattice = set(lattice)
         return lattice
 
-    # ---- Algorithm 2: add_hypothesis ------------------------------------
-    def add_hypothesis(self, equations, inputs=None) -> int:
-        """Algorithm 2 (incremental add), faithful to Lemma 2.
+    def _pair(self, i, j, out_i, in_i, in_j) -> bool:
+        """Decide the ordered pair (i, j), tau(i) < tau(j), by definition def:derived.
 
-        One Hopcroft-Karp matching for the У0 signature of the new hypothesis
-        (``O(s_max * sqrt(v_max))``), then a single ``Out & In`` test against each
-        existing hypothesis using their already-cached signatures
-        (``O(|H| * v_max)``) -- no rebuild, no per-pair closure. Returns the new
-        node index; connect its ``derived_by`` edges afterwards via
-        :meth:`connect`."""
-        h_new = [frozenset(eq) for eq in equations]
-        out_new, in_new = self._signature(h_new, inputs)
-        for i in range(len(self._hyps)):
-            # cheap bidirectional derivability probe (result drives edge decisions
-            # at the caller); no transitive closure.
-            _ = (self._out[i] & in_new) or (out_new & self._in[i])
-        idx = self.add(h_new, inputs)
+        Condition У3 has priority: an output collision (competes) or a
+        counter-supply (order conflict) is recorded and gives NO edge; otherwise
+        the edge exists iff ``Out(i) & In(j) != empty``. O(v_max)."""
+        out_j = self._out[j]
+        collision = bool(out_i & out_j)
+        counter = bool(in_i & out_j)
+        if collision:
+            self.competes_pairs.append((i, j))
+        if counter:
+            self.order_conflicts.append((i, j))
+        return not (collision or counter) and bool(out_i & in_j)
+
+    def _reach_from(self, s: int, adj) -> set[int]:
+        seen: set[int] = set()
+        st = [s]
+        while st:
+            nd = st.pop()
+            for nb in adj.get(nd, ()):
+                if nb not in seen:
+                    seen.add(nb)
+                    st.append(nb)
+        return seen
+
+    # ---- Algorithm 2: add_hypothesis ------------------------------------
+    def add_hypothesis(self, equations, inputs=None, preds=(), succs=()) -> int:
+        """Algorithm 2 (incremental add), faithful to Lemma 2 and Theorem thm:build (III).
+
+        Adds the hypothesis as a new node with its workflow edges ``preds -> new``
+        and ``new -> succs``, checks У0 with one Hopcroft-Karp matching
+        (``O(s_max * sqrt(v_max))``), finds the nodes related to the new one by
+        reachability in either direction with two traversals
+        (``O(|V(W)| + |E(W)|)``), and decides only the pairs involving the new
+        hypothesis by the same rule as :meth:`build` (``O(|H| * v_max)``). The
+        new derivability edges are added to :attr:`lattice` and returned in
+        :attr:`last_added`.
+
+        Precondition of thm:build (III): reachability between the existing nodes
+        is preserved. If the new node opens a path ``p -> new -> s`` between
+        previously unrelated nodes, the incremental result would be incomplete,
+        so the graph is rebuilt in full (and :attr:`last_add_was_rebuild` is set).
+        Returns the new node index."""
+        if not hasattr(self, "lattice"):
+            self.build()
+        new_paths = False
+        if preds and succs:
+            for pnode in preds:
+                r = self._reach_from(pnode, self._adj)
+                if any(snode != pnode and snode not in r for snode in succs):
+                    new_paths = True
+                    break
+        idx = self.add(equations, inputs)
+        for pnode in preds:
+            self.connect(pnode, idx)
+        for snode in succs:
+            self.connect(idx, snode)
+        self.last_add_was_rebuild = new_paths
+        if new_paths:
+            before = set(self.lattice)
+            self.build()
+            self.last_added = sorted(self.lattice - before)
+            return idx
+        radj: dict = {}
+        for u, v in self._edges:
+            radj.setdefault(v, set()).add(u)
+        ancestors = self._reach_from(idx, radj)
+        descendants = self._reach_from(idx, self._adj)
+        out_n, in_n = self._out[idx], self._in[idx]
+        added = []
+        for a in ancestors:
+            if self._pair(a, idx, self._out[a], self._in[a], in_n):
+                added.append((a, idx))
+        for b in descendants:
+            if self._pair(idx, b, out_n, in_n, self._in[b]):
+                added.append((idx, b))
+        self.lattice |= set(added)
+        self.last_added = sorted(added)
         return idx
 
     # ---- Algorithm 4: plan ----------------------------------------------
