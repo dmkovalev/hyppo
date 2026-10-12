@@ -22,6 +22,8 @@ from __future__ import annotations
 import os, sys, time, json
 import numpy as np
 sys.path.insert(0, os.getcwd())
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from examples.research.safe_recompute.common import CRM_EDGES
 
 from pywaterflood import CRM
 import networkx as nx
@@ -138,15 +140,9 @@ def fit_opr(hyb, wct_pred, oil):
 
 # ───────────────── граф 16 гипотез (рис. lattice_crm) ─────────────────
 NODES = [f"H{i}" for i in range(1, 17)]
-# ребро (a, b): b выведена из a (a -> b); H8->H9 --- межветвевое
-EDGES = [
-    ("H1", "H2"), ("H1", "H3"), ("H2", "H4"), ("H3", "H4"), ("H4", "H5"),
-    ("H6", "H5"), ("H7", "H8"), ("H5", "H8"),          # ветвь жидкости
-    ("H8", "H9"),                                       # межветвевое: материальный баланс использует l
-    ("H9", "H10"), ("H10", "H11"), ("H11", "H12"), ("H12", "H13"), ("H13", "H14"),
-    ("H15", "H5"),                                      # ГТМ модулирует продуктивность
-    ("H8", "H16"), ("H14", "H16"),                      # OPR = l * (1 - wct)
-]
+# ребро (a, b): b выведена из a (a -> b); H8->H9 межветвевое; H9->H10, H9->H11 (k_rw, k_ro читают только S_w), H10, H11 -> H12
+EDGES = CRM_EDGES  # единый источник: examples/research/safe_recompute/common.py (граф алгоритма 1)
+
 # гипотеза -> компонента модели (что реально исполняется)
 COMPONENT = {
     "H1": "CRM", "H2": "CRM", "H3": "CRM", "H4": "CRM", "H5": "CRM", "H6": "CRM",

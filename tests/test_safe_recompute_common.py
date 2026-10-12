@@ -6,9 +6,9 @@ from examples.research.safe_recompute import common
 
 def test_crm_graph_matches_dissertation():
     g = common.crm_graph()
-    assert g.number_of_nodes() == 16 and g.number_of_edges() == 17
+    assert g.number_of_nodes() == 16 and g.number_of_edges() == 18
     assert nx.is_directed_acyclic_graph(g)
-    assert nx.dag_longest_path_length(g) == 11
+    assert nx.dag_longest_path_length(g) == 10
 
 
 def test_nfcore_corpus_has_26_dags():
@@ -37,3 +37,13 @@ def test_wfcommons_full_corpus_matches_e2():
     assert sorted(g.number_of_nodes() for g in gs.values()) == sorted(v["n"] for v in sweep.values())
     with pytest.raises(ValueError):
         common.wfcommons_graphs(limit=0)
+
+
+def test_crm_edges_equal_algorithm1_golden():
+    """Единый источник: CRM_EDGES = рёбра, выведенные алгоритмом 1 (golden), в нумерации H1..H16."""
+    from tests.test_golden_claims import NORNE_GOLDEN_EDGES
+
+    to_diss = {"H11": "H9", "H12": "H10", "H12b": "H11", "H13": "H12", "H14": "H13",
+               "H15": "H14", "H19": "H16", "GRP": "H15"}
+    mapped = {(to_diss.get(a, a), to_diss.get(b, b)) for a, b in NORNE_GOLDEN_EDGES}
+    assert set(common.CRM_EDGES) == mapped and len(common.CRM_EDGES) == len(mapped) == 18

@@ -35,9 +35,9 @@ X:x передаётся парами (h, x) для всех читателей.
 
 Имена гипотез CRM/Norne соответствуют графу CRM гл. 4 (common.CRM_EDGES) так:
 GRP = H15 (GTM), H11 = H9 (MB), H12/H12b = H10/H11 (COREY), H13/H14 = H12/H13 (BL),
-H15 = H14 (WCTF), H19 = H16 (OPR), остальные совпадают. Граф по формулам отличается от
-CRM_EDGES одним местом: krw и kro (COREY) вычисляются параллельно из Sw, а не цепочкой,
-поэтому рёбер 18, а не 17.
+H15 = H14 (WCTF), H19 = H16 (OPR), остальные совпадают (TO_DISS). Граф по формулам в этой
+нумерации совпадает с common.CRM_EDGES (18 рёбер, глубина 10), а граф компонент -- с фактор-графом
+common.crm_graph() по NORNE_COMP; это проверяется в тестах.
 """
 from __future__ import annotations
 
@@ -190,6 +190,15 @@ NORNE_DATA = {"I_j", "q_f_prev", "q_s_prev", "q_prev", "dt", "x_hist", "Winj", "
 NORNE_FUN = {"exp", "MLP"}
 NORNE_COMP = {"GTM": ["GRP"], "CRM": ["H1", "H2", "H3", "H4", "H6", "H5"], "ML": ["H7"], "FUS": ["H8"],
               "MB": ["H11"], "COREY": ["H12", "H12b"], "BL": ["H13", "H14"], "WCTF": ["H15"], "OPR": ["H19"]}
+
+
+TO_DISS = {"H11": "H9", "H12": "H10", "H12b": "H11", "H13": "H12", "H14": "H13",
+           "H15": "H14", "H19": "H16", "GRP": "H15"}
+
+
+def diss_edges(inst):
+    """Рёбра графа гипотез экземпляра Norne в нумерации гл. 4 (H1..H16)."""
+    return {(TO_DISS.get(a, a), TO_DISS.get(b, b)) for a, b in inst.G.edges}
 
 
 def _norne_spec():

@@ -28,17 +28,13 @@ from pathlib import Path
 import networkx as nx
 
 from hyppo.manager import Manager
+from examples.research.safe_recompute.common import CRM_EDGES as _COMMON_CRM_EDGES
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data"
 OUT = DATA / "eviction_safe_vs_cascade.json"
 
-CRM_EDGES = [
-    ("H1", "H2"), ("H1", "H3"), ("H2", "H4"), ("H3", "H4"), ("H4", "H5"),
-    ("H6", "H5"), ("H7", "H8"), ("H5", "H8"), ("H8", "H9"), ("H9", "H10"),
-    ("H10", "H11"), ("H11", "H12"), ("H12", "H13"), ("H13", "H14"),
-    ("H15", "H5"), ("H8", "H16"), ("H14", "H16"),
-]
+CRM_EDGES = _COMMON_CRM_EDGES
 
 
 def graphs():
