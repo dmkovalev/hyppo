@@ -3,7 +3,7 @@ import pytest
 
 from hyppo.planner import causal_refine as cr
 
-from examples.research.safe_recompute import e2_mincost, e3_causal
+from examples.research.safe_recompute import e1_eviction, e2_mincost, e3_causal
 from examples.research.safe_recompute.common import DATA, load_json
 
 BASELINES = ("N_read", "N_needed_read", "cascade_read", "full", "best_simple")
@@ -275,6 +275,13 @@ def test_e6_native_by_kind_and_sensitivity(tmp_path):
     assert b["dvc_fewer_safe"]["1.0"] == 0 and a["dvc_fewer_safe"]["1.0"] > 0
     for P in (a, b):
         assert all(x["missed"] == 0 for x in P["per_system"]["hyppo_safe"].values())
+
+
+def test_e1_smoke(tmp_path):
+    out = e1_eviction.main(steps=4, seeds=1, out=tmp_path / "e1.json", graphs_limit=3)
+    for tag, row in out.items():
+        assert row["median_ratio_cascade_to_safe"] >= 1.0
+    assert "lru:0.75" in out and "random:0.75" in out
 
 
 def test_figures_smoke(tmp_path):

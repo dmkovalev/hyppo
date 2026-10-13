@@ -1,0 +1,2002 @@
+{
+  "lru:0.25": {
+    "graphs": {
+      "crm_brugge": {
+        "n": 16,
+        "capacity": 4,
+        "cascade_runs_median": 602.5,
+        "safe_runs_median": 562.0,
+        "full_runs": 640
+      },
+      "nfcore_rnaseq": {
+        "n": 18,
+        "capacity": 4,
+        "cascade_runs_median": 720.0,
+        "safe_runs_median": 633.5,
+        "full_runs": 720
+      },
+      "nfcore_airrflow": {
+        "n": 15,
+        "capacity": 3,
+        "cascade_runs_median": 600.0,
+        "safe_runs_median": 537.5,
+        "full_runs": 600
+      },
+      "nfcore_sarek": {
+        "n": 17,
+        "capacity": 4,
+        "cascade_runs_median": 680.0,
+        "safe_runs_median": 597.5,
+        "full_runs": 680
+      },
+      "nfcore_atacseq": {
+        "n": 14,
+        "capacity": 3,
+        "cascade_runs_median": 560.0,
+        "safe_runs_median": 508.0,
+        "full_runs": 560
+      },
+      "nfcore_chipseq": {
+        "n": 13,
+        "capacity": 3,
+        "cascade_runs_median": 520.0,
+        "safe_runs_median": 459.5,
+        "full_runs": 520
+      },
+      "nfcore_methylseq": {
+        "n": 15,
+        "capacity": 3,
+        "cascade_runs_median": 600.0,
+        "safe_runs_median": 536.0,
+        "full_runs": 600
+      },
+      "nfcore_hic": {
+        "n": 15,
+        "capacity": 3,
+        "cascade_runs_median": 600.0,
+        "safe_runs_median": 545.5,
+        "full_runs": 600
+      },
+      "nfcore_ampliseq": {
+        "n": 16,
+        "capacity": 4,
+        "cascade_runs_median": 640.0,
+        "safe_runs_median": 540.0,
+        "full_runs": 640
+      },
+      "nfcore_mag": {
+        "n": 16,
+        "capacity": 4,
+        "cascade_runs_median": 640.0,
+        "safe_runs_median": 553.0,
+        "full_runs": 640
+      },
+      "nfcore_viralrecon": {
+        "n": 15,
+        "capacity": 3,
+        "cascade_runs_median": 600.0,
+        "safe_runs_median": 534.5,
+        "full_runs": 600
+      },
+      "nfcore_scrnaseq": {
+        "n": 16,
+        "capacity": 4,
+        "cascade_runs_median": 640.0,
+        "safe_runs_median": 573.0,
+        "full_runs": 640
+      },
+      "nfcore_taxprofiler": {
+        "n": 14,
+        "capacity": 3,
+        "cascade_runs_median": 560.0,
+        "safe_runs_median": 504.0,
+        "full_runs": 560
+      },
+      "nfcore_cutandrun": {
+        "n": 14,
+        "capacity": 3,
+        "cascade_runs_median": 560.0,
+        "safe_runs_median": 502.0,
+        "full_runs": 560
+      },
+      "nfcore_smrnaseq": {
+        "n": 14,
+        "capacity": 3,
+        "cascade_runs_median": 560.0,
+        "safe_runs_median": 500.0,
+        "full_runs": 560
+      },
+      "nfcore_bacass": {
+        "n": 14,
+        "capacity": 3,
+        "cascade_runs_median": 560.0,
+        "safe_runs_median": 490.5,
+        "full_runs": 560
+      },
+      "nfcore_nanoseq": {
+        "n": 14,
+        "capacity": 3,
+        "cascade_runs_median": 560.0,
+        "safe_runs_median": 496.0,
+        "full_runs": 560
+      },
+      "nfcore_rnafusion": {
+        "n": 15,
+        "capacity": 3,
+        "cascade_runs_median": 600.0,
+        "safe_runs_median": 511.5,
+        "full_runs": 600
+      },
+      "nfcore_raredisease": {
+        "n": 15,
+        "capacity": 3,
+        "cascade_runs_median": 600.0,
+        "safe_runs_median": 543.0,
+        "full_runs": 600
+      },
+      "nfcore_funcscan": {
+        "n": 14,
+        "capacity": 3,
+        "cascade_runs_median": 523.0,
+        "safe_runs_median": 484.5,
+        "full_runs": 560
+      },
+      "nfcore_oncoanalyser": {
+        "n": 15,
+        "capacity": 3,
+        "cascade_runs_median": 600.0,
+        "safe_runs_median": 536.0,
+        "full_runs": 600
+      },
+      "nfcore_differentialabundance": {
+        "n": 14,
+        "capacity": 3,
+        "cascade_runs_median": 560.0,
+        "safe_runs_median": 486.0,
+        "full_runs": 560
+      },
+      "nfcore_hlatyping": {
+        "n": 13,
+        "capacity": 3,
+        "cascade_runs_median": 520.0,
+        "safe_runs_median": 446.5,
+        "full_runs": 520
+      },
+      "nfcore_bactmap": {
+        "n": 14,
+        "capacity": 3,
+        "cascade_runs_median": 560.0,
+        "safe_runs_median": 501.5,
+        "full_runs": 560
+      },
+      "nfcore_rnavar": {
+        "n": 14,
+        "capacity": 3,
+        "cascade_runs_median": 560.0,
+        "safe_runs_median": 488.0,
+        "full_runs": 560
+      },
+      "nfcore_rnasplice": {
+        "n": 14,
+        "capacity": 3,
+        "cascade_runs_median": 560.0,
+        "safe_runs_median": 511.0,
+        "full_runs": 560
+      },
+      "nfcore_epitopeprediction": {
+        "n": 13,
+        "capacity": 3,
+        "cascade_runs_median": 520.0,
+        "safe_runs_median": 459.5,
+        "full_runs": 520
+      }
+    },
+    "median_ratio_cascade_to_safe": 1.12,
+    "median_saving_of_safe": 0.1071428571428571,
+    "saving_iqr": [
+      0.09999999999999998,
+      0.12410714285714286
+    ],
+    "crm_ratio": 1.0720640569395017
+  },
+  "lru:0.5": {
+    "graphs": {
+      "crm_brugge": {
+        "n": 16,
+        "capacity": 8,
+        "cascade_runs_median": 602.5,
+        "safe_runs_median": 485.0,
+        "full_runs": 640
+      },
+      "nfcore_rnaseq": {
+        "n": 18,
+        "capacity": 9,
+        "cascade_runs_median": 720.0,
+        "safe_runs_median": 512.5,
+        "full_runs": 720
+      },
+      "nfcore_airrflow": {
+        "n": 15,
+        "capacity": 7,
+        "cascade_runs_median": 600.0,
+        "safe_runs_median": 453.5,
+        "full_runs": 600
+      },
+      "nfcore_sarek": {
+        "n": 17,
+        "capacity": 8,
+        "cascade_runs_median": 680.0,
+        "safe_runs_median": 498.5,
+        "full_runs": 680
+      },
+      "nfcore_atacseq": {
+        "n": 14,
+        "capacity": 7,
+        "cascade_runs_median": 560.0,
+        "safe_runs_median": 425.5,
+        "full_runs": 560
+      },
+      "nfcore_chipseq": {
+        "n": 13,
+        "capacity": 6,
+        "cascade_runs_median": 520.0,
+        "safe_runs_median": 391.0,
+        "full_runs": 520
+      },
+      "nfcore_methylseq": {
+        "n": 15,
+        "capacity": 7,
+        "cascade_runs_median": 525.0,
+        "safe_runs_median": 410.0,
+        "full_runs": 600
+      },
+      "nfcore_hic": {
+        "n": 15,
+        "capacity": 7,
+        "cascade_runs_median": 600.0,
+        "safe_runs_median": 459.5,
+        "full_runs": 600
+      },
+      "nfcore_ampliseq": {
+        "n": 16,
+        "capacity": 8,
+        "cascade_runs_median": 640.0,
+        "safe_runs_median": 437.5,
+        "full_runs": 640
+      },
+      "nfcore_mag": {
+        "n": 16,
+        "capacity": 8,
+        "cascade_runs_median": 640.0,
+        "safe_runs_median": 455.5,
+        "full_runs": 640
+      },
+      "nfcore_viralrecon": {
+        "n": 15,
+        "capacity": 7,
+        "cascade_runs_median": 600.0,
+        "safe_runs_median": 440.5,
+        "full_runs": 600
+      },
+      "nfcore_scrnaseq": {
+        "n": 16,
+        "capacity": 8,
+        "cascade_runs_median": 640.0,
+        "safe_runs_median": 484.0,
+        "full_runs": 640
+      },
+      "nfcore_taxprofiler": {
+        "n": 14,
+        "capacity": 7,
+        "cascade_runs_median": 560.0,
+        "safe_runs_median": 416.0,
+        "full_runs": 560
+      },
+      "nfcore_cutandrun": {
+        "n": 14,
+        "capacity": 7,
+        "cascade_runs_median": 560.0,
+        "safe_runs_median": 409.0,
+        "full_runs": 560
+      },
+      "nfcore_smrnaseq": {
+        "n": 14,
+        "capacity": 7,
+        "cascade_runs_median": 560.0,
+        "safe_runs_median": 402.0,
+        "full_runs": 560
+      },
+      "nfcore_bacass": {
+        "n": 14,
+        "capacity": 7,
+        "cascade_runs_median": 560.0,
+        "safe_runs_median": 394.5,
+        "full_runs": 560
+      },
+      "nfcore_nanoseq": {
+        "n": 14,
+        "capacity": 7,
+        "cascade_runs_median": 560.0,
+        "safe_runs_median": 406.0,
+        "full_runs": 560
+      },
+      "nfcore_rnafusion": {
+        "n": 15,
+        "capacity": 7,
+        "cascade_runs_median": 493.0,
+        "safe_runs_median": 394.0,
+        "full_runs": 600
+      },
+      "nfcore_raredisease": {
+        "n": 15,
+        "capacity": 7,
+        "cascade_runs_median": 600.0,
+        "safe_runs_median": 455.5,
+        "full_runs": 600
+      },
+      "nfcore_funcscan": {
+        "n": 14,
+        "capacity": 7,
+        "cascade_runs_median": 485.0,
+        "safe_runs_median": 360.0,
+        "full_runs": 560
+      },
+      "nfcore_oncoanalyser": {
+        "n": 15,
+        "capacity": 7,
+        "cascade_runs_median": 600.0,
+        "safe_runs_median": 412.0,
+        "full_runs": 600
+      },
+      "nfcore_differentialabundance": {
+        "n": 14,
+        "capacity": 7,
+        "cascade_runs_median": 486.5,
+        "safe_runs_median": 371.5,
+        "full_runs": 560
+      },
+      "nfcore_hlatyping": {
+        "n": 13,
+        "capacity": 6,
+        "cascade_runs_median": 520.0,
+        "safe_runs_median": 363.0,
+        "full_runs": 520
+      },
+      "nfcore_bactmap": {
+        "n": 14,
+        "capacity": 7,
+        "cascade_runs_median": 560.0,
+        "safe_runs_median": 413.0,
+        "full_runs": 560
+      },
+      "nfcore_rnavar": {
+        "n": 14,
+        "capacity": 7,
+        "cascade_runs_median": 560.0,
+        "safe_runs_median": 360.5,
+        "full_runs": 560
+      },
+      "nfcore_rnasplice": {
+        "n": 14,
+        "capacity": 7,
+        "cascade_runs_median": 560.0,
+        "safe_runs_median": 414.5,
+        "full_runs": 560
+      },
+      "nfcore_epitopeprediction": {
+        "n": 13,
+        "capacity": 6,
+        "cascade_runs_median": 520.0,
+        "safe_runs_median": 370.5,
+        "full_runs": 520
+      }
+    },
+    "median_ratio_cascade_to_safe": 1.3559322033898304,
+    "median_saving_of_safe": 0.26249999999999996,
+    "saving_iqr": [
+      0.24083333333333334,
+      0.2881944444444444
+    ],
+    "crm_ratio": 1.2422680412371134
+  },
+  "lru:0.75": {
+    "graphs": {
+      "crm_brugge": {
+        "n": 16,
+        "capacity": 12,
+        "cascade_runs_median": 527.5,
+        "safe_runs_median": 364.5,
+        "full_runs": 640
+      },
+      "nfcore_rnaseq": {
+        "n": 18,
+        "capacity": 13,
+        "cascade_runs_median": 682.0,
+        "safe_runs_median": 394.0,
+        "full_runs": 720
+      },
+      "nfcore_airrflow": {
+        "n": 15,
+        "capacity": 11,
+        "cascade_runs_median": 600.0,
+        "safe_runs_median": 344.5,
+        "full_runs": 600
+      },
+      "nfcore_sarek": {
+        "n": 17,
+        "capacity": 12,
+        "cascade_runs_median": 680.0,
+        "safe_runs_median": 382.5,
+        "full_runs": 680
+      },
+      "nfcore_atacseq": {
+        "n": 14,
+        "capacity": 10,
+        "cascade_runs_median": 523.0,
+        "safe_runs_median": 331.0,
+        "full_runs": 560
+      },
+      "nfcore_chipseq": {
+        "n": 13,
+        "capacity": 9,
+        "cascade_runs_median": 483.5,
+        "safe_runs_median": 299.5,
+        "full_runs": 520
+      },
+      "nfcore_methylseq": {
+        "n": 15,
+        "capacity": 11,
+        "cascade_runs_median": 525.0,
+        "safe_runs_median": 294.0,
+        "full_runs": 600
+      },
+      "nfcore_hic": {
+        "n": 15,
+        "capacity": 11,
+        "cascade_runs_median": 600.0,
+        "safe_runs_median": 348.5,
+        "full_runs": 600
+      },
+      "nfcore_ampliseq": {
+        "n": 16,
+        "capacity": 12,
+        "cascade_runs_median": 640.0,
+        "safe_runs_median": 322.0,
+        "full_runs": 640
+      },
+      "nfcore_mag": {
+        "n": 16,
+        "capacity": 12,
+        "cascade_runs_median": 640.0,
+        "safe_runs_median": 342.0,
+        "full_runs": 640
+      },
+      "nfcore_viralrecon": {
+        "n": 15,
+        "capacity": 11,
+        "cascade_runs_median": 600.0,
+        "safe_runs_median": 336.5,
+        "full_runs": 600
+      },
+      "nfcore_scrnaseq": {
+        "n": 16,
+        "capacity": 12,
+        "cascade_runs_median": 566.0,
+        "safe_runs_median": 348.0,
+        "full_runs": 640
+      },
+      "nfcore_taxprofiler": {
+        "n": 14,
+        "capacity": 10,
+        "cascade_runs_median": 560.0,
+        "safe_runs_median": 324.5,
+        "full_runs": 560
+      },
+      "nfcore_cutandrun": {
+        "n": 14,
+        "capacity": 10,
+        "cascade_runs_median": 560.0,
+        "safe_runs_median": 333.0,
+        "full_runs": 560
+      },
+      "nfcore_smrnaseq": {
+        "n": 14,
+        "capacity": 10,
+        "cascade_runs_median": 560.0,
+        "safe_runs_median": 325.0,
+        "full_runs": 560
+      },
+      "nfcore_bacass": {
+        "n": 14,
+        "capacity": 10,
+        "cascade_runs_median": 560.0,
+        "safe_runs_median": 307.5,
+        "full_runs": 560
+      },
+      "nfcore_nanoseq": {
+        "n": 14,
+        "capacity": 10,
+        "cascade_runs_median": 560.0,
+        "safe_runs_median": 322.5,
+        "full_runs": 560
+      },
+      "nfcore_rnafusion": {
+        "n": 15,
+        "capacity": 11,
+        "cascade_runs_median": 379.5,
+        "safe_runs_median": 252.5,
+        "full_runs": 600
+      },
+      "nfcore_raredisease": {
+        "n": 15,
+        "capacity": 11,
+        "cascade_runs_median": 490.0,
+        "safe_runs_median": 317.0,
+        "full_runs": 600
+      },
+      "nfcore_funcscan": {
+        "n": 14,
+        "capacity": 10,
+        "cascade_runs_median": 447.5,
+        "safe_runs_median": 264.5,
+        "full_runs": 560
+      },
+      "nfcore_oncoanalyser": {
+        "n": 15,
+        "capacity": 11,
+        "cascade_runs_median": 418.0,
+        "safe_runs_median": 274.0,
+        "full_runs": 600
+      },
+      "nfcore_differentialabundance": {
+        "n": 14,
+        "capacity": 10,
+        "cascade_runs_median": 486.5,
+        "safe_runs_median": 281.5,
+        "full_runs": 560
+      },
+      "nfcore_hlatyping": {
+        "n": 13,
+        "capacity": 9,
+        "cascade_runs_median": 448.5,
+        "safe_runs_median": 269.5,
+        "full_runs": 520
+      },
+      "nfcore_bactmap": {
+        "n": 14,
+        "capacity": 10,
+        "cascade_runs_median": 522.0,
+        "safe_runs_median": 325.0,
+        "full_runs": 560
+      },
+      "nfcore_rnavar": {
+        "n": 14,
+        "capacity": 10,
+        "cascade_runs_median": 418.5,
+        "safe_runs_median": 263.0,
+        "full_runs": 560
+      },
+      "nfcore_rnasplice": {
+        "n": 14,
+        "capacity": 10,
+        "cascade_runs_median": 488.5,
+        "safe_runs_median": 324.0,
+        "full_runs": 560
+      },
+      "nfcore_epitopeprediction": {
+        "n": 13,
+        "capacity": 9,
+        "cascade_runs_median": 520.0,
+        "safe_runs_median": 271.5,
+        "full_runs": 520
+      }
+    },
+    "median_ratio_cascade_to_safe": 1.721664275466284,
+    "median_saving_of_safe": 0.4191666666666667,
+    "saving_iqr": [
+      0.3715651135005974,
+      0.4375
+    ],
+    "crm_ratio": 1.4471879286694103
+  },
+  "lru:1.0": {
+    "graphs": {
+      "crm_brugge": {
+        "n": 16,
+        "capacity": 16,
+        "cascade_runs_median": 231.5,
+        "safe_runs_median": 231.5,
+        "full_runs": 640
+      },
+      "nfcore_rnaseq": {
+        "n": 18,
+        "capacity": 18,
+        "cascade_runs_median": 209.5,
+        "safe_runs_median": 209.5,
+        "full_runs": 720
+      },
+      "nfcore_airrflow": {
+        "n": 15,
+        "capacity": 15,
+        "cascade_runs_median": 200.5,
+        "safe_runs_median": 200.5,
+        "full_runs": 600
+      },
+      "nfcore_sarek": {
+        "n": 17,
+        "capacity": 17,
+        "cascade_runs_median": 201.5,
+        "safe_runs_median": 201.5,
+        "full_runs": 680
+      },
+      "nfcore_atacseq": {
+        "n": 14,
+        "capacity": 14,
+        "cascade_runs_median": 184.5,
+        "safe_runs_median": 184.5,
+        "full_runs": 560
+      },
+      "nfcore_chipseq": {
+        "n": 13,
+        "capacity": 13,
+        "cascade_runs_median": 155.0,
+        "safe_runs_median": 155.0,
+        "full_runs": 520
+      },
+      "nfcore_methylseq": {
+        "n": 15,
+        "capacity": 15,
+        "cascade_runs_median": 150.5,
+        "safe_runs_median": 150.5,
+        "full_runs": 600
+      },
+      "nfcore_hic": {
+        "n": 15,
+        "capacity": 15,
+        "cascade_runs_median": 204.0,
+        "safe_runs_median": 204.0,
+        "full_runs": 600
+      },
+      "nfcore_ampliseq": {
+        "n": 16,
+        "capacity": 16,
+        "cascade_runs_median": 177.0,
+        "safe_runs_median": 177.0,
+        "full_runs": 640
+      },
+      "nfcore_mag": {
+        "n": 16,
+        "capacity": 16,
+        "cascade_runs_median": 197.0,
+        "safe_runs_median": 197.0,
+        "full_runs": 640
+      },
+      "nfcore_viralrecon": {
+        "n": 15,
+        "capacity": 15,
+        "cascade_runs_median": 193.0,
+        "safe_runs_median": 193.0,
+        "full_runs": 600
+      },
+      "nfcore_scrnaseq": {
+        "n": 16,
+        "capacity": 16,
+        "cascade_runs_median": 203.0,
+        "safe_runs_median": 203.0,
+        "full_runs": 640
+      },
+      "nfcore_taxprofiler": {
+        "n": 14,
+        "capacity": 14,
+        "cascade_runs_median": 178.0,
+        "safe_runs_median": 178.0,
+        "full_runs": 560
+      },
+      "nfcore_cutandrun": {
+        "n": 14,
+        "capacity": 14,
+        "cascade_runs_median": 190.0,
+        "safe_runs_median": 190.0,
+        "full_runs": 560
+      },
+      "nfcore_smrnaseq": {
+        "n": 14,
+        "capacity": 14,
+        "cascade_runs_median": 182.5,
+        "safe_runs_median": 182.5,
+        "full_runs": 560
+      },
+      "nfcore_bacass": {
+        "n": 14,
+        "capacity": 14,
+        "cascade_runs_median": 168.0,
+        "safe_runs_median": 168.0,
+        "full_runs": 560
+      },
+      "nfcore_nanoseq": {
+        "n": 14,
+        "capacity": 14,
+        "cascade_runs_median": 179.0,
+        "safe_runs_median": 179.0,
+        "full_runs": 560
+      },
+      "nfcore_rnafusion": {
+        "n": 15,
+        "capacity": 15,
+        "cascade_runs_median": 112.0,
+        "safe_runs_median": 112.0,
+        "full_runs": 600
+      },
+      "nfcore_raredisease": {
+        "n": 15,
+        "capacity": 15,
+        "cascade_runs_median": 172.5,
+        "safe_runs_median": 172.5,
+        "full_runs": 600
+      },
+      "nfcore_funcscan": {
+        "n": 14,
+        "capacity": 14,
+        "cascade_runs_median": 123.0,
+        "safe_runs_median": 123.0,
+        "full_runs": 560
+      },
+      "nfcore_oncoanalyser": {
+        "n": 15,
+        "capacity": 15,
+        "cascade_runs_median": 130.0,
+        "safe_runs_median": 130.0,
+        "full_runs": 600
+      },
+      "nfcore_differentialabundance": {
+        "n": 14,
+        "capacity": 14,
+        "cascade_runs_median": 137.0,
+        "safe_runs_median": 137.0,
+        "full_runs": 560
+      },
+      "nfcore_hlatyping": {
+        "n": 13,
+        "capacity": 13,
+        "cascade_runs_median": 125.0,
+        "safe_runs_median": 125.0,
+        "full_runs": 520
+      },
+      "nfcore_bactmap": {
+        "n": 14,
+        "capacity": 14,
+        "cascade_runs_median": 183.5,
+        "safe_runs_median": 183.5,
+        "full_runs": 560
+      },
+      "nfcore_rnavar": {
+        "n": 14,
+        "capacity": 14,
+        "cascade_runs_median": 120.5,
+        "safe_runs_median": 120.5,
+        "full_runs": 560
+      },
+      "nfcore_rnasplice": {
+        "n": 14,
+        "capacity": 14,
+        "cascade_runs_median": 187.0,
+        "safe_runs_median": 187.0,
+        "full_runs": 560
+      },
+      "nfcore_epitopeprediction": {
+        "n": 13,
+        "capacity": 13,
+        "cascade_runs_median": 127.5,
+        "safe_runs_median": 127.5,
+        "full_runs": 520
+      }
+    },
+    "median_ratio_cascade_to_safe": 1.0,
+    "median_saving_of_safe": 0.0,
+    "saving_iqr": [
+      0.0,
+      0.0
+    ],
+    "crm_ratio": 1.0
+  },
+  "lru:2.0": {
+    "graphs": {
+      "crm_brugge": {
+        "n": 16,
+        "capacity": 32,
+        "cascade_runs_median": 219.5,
+        "safe_runs_median": 216.5,
+        "full_runs": 640
+      },
+      "nfcore_rnaseq": {
+        "n": 18,
+        "capacity": 36,
+        "cascade_runs_median": 185.0,
+        "safe_runs_median": 185.0,
+        "full_runs": 720
+      },
+      "nfcore_airrflow": {
+        "n": 15,
+        "capacity": 30,
+        "cascade_runs_median": 192.0,
+        "safe_runs_median": 191.0,
+        "full_runs": 600
+      },
+      "nfcore_sarek": {
+        "n": 17,
+        "capacity": 34,
+        "cascade_runs_median": 195.5,
+        "safe_runs_median": 195.0,
+        "full_runs": 680
+      },
+      "nfcore_atacseq": {
+        "n": 14,
+        "capacity": 28,
+        "cascade_runs_median": 172.0,
+        "safe_runs_median": 172.0,
+        "full_runs": 560
+      },
+      "nfcore_chipseq": {
+        "n": 13,
+        "capacity": 26,
+        "cascade_runs_median": 142.5,
+        "safe_runs_median": 141.5,
+        "full_runs": 520
+      },
+      "nfcore_methylseq": {
+        "n": 15,
+        "capacity": 30,
+        "cascade_runs_median": 142.5,
+        "safe_runs_median": 142.5,
+        "full_runs": 600
+      },
+      "nfcore_hic": {
+        "n": 15,
+        "capacity": 30,
+        "cascade_runs_median": 192.0,
+        "safe_runs_median": 192.0,
+        "full_runs": 600
+      },
+      "nfcore_ampliseq": {
+        "n": 16,
+        "capacity": 32,
+        "cascade_runs_median": 170.0,
+        "safe_runs_median": 169.5,
+        "full_runs": 640
+      },
+      "nfcore_mag": {
+        "n": 16,
+        "capacity": 32,
+        "cascade_runs_median": 184.0,
+        "safe_runs_median": 184.0,
+        "full_runs": 640
+      },
+      "nfcore_viralrecon": {
+        "n": 15,
+        "capacity": 30,
+        "cascade_runs_median": 186.5,
+        "safe_runs_median": 186.5,
+        "full_runs": 600
+      },
+      "nfcore_scrnaseq": {
+        "n": 16,
+        "capacity": 32,
+        "cascade_runs_median": 186.5,
+        "safe_runs_median": 186.5,
+        "full_runs": 640
+      },
+      "nfcore_taxprofiler": {
+        "n": 14,
+        "capacity": 28,
+        "cascade_runs_median": 168.5,
+        "safe_runs_median": 168.5,
+        "full_runs": 560
+      },
+      "nfcore_cutandrun": {
+        "n": 14,
+        "capacity": 28,
+        "cascade_runs_median": 167.0,
+        "safe_runs_median": 167.0,
+        "full_runs": 560
+      },
+      "nfcore_smrnaseq": {
+        "n": 14,
+        "capacity": 28,
+        "cascade_runs_median": 160.5,
+        "safe_runs_median": 160.5,
+        "full_runs": 560
+      },
+      "nfcore_bacass": {
+        "n": 14,
+        "capacity": 28,
+        "cascade_runs_median": 156.0,
+        "safe_runs_median": 156.0,
+        "full_runs": 560
+      },
+      "nfcore_nanoseq": {
+        "n": 14,
+        "capacity": 28,
+        "cascade_runs_median": 163.0,
+        "safe_runs_median": 163.0,
+        "full_runs": 560
+      },
+      "nfcore_rnafusion": {
+        "n": 15,
+        "capacity": 30,
+        "cascade_runs_median": 109.5,
+        "safe_runs_median": 109.5,
+        "full_runs": 600
+      },
+      "nfcore_raredisease": {
+        "n": 15,
+        "capacity": 30,
+        "cascade_runs_median": 160.0,
+        "safe_runs_median": 160.0,
+        "full_runs": 600
+      },
+      "nfcore_funcscan": {
+        "n": 14,
+        "capacity": 28,
+        "cascade_runs_median": 111.5,
+        "safe_runs_median": 111.5,
+        "full_runs": 560
+      },
+      "nfcore_oncoanalyser": {
+        "n": 15,
+        "capacity": 30,
+        "cascade_runs_median": 124.0,
+        "safe_runs_median": 122.5,
+        "full_runs": 600
+      },
+      "nfcore_differentialabundance": {
+        "n": 14,
+        "capacity": 28,
+        "cascade_runs_median": 126.5,
+        "safe_runs_median": 124.5,
+        "full_runs": 560
+      },
+      "nfcore_hlatyping": {
+        "n": 13,
+        "capacity": 26,
+        "cascade_runs_median": 114.0,
+        "safe_runs_median": 111.5,
+        "full_runs": 520
+      },
+      "nfcore_bactmap": {
+        "n": 14,
+        "capacity": 28,
+        "cascade_runs_median": 171.0,
+        "safe_runs_median": 171.0,
+        "full_runs": 560
+      },
+      "nfcore_rnavar": {
+        "n": 14,
+        "capacity": 28,
+        "cascade_runs_median": 113.5,
+        "safe_runs_median": 113.5,
+        "full_runs": 560
+      },
+      "nfcore_rnasplice": {
+        "n": 14,
+        "capacity": 28,
+        "cascade_runs_median": 174.0,
+        "safe_runs_median": 174.0,
+        "full_runs": 560
+      },
+      "nfcore_epitopeprediction": {
+        "n": 13,
+        "capacity": 26,
+        "cascade_runs_median": 117.0,
+        "safe_runs_median": 117.0,
+        "full_runs": 520
+      }
+    },
+    "median_ratio_cascade_to_safe": 1.0,
+    "median_saving_of_safe": 0.0,
+    "saving_iqr": [
+      0.0,
+      0.002941176470588225
+    ],
+    "crm_ratio": 1.0138568129330254
+  },
+  "random:0.25": {
+    "graphs": {
+      "crm_brugge": {
+        "n": 16,
+        "capacity": 4,
+        "cascade_runs_median": 606.5,
+        "safe_runs_median": 542.5,
+        "full_runs": 640
+      },
+      "nfcore_rnaseq": {
+        "n": 18,
+        "capacity": 4,
+        "cascade_runs_median": 682.0,
+        "safe_runs_median": 612.0,
+        "full_runs": 720
+      },
+      "nfcore_airrflow": {
+        "n": 15,
+        "capacity": 3,
+        "cascade_runs_median": 579.0,
+        "safe_runs_median": 526.0,
+        "full_runs": 600
+      },
+      "nfcore_sarek": {
+        "n": 17,
+        "capacity": 4,
+        "cascade_runs_median": 654.0,
+        "safe_runs_median": 569.0,
+        "full_runs": 680
+      },
+      "nfcore_atacseq": {
+        "n": 14,
+        "capacity": 3,
+        "cascade_runs_median": 526.0,
+        "safe_runs_median": 483.5,
+        "full_runs": 560
+      },
+      "nfcore_chipseq": {
+        "n": 13,
+        "capacity": 3,
+        "cascade_runs_median": 486.5,
+        "safe_runs_median": 440.0,
+        "full_runs": 520
+      },
+      "nfcore_methylseq": {
+        "n": 15,
+        "capacity": 3,
+        "cascade_runs_median": 565.0,
+        "safe_runs_median": 511.0,
+        "full_runs": 600
+      },
+      "nfcore_hic": {
+        "n": 15,
+        "capacity": 3,
+        "cascade_runs_median": 579.0,
+        "safe_runs_median": 524.5,
+        "full_runs": 600
+      },
+      "nfcore_ampliseq": {
+        "n": 16,
+        "capacity": 4,
+        "cascade_runs_median": 614.5,
+        "safe_runs_median": 534.0,
+        "full_runs": 640
+      },
+      "nfcore_mag": {
+        "n": 16,
+        "capacity": 4,
+        "cascade_runs_median": 612.5,
+        "safe_runs_median": 536.5,
+        "full_runs": 640
+      },
+      "nfcore_viralrecon": {
+        "n": 15,
+        "capacity": 3,
+        "cascade_runs_median": 581.0,
+        "safe_runs_median": 520.5,
+        "full_runs": 600
+      },
+      "nfcore_scrnaseq": {
+        "n": 16,
+        "capacity": 4,
+        "cascade_runs_median": 603.5,
+        "safe_runs_median": 539.5,
+        "full_runs": 640
+      },
+      "nfcore_taxprofiler": {
+        "n": 14,
+        "capacity": 3,
+        "cascade_runs_median": 538.5,
+        "safe_runs_median": 481.5,
+        "full_runs": 560
+      },
+      "nfcore_cutandrun": {
+        "n": 14,
+        "capacity": 3,
+        "cascade_runs_median": 539.0,
+        "safe_runs_median": 485.0,
+        "full_runs": 560
+      },
+      "nfcore_smrnaseq": {
+        "n": 14,
+        "capacity": 3,
+        "cascade_runs_median": 536.5,
+        "safe_runs_median": 484.0,
+        "full_runs": 560
+      },
+      "nfcore_bacass": {
+        "n": 14,
+        "capacity": 3,
+        "cascade_runs_median": 537.5,
+        "safe_runs_median": 480.0,
+        "full_runs": 560
+      },
+      "nfcore_nanoseq": {
+        "n": 14,
+        "capacity": 3,
+        "cascade_runs_median": 538.0,
+        "safe_runs_median": 488.5,
+        "full_runs": 560
+      },
+      "nfcore_rnafusion": {
+        "n": 15,
+        "capacity": 3,
+        "cascade_runs_median": 550.5,
+        "safe_runs_median": 506.0,
+        "full_runs": 600
+      },
+      "nfcore_raredisease": {
+        "n": 15,
+        "capacity": 3,
+        "cascade_runs_median": 565.0,
+        "safe_runs_median": 518.5,
+        "full_runs": 600
+      },
+      "nfcore_funcscan": {
+        "n": 14,
+        "capacity": 3,
+        "cascade_runs_median": 512.5,
+        "safe_runs_median": 471.0,
+        "full_runs": 560
+      },
+      "nfcore_oncoanalyser": {
+        "n": 15,
+        "capacity": 3,
+        "cascade_runs_median": 560.0,
+        "safe_runs_median": 508.0,
+        "full_runs": 600
+      },
+      "nfcore_differentialabundance": {
+        "n": 14,
+        "capacity": 3,
+        "cascade_runs_median": 529.0,
+        "safe_runs_median": 472.5,
+        "full_runs": 560
+      },
+      "nfcore_hlatyping": {
+        "n": 13,
+        "capacity": 3,
+        "cascade_runs_median": 485.5,
+        "safe_runs_median": 434.0,
+        "full_runs": 520
+      },
+      "nfcore_bactmap": {
+        "n": 14,
+        "capacity": 3,
+        "cascade_runs_median": 528.5,
+        "safe_runs_median": 485.0,
+        "full_runs": 560
+      },
+      "nfcore_rnavar": {
+        "n": 14,
+        "capacity": 3,
+        "cascade_runs_median": 526.5,
+        "safe_runs_median": 470.0,
+        "full_runs": 560
+      },
+      "nfcore_rnasplice": {
+        "n": 14,
+        "capacity": 3,
+        "cascade_runs_median": 535.5,
+        "safe_runs_median": 485.0,
+        "full_runs": 560
+      },
+      "nfcore_epitopeprediction": {
+        "n": 13,
+        "capacity": 3,
+        "cascade_runs_median": 499.5,
+        "safe_runs_median": 434.0,
+        "full_runs": 520
+      }
+    },
+    "median_ratio_cascade_to_safe": 1.111340206185567,
+    "median_saving_of_safe": 0.1001855287569573,
+    "saving_iqr": [
+      0.09200743494423791,
+      0.1068052930056711
+    ],
+    "crm_ratio": 1.1179723502304149
+  },
+  "random:0.5": {
+    "graphs": {
+      "crm_brugge": {
+        "n": 16,
+        "capacity": 8,
+        "cascade_runs_median": 564.5,
+        "safe_runs_median": 464.5,
+        "full_runs": 640
+      },
+      "nfcore_rnaseq": {
+        "n": 18,
+        "capacity": 9,
+        "cascade_runs_median": 640.5,
+        "safe_runs_median": 496.5,
+        "full_runs": 720
+      },
+      "nfcore_airrflow": {
+        "n": 15,
+        "capacity": 7,
+        "cascade_runs_median": 550.5,
+        "safe_runs_median": 437.0,
+        "full_runs": 600
+      },
+      "nfcore_sarek": {
+        "n": 17,
+        "capacity": 8,
+        "cascade_runs_median": 631.0,
+        "safe_runs_median": 483.0,
+        "full_runs": 680
+      },
+      "nfcore_atacseq": {
+        "n": 14,
+        "capacity": 7,
+        "cascade_runs_median": 488.0,
+        "safe_runs_median": 403.5,
+        "full_runs": 560
+      },
+      "nfcore_chipseq": {
+        "n": 13,
+        "capacity": 6,
+        "cascade_runs_median": 456.5,
+        "safe_runs_median": 375.0,
+        "full_runs": 520
+      },
+      "nfcore_methylseq": {
+        "n": 15,
+        "capacity": 7,
+        "cascade_runs_median": 523.0,
+        "safe_runs_median": 416.0,
+        "full_runs": 600
+      },
+      "nfcore_hic": {
+        "n": 15,
+        "capacity": 7,
+        "cascade_runs_median": 550.0,
+        "safe_runs_median": 438.0,
+        "full_runs": 600
+      },
+      "nfcore_ampliseq": {
+        "n": 16,
+        "capacity": 8,
+        "cascade_runs_median": 590.5,
+        "safe_runs_median": 442.0,
+        "full_runs": 640
+      },
+      "nfcore_mag": {
+        "n": 16,
+        "capacity": 8,
+        "cascade_runs_median": 589.5,
+        "safe_runs_median": 449.0,
+        "full_runs": 640
+      },
+      "nfcore_viralrecon": {
+        "n": 15,
+        "capacity": 7,
+        "cascade_runs_median": 550.5,
+        "safe_runs_median": 432.5,
+        "full_runs": 600
+      },
+      "nfcore_scrnaseq": {
+        "n": 16,
+        "capacity": 8,
+        "cascade_runs_median": 567.5,
+        "safe_runs_median": 457.5,
+        "full_runs": 640
+      },
+      "nfcore_taxprofiler": {
+        "n": 14,
+        "capacity": 7,
+        "cascade_runs_median": 508.5,
+        "safe_runs_median": 395.0,
+        "full_runs": 560
+      },
+      "nfcore_cutandrun": {
+        "n": 14,
+        "capacity": 7,
+        "cascade_runs_median": 513.0,
+        "safe_runs_median": 397.5,
+        "full_runs": 560
+      },
+      "nfcore_smrnaseq": {
+        "n": 14,
+        "capacity": 7,
+        "cascade_runs_median": 510.0,
+        "safe_runs_median": 391.5,
+        "full_runs": 560
+      },
+      "nfcore_bacass": {
+        "n": 14,
+        "capacity": 7,
+        "cascade_runs_median": 511.5,
+        "safe_runs_median": 393.0,
+        "full_runs": 560
+      },
+      "nfcore_nanoseq": {
+        "n": 14,
+        "capacity": 7,
+        "cascade_runs_median": 503.0,
+        "safe_runs_median": 398.0,
+        "full_runs": 560
+      },
+      "nfcore_rnafusion": {
+        "n": 15,
+        "capacity": 7,
+        "cascade_runs_median": 479.0,
+        "safe_runs_median": 389.0,
+        "full_runs": 600
+      },
+      "nfcore_raredisease": {
+        "n": 15,
+        "capacity": 7,
+        "cascade_runs_median": 518.5,
+        "safe_runs_median": 423.0,
+        "full_runs": 600
+      },
+      "nfcore_funcscan": {
+        "n": 14,
+        "capacity": 7,
+        "cascade_runs_median": 448.0,
+        "safe_runs_median": 360.5,
+        "full_runs": 560
+      },
+      "nfcore_oncoanalyser": {
+        "n": 15,
+        "capacity": 7,
+        "cascade_runs_median": 508.0,
+        "safe_runs_median": 410.0,
+        "full_runs": 600
+      },
+      "nfcore_differentialabundance": {
+        "n": 14,
+        "capacity": 7,
+        "cascade_runs_median": 479.0,
+        "safe_runs_median": 376.0,
+        "full_runs": 560
+      },
+      "nfcore_hlatyping": {
+        "n": 13,
+        "capacity": 6,
+        "cascade_runs_median": 450.0,
+        "safe_runs_median": 354.5,
+        "full_runs": 520
+      },
+      "nfcore_bactmap": {
+        "n": 14,
+        "capacity": 7,
+        "cascade_runs_median": 493.5,
+        "safe_runs_median": 396.5,
+        "full_runs": 560
+      },
+      "nfcore_rnavar": {
+        "n": 14,
+        "capacity": 7,
+        "cascade_runs_median": 479.5,
+        "safe_runs_median": 361.5,
+        "full_runs": 560
+      },
+      "nfcore_rnasplice": {
+        "n": 14,
+        "capacity": 7,
+        "cascade_runs_median": 501.0,
+        "safe_runs_median": 399.0,
+        "full_runs": 560
+      },
+      "nfcore_epitopeprediction": {
+        "n": 13,
+        "capacity": 6,
+        "cascade_runs_median": 469.0,
+        "safe_runs_median": 355.5,
+        "full_runs": 520
+      }
+    },
+    "median_ratio_cascade_to_safe": 1.263819095477387,
+    "median_saving_of_safe": 0.20874751491053678,
+    "saving_iqr": [
+      0.19383259911894268,
+      0.23167155425219943
+    ],
+    "crm_ratio": 1.2152852529601723
+  },
+  "random:0.75": {
+    "graphs": {
+      "crm_brugge": {
+        "n": 16,
+        "capacity": 12,
+        "cascade_runs_median": 524.5,
+        "safe_runs_median": 404.5,
+        "full_runs": 640
+      },
+      "nfcore_rnaseq": {
+        "n": 18,
+        "capacity": 13,
+        "cascade_runs_median": 613.0,
+        "safe_runs_median": 431.0,
+        "full_runs": 720
+      },
+      "nfcore_airrflow": {
+        "n": 15,
+        "capacity": 11,
+        "cascade_runs_median": 522.0,
+        "safe_runs_median": 365.0,
+        "full_runs": 600
+      },
+      "nfcore_sarek": {
+        "n": 17,
+        "capacity": 12,
+        "cascade_runs_median": 597.0,
+        "safe_runs_median": 404.0,
+        "full_runs": 680
+      },
+      "nfcore_atacseq": {
+        "n": 14,
+        "capacity": 10,
+        "cascade_runs_median": 460.0,
+        "safe_runs_median": 352.5,
+        "full_runs": 560
+      },
+      "nfcore_chipseq": {
+        "n": 13,
+        "capacity": 9,
+        "cascade_runs_median": 430.5,
+        "safe_runs_median": 319.0,
+        "full_runs": 520
+      },
+      "nfcore_methylseq": {
+        "n": 15,
+        "capacity": 11,
+        "cascade_runs_median": 467.5,
+        "safe_runs_median": 330.5,
+        "full_runs": 600
+      },
+      "nfcore_hic": {
+        "n": 15,
+        "capacity": 11,
+        "cascade_runs_median": 521.0,
+        "safe_runs_median": 368.0,
+        "full_runs": 600
+      },
+      "nfcore_ampliseq": {
+        "n": 16,
+        "capacity": 12,
+        "cascade_runs_median": 564.0,
+        "safe_runs_median": 364.0,
+        "full_runs": 640
+      },
+      "nfcore_mag": {
+        "n": 16,
+        "capacity": 12,
+        "cascade_runs_median": 569.0,
+        "safe_runs_median": 389.5,
+        "full_runs": 640
+      },
+      "nfcore_viralrecon": {
+        "n": 15,
+        "capacity": 11,
+        "cascade_runs_median": 527.0,
+        "safe_runs_median": 365.0,
+        "full_runs": 600
+      },
+      "nfcore_scrnaseq": {
+        "n": 16,
+        "capacity": 12,
+        "cascade_runs_median": 523.0,
+        "safe_runs_median": 371.0,
+        "full_runs": 640
+      },
+      "nfcore_taxprofiler": {
+        "n": 14,
+        "capacity": 10,
+        "cascade_runs_median": 482.5,
+        "safe_runs_median": 344.0,
+        "full_runs": 560
+      },
+      "nfcore_cutandrun": {
+        "n": 14,
+        "capacity": 10,
+        "cascade_runs_median": 494.5,
+        "safe_runs_median": 346.0,
+        "full_runs": 560
+      },
+      "nfcore_smrnaseq": {
+        "n": 14,
+        "capacity": 10,
+        "cascade_runs_median": 494.0,
+        "safe_runs_median": 344.5,
+        "full_runs": 560
+      },
+      "nfcore_bacass": {
+        "n": 14,
+        "capacity": 10,
+        "cascade_runs_median": 494.0,
+        "safe_runs_median": 341.0,
+        "full_runs": 560
+      },
+      "nfcore_nanoseq": {
+        "n": 14,
+        "capacity": 10,
+        "cascade_runs_median": 481.0,
+        "safe_runs_median": 348.0,
+        "full_runs": 560
+      },
+      "nfcore_rnafusion": {
+        "n": 15,
+        "capacity": 11,
+        "cascade_runs_median": 422.0,
+        "safe_runs_median": 310.5,
+        "full_runs": 600
+      },
+      "nfcore_raredisease": {
+        "n": 15,
+        "capacity": 11,
+        "cascade_runs_median": 475.0,
+        "safe_runs_median": 353.5,
+        "full_runs": 600
+      },
+      "nfcore_funcscan": {
+        "n": 14,
+        "capacity": 10,
+        "cascade_runs_median": 404.0,
+        "safe_runs_median": 303.0,
+        "full_runs": 560
+      },
+      "nfcore_oncoanalyser": {
+        "n": 15,
+        "capacity": 11,
+        "cascade_runs_median": 454.0,
+        "safe_runs_median": 318.0,
+        "full_runs": 600
+      },
+      "nfcore_differentialabundance": {
+        "n": 14,
+        "capacity": 10,
+        "cascade_runs_median": 438.5,
+        "safe_runs_median": 307.5,
+        "full_runs": 560
+      },
+      "nfcore_hlatyping": {
+        "n": 13,
+        "capacity": 9,
+        "cascade_runs_median": 418.0,
+        "safe_runs_median": 296.0,
+        "full_runs": 520
+      },
+      "nfcore_bactmap": {
+        "n": 14,
+        "capacity": 10,
+        "cascade_runs_median": 458.5,
+        "safe_runs_median": 346.0,
+        "full_runs": 560
+      },
+      "nfcore_rnavar": {
+        "n": 14,
+        "capacity": 10,
+        "cascade_runs_median": 452.5,
+        "safe_runs_median": 304.0,
+        "full_runs": 560
+      },
+      "nfcore_rnasplice": {
+        "n": 14,
+        "capacity": 10,
+        "cascade_runs_median": 480.0,
+        "safe_runs_median": 353.0,
+        "full_runs": 560
+      },
+      "nfcore_epitopeprediction": {
+        "n": 13,
+        "capacity": 9,
+        "cascade_runs_median": 440.5,
+        "safe_runs_median": 295.0,
+        "full_runs": 520
+      }
+    },
+    "median_ratio_cascade_to_safe": 1.4157608695652173,
+    "median_saving_of_safe": 0.2936660268714012,
+    "saving_iqr": [
+      0.264218009478673,
+      0.30740037950664134
+    ],
+    "crm_ratio": 1.2966625463535228
+  },
+  "random:1.0": {
+    "graphs": {
+      "crm_brugge": {
+        "n": 16,
+        "capacity": 16,
+        "cascade_runs_median": 493.0,
+        "safe_runs_median": 357.0,
+        "full_runs": 640
+      },
+      "nfcore_rnaseq": {
+        "n": 18,
+        "capacity": 18,
+        "cascade_runs_median": 550.5,
+        "safe_runs_median": 360.0,
+        "full_runs": 720
+      },
+      "nfcore_airrflow": {
+        "n": 15,
+        "capacity": 15,
+        "cascade_runs_median": 486.5,
+        "safe_runs_median": 316.0,
+        "full_runs": 600
+      },
+      "nfcore_sarek": {
+        "n": 17,
+        "capacity": 17,
+        "cascade_runs_median": 533.5,
+        "safe_runs_median": 343.0,
+        "full_runs": 680
+      },
+      "nfcore_atacseq": {
+        "n": 14,
+        "capacity": 14,
+        "cascade_runs_median": 415.0,
+        "safe_runs_median": 294.0,
+        "full_runs": 560
+      },
+      "nfcore_chipseq": {
+        "n": 13,
+        "capacity": 13,
+        "cascade_runs_median": 390.0,
+        "safe_runs_median": 257.5,
+        "full_runs": 520
+      },
+      "nfcore_methylseq": {
+        "n": 15,
+        "capacity": 15,
+        "cascade_runs_median": 430.5,
+        "safe_runs_median": 282.0,
+        "full_runs": 600
+      },
+      "nfcore_hic": {
+        "n": 15,
+        "capacity": 15,
+        "cascade_runs_median": 487.0,
+        "safe_runs_median": 329.0,
+        "full_runs": 600
+      },
+      "nfcore_ampliseq": {
+        "n": 16,
+        "capacity": 16,
+        "cascade_runs_median": 512.5,
+        "safe_runs_median": 310.5,
+        "full_runs": 640
+      },
+      "nfcore_mag": {
+        "n": 16,
+        "capacity": 16,
+        "cascade_runs_median": 531.5,
+        "safe_runs_median": 330.5,
+        "full_runs": 640
+      },
+      "nfcore_viralrecon": {
+        "n": 15,
+        "capacity": 15,
+        "cascade_runs_median": 481.5,
+        "safe_runs_median": 314.5,
+        "full_runs": 600
+      },
+      "nfcore_scrnaseq": {
+        "n": 16,
+        "capacity": 16,
+        "cascade_runs_median": 485.0,
+        "safe_runs_median": 339.0,
+        "full_runs": 640
+      },
+      "nfcore_taxprofiler": {
+        "n": 14,
+        "capacity": 14,
+        "cascade_runs_median": 448.0,
+        "safe_runs_median": 301.5,
+        "full_runs": 560
+      },
+      "nfcore_cutandrun": {
+        "n": 14,
+        "capacity": 14,
+        "cascade_runs_median": 461.0,
+        "safe_runs_median": 301.5,
+        "full_runs": 560
+      },
+      "nfcore_smrnaseq": {
+        "n": 14,
+        "capacity": 14,
+        "cascade_runs_median": 444.5,
+        "safe_runs_median": 288.0,
+        "full_runs": 560
+      },
+      "nfcore_bacass": {
+        "n": 14,
+        "capacity": 14,
+        "cascade_runs_median": 437.0,
+        "safe_runs_median": 282.5,
+        "full_runs": 560
+      },
+      "nfcore_nanoseq": {
+        "n": 14,
+        "capacity": 14,
+        "cascade_runs_median": 424.5,
+        "safe_runs_median": 292.0,
+        "full_runs": 560
+      },
+      "nfcore_rnafusion": {
+        "n": 15,
+        "capacity": 15,
+        "cascade_runs_median": 346.0,
+        "safe_runs_median": 235.5,
+        "full_runs": 600
+      },
+      "nfcore_raredisease": {
+        "n": 15,
+        "capacity": 15,
+        "cascade_runs_median": 433.5,
+        "safe_runs_median": 296.5,
+        "full_runs": 600
+      },
+      "nfcore_funcscan": {
+        "n": 14,
+        "capacity": 14,
+        "cascade_runs_median": 350.5,
+        "safe_runs_median": 245.0,
+        "full_runs": 560
+      },
+      "nfcore_oncoanalyser": {
+        "n": 15,
+        "capacity": 15,
+        "cascade_runs_median": 383.0,
+        "safe_runs_median": 258.0,
+        "full_runs": 600
+      },
+      "nfcore_differentialabundance": {
+        "n": 14,
+        "capacity": 14,
+        "cascade_runs_median": 385.5,
+        "safe_runs_median": 241.0,
+        "full_runs": 560
+      },
+      "nfcore_hlatyping": {
+        "n": 13,
+        "capacity": 13,
+        "cascade_runs_median": 360.0,
+        "safe_runs_median": 229.5,
+        "full_runs": 520
+      },
+      "nfcore_bactmap": {
+        "n": 14,
+        "capacity": 14,
+        "cascade_runs_median": 432.0,
+        "safe_runs_median": 298.5,
+        "full_runs": 560
+      },
+      "nfcore_rnavar": {
+        "n": 14,
+        "capacity": 14,
+        "cascade_runs_median": 369.5,
+        "safe_runs_median": 236.5,
+        "full_runs": 560
+      },
+      "nfcore_rnasplice": {
+        "n": 14,
+        "capacity": 14,
+        "cascade_runs_median": 442.0,
+        "safe_runs_median": 304.5,
+        "full_runs": 560
+      },
+      "nfcore_epitopeprediction": {
+        "n": 13,
+        "capacity": 13,
+        "cascade_runs_median": 381.5,
+        "safe_runs_median": 243.5,
+        "full_runs": 520
+      }
+    },
+    "median_ratio_cascade_to_safe": 1.5265957446808511,
+    "median_saving_of_safe": 0.3449477351916377,
+    "saving_iqr": [
+      0.3121319199057715,
+      0.3570759137769447
+    ],
+    "crm_ratio": 1.380952380952381
+  },
+  "random:2.0": {
+    "graphs": {
+      "crm_brugge": {
+        "n": 16,
+        "capacity": 32,
+        "cascade_runs_median": 407.0,
+        "safe_runs_median": 288.0,
+        "full_runs": 640
+      },
+      "nfcore_rnaseq": {
+        "n": 18,
+        "capacity": 36,
+        "cascade_runs_median": 407.0,
+        "safe_runs_median": 263.5,
+        "full_runs": 720
+      },
+      "nfcore_airrflow": {
+        "n": 15,
+        "capacity": 30,
+        "cascade_runs_median": 349.0,
+        "safe_runs_median": 251.0,
+        "full_runs": 600
+      },
+      "nfcore_sarek": {
+        "n": 17,
+        "capacity": 34,
+        "cascade_runs_median": 394.5,
+        "safe_runs_median": 259.0,
+        "full_runs": 680
+      },
+      "nfcore_atacseq": {
+        "n": 14,
+        "capacity": 28,
+        "cascade_runs_median": 329.0,
+        "safe_runs_median": 228.5,
+        "full_runs": 560
+      },
+      "nfcore_chipseq": {
+        "n": 13,
+        "capacity": 26,
+        "cascade_runs_median": 282.5,
+        "safe_runs_median": 194.5,
+        "full_runs": 520
+      },
+      "nfcore_methylseq": {
+        "n": 15,
+        "capacity": 30,
+        "cascade_runs_median": 284.0,
+        "safe_runs_median": 195.0,
+        "full_runs": 600
+      },
+      "nfcore_hic": {
+        "n": 15,
+        "capacity": 30,
+        "cascade_runs_median": 372.0,
+        "safe_runs_median": 248.0,
+        "full_runs": 600
+      },
+      "nfcore_ampliseq": {
+        "n": 16,
+        "capacity": 32,
+        "cascade_runs_median": 354.5,
+        "safe_runs_median": 232.0,
+        "full_runs": 640
+      },
+      "nfcore_mag": {
+        "n": 16,
+        "capacity": 32,
+        "cascade_runs_median": 387.0,
+        "safe_runs_median": 243.5,
+        "full_runs": 640
+      },
+      "nfcore_viralrecon": {
+        "n": 15,
+        "capacity": 30,
+        "cascade_runs_median": 350.5,
+        "safe_runs_median": 234.0,
+        "full_runs": 600
+      },
+      "nfcore_scrnaseq": {
+        "n": 16,
+        "capacity": 32,
+        "cascade_runs_median": 391.0,
+        "safe_runs_median": 251.5,
+        "full_runs": 640
+      },
+      "nfcore_taxprofiler": {
+        "n": 14,
+        "capacity": 28,
+        "cascade_runs_median": 315.0,
+        "safe_runs_median": 214.5,
+        "full_runs": 560
+      },
+      "nfcore_cutandrun": {
+        "n": 14,
+        "capacity": 28,
+        "cascade_runs_median": 346.5,
+        "safe_runs_median": 223.0,
+        "full_runs": 560
+      },
+      "nfcore_smrnaseq": {
+        "n": 14,
+        "capacity": 28,
+        "cascade_runs_median": 318.5,
+        "safe_runs_median": 217.0,
+        "full_runs": 560
+      },
+      "nfcore_bacass": {
+        "n": 14,
+        "capacity": 28,
+        "cascade_runs_median": 331.5,
+        "safe_runs_median": 215.5,
+        "full_runs": 560
+      },
+      "nfcore_nanoseq": {
+        "n": 14,
+        "capacity": 28,
+        "cascade_runs_median": 300.5,
+        "safe_runs_median": 215.5,
+        "full_runs": 560
+      },
+      "nfcore_rnafusion": {
+        "n": 15,
+        "capacity": 30,
+        "cascade_runs_median": 198.5,
+        "safe_runs_median": 141.5,
+        "full_runs": 600
+      },
+      "nfcore_raredisease": {
+        "n": 15,
+        "capacity": 30,
+        "cascade_runs_median": 303.5,
+        "safe_runs_median": 217.0,
+        "full_runs": 600
+      },
+      "nfcore_funcscan": {
+        "n": 14,
+        "capacity": 28,
+        "cascade_runs_median": 214.0,
+        "safe_runs_median": 147.5,
+        "full_runs": 560
+      },
+      "nfcore_oncoanalyser": {
+        "n": 15,
+        "capacity": 30,
+        "cascade_runs_median": 236.0,
+        "safe_runs_median": 160.0,
+        "full_runs": 600
+      },
+      "nfcore_differentialabundance": {
+        "n": 14,
+        "capacity": 28,
+        "cascade_runs_median": 242.5,
+        "safe_runs_median": 168.0,
+        "full_runs": 560
+      },
+      "nfcore_hlatyping": {
+        "n": 13,
+        "capacity": 26,
+        "cascade_runs_median": 232.0,
+        "safe_runs_median": 158.0,
+        "full_runs": 520
+      },
+      "nfcore_bactmap": {
+        "n": 14,
+        "capacity": 28,
+        "cascade_runs_median": 317.5,
+        "safe_runs_median": 217.0,
+        "full_runs": 560
+      },
+      "nfcore_rnavar": {
+        "n": 14,
+        "capacity": 28,
+        "cascade_runs_median": 229.5,
+        "safe_runs_median": 163.5,
+        "full_runs": 560
+      },
+      "nfcore_rnasplice": {
+        "n": 14,
+        "capacity": 28,
+        "cascade_runs_median": 333.0,
+        "safe_runs_median": 231.5,
+        "full_runs": 560
+      },
+      "nfcore_epitopeprediction": {
+        "n": 13,
+        "capacity": 26,
+        "cascade_runs_median": 257.5,
+        "safe_runs_median": 167.0,
+        "full_runs": 520
+      }
+    },
+    "median_ratio_cascade_to_safe": 1.467741935483871,
+    "median_saving_of_safe": 0.31868131868131866,
+    "saving_iqr": [
+      0.30480480480480476,
+      0.3455571227080395
+    ],
+    "crm_ratio": 1.4131944444444444
+  }
+}
