@@ -205,7 +205,7 @@
         "n": 16,
         "capacity": 8,
         "cascade_runs_median": 602.5,
-        "safe_runs_median": 485.5,
+        "safe_runs_median": 485.0,
         "full_runs": 640
       },
       "nfcore_rnaseq": {
@@ -397,7 +397,7 @@
       0.24083333333333334,
       0.2881944444444444
     ],
-    "crm_ratio": 1.2409886714727085
+    "crm_ratio": 1.2422680412371134
   },
   "lru:0.75": {
     "graphs": {
@@ -405,7 +405,7 @@
         "n": 16,
         "capacity": 12,
         "cascade_runs_median": 527.5,
-        "safe_runs_median": 365.0,
+        "safe_runs_median": 364.5,
         "full_runs": 640
       },
       "nfcore_rnaseq": {
@@ -597,15 +597,15 @@
       0.3715651135005974,
       0.4375
     ],
-    "crm_ratio": 1.4452054794520548
+    "crm_ratio": 1.4471879286694103
   },
   "lru:1.0": {
     "graphs": {
       "crm_brugge": {
         "n": 16,
         "capacity": 16,
-        "cascade_runs_median": 232.5,
-        "safe_runs_median": 232.5,
+        "cascade_runs_median": 231.5,
+        "safe_runs_median": 231.5,
         "full_runs": 640
       },
       "nfcore_rnaseq": {
@@ -804,8 +804,8 @@
       "crm_brugge": {
         "n": 16,
         "capacity": 32,
-        "cascade_runs_median": 220.5,
-        "safe_runs_median": 217.5,
+        "cascade_runs_median": 219.5,
+        "safe_runs_median": 216.5,
         "full_runs": 640
       },
       "nfcore_rnaseq": {
@@ -997,15 +997,15 @@
       0.0,
       0.002941176470588225
     ],
-    "crm_ratio": 1.013793103448276
+    "crm_ratio": 1.0138568129330254
   },
   "random:0.25": {
     "graphs": {
       "crm_brugge": {
         "n": 16,
         "capacity": 4,
-        "cascade_runs_median": 605.5,
-        "safe_runs_median": 546.5,
+        "cascade_runs_median": 606.5,
+        "safe_runs_median": 542.5,
         "full_runs": 640
       },
       "nfcore_rnaseq": {
@@ -1191,21 +1191,21 @@
         "full_runs": 520
       }
     },
-    "median_ratio_cascade_to_safe": 1.1084710743801653,
-    "median_saving_of_safe": 0.097856477166822,
+    "median_ratio_cascade_to_safe": 1.111340206185567,
+    "median_saving_of_safe": 0.1001855287569573,
     "saving_iqr": [
       0.09200743494423791,
       0.1068052930056711
     ],
-    "crm_ratio": 1.1079597438243367
+    "crm_ratio": 1.1179723502304149
   },
   "random:0.5": {
     "graphs": {
       "crm_brugge": {
         "n": 16,
         "capacity": 8,
-        "cascade_runs_median": 566.0,
-        "safe_runs_median": 467.5,
+        "cascade_runs_median": 564.5,
+        "safe_runs_median": 464.5,
         "full_runs": 640
       },
       "nfcore_rnaseq": {
@@ -1397,15 +1397,15 @@
       0.19383259911894268,
       0.23167155425219943
     ],
-    "crm_ratio": 1.2106951871657754
+    "crm_ratio": 1.2152852529601723
   },
   "random:0.75": {
     "graphs": {
       "crm_brugge": {
         "n": 16,
         "capacity": 12,
-        "cascade_runs_median": 530.5,
-        "safe_runs_median": 407.5,
+        "cascade_runs_median": 524.5,
+        "safe_runs_median": 404.5,
         "full_runs": 640
       },
       "nfcore_rnaseq": {
@@ -1597,15 +1597,15 @@
       0.264218009478673,
       0.30740037950664134
     ],
-    "crm_ratio": 1.301840490797546
+    "crm_ratio": 1.2966625463535228
   },
   "random:1.0": {
     "graphs": {
       "crm_brugge": {
         "n": 16,
         "capacity": 16,
-        "cascade_runs_median": 496.0,
-        "safe_runs_median": 361.5,
+        "cascade_runs_median": 493.0,
+        "safe_runs_median": 357.0,
         "full_runs": 640
       },
       "nfcore_rnaseq": {
@@ -1797,15 +1797,15 @@
       0.3121319199057715,
       0.3570759137769447
     ],
-    "crm_ratio": 1.372060857538036
+    "crm_ratio": 1.380952380952381
   },
   "random:2.0": {
     "graphs": {
       "crm_brugge": {
         "n": 16,
         "capacity": 32,
-        "cascade_runs_median": 395.5,
-        "safe_runs_median": 286.5,
+        "cascade_runs_median": 407.0,
+        "safe_runs_median": 288.0,
         "full_runs": 640
       },
       "nfcore_rnaseq": {
@@ -1997,6 +1997,6 @@
       0.30480480480480476,
       0.3455571227080395
     ],
-    "crm_ratio": 1.3804537521815008
+    "crm_ratio": 1.4131944444444444
   }
 }
