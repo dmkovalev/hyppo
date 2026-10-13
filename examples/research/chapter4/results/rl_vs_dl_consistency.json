@@ -1,0 +1,283 @@
+{
+ "platform": "Windows 11, Python 3.13.3",
+ "rl": "OWL 2 RL closure, clash = non-empty error list",
+ "dl": "full DL reasoner, inconsistency exception",
+ "domains": {
+  "astro_BGM": {
+   "nominal": {
+    "expected_inconsistent": false,
+    "rl_consistent": true,
+    "dl_consistent": true,
+    "agree": true,
+    "rl_errors": []
+   },
+   "disjoint_domain": {
+    "expected_inconsistent": true,
+    "rl_consistent": false,
+    "dl_consistent": false,
+    "agree": true,
+    "rl_errors": [
+     "Disjoint classes http://synthesis.ipi.ac.ru/virtual_experiment.owl#OilDomainOntology and http://synthesis.ipi.ac.ru/virtual_experiment.owl#AstroDomainOntology h"
+    ]
+   },
+   "disjoint_lifecycle_states": {
+    "expected_inconsistent": true,
+    "rl_consistent": false,
+    "dl_consistent": false,
+    "agree": true,
+    "rl_errors": [
+     "Disjoint classes http://synthesis.ipi.ac.ru/virtual_experiment.owl#ActiveHypothesis and http://synthesis.ipi.ac.ru/virtual_experiment.owl#DeprecatedHypothesis h"
+    ]
+   },
+   "disjoint_model_kinds": {
+    "expected_inconsistent": true,
+    "rl_consistent": false,
+    "dl_consistent": false,
+    "agree": true,
+    "rl_errors": [
+     "Disjoint classes http://synthesis.ipi.ac.ru/virtual_experiment.owl#PhysicsModel and http://synthesis.ipi.ac.ru/virtual_experiment.owl#DataDrivenModel have a com"
+    ]
+   },
+   "two_models_functional_alldifferent": {
+    "expected_inconsistent": true,
+    "rl_consistent": false,
+    "dl_consistent": false,
+    "agree": true,
+    "rl_errors": [
+     "'sameAs' and 'differentFrom' cannot be used on the same subject-object pair: (http://synthesis.ipi.ac.ru/virtual_experiment.owl#bgm_m_density_law_duplicate, htt",
+     "'sameAs' and 'differentFrom' cannot be used on the same subject-object pair: (http://synthesis.ipi.ac.ru/virtual_experiment.owl#bgm_m_density_law, http://synthe",
+     "'sameAs' and 'differentFrom' cannot be used on the same subject-object pair: (http://synthesis.ipi.ac.ru/virtual_experiment.owl#bgm_m_density_law_duplicate, htt"
+    ]
+   },
+   "model_typed_as_hypothesis": {
+    "expected_inconsistent": true,
+    "rl_consistent": false,
+    "dl_consistent": false,
+    "agree": true,
+    "rl_errors": [
+     "Disjoint classes http://synthesis.ipi.ac.ru/virtual_experiment.owl#Hypothesis and http://synthesis.ipi.ac.ru/virtual_experiment.owl#Model have a common individu"
+    ]
+   },
+   "orphan_hypothesis": {
+    "expected_inconsistent": false,
+    "rl_consistent": true,
+    "dl_consistent": true,
+    "agree": true,
+    "rl_errors": []
+   },
+   "dataset_missing": {
+    "expected_inconsistent": false,
+    "rl_consistent": true,
+    "dl_consistent": true,
+    "agree": true,
+    "rl_errors": []
+   },
+   "empty_task_unrealised_hypothesis": {
+    "expected_inconsistent": false,
+    "rl_consistent": true,
+    "dl_consistent": true,
+    "agree": true,
+    "rl_errors": []
+   },
+   "invariant_violation_marker": {
+    "expected_inconsistent": false,
+    "rl_consistent": true,
+    "dl_consistent": true,
+    "agree": true,
+    "rl_errors": []
+   },
+   "refuted_status": {
+    "expected_inconsistent": false,
+    "rl_consistent": true,
+    "dl_consistent": true,
+    "agree": true,
+    "rl_errors": []
+   }
+  },
+  "neuro_HCP": {
+   "nominal": {
+    "expected_inconsistent": false,
+    "rl_consistent": true,
+    "dl_consistent": true,
+    "agree": true,
+    "rl_errors": []
+   },
+   "disjoint_domain": {
+    "expected_inconsistent": true,
+    "rl_consistent": false,
+    "dl_consistent": false,
+    "agree": true,
+    "rl_errors": [
+     "Disjoint classes http://synthesis.ipi.ac.ru/virtual_experiment.owl#OilDomainOntology and http://synthesis.ipi.ac.ru/virtual_experiment.owl#NeuroDomainOntology h"
+    ]
+   },
+   "disjoint_lifecycle_states": {
+    "expected_inconsistent": true,
+    "rl_consistent": false,
+    "dl_consistent": false,
+    "agree": true,
+    "rl_errors": [
+     "Disjoint classes http://synthesis.ipi.ac.ru/virtual_experiment.owl#ActiveHypothesis and http://synthesis.ipi.ac.ru/virtual_experiment.owl#DeprecatedHypothesis h"
+    ]
+   },
+   "disjoint_model_kinds": {
+    "expected_inconsistent": true,
+    "rl_consistent": false,
+    "dl_consistent": false,
+    "agree": true,
+    "rl_errors": [
+     "Disjoint classes http://synthesis.ipi.ac.ru/virtual_experiment.owl#PhysicsModel and http://synthesis.ipi.ac.ru/virtual_experiment.owl#DataDrivenModel have a com"
+    ]
+   },
+   "two_models_functional_alldifferent": {
+    "expected_inconsistent": true,
+    "rl_consistent": false,
+    "dl_consistent": false,
+    "agree": true,
+    "rl_errors": [
+     "'sameAs' and 'differentFrom' cannot be used on the same subject-object pair: (http://synthesis.ipi.ac.ru/virtual_experiment.owl#hcp_m_h_atlas_duplicate, http://",
+     "'sameAs' and 'differentFrom' cannot be used on the same subject-object pair: (http://synthesis.ipi.ac.ru/virtual_experiment.owl#hcp_m_h_atlas, http://synthesis.",
+     "'sameAs' and 'differentFrom' cannot be used on the same subject-object pair: (http://synthesis.ipi.ac.ru/virtual_experiment.owl#hcp_m_h_atlas_duplicate, http://"
+    ]
+   },
+   "model_typed_as_hypothesis": {
+    "expected_inconsistent": true,
+    "rl_consistent": false,
+    "dl_consistent": false,
+    "agree": true,
+    "rl_errors": [
+     "Disjoint classes http://synthesis.ipi.ac.ru/virtual_experiment.owl#Hypothesis and http://synthesis.ipi.ac.ru/virtual_experiment.owl#Model have a common individu"
+    ]
+   },
+   "orphan_hypothesis": {
+    "expected_inconsistent": false,
+    "rl_consistent": true,
+    "dl_consistent": true,
+    "agree": true,
+    "rl_errors": []
+   },
+   "dataset_missing": {
+    "expected_inconsistent": false,
+    "rl_consistent": true,
+    "dl_consistent": true,
+    "agree": true,
+    "rl_errors": []
+   },
+   "empty_task_unrealised_hypothesis": {
+    "expected_inconsistent": false,
+    "rl_consistent": true,
+    "dl_consistent": true,
+    "agree": true,
+    "rl_errors": []
+   },
+   "invariant_violation_marker": {
+    "expected_inconsistent": false,
+    "rl_consistent": true,
+    "dl_consistent": true,
+    "agree": true,
+    "rl_errors": []
+   },
+   "refuted_status": {
+    "expected_inconsistent": false,
+    "rl_consistent": true,
+    "dl_consistent": true,
+    "agree": true,
+    "rl_errors": []
+   }
+  },
+  "petro_Norne": {
+   "nominal": {
+    "expected_inconsistent": false,
+    "rl_consistent": true,
+    "dl_consistent": true,
+    "agree": true,
+    "rl_errors": []
+   },
+   "disjoint_domain": {
+    "expected_inconsistent": true,
+    "rl_consistent": false,
+    "dl_consistent": false,
+    "agree": true,
+    "rl_errors": [
+     "Disjoint classes http://synthesis.ipi.ac.ru/virtual_experiment.owl#OilDomainOntology and http://synthesis.ipi.ac.ru/virtual_experiment.owl#NeuroDomainOntology h"
+    ]
+   },
+   "disjoint_lifecycle_states": {
+    "expected_inconsistent": true,
+    "rl_consistent": false,
+    "dl_consistent": false,
+    "agree": true,
+    "rl_errors": [
+     "Disjoint classes http://synthesis.ipi.ac.ru/virtual_experiment.owl#ActiveHypothesis and http://synthesis.ipi.ac.ru/virtual_experiment.owl#DeprecatedHypothesis h"
+    ]
+   },
+   "disjoint_model_kinds": {
+    "expected_inconsistent": true,
+    "rl_consistent": false,
+    "dl_consistent": false,
+    "agree": true,
+    "rl_errors": [
+     "Disjoint classes http://synthesis.ipi.ac.ru/virtual_experiment.owl#PhysicsModel and http://synthesis.ipi.ac.ru/virtual_experiment.owl#DataDrivenModel have a com"
+    ]
+   },
+   "two_models_functional_alldifferent": {
+    "expected_inconsistent": true,
+    "rl_consistent": false,
+    "dl_consistent": false,
+    "agree": true,
+    "rl_errors": [
+     "'sameAs' and 'differentFrom' cannot be used on the same subject-object pair: (http://synthesis.ipi.ac.ru/virtual_experiment.owl#norne_m_H1_duplicate, http://syn",
+     "'sameAs' and 'differentFrom' cannot be used on the same subject-object pair: (http://synthesis.ipi.ac.ru/virtual_experiment.owl#norne_m_H1, http://synthesis.ipi",
+     "'sameAs' and 'differentFrom' cannot be used on the same subject-object pair: (http://synthesis.ipi.ac.ru/virtual_experiment.owl#norne_m_H1_duplicate, http://syn"
+    ]
+   },
+   "model_typed_as_hypothesis": {
+    "expected_inconsistent": true,
+    "rl_consistent": false,
+    "dl_consistent": false,
+    "agree": true,
+    "rl_errors": [
+     "Disjoint classes http://synthesis.ipi.ac.ru/virtual_experiment.owl#Hypothesis and http://synthesis.ipi.ac.ru/virtual_experiment.owl#Model have a common individu"
+    ]
+   },
+   "orphan_hypothesis": {
+    "expected_inconsistent": false,
+    "rl_consistent": true,
+    "dl_consistent": true,
+    "agree": true,
+    "rl_errors": []
+   },
+   "dataset_missing": {
+    "expected_inconsistent": false,
+    "rl_consistent": true,
+    "dl_consistent": true,
+    "agree": true,
+    "rl_errors": []
+   },
+   "empty_task_unrealised_hypothesis": {
+    "expected_inconsistent": false,
+    "rl_consistent": true,
+    "dl_consistent": true,
+    "agree": true,
+    "rl_errors": []
+   },
+   "invariant_violation_marker": {
+    "expected_inconsistent": false,
+    "rl_consistent": true,
+    "dl_consistent": true,
+    "agree": true,
+    "rl_errors": []
+   },
+   "refuted_status": {
+    "expected_inconsistent": false,
+    "rl_consistent": true,
+    "dl_consistent": true,
+    "agree": true,
+    "rl_errors": []
+   }
+  }
+ },
+ "n_cases": 33,
+ "n_agree": 33,
+ "all_agree": true
+}
