@@ -63,19 +63,39 @@ def _load(data_dir, name):
     return json.loads(p.read_text(encoding="utf-8"))
 
 
-def _save(fig, out_dir, name):
+TEXTWIDTH_CM = 17.0  # статья: a4, поля 2 см
+MIN_PT = 7.0
+
+
+def min_effective_pt(fig, width_cm: float) -> tuple[float, float]:
+    """(наименьший кегль текста после масштабирования рисунка к ширине width_cm, масштаб)."""
+    from matplotlib.text import Text
+    fig.canvas.draw()
+    bbox = fig.get_tightbbox(fig.canvas.get_renderer())
+    scale = width_cm * CM / (bbox.width + 2 * plt.rcParams["savefig.pad_inches"])
+    sizes = [t.get_fontsize() for t in fig.findobj(Text) if t.get_visible() and t.get_text().strip()]
+    return min(sizes) * scale, scale
+
+
+def _save(fig, out_dir, name, width_cm=0.48 * TEXTWIDTH_CM):
+    """width_cm -- ширина рисунка в статье (minipage 0.48 textwidth или textwidth)."""
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     path = out_dir / name
+    pt, scale = min_effective_pt(fig, width_cm)
     fig.savefig(path)
     plt.close(fig)
-    print(f"[figures] {path}")
+    print(f"[figures] {path}: min {pt:.2f} pt at {width_cm:.1f} cm (x{scale:.2f})")
+    if pt < MIN_PT - 1e-6:
+        print(f"[figures] WARNING: text below {MIN_PT} pt in {name}")
     return path
 
 
 # --------------------------------------------------------------------- E1
 def fig_e1(data_dir=DATA, out_dir=FIG):
-    """Экономия безопасного режима относительно каскада от ёмкости кэша (LRU / случайное)."""
+    """Экономия безопасного режима относительно каскада от ёмкости репозитория (LRU / случайное).
+    Между ёмкостями 0,75 и 1 режим меняется (при ёмкости >= |V| вытеснения нет), поэтому этот
+    участок показан штрихом."""
     d = _load(data_dir, "e1_eviction.json")
     if d is None:
         return None
@@ -97,16 +117,23 @@ def fig_e1(data_dir=DATA, out_dir=FIG):
             continue
         pts.sort()
         x, m, lo, hi = map(np.array, zip(*pts))
-        ax.fill_between(x, lo, hi, color=color, alpha=0.18, lw=0)
-        ax.plot(x, m, color=color, marker=marker, ms=3.5, label=f"вытеснение: {label}")
+        below, above = x < 1, x >= 1
+        for sel in (below, above):
+            if sel.any():
+                ax.fill_between(x[sel], lo[sel], hi[sel], color=color, alpha=0.18, lw=0)
+                ax.plot(x[sel], m[sel], color=color, lw=1.0)
+        if below.any() and above.any():
+            i, j = np.flatnonzero(below)[-1], np.flatnonzero(above)[0]
+            ax.plot(x[[i, j]], m[[i, j]], color=color, lw=0.8, ls="--")
+        ax.plot(x, m, color=color, marker=marker, ms=3.5, ls="none", label=f"вытеснение: {label}")
     ax.set_xscale("log", base=2)
     ax.set_xticks([0.25, 0.5, 0.75, 1, 2])
     ax.xaxis.set_major_formatter(_comma)
     ax.xaxis.set_minor_formatter(FuncFormatter(lambda *_: ""))
-    ax.set_xlabel(r"ёмкость кэша, доля $|H|$")
+    ax.set_xlabel(r"ёмкость репозитория, доля $|V|$")
     ax.set_ylabel("экономия запусков, %")
-    ax.set_ylim(bottom=0)
-    ax.legend(title="медиана и МКР по графам", title_fontsize=8, loc="best")
+    ax.set_ylim(0, 66)  # место для легенды над точками
+    ax.legend(title="медиана и МКР по графам", title_fontsize=8, loc="upper right")
     ax.grid(alpha=0.3, lw=0.4)
     return _save(fig, out_dir, "e1_eviction.pdf")
 
@@ -138,7 +165,7 @@ def fig_e2(data_dir=DATA, out_dir=FIG):
                            whiskerprops=dict(color=color, lw=0.7), capprops=dict(color=color, lw=0.7))
                 ax.plot(pos, np.mean(g), marker="D", ms=2.5, color="k", zorder=5)
                 share = sum(x > 1e-6 for x in g) / len(g)
-                ax.text(pos, -9, f"{round(100 * share)}", ha="center", va="center", fontsize=6,
+                ax.text(pos, -9, f"{round(100 * share)}", ha="center", va="center", fontsize=7.5,
                         color=color)
         ax.set_title(title, loc="left", pad=2)
         ax.set_ylabel("выигрыш, %")
@@ -149,17 +176,17 @@ def fig_e2(data_dir=DATA, out_dir=FIG):
     axes[-1].set_xticklabels([rf"$\rho={_mnum(r)}$" for r in rhos])
     handles = [Patch(facecolor=c, alpha=0.35, edgecolor=c, label=f"отн. {lbl}") for _, lbl, c in bases]
     handles.append(plt.Line2D([], [], marker="D", ms=2.5, color="k", lw=0, label="среднее"))
-    axes[0].legend(handles=handles, loc="upper left", ncol=2, fontsize=7, handlelength=1.2,
+    axes[0].legend(handles=handles, loc="upper left", ncol=2, fontsize=7.5, handlelength=1.2,
                    columnspacing=0.8)
-    fig.text(0.02, 0.005, "Ящик: квартили, усы: 10 и 90 %; цифры под ящиками:\n"
-             "доля случаев с выигрышем > 0, %.", fontsize=6.5, ha="left")
-    fig.tight_layout(rect=(0, 0.05, 1, 1), h_pad=0.4)
+    fig.text(0.02, 0.005, "Ящик: квартили, усы: 10 и 90 %;\nцифры под ящиками: доля случаев\n"
+             "с выигрышем > 0, %.", fontsize=7.5, ha="left")
+    fig.tight_layout(rect=(0, 0.09, 1, 1), h_pad=0.4)
     return _save(fig, out_dir, "e2_mincost.pdf")
 
 
 # --------------------------------------------------------------------- E3
 def fig_e3(data_dir=DATA, out_dir=FIG):
-    """Причинное уточнение: доля строгих случаев и среднее N_caus/N от доли многовыходных гипотез."""
+    """Причинное уточнение: доля строгих случаев и среднее |N_caus|/|N| от доли многовыходных гипотез."""
     d = _load(data_dir, "e3_causal.json")
     if d is None:
         return None
@@ -170,16 +197,17 @@ def fig_e3(data_dir=DATA, out_dir=FIG):
     ratio = np.array([e["mean_ratio"] for e in syn])
     fig, (ax, ax2) = plt.subplots(2, 1, figsize=(W1, 8 * CM), sharex=True,
                                   gridspec_kw=dict(height_ratios=[1.3, 1], hspace=0.3))
-    ax.plot(x, strict, "o-", color="C0", ms=3.5, label=r"случаи с $N_{\mathrm{caus}}<N$")
+    ax.plot(x, strict, "o-", color="C0", ms=3.5, label=r"случаи с $N_{\mathrm{caus}}\subsetneq N$")
     ax.plot(x, inst, "s--", color="C0", ms=3, mfc="white",
             label=r"системы, где такой случай есть")
     ax.set_ylabel("доля, %")
     ax.set_ylim(0, max(30, inst.max() * 1.15))
-    ax.legend(loc="upper left", fontsize=7)
+    ax.legend(loc="upper left", fontsize=7.5)
     ax.set_title("(а)", loc="left", pad=2)
     ax2.plot(x, ratio, "^-", color="C3", ms=3.5)
-    ax2.set_ylabel(r"среднее $N_{\mathrm{caus}}/N$")
-    ax2.set_ylim(0.95, 1.003)
+    ax2.set_ylabel(r"$|N_{\mathrm{caus}}|/|N|$")
+    ax2.set_ylim(0.915, 1.004)  # место для врезки CRM под кривой
+    ax2.set_yticks([0.92, 0.96, 1.0])
     ax2.yaxis.set_major_formatter(_comma)
     ax2.set_xlabel("доля многовыходных гипотез, %")
     ax2.set_title("(б)", loc="left", pad=2)
@@ -187,15 +215,19 @@ def fig_e3(data_dir=DATA, out_dir=FIG):
         a.grid(alpha=0.3, lw=0.4)
     fine, coarse = d.get("crm_fine"), d.get("crm_coarse")
     if fine and coarse:
+        # На графе компонент N_caus совпадает с N (n_caus_components_mean == n_mean);
+        # укрупнение увеличивает сам план N относительно мелкого графа.
         rc = coarse.get("rows", [])
-        n_strict = sum(r["N_caus"] < r["N_coarse"] for r in rc)
-        mr = statistics.mean(r["N_caus"] / r["N_coarse"] for r in rc) if rc else float("nan")
+        n = len(rc)
+        n_gt = sum(r["N_coarse"] > r["N_fine"] for r in rc)
+        n_eq = sum(r["N_caus_coarse_components"] == r["N_coarse"] for r in rc)
+        all_eq = "во всех" if n_eq == n else f"в {n_eq} из"
         nc = r"N_{\mathrm{caus}}"
         txt = (f"CRM, мелкие гипотезы: ${nc}=N$ во всех {fine['cases']} случаях;\n"
-               f"CRM, укрупнённые: ${nc}<N$ в "
-               f"{_num(100 * coarse['frac_coarse_gt_caus'], 1)} % ({n_strict}/{coarse['cases']}),\n"
-               f"среднее ${nc}/N={_mnum(round(mr, 2))}$")
-        ax2.text(0.03, 0.06, txt, transform=ax2.transAxes, ha="left", va="bottom", fontsize=6.5,
+               f"CRM, укрупнённые: $N$ на графе компонент больше,\n"
+               f"чем на мелком, в {_num(100 * n_gt / n, 1)} % ({n_gt}/{n}); ${nc}=N$\n"
+               f"{all_eq} {n} случаях")
+        ax2.text(0.03, 0.06, txt, transform=ax2.transAxes, ha="left", va="bottom", fontsize=7.5,
                  bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="0.6", lw=0.5))
     return _save(fig, out_dir, "e3_causal.pdf")
 
@@ -221,10 +253,10 @@ def fig_e5(data_dir=DATA, out_dir=FIG):
         ax.plot(xx, 10 ** (b + k * np.log10(xx)), color=color, lw=0.8)
     ax.set_xscale("log")
     ax.set_yscale("log")
-    ax.set_xlabel(r"число гипотез $|H|$")
+    ax.set_xlabel(r"число гипотез $|V|$")
     ax.set_ylabel("время планирования, с")
     ax.grid(alpha=0.3, lw=0.4, which="both")
-    ax.legend(loc="upper left", fontsize=7)
+    ax.legend(loc="upper left", fontsize=7.5)
     return _save(fig, out_dir, "e5_planning_time.pdf")
 
 
@@ -235,7 +267,7 @@ E6_SYSTEMS = [  # (ключ, подпись, группа)
     ("bazel", "Bazel", 1), ("hyppo_cascade", "комплекс, каскад", 2),
     ("hyppo_safe", "комплекс, безопасный", 3),
 ]
-E6_GROUPS = [("файловый каскад", "#9e9e9e"), ("ранняя отсечка", "C0"),
+E6_GROUPS = [("файловый каскад", "#9e9e9e"), ("раннее отсечение", "C0"),
              ("комплекс: каскад", "C1"), ("комплекс: безопасный", "C2")]
 
 
@@ -275,7 +307,7 @@ def fig_e6(data_dir=DATA, out_dir=FIG):
     ax_m.set_ylabel("пропущено,\nтыс.")
     ax_m.set_xticks(range(len(ps)))
     ax_m.set_xticklabels([f"$p={_mnum(float(p))}$" for p in ps])
-    ax_m.set_xlabel(r"доля объявленных пересмотров $p$")
+    ax_m.set_xlabel(r"доля объявленных пар $p$")
     plt.setp(ax_r.get_xticklabels(), visible=False)
     for a in (ax_r, ax_m):
         a.grid(axis="y", alpha=0.3, lw=0.4)
@@ -285,11 +317,11 @@ def fig_e6(data_dir=DATA, out_dir=FIG):
                   / 1e3 * 1.1)
     handles = [Patch(facecolor=c, edgecolor="k", lw=0.3, label=lbl) for lbl, c in E6_GROUPS]
     handles.append(Patch(facecolor="white", edgecolor="k", lw=0.3, hatch="////",
-                         label="только симулятор"))
-    fig.legend(handles=handles, loc="lower center", ncol=5, fontsize=7, handlelength=1.4,
-               columnspacing=1.2, bbox_to_anchor=(0.5, -0.14))
+                         label="правило не сверено с реальным прогоном"))
+    fig.legend(handles=handles, loc="lower center", ncol=3, fontsize=7.5, handlelength=1.4,
+               columnspacing=1.2, bbox_to_anchor=(0.5, -0.165))
     order = "; ".join(lbl for _, lbl, _ in systems)
-    fig.text(0.5, -0.15, f"Порядок столбцов в группе: {order}.", fontsize=6.5, ha="center",
+    fig.text(0.5, -0.175, f"Порядок столбцов в группе: {order}.", fontsize=7.5, ha="center",
              va="top")
 
     # (б) чувствительность
@@ -302,7 +334,7 @@ def fig_e6(data_dir=DATA, out_dir=FIG):
             same = all(np.allclose(curves[k], curves[cutoff[0]]) for k in cutoff)
             groups = [(cutoff, curves[cutoff[0]])] if same else [([k], curves[k]) for k in cutoff]
             for ks, y in groups:
-                names = "ранняя отсечка" if same else dict((k, l) for k, l, _ in systems)[ks[0]]
+                names = "раннее отсечение" if same else dict((k, l) for k, l, _ in systems)[ks[0]]
                 ax_s.plot([float(P) for P in Ps], y, ls=style, marker=mk, ms=3.5, color="C0",
                           mfc="white" if p == "0.5" else "C0",
                           label=f"{names}, $p={_mnum(float(p))}$")
@@ -311,7 +343,7 @@ def fig_e6(data_dir=DATA, out_dir=FIG):
                     miss = sens[P]["per_system"][cutoff[0]][p]["missed"]
                     ax_s.annotate(f"−{miss / 1e3:.1f}".replace(".", ","), (float(P), yy),
                                   xytext=(0, -9), textcoords="offset points", ha="center",
-                                  fontsize=6, color="C3")
+                                  fontsize=7.5, color="C3")
         for key, color, ls in [("hyppo_safe", "C2", "-"), ("hyppo_cascade", "C1", ":")]:
             if key in sens[Ps[0]]["per_system"]:
                 y = sens[Ps[0]]["per_system"][key]["1.0"]["recomputed"] / 1e3
@@ -321,15 +353,15 @@ def fig_e6(data_dir=DATA, out_dir=FIG):
         ax_s.xaxis.set_major_formatter(_comma)
         ax_s.set_xlabel("P(выход изменился)")
         ax_s.set_ylabel("перевычислено, тыс. запусков")
-        ax_s.set_title("(б) чувствительность ранней отсечки", loc="left", pad=2)
+        ax_s.set_title("(б) чувствительность раннего отсечения", loc="left", pad=2)
         lo = min(min(sens[P]["per_system"][cutoff[0]]["0.5"]["recomputed"] for P in Ps) / 1e3, 1e9)
         ax_s.set_ylim(lo * 0.85, sens[Ps[0]]["per_system"]["hyppo_cascade"]["1.0"]["recomputed"]
                       / 1e3 * 1.08 if "hyppo_cascade" in sens[Ps[0]]["per_system"] else None)
         ax_s.grid(alpha=0.3, lw=0.4)
-        ax_s.legend(loc="center right", fontsize=7, bbox_to_anchor=(1.0, 0.62))
+        ax_s.legend(loc="center right", fontsize=7.5, bbox_to_anchor=(1.0, 0.62))
         ax_s.text(0.03, 0.83, "красным: пропущено при $p=0{,}5$, тыс.", transform=ax_s.transAxes,
-                  fontsize=6.5, color="C3", ha="left", va="top")
-    return _save(fig, out_dir, "e6_systems.pdf")
+                  fontsize=7.5, color="C3", ha="left", va="top")
+    return _save(fig, out_dir, "e6_systems.pdf", width_cm=TEXTWIDTH_CM)
 
 
 def main(data_dir=DATA, out_dir=FIG):

@@ -17,6 +17,11 @@ def test_nfcore_corpus_has_26_dags():
     assert all(nx.is_directed_acyclic_graph(g) for g in gs.values())
 
 
+needs_wfcommons = pytest.mark.skipif(not (common.PLANNING_CACHE / "wfcommons").exists(),
+                                     reason="WfCommons cache missing (fetch_wfcommons)")
+
+
+@needs_wfcommons
 def test_wfcommons_corpus_loads():
     gs = common.wfcommons_graphs(limit=5)
     assert 1 <= len(gs) <= 5
@@ -28,15 +33,33 @@ def test_save_json_roundtrip(tmp_path):
     assert common.load_json(p) == {"a": 1}
 
 
+@needs_wfcommons
 def test_wfcommons_full_corpus_matches_e2():
-    if not (common.PLANNING_CACHE / "wfcommons").exists():
-        pytest.skip("WfCommons cache missing")
     gs = common.wfcommons_graphs()
     assert len(gs) == 171
     sweep = common.load_json(common.PLANNING_DATA / "wfcommons_per_workflow_sweep.json")["by_workflow"]
     assert sorted(g.number_of_nodes() for g in gs.values()) == sorted(v["n"] for v in sweep.values())
     with pytest.raises(ValueError):
         common.wfcommons_graphs(limit=0)
+
+
+def test_wfcommons_manifest_pins_the_e2_corpus():
+    m = common.wfcommons_manifest()
+    assert len(m) == 171
+    assert {tuple(k.split("/")) for k in m} == common._wfcommons_corpus()
+    sweep = common.load_json(common.PLANNING_DATA / "wfcommons_per_workflow_sweep.json")["by_workflow"]
+    assert sorted(v["n_nodes"] for v in m.values()) == sorted(v["n"] for v in sweep.values())
+
+
+def test_wfcommons_graphs_rejects_changed_or_missing_trace(tmp_path):
+    key, m = next(iter(common.wfcommons_manifest().items()))
+    with pytest.raises(common.CorpusMismatch, match="missing"):
+        common.wfcommons_graphs(limit=1, root=tmp_path)
+    path = tmp_path / m["path"]
+    path.parent.mkdir(parents=True)
+    path.write_text('{"workflow": {"specification": {"tasks": []}}}', encoding="utf-8")
+    with pytest.raises(common.CorpusMismatch, match="differs"):
+        common.wfcommons_graphs(limit=1, root=tmp_path)
 
 
 def test_crm_edges_equal_algorithm1_golden():
