@@ -18,6 +18,7 @@
 """
 from __future__ import annotations
 
+import time
 from pathlib import Path
 
 from examples.research.baseline_filecache import experiment
@@ -39,7 +40,20 @@ def _grid_name(grid: dict) -> str:
     raise ValueError("Snakefile знает только сетки small и full")
 
 
-def run_workload(workdir: Path, grid: dict, events: list[tuple], declared) -> dict:
+def _dry_default(work: Path, meta: Path, gname: str, pairs, ridge: str, extra: list[str], grid) -> set[str]:
+    """Сухой прогон с триггерами Snakemake по умолчанию (без --rerun-triggers)."""
+    import subprocess
+    from examples.research.baseline_filecache.config import pair_id
+    cmd = [str(SNAKEMAKE_PY), "-m", "snakemake", "-s", str(experiment.SNAKEFILE), "--directory", str(work),
+           "--config", f"meta={meta}", f"grid={gname}", "declared=" + ",".join(pair_id(p) for p in pairs),
+           f"ridge={ridge}", *extra]
+    out = subprocess.run(cmd, capture_output=True, text=True)
+    if out.returncode != 0:
+        raise RuntimeError(out.stdout + out.stderr)
+    return experiment._dry_run_jobs(out.stdout + out.stderr, grid)
+
+
+def run_workload(workdir: Path, grid: dict, events: list[tuple], declared, trigger_check: bool = False) -> dict:
     for ev in events:
         check_event(ev, grid)
     gname, pairs = _grid_name(grid), sorted(declared_pairs(declared))
@@ -53,7 +67,10 @@ def run_workload(workdir: Path, grid: dict, events: list[tuple], declared) -> di
         out = experiment._snk(work, meta, gname, pairs, ridge, list(extra))
         return experiment._dry_run_jobs(out, grid)
 
-    res = {"initial": run(), "after": [], "native_evict": [], "outputs": [output_digests(work, grid)]}
+    t0 = time.perf_counter()
+    res = {"initial": run(), "after": [], "native_evict": [], "native_absent": [], "trigger_check": [],
+           "outputs": [output_digests(work, grid)]}
+    res["seconds"] = [time.perf_counter() - t0]
     for ev in events:
         extra = ("--cores", "1")
         if ev[0] == "param":
@@ -61,9 +78,16 @@ def run_workload(workdir: Path, grid: dict, events: list[tuple], declared) -> di
         elif ev[0] == "evict":
             (work / ev[1]).unlink()
             res["native_evict"].append(run(("-n", "--cores", "1")))
+            res["native_absent"].append(not (work / ev[1]).exists())
             extra = ("--cores", "1", "all", ev[1])
         else:
             revise(meta, ev[1])
+        if trigger_check:
+            dry = ["-n", *extra]
+            res["trigger_check"].append({"mtime_params": run(dry),
+                                         "default": _dry_default(work, meta, gname, pairs, ridge, dry, grid)})
+        t0 = time.perf_counter()
         res["after"].append(run(extra))
+        res["seconds"].append(time.perf_counter() - t0)
         res["outputs"].append(output_digests(work, grid))
     return res

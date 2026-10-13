@@ -11,6 +11,21 @@
   `run_workload(workdir, grid, events, declared)`. Порты нужны для Э6:
   сверить симуляторы с реальными запусками систем.
 
+- `e6_systems.py`: Э6, сравнение с существующими системами. `real` -- реальные
+  прогоны Brugge (13 событий: 5 правок ridge, 5 удалений выхода, 3 ревизии
+  хранилища) в Snakemake, DVC, Dagster и комплексе (режим 'safe') против
+  эталона полным пересчётом; сверка `simulators.run_sequence` с реальными
+  множествами (forced и native evict); `scale` -- симуляторы на CRM, 26 nf-core
+  и 171 WfCommons при доле объявленных пар p in {0, 0.5, 1}. Итог --
+  `data/e6_systems.json` (ключи `real`, `validation`, `per_system`).
+
+  ```
+  python -m examples.research.safe_recompute.e6_systems real small
+  python -m examples.research.safe_recompute.e6_systems real full
+  python -m examples.research.safe_recompute.e6_systems scale 200
+  ```
+  Нужны HYPPO_BRUGGE_RUN, HYPPO_PY, HYPPO_DIAG_ROOT (как для портов).
+
 Наука конвейера (воркеры, хранилище, правки) не дублируется: порты вызывают
 `baseline_filecache/workers.py` и `revise.py`.
 
