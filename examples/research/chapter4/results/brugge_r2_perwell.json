@@ -1,0 +1,555 @@
+{
+  "field": "Brugge",
+  "n_producers": 20,
+  "T": 133,
+  "s0": 24,
+  "hi": 93,
+  "cv_min": 0.01,
+  "wct_breakthrough": 0.05,
+  "constant_rate_definition": "CV = std/mean дебита жидкости по месяцам с дебитом > 1 в окне < cv_min",
+  "no_breakthrough_definition": "max обводнённости по ряду < wct_breakthrough",
+  "note_wct": "WCT подгоняется по скважинам на всём ряде: посткважинный R^2 WCT in-sample",
+  "pooled": {
+    "CRM": 0.978,
+    "Hybrid": 0.971,
+    "WCT": 0.979,
+    "CRM_fit_window": 0.97,
+    "CRM_heldout": 0.985,
+    "Hybrid_heldout": 0.984
+  },
+  "per_well_summary": {
+    "fit": {
+      "window_months": [
+        24,
+        93
+      ],
+      "constant_rate_wells": [
+        1,
+        2,
+        4,
+        5,
+        6,
+        10,
+        11,
+        12,
+        13,
+        15,
+        16,
+        17,
+        18,
+        19
+      ],
+      "n_constant": 14,
+      "n_included": 6,
+      "CRM": {
+        "n": 6,
+        "median": 0.0,
+        "q1": -0.0,
+        "q3": 0.647,
+        "min": -17.528,
+        "max": 0.907,
+        "n_negative": 2
+      },
+      "Hybrid": {
+        "n": 6,
+        "median": 0.127,
+        "q1": 0.075,
+        "q3": 0.717,
+        "min": 0.029,
+        "max": 0.944,
+        "n_negative": 0
+      }
+    },
+    "heldout": {
+      "window_months": [
+        93,
+        133
+      ],
+      "constant_rate_wells": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        10,
+        11,
+        12,
+        13,
+        15,
+        16,
+        17,
+        18,
+        19
+      ],
+      "n_constant": 15,
+      "n_included": 5,
+      "CRM": {
+        "n": 5,
+        "median": -0.147,
+        "q1": -2.701,
+        "q3": -0.11,
+        "min": -7.631,
+        "max": -0.05,
+        "n_negative": 5
+      },
+      "Hybrid": {
+        "n": 5,
+        "median": -0.211,
+        "q1": -0.289,
+        "q3": -0.17,
+        "min": -2.947,
+        "max": -0.064,
+        "n_negative": 5
+      }
+    },
+    "WCT_full_series": {
+      "no_breakthrough_wells": [
+        0,
+        2,
+        3,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "n_included": 12,
+      "WCT": {
+        "n": 12,
+        "median": 0.949,
+        "q1": 0.925,
+        "q3": 0.966,
+        "min": 0.818,
+        "max": 0.976,
+        "n_negative": 0
+      },
+      "wells": [
+        {
+          "well": 0,
+          "max_wct": 1e-05,
+          "R2": -180457778.8006,
+          "excluded_no_breakthrough": true
+        },
+        {
+          "well": 1,
+          "max_wct": 0.15183,
+          "R2": 0.8953,
+          "excluded_no_breakthrough": false
+        },
+        {
+          "well": 2,
+          "max_wct": 0.0002,
+          "R2": -493062.8437,
+          "excluded_no_breakthrough": true
+        },
+        {
+          "well": 3,
+          "max_wct": 0.00104,
+          "R2": -1652.2424,
+          "excluded_no_breakthrough": true
+        },
+        {
+          "well": 4,
+          "max_wct": 0.80428,
+          "R2": 0.9755,
+          "excluded_no_breakthrough": false
+        },
+        {
+          "well": 5,
+          "max_wct": 0.00392,
+          "R2": -1277.4105,
+          "excluded_no_breakthrough": true
+        },
+        {
+          "well": 6,
+          "max_wct": 0.00228,
+          "R2": -3178.8173,
+          "excluded_no_breakthrough": true
+        },
+        {
+          "well": 7,
+          "max_wct": 0.00634,
+          "R2": -38.7599,
+          "excluded_no_breakthrough": true
+        },
+        {
+          "well": 8,
+          "max_wct": 0.03472,
+          "R2": -2.05,
+          "excluded_no_breakthrough": true
+        },
+        {
+          "well": 9,
+          "max_wct": 0.04969,
+          "R2": -1.3659,
+          "excluded_no_breakthrough": true
+        },
+        {
+          "well": 10,
+          "max_wct": 0.6927,
+          "R2": 0.9437,
+          "excluded_no_breakthrough": false
+        },
+        {
+          "well": 11,
+          "max_wct": 0.87472,
+          "R2": 0.9694,
+          "excluded_no_breakthrough": false
+        },
+        {
+          "well": 12,
+          "max_wct": 0.65695,
+          "R2": 0.9683,
+          "excluded_no_breakthrough": false
+        },
+        {
+          "well": 13,
+          "max_wct": 0.67015,
+          "R2": 0.9546,
+          "excluded_no_breakthrough": false
+        },
+        {
+          "well": 14,
+          "max_wct": 0.90055,
+          "R2": 0.9631,
+          "excluded_no_breakthrough": false
+        },
+        {
+          "well": 15,
+          "max_wct": 0.48224,
+          "R2": 0.8184,
+          "excluded_no_breakthrough": false
+        },
+        {
+          "well": 16,
+          "max_wct": 0.85698,
+          "R2": 0.9354,
+          "excluded_no_breakthrough": false
+        },
+        {
+          "well": 17,
+          "max_wct": 0.90069,
+          "R2": 0.9252,
+          "excluded_no_breakthrough": false
+        },
+        {
+          "well": 18,
+          "max_wct": 0.31521,
+          "R2": 0.9252,
+          "excluded_no_breakthrough": false
+        },
+        {
+          "well": 19,
+          "max_wct": 0.90109,
+          "R2": 0.9658,
+          "excluded_no_breakthrough": false
+        }
+      ]
+    }
+  },
+  "wells": [
+    {
+      "well": 0,
+      "window": "fit",
+      "n_months": 69,
+      "cv_liq": 0.2348,
+      "excluded_constant_rate": false,
+      "CRM": 0.0,
+      "Hybrid": 0.058
+    },
+    {
+      "well": 1,
+      "window": "fit",
+      "n_months": 69,
+      "cv_liq": 0.0,
+      "excluded_constant_rate": true
+    },
+    {
+      "well": 2,
+      "window": "fit",
+      "n_months": 69,
+      "cv_liq": 0.0,
+      "excluded_constant_rate": true
+    },
+    {
+      "well": 3,
+      "window": "fit",
+      "n_months": 69,
+      "cv_liq": 0.0387,
+      "excluded_constant_rate": false,
+      "CRM": -0.0,
+      "Hybrid": 0.1294
+    },
+    {
+      "well": 4,
+      "window": "fit",
+      "n_months": 69,
+      "cv_liq": 0.0,
+      "excluded_constant_rate": true
+    },
+    {
+      "well": 5,
+      "window": "fit",
+      "n_months": 69,
+      "cv_liq": 0.0,
+      "excluded_constant_rate": true
+    },
+    {
+      "well": 6,
+      "window": "fit",
+      "n_months": 69,
+      "cv_liq": 0.0,
+      "excluded_constant_rate": true
+    },
+    {
+      "well": 7,
+      "window": "fit",
+      "n_months": 69,
+      "cv_liq": 0.0828,
+      "excluded_constant_rate": false,
+      "CRM": 0.0,
+      "Hybrid": 0.1245
+    },
+    {
+      "well": 8,
+      "window": "fit",
+      "n_months": 69,
+      "cv_liq": 0.0484,
+      "excluded_constant_rate": false,
+      "CRM": -17.5276,
+      "Hybrid": 0.0293
+    },
+    {
+      "well": 9,
+      "window": "fit",
+      "n_months": 69,
+      "cv_liq": 0.0762,
+      "excluded_constant_rate": false,
+      "CRM": 0.9075,
+      "Hybrid": 0.9445
+    },
+    {
+      "well": 10,
+      "window": "fit",
+      "n_months": 69,
+      "cv_liq": 0.0,
+      "excluded_constant_rate": true
+    },
+    {
+      "well": 11,
+      "window": "fit",
+      "n_months": 69,
+      "cv_liq": 0.0,
+      "excluded_constant_rate": true
+    },
+    {
+      "well": 12,
+      "window": "fit",
+      "n_months": 69,
+      "cv_liq": 0.0,
+      "excluded_constant_rate": true
+    },
+    {
+      "well": 13,
+      "window": "fit",
+      "n_months": 69,
+      "cv_liq": 0.0,
+      "excluded_constant_rate": true
+    },
+    {
+      "well": 14,
+      "window": "fit",
+      "n_months": 69,
+      "cv_liq": 0.1689,
+      "excluded_constant_rate": false,
+      "CRM": 0.8624,
+      "Hybrid": 0.9125
+    },
+    {
+      "well": 15,
+      "window": "fit",
+      "n_months": 69,
+      "cv_liq": 0.0,
+      "excluded_constant_rate": true
+    },
+    {
+      "well": 16,
+      "window": "fit",
+      "n_months": 69,
+      "cv_liq": 0.0,
+      "excluded_constant_rate": true
+    },
+    {
+      "well": 17,
+      "window": "fit",
+      "n_months": 69,
+      "cv_liq": 0.0,
+      "excluded_constant_rate": true
+    },
+    {
+      "well": 18,
+      "window": "fit",
+      "n_months": 69,
+      "cv_liq": 0.0,
+      "excluded_constant_rate": true
+    },
+    {
+      "well": 19,
+      "window": "fit",
+      "n_months": 69,
+      "cv_liq": 0.0,
+      "excluded_constant_rate": true
+    },
+    {
+      "well": 0,
+      "window": "heldout",
+      "n_months": 40,
+      "cv_liq": 0.1097,
+      "excluded_constant_rate": false,
+      "CRM": -0.0501,
+      "Hybrid": -0.0637
+    },
+    {
+      "well": 1,
+      "window": "heldout",
+      "n_months": 40,
+      "cv_liq": 0.0,
+      "excluded_constant_rate": true
+    },
+    {
+      "well": 2,
+      "window": "heldout",
+      "n_months": 40,
+      "cv_liq": 0.0,
+      "excluded_constant_rate": true
+    },
+    {
+      "well": 3,
+      "window": "heldout",
+      "n_months": 40,
+      "cv_liq": 0.0008,
+      "excluded_constant_rate": true
+    },
+    {
+      "well": 4,
+      "window": "heldout",
+      "n_months": 40,
+      "cv_liq": 0.0,
+      "excluded_constant_rate": true
+    },
+    {
+      "well": 5,
+      "window": "heldout",
+      "n_months": 40,
+      "cv_liq": 0.0,
+      "excluded_constant_rate": true
+    },
+    {
+      "well": 6,
+      "window": "heldout",
+      "n_months": 40,
+      "cv_liq": 0.0,
+      "excluded_constant_rate": true
+    },
+    {
+      "well": 7,
+      "window": "heldout",
+      "n_months": 40,
+      "cv_liq": 0.0438,
+      "excluded_constant_rate": false,
+      "CRM": -2.7006,
+      "Hybrid": -2.9473
+    },
+    {
+      "well": 8,
+      "window": "heldout",
+      "n_months": 40,
+      "cv_liq": 0.021,
+      "excluded_constant_rate": false,
+      "CRM": -7.6306,
+      "Hybrid": -0.2113
+    },
+    {
+      "well": 9,
+      "window": "heldout",
+      "n_months": 40,
+      "cv_liq": 0.0226,
+      "excluded_constant_rate": false,
+      "CRM": -0.1473,
+      "Hybrid": -0.1697
+    },
+    {
+      "well": 10,
+      "window": "heldout",
+      "n_months": 40,
+      "cv_liq": 0.0,
+      "excluded_constant_rate": true
+    },
+    {
+      "well": 11,
+      "window": "heldout",
+      "n_months": 40,
+      "cv_liq": 0.0,
+      "excluded_constant_rate": true
+    },
+    {
+      "well": 12,
+      "window": "heldout",
+      "n_months": 40,
+      "cv_liq": 0.0,
+      "excluded_constant_rate": true
+    },
+    {
+      "well": 13,
+      "window": "heldout",
+      "n_months": 40,
+      "cv_liq": 0.0,
+      "excluded_constant_rate": true
+    },
+    {
+      "well": 14,
+      "window": "heldout",
+      "n_months": 25,
+      "cv_liq": 0.048,
+      "excluded_constant_rate": false,
+      "CRM": -0.11,
+      "Hybrid": -0.2891
+    },
+    {
+      "well": 15,
+      "window": "heldout",
+      "n_months": 40,
+      "cv_liq": 0.0,
+      "excluded_constant_rate": true
+    },
+    {
+      "well": 16,
+      "window": "heldout",
+      "n_months": 40,
+      "cv_liq": 0.0,
+      "excluded_constant_rate": true
+    },
+    {
+      "well": 17,
+      "window": "heldout",
+      "n_months": 17,
+      "cv_liq": 0.0,
+      "excluded_constant_rate": true
+    },
+    {
+      "well": 18,
+      "window": "heldout",
+      "n_months": 40,
+      "cv_liq": 0.0,
+      "excluded_constant_rate": true
+    },
+    {
+      "well": 19,
+      "window": "heldout",
+      "n_months": 30,
+      "cv_liq": 0.0,
+      "excluded_constant_rate": true
+    }
+  ]
+}

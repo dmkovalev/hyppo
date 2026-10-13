@@ -1,0 +1,181 @@
+{
+ "nodes": [
+  "density_law",
+  "age_cells",
+  "SFR",
+  "IMF",
+  "local_volume_density",
+  "star_birthrate",
+  "evolutionary_tracks",
+  "local_luminosity",
+  "velocity_dispersion",
+  "dynamical_self_consistency"
+ ],
+ "edges": [
+  [
+   "age_cells",
+   "local_volume_density"
+  ],
+  [
+   "density_law",
+   "local_volume_density"
+  ],
+  [
+   "SFR",
+   "star_birthrate"
+  ],
+  [
+   "IMF",
+   "star_birthrate"
+  ],
+  [
+   "age_cells",
+   "star_birthrate"
+  ],
+  [
+   "local_volume_density",
+   "evolutionary_tracks"
+  ],
+  [
+   "star_birthrate",
+   "local_luminosity"
+  ],
+  [
+   "local_volume_density",
+   "local_luminosity"
+  ],
+  [
+   "evolutionary_tracks",
+   "velocity_dispersion"
+  ],
+  [
+   "local_luminosity",
+   "dynamical_self_consistency"
+  ],
+  [
+   "evolutionary_tracks",
+   "dynamical_self_consistency"
+  ],
+  [
+   "velocity_dispersion",
+   "dynamical_self_consistency"
+  ]
+ ],
+ "scenarios": [
+  {
+   "invalid": "IMF",
+   "stale": [
+    "dynamical_self_consistency",
+    "local_luminosity",
+    "star_birthrate"
+   ],
+   "oracle_descendants": [
+    "dynamical_self_consistency",
+    "local_luminosity",
+    "star_birthrate"
+   ],
+   "rule4_match": true,
+   "derived_stale_runs": {
+    "R_dyn": true,
+    "R_trk": false
+   },
+   "expected_runs": {
+    "R_dyn": true,
+    "R_trk": false
+   },
+   "rule7_match": true,
+   "inferred_classes": {
+    "star_birthrate": [
+     "HypothesisWithStaleAncestor",
+     "StaleHypothesis"
+    ],
+    "local_luminosity": [
+     "HypothesisWithStaleAncestor",
+     "StaleHypothesis"
+    ],
+    "dynamical_self_consistency": [
+     "HypothesisWithStaleAncestor",
+     "StaleHypothesis"
+    ],
+    "R_dyn": [
+     "DerivedStaleRun"
+    ]
+   },
+   "rules_fired": [
+    4,
+    7
+   ],
+   "unmapped_inferred_classes": []
+  },
+  {
+   "invalid": "SFR",
+   "stale": [
+    "dynamical_self_consistency",
+    "local_luminosity",
+    "star_birthrate"
+   ],
+   "oracle_descendants": [
+    "dynamical_self_consistency",
+    "local_luminosity",
+    "star_birthrate"
+   ],
+   "rule4_match": true,
+   "derived_stale_runs": {
+    "R_dyn": true,
+    "R_trk": false
+   },
+   "expected_runs": {
+    "R_dyn": true,
+    "R_trk": false
+   },
+   "rule7_match": true,
+   "inferred_classes": {
+    "star_birthrate": [
+     "HypothesisWithStaleAncestor",
+     "StaleHypothesis"
+    ],
+    "local_luminosity": [
+     "HypothesisWithStaleAncestor",
+     "StaleHypothesis"
+    ],
+    "dynamical_self_consistency": [
+     "HypothesisWithStaleAncestor",
+     "StaleHypothesis"
+    ],
+    "R_dyn": [
+     "DerivedStaleRun"
+    ]
+   },
+   "rules_fired": [
+    4,
+    7
+   ],
+   "unmapped_inferred_classes": []
+  }
+ ],
+ "rules_fired_union": [
+  4,
+  7
+ ],
+ "rules_not_fired": [
+  1,
+  2,
+  3,
+  5,
+  6,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18,
+  19
+ ],
+ "note": "BGM supplies only hypotheses and derived_by edges; no models, workflow tasks, configurations, domain ontology, lifecycle states or competes pairs are asserted in bgm_cascade.py, so rules depending on them have nothing to fire on.",
+ "wall_seconds": 1.2
+}

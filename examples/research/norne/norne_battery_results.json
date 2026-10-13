@@ -14,6 +14,7 @@
     "H3",
     "H4",
     "H5",
+    "H7",
     "H8"
    ],
    "match": true
@@ -30,6 +31,7 @@
     "H19",
     "H4",
     "H5",
+    "H7",
     "H8"
    ],
    "match": true
@@ -46,6 +48,7 @@
     "H19",
     "H4",
     "H5",
+    "H7",
     "H8"
    ],
    "match": true
@@ -61,6 +64,7 @@
     "H15",
     "H19",
     "H5",
+    "H7",
     "H8"
    ],
    "match": true
@@ -702,6 +706,10 @@
    "H5"
   ],
   [
+   "H4",
+   "H7"
+  ],
+  [
    "H5",
    "H8"
   ],
@@ -723,12 +731,12 @@
   ]
  ],
  "summary": {
-  "rule4_classifications": 102,
+  "rule4_classifications": 106,
   "rule4_mismatches": 0,
   "rule7_tp": 43,
   "rule7_tn": 21,
   "rule7_errors": 0,
   "trials": 80,
-  "wall_seconds": 60.7
+  "wall_seconds": 58.2
  }
 }
