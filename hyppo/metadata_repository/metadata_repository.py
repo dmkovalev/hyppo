@@ -49,6 +49,10 @@ class MetadataRepository:
                 hypothesis_id TEXT NOT NULL,
                 PRIMARY KEY (kind, hypothesis_id)
             );
+            CREATE TABLE IF NOT EXISTS epochs (
+                hypothesis_id TEXT PRIMARY KEY,
+                epoch INTEGER NOT NULL
+            );
             CREATE TABLE IF NOT EXISTS graphs (
                 graph_id TEXT PRIMARY KEY,
                 nodes_json TEXT NOT NULL,
@@ -113,6 +117,20 @@ class MetadataRepository:
         self._conn.executemany(
             "INSERT INTO marks (kind, hypothesis_id) VALUES (?, ?)",
             [(kind, h) for h in sorted(ids)],
+        )
+        self._conn.commit()
+
+    def load_epochs(self) -> dict[str, int]:
+        """Revision epochs {hypothesis_id: epsilon} (absent means 0)."""
+        rows = self._conn.execute("SELECT hypothesis_id, epoch FROM epochs").fetchall()
+        return {r["hypothesis_id"]: r["epoch"] for r in rows}
+
+    def save_epochs(self, epochs: dict[str, int]) -> None:
+        """Replace the stored revision epochs (zero epochs are not stored)."""
+        self._conn.execute("DELETE FROM epochs")
+        self._conn.executemany(
+            "INSERT INTO epochs (hypothesis_id, epoch) VALUES (?, ?)",
+            [(h, e) for h, e in sorted(epochs.items()) if e],
         )
         self._conn.commit()
 

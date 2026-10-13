@@ -13,6 +13,15 @@ parameters changes the keys of all its descendants. (4) covers revisions that
 touch neither models nor configurations (e.g. a source SUPERSEDED by a rival,
 witness delta_1' of prop:hidden_stale) and is checked separately.
 
+Revision epochs: a hypothesis g carries an epoch eps_g, incremented on every
+revision event of g (its status became REFUTED / SUPERSEDED). The key of h
+includes ``(g, K(g), eps_g)`` for every direct predecessor g, so every record of
+a consumer of g made before the revision has a different key and is never read
+again, in any parameter context. The marks of (4) are then only a fast path
+within the run sequence; safety across runs does not depend on them. With
+eps_g = 0 the entry is the bare digest of K(g), so keys of graphs without
+revision events are unchanged.
+
 Writers (the runner) and readers (the planner / manager) must use the same keys:
 compute them with :func:`chained_keys` and pass them as the cache configuration.
 """
@@ -35,20 +44,28 @@ def chained_keys(
     edges: Iterable[tuple],
     configs: Mapping | None = None,
     model_ids: Mapping | None = None,
+    epochs: Mapping | None = None,
 ) -> dict:
     """Chained cache configurations ``{h: key_dict}`` in one topological pass.
 
     ``key_dict = {"cfg": own config, "model": model id, "up": {pred: digest}}``;
     O(|V| + |E|). ``nodes_topo`` must list every node after its predecessors;
-    ``edges`` are derived_by edges ``(source, dependent)``."""
+    ``edges`` are derived_by edges ``(source, dependent)``. ``epochs`` are the
+    revision epochs eps_g of the predecessors (absent or 0: ``digest``,
+    else ``digest@eps_g``)."""
     configs = configs or {}
     model_ids = model_ids or {}
+    epochs = epochs or {}
     preds: dict = {}
     for u, v in edges:
         preds.setdefault(v, set()).add(u)
     keys: dict = {}
     for h in nodes_topo:
-        up = {str(p): _digest(keys[p]) for p in sorted(preds.get(h, ()), key=str) if p in keys}
+        up = {
+            str(p): _digest(keys[p]) + (f"@{epochs[p]}" if epochs.get(p) else "")
+            for p in sorted(preds.get(h, ()), key=str)
+            if p in keys
+        }
         keys[h] = {"cfg": configs.get(h, {}), "model": model_ids.get(h), "up": up}
     return keys
 

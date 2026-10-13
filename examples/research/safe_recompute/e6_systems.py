@@ -280,7 +280,7 @@ def run_hyppo(workdir: Path, grid: dict, events, declared=DECLARED) -> dict:
                 state["ridge"] = str(ev[2])
             elif ev[0] == "evict":
                 n = node_of[ev[1]]
-                keys = mgr.cache_keys(hg, models, cfg(), model_ids)
+                keys = mgr.current_cache_keys(hg, models, cfg(), model_ids)
                 if not mgr.repository.evict(n, keys[n]):
                     raise RuntimeError(f"нет записи {n} в репозитории")
                 (work / ev[1]).unlink()
