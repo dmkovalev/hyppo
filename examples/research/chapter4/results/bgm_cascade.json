@@ -13,35 +13,35 @@
   ],
   "edges": [
     [
-      "age_cells",
-      "local_volume_density"
-    ],
-    [
-      "density_law",
-      "local_volume_density"
+      "IMF",
+      "star_birthrate"
     ],
     [
       "SFR",
       "star_birthrate"
     ],
     [
-      "IMF",
-      "star_birthrate"
+      "age_cells",
+      "evolutionary_tracks"
+    ],
+    [
+      "age_cells",
+      "local_volume_density"
     ],
     [
       "age_cells",
       "star_birthrate"
     ],
     [
-      "local_volume_density",
-      "evolutionary_tracks"
+      "density_law",
+      "local_volume_density"
     ],
     [
-      "star_birthrate",
-      "local_luminosity"
+      "evolutionary_tracks",
+      "dynamical_self_consistency"
     ],
     [
-      "local_volume_density",
+      "evolutionary_tracks",
       "local_luminosity"
     ],
     [
@@ -53,14 +53,24 @@
       "dynamical_self_consistency"
     ],
     [
-      "evolutionary_tracks",
-      "dynamical_self_consistency"
+      "local_volume_density",
+      "evolutionary_tracks"
+    ],
+    [
+      "local_volume_density",
+      "local_luminosity"
+    ],
+    [
+      "star_birthrate",
+      "local_luminosity"
     ],
     [
       "velocity_dispersion",
       "dynamical_self_consistency"
     ]
   ],
+  "edges_source": "derived by Algorithm 1 (GraphConstructor) from the hypothesis structures of hyppo.adapters.bgm_adapter",
+  "depth": 4,
   "n_hypotheses": 10,
   "cascade": {
     "change_SFR": {

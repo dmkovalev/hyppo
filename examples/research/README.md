@@ -10,6 +10,12 @@ covered by the packaging tests), but always driven through the real
 - `chapter4/`: dissertation Chapter 4 experiments (BGM and HCP cascade
   studies, synthetic A/B and honest-baseline comparisons, sensitivity
   sweep); `figures/` and `results/` hold generated PNG/JSON artifacts.
+  `bgm_experiment.py` / `hcp_experiment.py` run the two domain layers
+  (`hyppo/adapters/bgm_adapter.py`, `hcp_adapter.py`: hypothesis structures,
+  workflow, domain OWL ontology, numeric invariants) through the core:
+  graph derived by Algorithm 1, consistency check, reasoner and the 19 rules
+  on the life-cycle scenarios and injected defects; `reasoning_time.py`
+  times the RL materialisation and HermiT on the three domain ontologies.
 - `planning/`: reproducibility package for the dissertation's planning
   chapter — see `planning/README.md` for the full script index
   (Algorithm 1/2/4 benchmarks, WfCommons/Gene Ontology/nf-core cascade

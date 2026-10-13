@@ -1,0 +1,64 @@
+{
+ "platform": "Windows 11, Python 3.13.3",
+ "tbox_classes": 117,
+ "domains": {
+  "astro_BGM": {
+   "size": {
+    "hypotheses": 10,
+    "edges": 14,
+    "individuals": 95,
+    "abox_triples": 1115
+   },
+   "rl_materialisation": {
+    "median_s": 1.249,
+    "min_s": 1.216,
+    "max_s": 1.396,
+    "closure_triples": 6278,
+    "repeats": 5
+   },
+   "hermit": {
+    "median_s": 0.782,
+    "repeats": 3
+   }
+  },
+  "neuro_HCP": {
+   "size": {
+    "hypotheses": 3,
+    "edges": 2,
+    "individuals": 30,
+    "abox_triples": 876
+   },
+   "rl_materialisation": {
+    "median_s": 1.005,
+    "min_s": 1.001,
+    "max_s": 1.029,
+    "closure_triples": 5602,
+    "repeats": 5
+   },
+   "hermit": {
+    "median_s": 0.709,
+    "repeats": 3
+   }
+  },
+  "petro_Norne": {
+   "size": {
+    "hypotheses": 16,
+    "edges": 19,
+    "individuals": 135,
+    "abox_triples": 1262
+   },
+   "rl_materialisation": {
+    "median_s": 1.87,
+    "min_s": 1.808,
+    "max_s": 1.901,
+    "closure_triples": 6885,
+    "repeats": 5
+   },
+   "hermit": {
+    "median_s": 0.9,
+    "repeats": 3
+   }
+  }
+ },
+ "largest_by_individuals": "petro_Norne"
+}

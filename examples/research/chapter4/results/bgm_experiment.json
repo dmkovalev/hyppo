@@ -1,0 +1,1064 @@
+{
+ "domain": "astro (BGM)",
+ "hypotheses": {
+  "density_law": {
+   "label": "Закон плотности",
+   "task": 1,
+   "equations": [
+    "g_rho = exp(-sqrt(1/4 + (R**2 + z**2/eps**2)/h_p**2)) - exp(-sqrt(1/4 + (R**2 + z**2/eps**2)/h_m**2))"
+   ],
+   "in": [
+    "R",
+    "eps",
+    "h_m",
+    "h_p",
+    "z"
+   ],
+   "out": [
+    "g_rho"
+   ],
+   "variants": 1,
+   "note": "Einasto law of the thin disc; g_rho(R, z; eps) is the profile shape for axis ratio eps, h_p/h_m the outer/inner scale lengths"
+  },
+  "age_cells": {
+   "label": "Возрастные ячейки",
+   "task": 1,
+   "equations": [
+    "x_c = (t_lo + t_hi)/2",
+    "d = t_hi - t_lo"
+   ],
+   "in": [
+    "t_hi",
+    "t_lo"
+   ],
+   "out": [
+    "d",
+    "x_c"
+   ],
+   "variants": 3,
+   "note": "7 thin-disc age bins; 3 variants of the thin-disc formation age (upper edge of the oldest bin)"
+  },
+  "SFR": {
+   "label": "Закон SFR",
+   "task": 1,
+   "equations": [
+    "psi = exp(gam*tau)"
+   ],
+   "in": [
+    "gam",
+    "tau"
+   ],
+   "out": [
+    "psi"
+   ],
+   "variants": 2,
+   "note": "star formation law psi(tau) = exp(gamma*tau) on the age grid tau; gamma in {0.12, 0.25} (eq:sfr)"
+  },
+  "IMF": {
+   "label": "IMF",
+   "task": 1,
+   "equations": [
+    "xi = A_xi*m**(-alpha)",
+    "A_xi = (2 - alpha)/(m_up**(2 - alpha) - m_lo**(2 - alpha))"
+   ],
+   "in": [
+    "alpha",
+    "m",
+    "m_lo",
+    "m_up"
+   ],
+   "out": [
+    "A_xi",
+    "xi"
+   ],
+   "variants": 11,
+   "note": "power-law IMF xi(m) = A m^-alpha, mass-normalised on [m_lo, m_up] (integral of m*xi dm = 1); 11 variants of alpha"
+  },
+  "local_volume_density": {
+   "label": "Локальная объёмная плотность",
+   "task": 2,
+   "equations": [
+    "eps_i = Eval(eps_t, x_c)",
+    "rho = rho_sun*Eval(g_rho, eps_i)"
+   ],
+   "in": [
+    "eps_t",
+    "g_rho",
+    "rho_sun",
+    "x_c"
+   ],
+   "out": [
+    "eps_i",
+    "rho"
+   ],
+   "variants": 3,
+   "note": "axis ratio of every bin from the age-axis-ratio relation eps_t at the bin centre; local density rho_i = rho_sun_i * g_rho(eps_i); 3 sets of local mass densities"
+  },
+  "star_birthrate": {
+   "label": "Функция звёздной рождаемости",
+   "task": 2,
+   "equations": [
+    "SFR_i = Eval(psi, x_c)*d",
+    "b = SFR_i*xi"
+   ],
+   "in": [
+    "d",
+    "psi",
+    "x_c",
+    "xi"
+   ],
+   "out": [
+    "SFR_i",
+    "b"
+   ],
+   "variants": 1,
+   "note": "SFR(i) = exp(gamma x_c(i)) d (eq:sfr) and the birthrate b(m, i) = SFR(i) IMF(m) (eq:birthrate)"
+  },
+  "evolutionary_tracks": {
+   "label": "Эволюционные треки",
+   "task": 3,
+   "equations": [
+    "w_i = Eval(W_trk, x_c)",
+    "L_iso = Eval(L_trk, m, x_c)",
+    "rho_dyn = rho/(1 - w_i)"
+   ],
+   "in": [
+    "L_trk",
+    "W_trk",
+    "m",
+    "rho",
+    "x_c"
+   ],
+   "out": [
+    "L_iso",
+    "rho_dyn",
+    "w_i"
+   ],
+   "variants": 2,
+   "note": "track set evaluated at the bin ages: isochrones L_iso(m, i) and the remnant mass fraction w_i; dynamical (stars + remnants) density rho_dyn = rho/(1 - w_i); 2 track sets"
+  },
+  "local_luminosity": {
+   "label": "Локальная светимость",
+   "task": 4,
+   "equations": [
+    "ell = Conv(b, L_iso, BC_atm)",
+    "j_L = rho*ell"
+   ],
+   "in": [
+    "BC_atm",
+    "L_iso",
+    "b",
+    "rho"
+   ],
+   "out": [
+    "ell",
+    "j_L"
+   ],
+   "variants": 3,
+   "note": "luminosity per unit mass formed, birthrate convolved with the isochrones and the bolometric corrections of the atmosphere models; local luminosity density j_L = rho * ell; 3 atmosphere sets"
+  },
+  "velocity_dispersion": {
+   "label": "Дисперсия скоростей",
+   "task": 4,
+   "equations": [
+    "Phi = Poisson(rho_dyn)",
+    "sigma_W = Jeans(rho_dyn, Phi)"
+   ],
+   "in": [
+    "rho_dyn"
+   ],
+   "out": [
+    "Phi",
+    "sigma_W"
+   ],
+   "variants": 1,
+   "note": "vertical potential from the dynamical density (Poisson) and the vertical velocity dispersion of every isothermal population from the vertical Jeans equation"
+  },
+  "dynamical_self_consistency": {
+   "label": "Динамическая самосогласованность",
+   "task": 5,
+   "equations": [
+    "Upsilon = Tot(rho_dyn)/Tot(j_L)",
+    "chi_dyn = Chi2(sigma_W, sigma_obs) + Chi2(Upsilon, Upsilon_obs)"
+   ],
+   "in": [
+    "Upsilon_obs",
+    "j_L",
+    "rho_dyn",
+    "sigma_W",
+    "sigma_obs"
+   ],
+   "out": [
+    "Upsilon",
+    "chi_dyn"
+   ],
+   "variants": 1,
+   "note": "local dynamical mass-to-light ratio and the misfit of the predicted dispersions and M/L against observations (Bienayme et al. 1987)"
+  }
+ },
+ "workflow": [
+  [
+   "density_law",
+   "age_cells",
+   "SFR",
+   "IMF"
+  ],
+  [
+   "local_volume_density",
+   "star_birthrate"
+  ],
+  [
+   "evolutionary_tracks"
+  ],
+  [
+   "local_luminosity",
+   "velocity_dispersion"
+  ],
+  [
+   "dynamical_self_consistency"
+  ]
+ ],
+ "graph": {
+  "nodes": [
+   "density_law",
+   "age_cells",
+   "SFR",
+   "IMF",
+   "local_volume_density",
+   "star_birthrate",
+   "evolutionary_tracks",
+   "local_luminosity",
+   "velocity_dispersion",
+   "dynamical_self_consistency"
+  ],
+  "edges": [
+   [
+    "IMF",
+    "star_birthrate"
+   ],
+   [
+    "SFR",
+    "star_birthrate"
+   ],
+   [
+    "age_cells",
+    "evolutionary_tracks"
+   ],
+   [
+    "age_cells",
+    "local_volume_density"
+   ],
+   [
+    "age_cells",
+    "star_birthrate"
+   ],
+   [
+    "density_law",
+    "local_volume_density"
+   ],
+   [
+    "evolutionary_tracks",
+    "dynamical_self_consistency"
+   ],
+   [
+    "evolutionary_tracks",
+    "local_luminosity"
+   ],
+   [
+    "evolutionary_tracks",
+    "velocity_dispersion"
+   ],
+   [
+    "local_luminosity",
+    "dynamical_self_consistency"
+   ],
+   [
+    "local_volume_density",
+    "evolutionary_tracks"
+   ],
+   [
+    "local_volume_density",
+    "local_luminosity"
+   ],
+   [
+    "star_birthrate",
+    "local_luminosity"
+   ],
+   [
+    "velocity_dispersion",
+    "dynamical_self_consistency"
+   ]
+  ],
+  "n_edges": 14,
+  "depth": 4,
+  "competes": [],
+  "order_conflicts": [],
+  "hypothesis_graph_build_agrees": true,
+  "vs_dissertation": {
+   "common": [
+    [
+     "IMF",
+     "star_birthrate"
+    ],
+    [
+     "SFR",
+     "star_birthrate"
+    ],
+    [
+     "age_cells",
+     "local_volume_density"
+    ],
+    [
+     "age_cells",
+     "star_birthrate"
+    ],
+    [
+     "density_law",
+     "local_volume_density"
+    ],
+    [
+     "evolutionary_tracks",
+     "dynamical_self_consistency"
+    ],
+    [
+     "evolutionary_tracks",
+     "velocity_dispersion"
+    ],
+    [
+     "local_luminosity",
+     "dynamical_self_consistency"
+    ],
+    [
+     "local_volume_density",
+     "evolutionary_tracks"
+    ],
+    [
+     "local_volume_density",
+     "local_luminosity"
+    ],
+    [
+     "star_birthrate",
+     "local_luminosity"
+    ],
+    [
+     "velocity_dispersion",
+     "dynamical_self_consistency"
+    ]
+   ],
+   "only_derived": [
+    [
+     "age_cells",
+     "evolutionary_tracks"
+    ],
+    [
+     "evolutionary_tracks",
+     "local_luminosity"
+    ]
+   ],
+   "only_expected": []
+  }
+ },
+ "dissertation_workflow_check": {
+  "workflow": [
+   [
+    "density_law",
+    "age_cells",
+    "SFR",
+    "IMF"
+   ],
+   [
+    "local_volume_density",
+    "star_birthrate"
+   ],
+   [
+    "evolutionary_tracks",
+    "local_luminosity"
+   ],
+   [
+    "velocity_dispersion"
+   ],
+   [
+    "dynamical_self_consistency"
+   ]
+  ],
+  "n_edges": 13,
+  "consistency": {
+   "ok": false,
+   "status": "condition 5: causal order violation (Algorithm consistence)",
+   "details": {
+    "stage_a": "skipped",
+    "stage_a_engine": "skipped",
+    "c3": "passed",
+    "c4": "passed",
+    "c5": "passed (10 finite parameter domains)",
+    "c7": "passed (все переменные грунтированы в домене)",
+    "cond4": "passed (проекции pi_t(V) непусты)",
+    "cond5": {
+     "task": "t3",
+     "hypothesis": "local_luminosity",
+     "dependency": "evolutionary_tracks",
+     "dependency_task": "t3"
+    }
+   }
+  }
+ },
+ "cascade": {
+  "IMF": {
+   "recompute": [
+    "IMF",
+    "dynamical_self_consistency",
+    "local_luminosity",
+    "star_birthrate"
+   ],
+   "fraction": 0.4
+  },
+  "SFR": {
+   "recompute": [
+    "SFR",
+    "dynamical_self_consistency",
+    "local_luminosity",
+    "star_birthrate"
+   ],
+   "fraction": 0.4
+  }
+ },
+ "config_space": {
+  "axes": {
+   "IMF slope alpha": {
+    "hypothesis": "IMF",
+    "levels": [
+     1.3,
+     1.5,
+     1.7,
+     1.9,
+     2.1,
+     2.3,
+     2.5,
+     2.7,
+     2.9,
+     3.1,
+     3.3
+    ]
+   },
+   "SFR gamma": {
+    "hypothesis": "SFR",
+    "levels": [
+     0.12,
+     0.25
+    ]
+   },
+   "evolutionary track set": {
+    "hypothesis": "evolutionary_tracks",
+    "levels": [
+     "tracks_A",
+     "tracks_B"
+    ]
+   },
+   "atmosphere models": {
+    "hypothesis": "local_luminosity",
+    "levels": [
+     "atm_A",
+     "atm_B",
+     "atm_C"
+    ]
+   },
+   "thin-disc formation age, Gyr": {
+    "hypothesis": "age_cells",
+    "levels": [
+     9.0,
+     10.0,
+     11.0
+    ]
+   },
+   "local mass density set": {
+    "hypothesis": "local_volume_density",
+    "levels": [
+     "rho_A",
+     "rho_B",
+     "rho_C"
+    ]
+   }
+  },
+  "N": 1188,
+  "d_bar": 18
+ },
+ "invariants_nominal": {
+  "density_law": [],
+  "age_cells": [],
+  "SFR": [],
+  "IMF": [],
+  "local_volume_density": [],
+  "star_birthrate": [],
+  "evolutionary_tracks": [],
+  "local_luminosity": [],
+  "velocity_dispersion": [],
+  "dynamical_self_consistency": []
+ },
+ "ontology_size": {
+  "classes": 99,
+  "individuals": 95,
+  "triples": 1106
+ },
+ "consistency": {
+  "ic_conditions_1_3": {
+   "rl_errors": [],
+   "condition1": {
+    "ok": true,
+    "slots": {
+     "O": 1,
+     "H": 10,
+     "M": 10,
+     "W": 1,
+     "C": 1
+    },
+    "R_unrealised": []
+   },
+   "condition2": {
+    "ok": true,
+    "empty_tasks": []
+   },
+   "condition3": {
+    "ok": true,
+    "unrealised": []
+   }
+  },
+  "structural": {
+   "ok": true,
+   "status": "OK",
+   "details": {
+    "stage_a": "passed",
+    "stage_a_engine": "owlrl",
+    "c3": "passed",
+    "c4": "passed",
+    "c5": "passed (10 finite parameter domains)",
+    "c7": "passed (все переменные грунтированы в домене)",
+    "cond4": "passed (проекции pi_t(V) непусты)",
+    "cond5": "passed (причинный порядок согласован с потоком работ)"
+   }
+  }
+ },
+ "nominal": {
+  "rules_fired": [
+   1,
+   2,
+   3,
+   5
+  ],
+  "markers": {
+   "rule2": 1,
+   "rule9": 0,
+   "rule11": 0,
+   "rule13": 0,
+   "rule15": 0
+  },
+  "reasoner_seconds": 0.675,
+  "n_inferred_derived_by": 14
+ },
+ "timing": {
+  "rl_materialisation": {
+   "median_s": 1.131,
+   "min_s": 1.128,
+   "max_s": 1.15,
+   "closure_triples": 5934,
+   "repeats": 5
+  },
+  "hermit": {
+   "median_s": 0.707,
+   "repeats": 3
+  }
+ },
+ "change": {
+  "IMF": {
+   "changed": "IMF",
+   "stale": [
+    "dynamical_self_consistency",
+    "local_luminosity",
+    "star_birthrate"
+   ],
+   "oracle_descendants": [
+    "dynamical_self_consistency",
+    "local_luminosity",
+    "star_birthrate"
+   ],
+   "rule4_match": true,
+   "derived_stale_runs": [
+    "dynamical_self_consistency",
+    "local_luminosity",
+    "star_birthrate"
+   ],
+   "rule7_match": true,
+   "obsolete_versions": [
+    "bgm_IMF_v0"
+   ],
+   "plan_P_ne": [
+    "IMF",
+    "dynamical_self_consistency",
+    "local_luminosity",
+    "star_birthrate"
+   ],
+   "plan_matches_marking": true,
+   "fresh_after_recompute": [
+    "dynamical_self_consistency",
+    "local_luminosity",
+    "star_birthrate"
+   ],
+   "rules_fired": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    7,
+    8,
+    18
+   ],
+   "reasoner_seconds": 0.778
+  },
+  "SFR": {
+   "changed": "SFR",
+   "stale": [
+    "dynamical_self_consistency",
+    "local_luminosity",
+    "star_birthrate"
+   ],
+   "oracle_descendants": [
+    "dynamical_self_consistency",
+    "local_luminosity",
+    "star_birthrate"
+   ],
+   "rule4_match": true,
+   "derived_stale_runs": [
+    "dynamical_self_consistency",
+    "local_luminosity",
+    "star_birthrate"
+   ],
+   "rule7_match": true,
+   "obsolete_versions": [
+    "bgm_SFR_v0"
+   ],
+   "plan_P_ne": [
+    "SFR",
+    "dynamical_self_consistency",
+    "local_luminosity",
+    "star_birthrate"
+   ],
+   "plan_matches_marking": true,
+   "fresh_after_recompute": [
+    "dynamical_self_consistency",
+    "local_luminosity",
+    "star_birthrate"
+   ],
+   "rules_fired": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    7,
+    8,
+    18
+   ],
+   "reasoner_seconds": 0.771
+  }
+ },
+ "rivals": {
+  "competes_pairs": [
+   [
+    "IMF_Haywood",
+    "IMF_Kroupa"
+   ],
+   [
+    "IMF_Haywood",
+    "IMF_Salpeter"
+   ],
+   [
+    "IMF_Kroupa",
+    "IMF_Salpeter"
+   ]
+  ],
+  "ranking": [
+   {
+    "hypothesis": "IMF_Kroupa",
+    "metric": 187.0
+   },
+   {
+    "hypothesis": "IMF_Haywood",
+    "metric": 342.0
+   },
+   {
+    "hypothesis": "IMF_Salpeter",
+    "metric": 518.0
+   }
+  ],
+  "phase1_active_rivals": {
+   "conflicting_hypotheses": [
+    "IMF_Haywood",
+    "IMF_Kroupa",
+    "IMF_Salpeter"
+   ],
+   "conflicting_tasks": [
+    "bgmr_task1"
+   ],
+   "rules_fired": [
+    1,
+    2,
+    3,
+    5,
+    10,
+    17
+   ]
+  },
+  "phase2_after_ranking": {
+   "preferred": [
+    "IMF_Kroupa"
+   ],
+   "blocking_deprecation": [
+    "IMF_Haywood",
+    "IMF_Salpeter"
+   ],
+   "promising_routes": [
+    "dynamical_self_consistency",
+    "local_luminosity",
+    "star_birthrate"
+   ],
+   "prunable_subtrees": [],
+   "stale": [
+    "dynamical_self_consistency",
+    "local_luminosity",
+    "star_birthrate"
+   ],
+   "rules_fired": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    7,
+    10,
+    12,
+    16,
+    19
+   ]
+  },
+  "rules_fired": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   7,
+   10,
+   12,
+   16,
+   17,
+   19
+  ],
+  "graph": {
+   "n_nodes": 12,
+   "n_edges": 16,
+   "depth": 4
+  },
+  "consistency": {
+   "ok": true,
+   "status": "OK",
+   "details": {
+    "stage_a": "skipped",
+    "stage_a_engine": "skipped",
+    "c3": "passed",
+    "c4": "passed",
+    "c5": "passed (12 finite parameter domains)",
+    "c7": "passed (все переменные грунтированы в домене)",
+    "cond4": "passed (проекции pi_t(V) непусты)",
+    "cond5": "passed (причинный порядок согласован с потоком работ)"
+   }
+  }
+ },
+ "faults": {
+  "orphan_hypothesis": {
+   "orphans": [
+    "bgm_extinction_law"
+   ],
+   "rules_fired": [
+    1,
+    2,
+    3,
+    5,
+    9
+   ]
+  },
+  "dataset_missing": {
+   "models_without_dataset": [
+    "bgm_m_dynamical_self_consistency"
+   ],
+   "rules_fired": [
+    1,
+    2,
+    3,
+    5,
+    15
+   ]
+  },
+  "shared_hypothesis": {
+   "shared": [
+    "bgm_IMF"
+   ],
+   "rules_fired": [
+    1,
+    2,
+    3,
+    5,
+    13
+   ]
+  },
+  "disjoint_domain": {
+   "inconsistency_detected": true,
+   "rules_fired": [
+    6
+   ]
+  },
+  "ic_conditions": {
+   "condition1": {
+    "ok": false,
+    "slots": {
+     "O": 1,
+     "H": 10,
+     "M": 10,
+     "W": 1,
+     "C": 1
+    },
+    "R_unrealised": [
+     "bgm_local_luminosity"
+    ]
+   },
+   "condition2": {
+    "ok": false,
+    "empty_tasks": [
+     "bgm_task3"
+    ]
+   },
+   "condition3": {
+    "ok": false,
+    "unrealised": [
+     "bgm_local_luminosity"
+    ]
+   }
+  },
+  "invariant_IMF": {
+   "hypothesis": "IMF",
+   "violated": true,
+   "message": "Value error, IMF mass range must satisfy 0 < m_lo < m_up",
+   "stale": [
+    "dynamical_self_consistency",
+    "local_luminosity",
+    "star_birthrate"
+   ],
+   "matches_descendants": true,
+   "rules_fired": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    7
+   ]
+  }
+ },
+ "rules": {
+  "1": {
+   "name": "classification by model type",
+   "life_cycle": [
+    "change_IMF",
+    "change_SFR",
+    "nominal",
+    "rivals"
+   ],
+   "fault_injection": [
+    "fault_dataset_missing",
+    "fault_invariant_IMF",
+    "fault_orphan_hypothesis",
+    "fault_shared_hypothesis"
+   ]
+  },
+  "2": {
+   "name": "tuple completeness (condition 1)",
+   "life_cycle": [
+    "change_IMF",
+    "change_SFR",
+    "nominal",
+    "rivals"
+   ],
+   "fault_injection": [
+    "fault_dataset_missing",
+    "fault_invariant_IMF",
+    "fault_orphan_hypothesis",
+    "fault_shared_hypothesis"
+   ]
+  },
+  "3": {
+   "name": "dependency via derived_by",
+   "life_cycle": [
+    "change_IMF",
+    "change_SFR",
+    "nominal",
+    "rivals"
+   ],
+   "fault_injection": [
+    "fault_dataset_missing",
+    "fault_invariant_IMF",
+    "fault_orphan_hypothesis",
+    "fault_shared_hypothesis"
+   ]
+  },
+  "4": {
+   "name": "cascade invalidation",
+   "life_cycle": [
+    "change_IMF",
+    "change_SFR",
+    "rivals"
+   ],
+   "fault_injection": [
+    "fault_invariant_IMF"
+   ]
+  },
+  "5": {
+   "name": "transitivity of derived_by",
+   "life_cycle": [
+    "change_IMF",
+    "change_SFR",
+    "nominal",
+    "rivals"
+   ],
+   "fault_injection": [
+    "fault_dataset_missing",
+    "fault_invariant_IMF",
+    "fault_orphan_hypothesis",
+    "fault_shared_hypothesis"
+   ]
+  },
+  "6": {
+   "name": "domain ontology hierarchy/disjointness",
+   "life_cycle": [],
+   "fault_injection": [
+    "fault_disjoint_domain"
+   ]
+  },
+  "7": {
+   "name": "hidden staleness of runs",
+   "life_cycle": [
+    "change_IMF",
+    "change_SFR",
+    "rivals"
+   ],
+   "fault_injection": [
+    "fault_invariant_IMF"
+   ]
+  },
+  "8": {
+   "name": "version tracking",
+   "life_cycle": [
+    "change_IMF",
+    "change_SFR"
+   ],
+   "fault_injection": []
+  },
+  "9": {
+   "name": "orphan hypotheses",
+   "life_cycle": [],
+   "fault_injection": [
+    "fault_orphan_hypothesis"
+   ]
+  },
+  "10": {
+   "name": "tasks with rival hypotheses",
+   "life_cycle": [
+    "rivals"
+   ],
+   "fault_injection": []
+  },
+  "11": {
+   "name": "prunable subtrees",
+   "life_cycle": [],
+   "fault_injection": []
+  },
+  "12": {
+   "name": "promising routes",
+   "life_cycle": [
+    "rivals"
+   ],
+   "fault_injection": []
+  },
+  "13": {
+   "name": "shared hypotheses",
+   "life_cycle": [],
+   "fault_injection": [
+    "fault_shared_hypothesis"
+   ]
+  },
+  "14": {
+   "name": "data-format mismatch",
+   "life_cycle": [],
+   "fault_injection": []
+  },
+  "15": {
+   "name": "dataset missing in configuration",
+   "life_cycle": [],
+   "fault_injection": [
+    "fault_dataset_missing"
+   ]
+  },
+  "16": {
+   "name": "blocking deprecation",
+   "life_cycle": [
+    "rivals"
+   ],
+   "fault_injection": []
+  },
+  "17": {
+   "name": "conflict of active rivals",
+   "life_cycle": [
+    "rivals"
+   ],
+   "fault_injection": []
+  },
+  "18": {
+   "name": "fresh after recompute",
+   "life_cycle": [
+    "change_IMF",
+    "change_SFR"
+   ],
+   "fault_injection": []
+  },
+  "19": {
+   "name": "preferred surviving rival",
+   "life_cycle": [
+    "rivals"
+   ],
+   "fault_injection": []
+  }
+ },
+ "rules_fired_life_cycle": [
+  1,
+  2,
+  3,
+  4,
+  5,
+  7,
+  8,
+  10,
+  12,
+  16,
+  17,
+  18,
+  19
+ ],
+ "rules_fired_fault_only": [
+  6,
+  9,
+  13,
+  15
+ ],
+ "rules_not_fired": [
+  11,
+  14
+ ]
+}
