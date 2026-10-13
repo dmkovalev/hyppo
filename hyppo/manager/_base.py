@@ -49,6 +49,11 @@ class Manager:
         self.pending_stale: set[str] = self.repository.load_marks("pending_stale")
         # hypotheses REFUTED/SUPERSEDED as of the last run (cascade fires on change)
         self.invalid_seen: set[str] = self.repository.load_marks("invalid_seen")
+        # revision epochs eps_g (persisted): incremented on every invalidation
+        # event of g and chained into the keys of all consumers of g, so records
+        # made before a revision of a source are never read again, whatever the
+        # parameters (the marks above are only a fast path, see cache_keys)
+        self.epochs: dict[str, int] = self.repository.load_epochs()
         self.r2_threshold = r2_threshold
         self.runner = Runner(
             repository=self.repository, max_retries=max_retries, max_workers=max_workers
@@ -123,7 +128,7 @@ class Manager:
         # Actuality (def:12): chained cache keys cover models/parameters of the
         # hypothesis and all its sources; `stale` (StaleHypothesis markers of
         # the ontology layer) covers revisions that touch neither.
-        keys = self.cache_keys(hyp_graph, models, config, model_ids)
+        keys = self.current_cache_keys(hyp_graph, models, config, model_ids)
         stale_now = set(stale or set()) | set(self.pending_stale)
         p_ne, p_e = self._partition(hyp_graph, keys, stale_now)
 
@@ -151,6 +156,9 @@ class Manager:
         # every run in which the status persists
         newly_invalid = invalid - self.invalid_seen
         self.invalid_seen = invalid
+        for h in newly_invalid:  # revision event of h: new epoch for its consumers
+            self.epochs[h] = self.epochs.get(h, 0) + 1
+        self.repository.save_epochs(self.epochs)
         self.pending_stale |= self._cascade(hyp_graph, newly_invalid, individuals, ontology)
         self.repository.save_marks("pending_stale", self.pending_stale)
         self.repository.save_marks("invalid_seen", self.invalid_seen)
@@ -190,13 +198,19 @@ class Manager:
         models: dict[str, Callable] | None = None,
         config: dict[str, dict] | None = None,
         model_ids: dict[str, str] | None = None,
+        epochs: dict[str, int] | None = None,
     ) -> dict[str, dict]:
         """Chained cache keys (definition def:12, conditions (1)-(3)) for every
         hypothesis of ``graph``: own config, model identifier (explicit
         ``model_ids`` or the model callable's qualified name) and the keys of the
         direct predecessors. The runner saves and the planner looks up results by
         these keys, so a change of a source's model or parameters misses the
-        cache for the source and all its descendants."""
+        cache for the source and all its descendants.
+
+        ``epochs``: revision epochs of the hypotheses (see :attr:`epochs`); the
+        key of h contains ``(g, K(g), eps_g)`` for every source g. Without
+        ``epochs`` (static use) all epochs are 0; to address the records written
+        by a Manager after revision events use :meth:`current_cache_keys`."""
         from hyppo.planner.actuality import chained_keys
 
         if model_ids is None:
@@ -205,7 +219,18 @@ class Manager:
                 for h, fn in (models or {}).items()
             }
         topo = list(nx.topological_sort(hyp_graph))
-        return chained_keys(topo, hyp_graph.edges(), config or {}, model_ids)
+        return chained_keys(topo, hyp_graph.edges(), config or {}, model_ids, epochs)
+
+    def current_cache_keys(
+        self,
+        hyp_graph: nx.DiGraph,
+        models: dict[str, Callable] | None = None,
+        config: dict[str, dict] | None = None,
+        model_ids: dict[str, str] | None = None,
+    ) -> dict[str, dict]:
+        """:meth:`cache_keys` with the current revision epochs of this Manager:
+        the keys under which ``orchestrate`` reads and writes records now."""
+        return self.cache_keys(hyp_graph, models, config, model_ids, self.epochs)
 
     def _partition(
         self, hyp_graph: nx.DiGraph, config: dict[str, dict], stale: set[str] = frozenset()
