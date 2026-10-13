@@ -13,9 +13,11 @@ sequences:
     the R^2 cut d is in P_ne of every later run.
 
 The oracle uses only observable results (statuses, plans), not Manager state.
-Boundaries (documented, strict xfail): simultaneous nested events (bug: the
-descendant that is itself newly invalid is dropped), loss of the in-memory
-marks with a new Manager on the same repository.
+Former boundaries are now regression tests: simultaneous nested events (the
+descendant that is itself newly invalid is marked too) and a new Manager on
+the same repository (marks and revision epochs are persisted in the
+repository, so they survive the session). Outside the class: a
+rehabilitation SUPERSEDED -> SUPPORTED is not an invalidation event.
 """
 
 from __future__ import annotations

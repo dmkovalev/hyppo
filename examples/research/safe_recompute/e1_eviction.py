@@ -12,7 +12,8 @@ value that depends on the parameters and models of the hypothesis and all its
 sources. After every step all results in both modes must equal the current
 digests: a stale reused result would fail the check.
 
-Usage: python eviction_safe_vs_cascade.py [steps] [seeds]
+Usage: python -m examples.research.safe_recompute.e1_eviction [steps] [seeds]
+       (defaults 40 and 10; writes data/e1_eviction.json)
 """
 from __future__ import annotations
 
@@ -79,7 +80,12 @@ def run_workload(nodes, edges, mode, capacity, steps, seed, policy="lru"):
             for x in nodes:  # correctness: every result is actual for the current keys
                 v = res[x]["metrics"].get("v")
                 assert v == digest(keys[x]), (mode, step, x)
-            for x in nodes:  # LRU bookkeeping: all records of this run were used
+            # LRU bookkeeping: all records of this run were used. They are touched in
+            # node-list order (sources before descendants within one configuration; in
+            # all 26 nf-core graphs the list is topological, in CRM except H6, H15 -> H5),
+            # so a source's record is older than its descendants' and is evicted first.
+            # Known property of the workload; it affects the capacity C = 2|V| points.
+            for x in nodes:
                 k = (x, digest(keys[x]))
                 lru.pop(k, None); lru[k] = keys[x]
             while len(lru) > capacity:
