@@ -1,0 +1,767 @@
+{
+ "domain": "neuro (HCP)",
+ "hypotheses": {
+  "h_atlas": {
+   "label": "Выбор атласа анатомических регионов",
+   "task": 1,
+   "equations": [
+    "X = P*Y"
+   ],
+   "in": [
+    "P",
+    "Y"
+   ],
+   "out": [
+    "X"
+   ],
+   "variants": 4,
+   "note": "ROI time series = atlas parcellation (averaging weights) x voxel BOLD"
+  },
+  "h_conn": {
+   "label": "Функциональная связность",
+   "task": 2,
+   "equations": [
+    "C = Conn(X, kappa)"
+   ],
+   "in": [
+    "X",
+    "kappa"
+   ],
+   "out": [
+    "C"
+   ],
+   "variants": 4,
+   "note": "connectivity matrix of the ROI series by estimator kappa"
+  },
+  "h_group": {
+   "label": "Значимые различия по полу",
+   "task": 3,
+   "equations": [
+    "C_grp = GroupMean(C, grp)"
+   ],
+   "in": [
+    "C",
+    "grp"
+   ],
+   "out": [
+    "C_grp"
+   ],
+   "variants": 3,
+   "note": "group-level connectivity of the subject group grp (men / women / mixed); compared across groups by the ranking module"
+  }
+ },
+ "graph": {
+  "nodes": [
+   "h_atlas",
+   "h_conn",
+   "h_group"
+  ],
+  "edges": [
+   [
+    "h_atlas",
+    "h_conn"
+   ],
+   [
+    "h_conn",
+    "h_group"
+   ]
+  ],
+  "n_edges": 2,
+  "depth": 2,
+  "competes": [],
+  "order_conflicts": [],
+  "hypothesis_graph_build_agrees": true,
+  "vs_dissertation": {
+   "common": [
+    [
+     "h_atlas",
+     "h_conn"
+    ],
+    [
+     "h_conn",
+     "h_group"
+    ]
+   ],
+   "only_derived": [],
+   "only_expected": []
+  }
+ },
+ "cascade": {
+  "h_atlas": {
+   "recompute": [
+    "h_atlas",
+    "h_conn",
+    "h_group"
+   ],
+   "fraction": 1.0
+  },
+  "h_conn": {
+   "recompute": [
+    "h_conn",
+    "h_group"
+   ],
+   "fraction": 0.6666666666666666
+  },
+  "h_group": {
+   "recompute": [
+    "h_group"
+   ],
+   "fraction": 0.3333333333333333
+  }
+ },
+ "config_space": {
+  "atlases": [
+   "harvard_oxford",
+   "aal",
+   "schaefer_100",
+   "schaefer_200"
+  ],
+  "conn_methods": [
+   "pearson",
+   "partial",
+   "covariance",
+   "tangent"
+  ],
+  "groups": [
+   "men",
+   "women",
+   "mixed"
+  ],
+  "N": 48,
+  "d_bar": 8
+ },
+ "enumeration": {
+  "configurations": 48,
+  "model_runs_with_reuse": {
+   "h_atlas": 4,
+   "h_conn": 16,
+   "h_group": 48
+  },
+  "total_runs_with_reuse": 68,
+  "model_runs_without_reuse": 144,
+  "invariant_violations": [],
+  "group_sizes": {
+   "men": 6,
+   "women": 6,
+   "mixed": 12
+  },
+  "wall_seconds": 0.92,
+  "data_note": "seeded surrogate cohort (HCP S1200 is DUA-restricted)"
+ },
+ "region_decisions": {
+  "Precentral Gyrus": {
+   "p": 0.0045,
+   "eta": 29.0,
+   "control": false,
+   "significant": true
+  },
+  "Postcentral Gyrus": {
+   "p": 0.0003,
+   "eta": 54.0,
+   "control": false,
+   "significant": true
+  },
+  "Planum Polare": {
+   "p": 0.08,
+   "eta": 7.0,
+   "control": true,
+   "significant": false
+  }
+ },
+ "ontology_size": {
+  "classes": 89,
+  "individuals": 30,
+  "triples": 760
+ },
+ "consistency": {
+  "ic_conditions_1_3": {
+   "rl_errors": [],
+   "condition1": {
+    "ok": true,
+    "slots": {
+     "O": 1,
+     "H": 3,
+     "M": 3,
+     "W": 1,
+     "C": 1
+    },
+    "R_unrealised": []
+   },
+   "condition2": {
+    "ok": true,
+    "empty_tasks": []
+   },
+   "condition3": {
+    "ok": true,
+    "unrealised": []
+   }
+  },
+  "structural": {
+   "ok": true,
+   "status": "OK",
+   "details": {
+    "stage_a": "passed",
+    "stage_a_engine": "owlrl",
+    "c3": "passed",
+    "c4": "passed",
+    "c5": "passed (3 finite parameter domains)",
+    "c7": "passed (все переменные грунтированы в домене)",
+    "cond4": "passed (проекции pi_t(V) непусты)",
+    "cond5": "passed (причинный порядок согласован с потоком работ)"
+   }
+  }
+ },
+ "nominal": {
+  "rules_fired": [
+   1,
+   2,
+   3,
+   5
+  ],
+  "markers": {
+   "rule2": 1,
+   "rule9": 0,
+   "rule11": 0,
+   "rule13": 0,
+   "rule15": 0
+  },
+  "reasoner_seconds": 0.626
+ },
+ "timing": {
+  "rl_materialisation": {
+   "median_s": 0.922,
+   "min_s": 0.884,
+   "max_s": 0.968,
+   "closure_triples": 5090,
+   "repeats": 5
+  },
+  "hermit": {
+   "median_s": 0.66,
+   "repeats": 3
+  }
+ },
+ "change": {
+  "h_atlas": {
+   "changed": "h_atlas",
+   "stale": [
+    "h_conn",
+    "h_group"
+   ],
+   "oracle_descendants": [
+    "h_conn",
+    "h_group"
+   ],
+   "rule4_match": true,
+   "derived_stale_runs": [
+    "h_conn",
+    "h_group"
+   ],
+   "rule7_match": true,
+   "obsolete_versions": [
+    "hcp_h_atlas_v0"
+   ],
+   "plan_P_ne": [
+    "h_atlas",
+    "h_conn",
+    "h_group"
+   ],
+   "plan_matches_marking": true,
+   "fresh_after_recompute": [
+    "h_conn",
+    "h_group"
+   ],
+   "rules_fired": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    7,
+    8,
+    18
+   ],
+   "reasoner_seconds": 0.659
+  },
+  "h_conn": {
+   "changed": "h_conn",
+   "stale": [
+    "h_group"
+   ],
+   "oracle_descendants": [
+    "h_group"
+   ],
+   "rule4_match": true,
+   "derived_stale_runs": [
+    "h_group"
+   ],
+   "rule7_match": true,
+   "obsolete_versions": [
+    "hcp_h_conn_v0"
+   ],
+   "plan_P_ne": [
+    "h_conn",
+    "h_group"
+   ],
+   "plan_matches_marking": true,
+   "fresh_after_recompute": [
+    "h_group"
+   ],
+   "rules_fired": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    7,
+    8,
+    18
+   ],
+   "reasoner_seconds": 0.65
+  },
+  "h_group": {
+   "changed": "h_group",
+   "stale": [],
+   "oracle_descendants": [],
+   "rule4_match": true,
+   "derived_stale_runs": [],
+   "rule7_match": true,
+   "obsolete_versions": [
+    "hcp_h_group_v0"
+   ],
+   "plan_P_ne": [
+    "h_group"
+   ],
+   "plan_matches_marking": true,
+   "fresh_after_recompute": [],
+   "rules_fired": [
+    1,
+    2,
+    3,
+    5,
+    8
+   ],
+   "reasoner_seconds": 0.623
+  }
+ },
+ "rivals": {
+  "competes_pairs": [
+   [
+    "h_conn",
+    "h_conn_gp"
+   ]
+  ],
+  "ranking": [
+   {
+    "hypothesis": "h_conn_gp",
+    "metric": -121611.0
+   },
+   {
+    "hypothesis": "h_conn",
+    "metric": -106215.0
+   }
+  ],
+  "phase1_active_rivals": {
+   "conflicting_hypotheses": [
+    "h_conn",
+    "h_conn_gp"
+   ],
+   "conflicting_tasks": [
+    "hcpr_task2"
+   ],
+   "rules_fired": [
+    1,
+    2,
+    3,
+    5,
+    10,
+    17
+   ]
+  },
+  "phase2_after_ranking": {
+   "preferred": [
+    "h_conn_gp"
+   ],
+   "blocking_deprecation": [
+    "h_conn"
+   ],
+   "promising_routes": [
+    "h_group"
+   ],
+   "prunable_subtrees": [],
+   "stale": [
+    "h_group"
+   ],
+   "rules_fired": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    7,
+    10,
+    12,
+    16,
+    19
+   ]
+  },
+  "rules_fired": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   7,
+   10,
+   12,
+   16,
+   17,
+   19
+  ],
+  "graph": {
+   "n_nodes": 4,
+   "n_edges": 4,
+   "edges": [
+    [
+     "h_atlas",
+     "h_conn"
+    ],
+    [
+     "h_atlas",
+     "h_conn_gp"
+    ],
+    [
+     "h_conn",
+     "h_group"
+    ],
+    [
+     "h_conn_gp",
+     "h_group"
+    ]
+   ]
+  },
+  "consistency": {
+   "ok": true,
+   "status": "OK",
+   "details": {
+    "stage_a": "skipped",
+    "stage_a_engine": "skipped",
+    "c3": "passed",
+    "c4": "passed",
+    "c5": "passed (4 finite parameter domains)",
+    "c7": "passed (все переменные грунтированы в домене)",
+    "cond4": "passed (проекции pi_t(V) непусты)",
+    "cond5": "passed (причинный порядок согласован с потоком работ)"
+   }
+  }
+ },
+ "faults": {
+  "orphan_hypothesis": {
+   "orphans": [
+    "hcp_motion_regression"
+   ],
+   "rules_fired": [
+    1,
+    2,
+    3,
+    5,
+    9
+   ]
+  },
+  "dataset_missing": {
+   "models_without_dataset": [
+    "hcp_m_h_atlas"
+   ],
+   "rules_fired": [
+    1,
+    2,
+    3,
+    5,
+    15
+   ]
+  },
+  "shared_hypothesis": {
+   "shared": [
+    "hcp_h_atlas"
+   ],
+   "rules_fired": [
+    1,
+    2,
+    3,
+    5,
+    13
+   ]
+  },
+  "disjoint_domain": {
+   "inconsistency_detected": true,
+   "rules_fired": [
+    6
+   ]
+  },
+  "format_mismatch": {
+   "format_mismatch": [
+    "hcp_m_h_atlas"
+   ],
+   "rules_fired": [
+    1,
+    2,
+    3,
+    5,
+    14
+   ]
+  },
+  "ic_conditions": {
+   "condition1": {
+    "ok": false,
+    "slots": {
+     "O": 1,
+     "H": 3,
+     "M": 3,
+     "W": 1,
+     "C": 1
+    },
+    "R_unrealised": [
+     "hcp_h_conn"
+    ]
+   },
+   "condition2": {
+    "ok": false,
+    "empty_tasks": [
+     "hcp_task3"
+    ]
+   },
+   "condition3": {
+    "ok": false,
+    "unrealised": [
+     "hcp_h_conn"
+    ]
+   }
+  },
+  "invariant_atlas": {
+   "hypothesis": "h_atlas",
+   "violated": true,
+   "message": "Value error, parcellation rows must be averaging weights",
+   "stale": [
+    "h_conn",
+    "h_group"
+   ],
+   "matches_descendants": true,
+   "rules_fired": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    7
+   ]
+  }
+ },
+ "rules": {
+  "1": {
+   "name": "classification by model type",
+   "life_cycle": [
+    "change_h_atlas",
+    "change_h_conn",
+    "change_h_group",
+    "nominal",
+    "rivals"
+   ],
+   "fault_injection": [
+    "fault_dataset_missing",
+    "fault_format_mismatch",
+    "fault_invariant_atlas",
+    "fault_orphan_hypothesis",
+    "fault_shared_hypothesis"
+   ]
+  },
+  "2": {
+   "name": "tuple completeness (condition 1)",
+   "life_cycle": [
+    "change_h_atlas",
+    "change_h_conn",
+    "change_h_group",
+    "nominal",
+    "rivals"
+   ],
+   "fault_injection": [
+    "fault_dataset_missing",
+    "fault_format_mismatch",
+    "fault_invariant_atlas",
+    "fault_orphan_hypothesis",
+    "fault_shared_hypothesis"
+   ]
+  },
+  "3": {
+   "name": "dependency via derived_by",
+   "life_cycle": [
+    "change_h_atlas",
+    "change_h_conn",
+    "change_h_group",
+    "nominal",
+    "rivals"
+   ],
+   "fault_injection": [
+    "fault_dataset_missing",
+    "fault_format_mismatch",
+    "fault_invariant_atlas",
+    "fault_orphan_hypothesis",
+    "fault_shared_hypothesis"
+   ]
+  },
+  "4": {
+   "name": "cascade invalidation",
+   "life_cycle": [
+    "change_h_atlas",
+    "change_h_conn",
+    "rivals"
+   ],
+   "fault_injection": [
+    "fault_invariant_atlas"
+   ]
+  },
+  "5": {
+   "name": "transitivity of derived_by",
+   "life_cycle": [
+    "change_h_atlas",
+    "change_h_conn",
+    "change_h_group",
+    "nominal",
+    "rivals"
+   ],
+   "fault_injection": [
+    "fault_dataset_missing",
+    "fault_format_mismatch",
+    "fault_invariant_atlas",
+    "fault_orphan_hypothesis",
+    "fault_shared_hypothesis"
+   ]
+  },
+  "6": {
+   "name": "domain ontology hierarchy/disjointness",
+   "life_cycle": [],
+   "fault_injection": [
+    "fault_disjoint_domain"
+   ]
+  },
+  "7": {
+   "name": "hidden staleness of runs",
+   "life_cycle": [
+    "change_h_atlas",
+    "change_h_conn",
+    "rivals"
+   ],
+   "fault_injection": [
+    "fault_invariant_atlas"
+   ]
+  },
+  "8": {
+   "name": "version tracking",
+   "life_cycle": [
+    "change_h_atlas",
+    "change_h_conn",
+    "change_h_group"
+   ],
+   "fault_injection": []
+  },
+  "9": {
+   "name": "orphan hypotheses",
+   "life_cycle": [],
+   "fault_injection": [
+    "fault_orphan_hypothesis"
+   ]
+  },
+  "10": {
+   "name": "tasks with rival hypotheses",
+   "life_cycle": [
+    "rivals"
+   ],
+   "fault_injection": []
+  },
+  "11": {
+   "name": "prunable subtrees",
+   "life_cycle": [],
+   "fault_injection": []
+  },
+  "12": {
+   "name": "promising routes",
+   "life_cycle": [
+    "rivals"
+   ],
+   "fault_injection": []
+  },
+  "13": {
+   "name": "shared hypotheses",
+   "life_cycle": [],
+   "fault_injection": [
+    "fault_shared_hypothesis"
+   ]
+  },
+  "14": {
+   "name": "data-format mismatch",
+   "life_cycle": [],
+   "fault_injection": [
+    "fault_format_mismatch"
+   ]
+  },
+  "15": {
+   "name": "dataset missing in configuration",
+   "life_cycle": [],
+   "fault_injection": [
+    "fault_dataset_missing"
+   ]
+  },
+  "16": {
+   "name": "blocking deprecation",
+   "life_cycle": [
+    "rivals"
+   ],
+   "fault_injection": []
+  },
+  "17": {
+   "name": "conflict of active rivals",
+   "life_cycle": [
+    "rivals"
+   ],
+   "fault_injection": []
+  },
+  "18": {
+   "name": "fresh after recompute",
+   "life_cycle": [
+    "change_h_atlas",
+    "change_h_conn"
+   ],
+   "fault_injection": []
+  },
+  "19": {
+   "name": "preferred surviving rival",
+   "life_cycle": [
+    "rivals"
+   ],
+   "fault_injection": []
+  }
+ },
+ "rules_fired_life_cycle": [
+  1,
+  2,
+  3,
+  4,
+  5,
+  7,
+  8,
+  10,
+  12,
+  16,
+  17,
+  18,
+  19
+ ],
+ "rules_fired_fault_only": [
+  6,
+  9,
+  13,
+  14,
+  15
+ ],
+ "rules_not_fired": [
+  11
+ ]
+}

@@ -14,6 +14,7 @@
       "h_group"
     ]
   ],
+  "edges_source": "derived by Algorithm 1 (GraphConstructor) from the hypothesis structures of hyppo.adapters.hcp_adapter",
   "n_variants": {
     "h_atlas": 4,
     "h_conn": 4,
@@ -64,5 +65,5 @@
     }
   },
   "generator_best_r2": 0.8,
-  "data_note": "sign-test p (Holm) and Bayesian eta from the published HCP analysis; fMRI is DUA-restricted. Graph/cascade reproduced from hyppo.coa.HypothesisGraph."
+  "data_note": "sign-test p (Holm) and Bayesian eta from the published HCP analysis; fMRI is DUA-restricted. Graph/cascade reproduced by Algorithm 1 / hyppo.coa.HypothesisGraph."
 }

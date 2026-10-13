@@ -1,14 +1,17 @@
 #!/usr/bin/env python
-"""Chapter 4 -- HCP functional-connectivity cascade demo (Section 4.1, part4.tex).
+"""Chapter 4 -- HCP functional-connectivity cascade demo (Section 4.3, part4.tex).
 
 Reproduces the *method* claims of the neurophysiology application from the
 library, without reprocessing fMRI (the connectivity-extraction pipeline is not
 part of hyppo). The brain-imaging statistics are taken from the published HCP
-analysis (dissertation Tables in Section 4.1; sign test with Holm correction and
+analysis (dissertation Tables in Section 4.3; sign test with Holm correction and
 Bayesian factors); hyppo contributes the hypothesis graph, the cascade planner,
 and the comparison decision.
 
-  * Algorithm 1 (HypothesisGraph.build) builds the 3-hypothesis chain
+  * the three hypotheses are structures with declared inputs
+    (:mod:`hyppo.adapters.hcp_adapter`: ``X = P*Y``, ``C = Conn(X, kappa)``,
+    ``C_grp = GroupMean(C, grp)``); Algorithm 1 (``GraphConstructor``,
+    cross-checked by ``HypothesisGraph.build``) DERIVES the chain
     ``h_atlas -> h_conn -> h_group`` (configuration space N = 4*4*3 = 48);
   * Algorithm 4 (HypothesisGraph.plan) recomputes only affected hypotheses:
     changing the atlas re-runs all 3, the connectivity 2/3, the group method 1/3;
@@ -27,19 +30,32 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from hyppo.coa import HypothesisGraph
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
+from hyppo.adapters.hcp_adapter import (  # noqa: E402
+    CONFIG_SPACE_SIZE,
+    HCP_HYPOTHESES,
+    HCP_TASK_EDGES,
+    HCP_TASKS,
+)
+from hyppo.coa import HypothesisGraph  # noqa: E402
+
+from examples.research.chapter4._domain_run import derive_graph  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
 RESULTS = HERE / "results"
 
-# --- HCP hypothesis graph (Section 4.1): atlas -> connectivity -> group -----
-NODES = ["h_atlas", "h_conn", "h_group"]
+# --- HCP hypothesis graph (Section 4.3): derived by Algorithm 1 -------------
+NODES = [h.name for h in HCP_HYPOTHESES]
 IDX = {n: i for i, n in enumerate(NODES)}
-EDGES = [("h_atlas", "h_conn"), ("h_conn", "h_group")]
-N_VARIANTS = {"h_atlas": 4, "h_conn": 4, "h_group": 3}  # config space N = 48
-CONFIG_SPACE = 4 * 4 * 3
+_GRAPH = derive_graph(HCP_HYPOTHESES, HCP_TASKS, HCP_TASK_EDGES)
+EDGES = [tuple(e) for e in _GRAPH.edges]
+N_VARIANTS = {h.name: h.n_variants for h in HCP_HYPOTHESES}  # config space N = 48
+CONFIG_SPACE = CONFIG_SPACE_SIZE
 
-# --- Published per-region statistics (dissertation Section 4.1 tables) ------
+# --- Published per-region statistics (dissertation Section 4.3 tables) ------
 # sign test (Holm-corrected) p-value, Bayesian factor eta:1, alpha = 0.05.
 # Precentral/Postcentral: documented gender differences; Planum Polare: control.
 REGION_STATS = {
@@ -52,12 +68,8 @@ GENERATOR_R2 = 0.8  # best generated hypothesis (GLM-seeded GP), published
 
 
 def build_hcp_graph() -> HypothesisGraph:
-    g = HypothesisGraph()
-    for _ in NODES:
-        g.add([])
-    for u, v in EDGES:
-        g.connect(IDX[u], IDX[v])
-    return g
+    """Planning graph over the derived edges (Algorithm 4 uses the topology)."""
+    return HypothesisGraph.from_edges(len(NODES), [(IDX[u], IDX[v]) for u, v in EDGES])
 
 
 def recompute_on_change(g: HypothesisGraph, changed: set[str]) -> list[str]:
@@ -67,7 +79,6 @@ def recompute_on_change(g: HypothesisGraph, changed: set[str]) -> list[str]:
 
 def main() -> None:
     g = build_hcp_graph()
-    g.build()                       # Algorithm 1
     n = len(NODES)
 
     cascade = {nm: recompute_on_change(g, {nm}) for nm in NODES}
@@ -92,7 +103,8 @@ def main() -> None:
         print(f"  {region:18s} [{tag}]: p={d['p']:.4f} eta={d['eta']:.0f}:1 "
               f"-> {'significant' if d['significant'] else 'not rejected'}")
 
-    # method claims (Section 4.1)
+    # method claims (Section 4.3)
+    assert EDGES == [("h_atlas", "h_conn"), ("h_conn", "h_group")] and _GRAPH.depth == 2
     assert cascade["h_atlas"] == ["h_atlas", "h_conn", "h_group"]      # 3/3
     assert cascade["h_conn"] == ["h_conn", "h_group"]                   # 2/3
     assert cascade["h_group"] == ["h_group"]                           # 1/3
@@ -105,6 +117,8 @@ def main() -> None:
     out = {
         "nodes": NODES,
         "edges": EDGES,
+        "edges_source": "derived by Algorithm 1 (GraphConstructor) from the "
+                        "hypothesis structures of hyppo.adapters.hcp_adapter",
         "n_variants": N_VARIANTS,
         "config_space": CONFIG_SPACE,
         "cascade": {nm: {"recompute": cascade[nm],
@@ -113,7 +127,7 @@ def main() -> None:
         "generator_best_r2": GENERATOR_R2,
         "data_note": ("sign-test p (Holm) and Bayesian eta from the published HCP "
                       "analysis; fMRI is DUA-restricted. Graph/cascade reproduced "
-                      "from hyppo.coa.HypothesisGraph."),
+                      "by Algorithm 1 / hyppo.coa.HypothesisGraph."),
     }
     RESULTS.mkdir(parents=True, exist_ok=True)
     (RESULTS / "hcp_cascade.json").write_text(json.dumps(out, indent=2))

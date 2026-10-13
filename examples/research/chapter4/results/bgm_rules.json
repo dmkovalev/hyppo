@@ -13,35 +13,35 @@
  ],
  "edges": [
   [
-   "age_cells",
-   "local_volume_density"
-  ],
-  [
-   "density_law",
-   "local_volume_density"
+   "IMF",
+   "star_birthrate"
   ],
   [
    "SFR",
    "star_birthrate"
   ],
   [
-   "IMF",
-   "star_birthrate"
+   "age_cells",
+   "evolutionary_tracks"
+  ],
+  [
+   "age_cells",
+   "local_volume_density"
   ],
   [
    "age_cells",
    "star_birthrate"
   ],
   [
-   "local_volume_density",
-   "evolutionary_tracks"
+   "density_law",
+   "local_volume_density"
   ],
   [
-   "star_birthrate",
-   "local_luminosity"
+   "evolutionary_tracks",
+   "dynamical_self_consistency"
   ],
   [
-   "local_volume_density",
+   "evolutionary_tracks",
    "local_luminosity"
   ],
   [
@@ -53,14 +53,23 @@
    "dynamical_self_consistency"
   ],
   [
-   "evolutionary_tracks",
-   "dynamical_self_consistency"
+   "local_volume_density",
+   "evolutionary_tracks"
+  ],
+  [
+   "local_volume_density",
+   "local_luminosity"
+  ],
+  [
+   "star_birthrate",
+   "local_luminosity"
   ],
   [
    "velocity_dispersion",
    "dynamical_self_consistency"
   ]
  ],
+ "edges_source": "Algorithm 1 (GraphConstructor) over hyppo.adapters.bgm_adapter",
  "scenarios": [
   {
    "invalid": "IMF",
@@ -75,37 +84,22 @@
     "star_birthrate"
    ],
    "rule4_match": true,
-   "derived_stale_runs": {
-    "R_dyn": true,
-    "R_trk": false
-   },
-   "expected_runs": {
-    "R_dyn": true,
-    "R_trk": false
-   },
-   "rule7_match": true,
-   "inferred_classes": {
-    "star_birthrate": [
-     "HypothesisWithStaleAncestor",
-     "StaleHypothesis"
-    ],
-    "local_luminosity": [
-     "HypothesisWithStaleAncestor",
-     "StaleHypothesis"
-    ],
-    "dynamical_self_consistency": [
-     "HypothesisWithStaleAncestor",
-     "StaleHypothesis"
-    ],
-    "R_dyn": [
-     "DerivedStaleRun"
-    ]
-   },
-   "rules_fired": [
-    4,
-    7
+   "derived_stale_runs": [
+    "dynamical_self_consistency",
+    "local_luminosity",
+    "star_birthrate"
    ],
-   "unmapped_inferred_classes": []
+   "rule7_match": true,
+   "rules_fired": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    7,
+    8,
+    18
+   ]
   },
   {
    "invalid": "SFR",
@@ -120,62 +114,241 @@
     "star_birthrate"
    ],
    "rule4_match": true,
-   "derived_stale_runs": {
-    "R_dyn": true,
-    "R_trk": false
-   },
-   "expected_runs": {
-    "R_dyn": true,
-    "R_trk": false
-   },
-   "rule7_match": true,
-   "inferred_classes": {
-    "star_birthrate": [
-     "HypothesisWithStaleAncestor",
-     "StaleHypothesis"
-    ],
-    "local_luminosity": [
-     "HypothesisWithStaleAncestor",
-     "StaleHypothesis"
-    ],
-    "dynamical_self_consistency": [
-     "HypothesisWithStaleAncestor",
-     "StaleHypothesis"
-    ],
-    "R_dyn": [
-     "DerivedStaleRun"
-    ]
-   },
-   "rules_fired": [
-    4,
-    7
+   "derived_stale_runs": [
+    "dynamical_self_consistency",
+    "local_luminosity",
+    "star_birthrate"
    ],
-   "unmapped_inferred_classes": []
+   "rule7_match": true,
+   "rules_fired": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    7,
+    8,
+    18
+   ]
   }
  ],
- "rules_fired_union": [
-  4,
-  7
- ],
- "rules_not_fired": [
+ "rules": {
+  "1": {
+   "name": "classification by model type",
+   "life_cycle": [
+    "change_IMF",
+    "change_SFR",
+    "nominal",
+    "rivals"
+   ],
+   "fault_injection": [
+    "fault_dataset_missing",
+    "fault_invariant_IMF",
+    "fault_orphan_hypothesis",
+    "fault_shared_hypothesis"
+   ]
+  },
+  "2": {
+   "name": "tuple completeness (condition 1)",
+   "life_cycle": [
+    "change_IMF",
+    "change_SFR",
+    "nominal",
+    "rivals"
+   ],
+   "fault_injection": [
+    "fault_dataset_missing",
+    "fault_invariant_IMF",
+    "fault_orphan_hypothesis",
+    "fault_shared_hypothesis"
+   ]
+  },
+  "3": {
+   "name": "dependency via derived_by",
+   "life_cycle": [
+    "change_IMF",
+    "change_SFR",
+    "nominal",
+    "rivals"
+   ],
+   "fault_injection": [
+    "fault_dataset_missing",
+    "fault_invariant_IMF",
+    "fault_orphan_hypothesis",
+    "fault_shared_hypothesis"
+   ]
+  },
+  "4": {
+   "name": "cascade invalidation",
+   "life_cycle": [
+    "change_IMF",
+    "change_SFR",
+    "rivals"
+   ],
+   "fault_injection": [
+    "fault_invariant_IMF"
+   ]
+  },
+  "5": {
+   "name": "transitivity of derived_by",
+   "life_cycle": [
+    "change_IMF",
+    "change_SFR",
+    "nominal",
+    "rivals"
+   ],
+   "fault_injection": [
+    "fault_dataset_missing",
+    "fault_invariant_IMF",
+    "fault_orphan_hypothesis",
+    "fault_shared_hypothesis"
+   ]
+  },
+  "6": {
+   "name": "domain ontology hierarchy/disjointness",
+   "life_cycle": [],
+   "fault_injection": [
+    "fault_disjoint_domain"
+   ]
+  },
+  "7": {
+   "name": "hidden staleness of runs",
+   "life_cycle": [
+    "change_IMF",
+    "change_SFR",
+    "rivals"
+   ],
+   "fault_injection": [
+    "fault_invariant_IMF"
+   ]
+  },
+  "8": {
+   "name": "version tracking",
+   "life_cycle": [
+    "change_IMF",
+    "change_SFR"
+   ],
+   "fault_injection": []
+  },
+  "9": {
+   "name": "orphan hypotheses",
+   "life_cycle": [],
+   "fault_injection": [
+    "fault_orphan_hypothesis"
+   ]
+  },
+  "10": {
+   "name": "tasks with rival hypotheses",
+   "life_cycle": [
+    "rivals"
+   ],
+   "fault_injection": []
+  },
+  "11": {
+   "name": "prunable subtrees",
+   "life_cycle": [],
+   "fault_injection": []
+  },
+  "12": {
+   "name": "promising routes",
+   "life_cycle": [
+    "rivals"
+   ],
+   "fault_injection": []
+  },
+  "13": {
+   "name": "shared hypotheses",
+   "life_cycle": [],
+   "fault_injection": [
+    "fault_shared_hypothesis"
+   ]
+  },
+  "14": {
+   "name": "data-format mismatch",
+   "life_cycle": [],
+   "fault_injection": []
+  },
+  "15": {
+   "name": "dataset missing in configuration",
+   "life_cycle": [],
+   "fault_injection": [
+    "fault_dataset_missing"
+   ]
+  },
+  "16": {
+   "name": "blocking deprecation",
+   "life_cycle": [
+    "rivals"
+   ],
+   "fault_injection": []
+  },
+  "17": {
+   "name": "conflict of active rivals",
+   "life_cycle": [
+    "rivals"
+   ],
+   "fault_injection": []
+  },
+  "18": {
+   "name": "fresh after recompute",
+   "life_cycle": [
+    "change_IMF",
+    "change_SFR"
+   ],
+   "fault_injection": []
+  },
+  "19": {
+   "name": "preferred surviving rival",
+   "life_cycle": [
+    "rivals"
+   ],
+   "fault_injection": []
+  }
+ },
+ "rules_fired_life_cycle": [
   1,
   2,
   3,
+  4,
+  5,
+  7,
+  8,
+  10,
+  12,
+  16,
+  17,
+  18,
+  19
+ ],
+ "rules_fired_fault_only": [
+  6,
+  9,
+  13,
+  15
+ ],
+ "rules_fired_union": [
+  1,
+  2,
+  3,
+  4,
   5,
   6,
+  7,
   8,
   9,
   10,
-  11,
   12,
   13,
-  14,
   15,
   16,
   17,
   18,
   19
  ],
- "note": "BGM supplies only hypotheses and derived_by edges; no models, workflow tasks, configurations, domain ontology, lifecycle states or competes pairs are asserted in bgm_cascade.py, so rules depending on them have nothing to fire on.",
- "wall_seconds": 1.2
+ "rules_not_fired": [
+  11,
+  14
+ ],
+ "consistency": "OK",
+ "wall_seconds": 12.5
 }
