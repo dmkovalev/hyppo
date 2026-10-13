@@ -275,3 +275,13 @@ def test_e6_native_by_kind_and_sensitivity(tmp_path):
     assert b["dvc_fewer_safe"]["1.0"] == 0 and a["dvc_fewer_safe"]["1.0"] > 0
     for P in (a, b):
         assert all(x["missed"] == 0 for x in P["per_system"]["hyppo_safe"].values())
+
+
+def test_figures_smoke(tmp_path):
+    from examples.research.safe_recompute import figures
+
+    paths = figures.main(out_dir=tmp_path)
+    assert len(paths) >= 4
+    for p in paths:
+        assert p.exists() and p.stat().st_size > 1000 and p.read_bytes()[:4] == b"%PDF"
+    assert figures.fig_e1(data_dir=tmp_path, out_dir=tmp_path) is None  # нет JSON -- пропуск
