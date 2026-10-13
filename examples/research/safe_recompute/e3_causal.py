@@ -36,7 +36,7 @@ X:x передаётся парами (h, x) для всех читателей.
 Имена гипотез CRM/Norne соответствуют графу CRM гл. 4 (common.CRM_EDGES) так:
 GRP = H15 (GTM), H11 = H9 (MB), H12/H12b = H10/H11 (COREY), H13/H14 = H12/H13 (BL),
 H15 = H14 (WCTF), H19 = H16 (OPR), остальные совпадают (TO_DISS). Граф по формулам в этой
-нумерации совпадает с common.CRM_EDGES (18 рёбер, глубина 10), а граф компонент -- с фактор-графом
+нумерации совпадает с common.CRM_EDGES (19 рёбер, глубина 10), а граф компонент -- с фактор-графом
 common.crm_graph() по NORNE_COMP; это проверяется в тестах.
 """
 from __future__ import annotations
@@ -178,7 +178,7 @@ NORNE = [  # examples/norne_alg1_graph.py (HYPS), формулы дословн�
     ("H1", "I_agg = w_ij * I_j", "I_agg"), ("H2", "q_f = a_f*q_f_prev + b_f*I_agg", "q_f"),
     ("H3", "q_s = a_s*q_s_prev + b_s*I_agg", "q_s"), ("H4", "q_c = w_f*q_f + (1-w_f)*q_s", "q_c"),
     ("H5", "q_liq_phys = J*q_c + q_prim", "q_liq_phys"), ("H6", "q_prim = q_prev*exp(-dt*taup)", "q_prim"),
-    ("H7", "l_ml = MLP(x_hist)", "l_ml"), ("H8", "l = g*q_liq_phys + (1-g)*l_ml", "l"),
+    ("H7", "l_ml = w0 + w1*q_c + w2*l_prev + w3*I_mean", "l_ml"), ("H8", "l = g*q_liq_phys + (1-g)*l_ml", "l"),
     ("H11", "Sw = Sw_prev + (Winj - l)*dt/Vp", "Sw"),
     ("H12", "krw = ((Sw-Swc)/(1-Swc-Sor))**nw", "krw"), ("H12b", "kro = ((1-Sw-Sor)/(1-Swc-Sor))**no", "kro"),
     ("H13", "fw = 1/(1 + kro*muw/(krw*muo))", "fw"), ("H14", "o_p = 1 - fw", "o_p"),
@@ -186,8 +186,11 @@ NORNE = [  # examples/norne_alg1_graph.py (HYPS), формулы дословн�
 ]
 NORNE_TASKS = [["H1"], ["H2", "H3"], ["H4"], ["H6"], ["GRP"], ["H5"], ["H7"], ["H8"], ["H11"],
                ["H12", "H12b"], ["H13"], ["H14"], ["H15"], ["H19"]]
-NORNE_DATA = {"I_j", "q_f_prev", "q_s_prev", "q_prev", "dt", "x_hist", "Winj", "Sw_prev", "o_m", "Swc", "Sor"}
-NORNE_FUN = {"exp", "MLP"}
+NORNE_DATA = {"I_j", "q_f_prev", "q_s_prev", "q_prev", "dt", "l_prev", "I_mean", "Winj", "Sw_prev", "o_m", "Swc", "Sor"}
+# H7 (гл. 4): l_m = w0 + w1 q_CRM + w2 l^- + w3 Ī; q_CRM = q_c (выход H4, R(m_CRM) = H1..H4),
+# лаг l^- (l_prev) и средняя закачка Ī (I_mean, среднее сырых ставок нагнетательных скважин,
+# не I_agg) -- экзогенные данные, как q_f_prev/q_prev/Sw_prev.
+NORNE_FUN = {"exp"}
 NORNE_COMP = {"GTM": ["GRP"], "CRM": ["H1", "H2", "H3", "H4", "H6", "H5"], "ML": ["H7"], "FUS": ["H8"],
               "MB": ["H11"], "COREY": ["H12", "H12b"], "BL": ["H13", "H14"], "WCTF": ["H15"], "OPR": ["H19"]}
 

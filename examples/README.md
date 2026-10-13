@@ -33,7 +33,7 @@ The example will output:
 
 The full virtual-experiment lifecycle on the Norne HybridCRM case in one
 readable script: the Definition 1 tuple <O,H,M,R,W,C>, Algorithm 1 (graph:
-16 nodes / 18 edges / depth 10), Algorithm 2 incremental update (Lemma 2),
+16 nodes / 19 edges / depth 10), Algorithm 2 incremental update (Lemma 2),
 Algorithm 4 recompute plan with a Theorem 1 correctness/minimality check,
 Runner execution with epistemic statuses, and statistical comparison of
 competing hypotheses. Self-checks against the golden values pinned by

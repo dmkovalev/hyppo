@@ -86,7 +86,7 @@ def test_e3_crm_graphs_match_common():
     from examples.research.safe_recompute import common
     fine, coarse = e3_causal.norne(False), e3_causal.norne(True)
     assert e3_causal.diss_edges(fine) == set(common.CRM_EDGES)
-    assert fine.G.number_of_edges() == len(common.CRM_EDGES) == 18
+    assert fine.G.number_of_edges() == len(common.CRM_EDGES) == 19
     g = common.crm_graph()
     assert nx.dag_longest_path_length(g) == 10
     assert {e3_causal.TO_DISS.get(h, h) for h in fine.G} == set(g.nodes)

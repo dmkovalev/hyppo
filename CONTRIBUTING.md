@@ -32,7 +32,7 @@ All three must report zero findings before a change is merged.
 ## Golden-test contract
 
 `tests/test_golden_claims.py` pins the dissertation's and papers'
-claims (e.g. the Norne hypothesis graph: 16 nodes, 18 edges, DAG depth 10;
+claims (e.g. the Norne hypothesis graph: 16 nodes, 19 edges, DAG depth 10;
 Algorithm 2 incremental-equals-full-rebuild; Algorithm 4 plan
 correctness and minimality; operation-count complexity bounds; rule 5
 acyclicity) to the real implementation.

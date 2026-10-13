@@ -21,7 +21,7 @@
 
 | Данные | Где | В git |
 |---|---|---|
-| CRM Brugge (16 гипотез, 18 рёбер) | `common.CRM_EDGES` | да |
+| CRM Brugge (16 гипотез, 19 рёбер) | `common.CRM_EDGES` | да |
 | 26 графов nf-core | `examples/research/planning/data/hand_curated_hypothesis_graphs_26.json` | да |
 | 171 трасса WfCommons (~309 МБ) | `examples/research/planning/cache/wfcommons/` | нет, фиксируется манифестом |
 | ряды Brugge для реальных прогонов (Э4, Э6) | `thesis/papers/brugge_run/` | да, в репозитории диссертации |
@@ -102,6 +102,13 @@ python -m examples.research.safe_recompute.e1_eviction [steps=40] [seeds=10]
 27 графов (CRM + 26 nf-core), ёмкость репозитория 0,25--2 |V|, вытеснение LRU и
 случайное. Время: около 3,5 ч (примерно 20 мин на каждую из 10 пар «политика, ёмкость»).
 Выход: `data/e1_eviction.json` (перезаписывается).
+
+При изменении только графа CRM (`common.CRM_EDGES`) достаточно пересчитать его одного
+(около 5 мин) и влить в имеющийся JSON с пересчётом медиан, IQR и `crm_ratio` по 27 графам:
+
+```
+python -m examples.research.safe_recompute.e1_merge_crm [steps=40] [seeds=10]
+```
 
 ## Э2. План минимальной стоимости
 

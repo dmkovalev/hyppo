@@ -6,7 +6,7 @@ from examples.research.safe_recompute import common
 
 def test_crm_graph_matches_dissertation():
     g = common.crm_graph()
-    assert g.number_of_nodes() == 16 and g.number_of_edges() == 18
+    assert g.number_of_nodes() == 16 and g.number_of_edges() == 19
     assert nx.is_directed_acyclic_graph(g)
     assert nx.dag_longest_path_length(g) == 10
 
@@ -69,4 +69,4 @@ def test_crm_edges_equal_algorithm1_golden():
     to_diss = {"H11": "H9", "H12": "H10", "H12b": "H11", "H13": "H12", "H14": "H13",
                "H15": "H14", "H19": "H16", "GRP": "H15"}
     mapped = {(to_diss.get(a, a), to_diss.get(b, b)) for a, b in NORNE_GOLDEN_EDGES}
-    assert set(common.CRM_EDGES) == mapped and len(common.CRM_EDGES) == len(mapped) == 18
+    assert set(common.CRM_EDGES) == mapped and len(common.CRM_EDGES) == len(mapped) == 19

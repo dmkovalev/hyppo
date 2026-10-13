@@ -73,57 +73,57 @@
   },
   "crm_fine": {
     "hypotheses": 16,
-    "edges": 18,
-    "cases": 43,
+    "edges": 19,
+    "cases": 48,
     "strict_cases": 0,
-    "n_mean": 7.953488372093023,
-    "n_caus_mean": 7.953488372093023
+    "n_mean": 8.333333333333334,
+    "n_caus_mean": 8.333333333333334
   },
   "crm_coarse": {
     "components": 9,
-    "edges": 9,
-    "cases": 43,
-    "n_mean": 9.720930232558139,
-    "n_caus_mean": 7.953488372093023,
-    "n_caus_components_mean": 9.720930232558139,
-    "frac_coarse_gt_caus": 0.6046511627906976,
-    "frac_coarse_gt_fine": 0.6046511627906976,
+    "edges": 10,
+    "cases": 48,
+    "n_mean": 10.083333333333334,
+    "n_caus_mean": 8.333333333333334,
+    "n_caus_components_mean": 9.916666666666666,
+    "frac_coarse_gt_caus": 0.5416666666666666,
+    "frac_coarse_gt_fine": 0.5416666666666666,
     "variable_level_invariance_ok": true,
     "rows": [
       {
         "param": "GRP.J0",
         "N_fine": 10,
-        "N_coarse": 15,
+        "N_coarse": 16,
         "N_caus": 10,
         "N_caus_coarse_components": 15
       },
       {
         "param": "GRP.M",
         "N_fine": 10,
-        "N_coarse": 15,
+        "N_coarse": 16,
         "N_caus": 10,
         "N_caus_coarse_components": 15
       },
       {
         "param": "GRP.dJ_grp",
         "N_fine": 10,
-        "N_coarse": 15,
+        "N_coarse": 16,
         "N_caus": 10,
         "N_caus_coarse_components": 15
       },
       {
         "param": "H1.M",
-        "N_fine": 13,
-        "N_coarse": 14,
-        "N_caus": 13,
-        "N_caus_coarse_components": 14
+        "N_fine": 14,
+        "N_coarse": 15,
+        "N_caus": 14,
+        "N_caus_coarse_components": 15
       },
       {
         "param": "H1.w_ij",
-        "N_fine": 13,
-        "N_coarse": 14,
-        "N_caus": 13,
-        "N_caus_coarse_components": 14
+        "N_fine": 14,
+        "N_coarse": 15,
+        "N_caus": 14,
+        "N_caus_coarse_components": 15
       },
       {
         "param": "H11.M",
@@ -218,83 +218,111 @@
       },
       {
         "param": "H2.M",
-        "N_fine": 11,
-        "N_coarse": 14,
-        "N_caus": 11,
-        "N_caus_coarse_components": 14
+        "N_fine": 12,
+        "N_coarse": 15,
+        "N_caus": 12,
+        "N_caus_coarse_components": 15
       },
       {
         "param": "H2.a_f",
-        "N_fine": 11,
-        "N_coarse": 14,
-        "N_caus": 11,
-        "N_caus_coarse_components": 14
+        "N_fine": 12,
+        "N_coarse": 15,
+        "N_caus": 12,
+        "N_caus_coarse_components": 15
       },
       {
         "param": "H2.b_f",
-        "N_fine": 11,
-        "N_coarse": 14,
-        "N_caus": 11,
-        "N_caus_coarse_components": 14
+        "N_fine": 12,
+        "N_coarse": 15,
+        "N_caus": 12,
+        "N_caus_coarse_components": 15
       },
       {
         "param": "H3.M",
-        "N_fine": 11,
-        "N_coarse": 14,
-        "N_caus": 11,
-        "N_caus_coarse_components": 14
+        "N_fine": 12,
+        "N_coarse": 15,
+        "N_caus": 12,
+        "N_caus_coarse_components": 15
       },
       {
         "param": "H3.a_s",
-        "N_fine": 11,
-        "N_coarse": 14,
-        "N_caus": 11,
-        "N_caus_coarse_components": 14
+        "N_fine": 12,
+        "N_coarse": 15,
+        "N_caus": 12,
+        "N_caus_coarse_components": 15
       },
       {
         "param": "H3.b_s",
-        "N_fine": 11,
-        "N_coarse": 14,
-        "N_caus": 11,
-        "N_caus_coarse_components": 14
+        "N_fine": 12,
+        "N_coarse": 15,
+        "N_caus": 12,
+        "N_caus_coarse_components": 15
       },
       {
         "param": "H4.M",
-        "N_fine": 10,
-        "N_coarse": 14,
-        "N_caus": 10,
-        "N_caus_coarse_components": 14
+        "N_fine": 11,
+        "N_coarse": 15,
+        "N_caus": 11,
+        "N_caus_coarse_components": 15
       },
       {
         "param": "H4.w_f",
-        "N_fine": 10,
-        "N_coarse": 14,
-        "N_caus": 10,
-        "N_caus_coarse_components": 14
+        "N_fine": 11,
+        "N_coarse": 15,
+        "N_caus": 11,
+        "N_caus_coarse_components": 15
       },
       {
         "param": "H5.M",
         "N_fine": 9,
-        "N_coarse": 14,
+        "N_coarse": 15,
         "N_caus": 9,
         "N_caus_coarse_components": 14
       },
       {
         "param": "H6.M",
         "N_fine": 10,
-        "N_coarse": 14,
+        "N_coarse": 15,
         "N_caus": 10,
         "N_caus_coarse_components": 14
       },
       {
         "param": "H6.taup",
         "N_fine": 10,
-        "N_coarse": 14,
+        "N_coarse": 15,
         "N_caus": 10,
         "N_caus_coarse_components": 14
       },
       {
         "param": "H7.M",
+        "N_fine": 9,
+        "N_coarse": 9,
+        "N_caus": 9,
+        "N_caus_coarse_components": 9
+      },
+      {
+        "param": "H7.w0",
+        "N_fine": 9,
+        "N_coarse": 9,
+        "N_caus": 9,
+        "N_caus_coarse_components": 9
+      },
+      {
+        "param": "H7.w1",
+        "N_fine": 9,
+        "N_coarse": 9,
+        "N_caus": 9,
+        "N_caus_coarse_components": 9
+      },
+      {
+        "param": "H7.w2",
+        "N_fine": 9,
+        "N_coarse": 9,
+        "N_caus": 9,
+        "N_caus_coarse_components": 9
+      },
+      {
+        "param": "H7.w3",
         "N_fine": 9,
         "N_coarse": 9,
         "N_caus": 9,
@@ -316,10 +344,17 @@
       },
       {
         "param": "X:I_j",
-        "N_fine": 13,
-        "N_coarse": 14,
-        "N_caus": 13,
-        "N_caus_coarse_components": 14
+        "N_fine": 14,
+        "N_coarse": 15,
+        "N_caus": 14,
+        "N_caus_coarse_components": 15
+      },
+      {
+        "param": "X:I_mean",
+        "N_fine": 9,
+        "N_coarse": 9,
+        "N_caus": 9,
+        "N_caus_coarse_components": 9
       },
       {
         "param": "X:Sor",
@@ -352,9 +387,16 @@
       {
         "param": "X:dt",
         "N_fine": 10,
-        "N_coarse": 14,
+        "N_coarse": 15,
         "N_caus": 10,
         "N_caus_coarse_components": 14
+      },
+      {
+        "param": "X:l_prev",
+        "N_fine": 9,
+        "N_coarse": 9,
+        "N_caus": 9,
+        "N_caus_coarse_components": 9
       },
       {
         "param": "X:o_m",
@@ -365,31 +407,24 @@
       },
       {
         "param": "X:q_f_prev",
-        "N_fine": 11,
-        "N_coarse": 14,
-        "N_caus": 11,
-        "N_caus_coarse_components": 14
+        "N_fine": 12,
+        "N_coarse": 15,
+        "N_caus": 12,
+        "N_caus_coarse_components": 15
       },
       {
         "param": "X:q_prev",
         "N_fine": 10,
-        "N_coarse": 14,
+        "N_coarse": 15,
         "N_caus": 10,
         "N_caus_coarse_components": 14
       },
       {
         "param": "X:q_s_prev",
-        "N_fine": 11,
-        "N_coarse": 14,
-        "N_caus": 11,
-        "N_caus_coarse_components": 14
-      },
-      {
-        "param": "X:x_hist",
-        "N_fine": 9,
-        "N_coarse": 9,
-        "N_caus": 9,
-        "N_caus_coarse_components": 9
+        "N_fine": 12,
+        "N_coarse": 15,
+        "N_caus": 12,
+        "N_caus_coarse_components": 15
       }
     ]
   },
