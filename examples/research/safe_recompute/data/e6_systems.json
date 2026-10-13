@@ -9828,39 +9828,39 @@
       "bazel",
       "hyppo_cascade"
     ],
-    "seconds": 15.813098600017838
+    "seconds": 17.61888009996619
   },
   "per_system": {
     "snakemake": {
       "headline": "p=0.5, evict=forced",
-      "recomputed_total": 539507,
-      "missed_total": 20357,
+      "recomputed_total": 539674,
+      "missed_total": 20333,
       "events": 39600,
       "by_p": {
         "0.0": {
-          "recomputed_total": 497339,
-          "missed_total": 28656,
+          "recomputed_total": 497549,
+          "missed_total": 28709,
           "events": 39600,
           "by_kind": {
             "param": {
-              "recomputed": 328436,
+              "recomputed": 328600,
               "missed": 0,
               "events": 23762
             },
             "evict": {
-              "recomputed": 168903,
+              "recomputed": 168949,
               "missed": 0,
               "events": 11846
             },
             "revise": {
               "recomputed": 0,
-              "missed": 28656,
+              "missed": 28709,
               "events": 3992
             }
           },
           "by_kind_native": {
             "param": {
-              "recomputed": 328436,
+              "recomputed": 328600,
               "missed": 0,
               "absent": 0,
               "events": 23762
@@ -9873,36 +9873,36 @@
             },
             "revise": {
               "recomputed": 0,
-              "missed": 28656,
+              "missed": 28709,
               "absent": 0,
               "events": 3992
             }
           }
         },
         "0.5": {
-          "recomputed_total": 539507,
-          "missed_total": 20357,
+          "recomputed_total": 539674,
+          "missed_total": 20333,
           "events": 39600,
           "by_kind": {
             "param": {
-              "recomputed": 328436,
+              "recomputed": 328600,
               "missed": 0,
               "events": 23762
             },
             "evict": {
-              "recomputed": 168903,
+              "recomputed": 168949,
               "missed": 0,
               "events": 11846
             },
             "revise": {
-              "recomputed": 42168,
-              "missed": 20357,
+              "recomputed": 42125,
+              "missed": 20333,
               "events": 3992
             }
           },
           "by_kind_native": {
             "param": {
-              "recomputed": 328436,
+              "recomputed": 328600,
               "missed": 0,
               "absent": 0,
               "events": 23762
@@ -9914,37 +9914,37 @@
               "events": 11846
             },
             "revise": {
-              "recomputed": 42168,
-              "missed": 20357,
+              "recomputed": 42125,
+              "missed": 20333,
               "absent": 0,
               "events": 3992
             }
           }
         },
         "1.0": {
-          "recomputed_total": 580299,
+          "recomputed_total": 580469,
           "missed_total": 0,
           "events": 39600,
           "by_kind": {
             "param": {
-              "recomputed": 328436,
+              "recomputed": 328600,
               "missed": 0,
               "events": 23762
             },
             "evict": {
-              "recomputed": 168903,
+              "recomputed": 168949,
               "missed": 0,
               "events": 11846
             },
             "revise": {
-              "recomputed": 82960,
+              "recomputed": 82920,
               "missed": 0,
               "events": 3992
             }
           },
           "by_kind_native": {
             "param": {
-              "recomputed": 328436,
+              "recomputed": 328600,
               "missed": 0,
               "absent": 0,
               "events": 23762
@@ -9956,7 +9956,7 @@
               "events": 11846
             },
             "revise": {
-              "recomputed": 82960,
+              "recomputed": 82920,
               "missed": 0,
               "absent": 0,
               "events": 3992
@@ -9974,34 +9974,34 @@
     },
     "dvc": {
       "headline": "p=0.5, evict=forced",
-      "recomputed_total": 309525,
-      "missed_total": 19259,
+      "recomputed_total": 309926,
+      "missed_total": 19215,
       "events": 39600,
       "by_p": {
         "0.0": {
-          "recomputed_total": 276005,
-          "missed_total": 27075,
+          "recomputed_total": 276570,
+          "missed_total": 27041,
           "events": 39600,
           "by_kind": {
             "param": {
-              "recomputed": 248243,
+              "recomputed": 248717,
               "missed": 0,
               "events": 23762
             },
             "evict": {
-              "recomputed": 27762,
+              "recomputed": 27853,
               "missed": 0,
               "events": 11846
             },
             "revise": {
               "recomputed": 0,
-              "missed": 27075,
+              "missed": 27041,
               "events": 3992
             }
           },
           "by_kind_native": {
             "param": {
-              "recomputed": 248243,
+              "recomputed": 248717,
               "missed": 0,
               "absent": 0,
               "events": 23762
@@ -10014,36 +10014,36 @@
             },
             "revise": {
               "recomputed": 0,
-              "missed": 27075,
+              "missed": 27041,
               "absent": 0,
               "events": 3992
             }
           }
         },
         "0.5": {
-          "recomputed_total": 309525,
-          "missed_total": 19259,
+          "recomputed_total": 309926,
+          "missed_total": 19215,
           "events": 39600,
           "by_kind": {
             "param": {
-              "recomputed": 245131,
+              "recomputed": 245376,
               "missed": 0,
               "events": 23762
             },
             "evict": {
-              "recomputed": 22226,
+              "recomputed": 22425,
               "missed": 0,
               "events": 11846
             },
             "revise": {
-              "recomputed": 42168,
-              "missed": 19259,
+              "recomputed": 42125,
+              "missed": 19215,
               "events": 3992
             }
           },
           "by_kind_native": {
             "param": {
-              "recomputed": 245131,
+              "recomputed": 245376,
               "missed": 0,
               "absent": 0,
               "events": 23762
@@ -10055,20 +10055,20 @@
               "events": 11846
             },
             "revise": {
-              "recomputed": 42168,
-              "missed": 19259,
+              "recomputed": 42125,
+              "missed": 19215,
               "absent": 0,
               "events": 3992
             }
           }
         },
         "1.0": {
-          "recomputed_total": 334120,
+          "recomputed_total": 334229,
           "missed_total": 0,
           "events": 39600,
           "by_kind": {
             "param": {
-              "recomputed": 239314,
+              "recomputed": 239463,
               "missed": 0,
               "events": 23762
             },
@@ -10078,14 +10078,14 @@
               "events": 11846
             },
             "revise": {
-              "recomputed": 82960,
+              "recomputed": 82920,
               "missed": 0,
               "events": 3992
             }
           },
           "by_kind_native": {
             "param": {
-              "recomputed": 239314,
+              "recomputed": 239463,
               "missed": 0,
               "absent": 0,
               "events": 23762
@@ -10097,7 +10097,7 @@
               "events": 11846
             },
             "revise": {
-              "recomputed": 82960,
+              "recomputed": 82920,
               "missed": 0,
               "absent": 0,
               "events": 3992
@@ -10115,34 +10115,34 @@
     },
     "dagster": {
       "headline": "p=0.5, evict=forced",
-      "recomputed_total": 309525,
-      "missed_total": 19259,
+      "recomputed_total": 309926,
+      "missed_total": 19215,
       "events": 39600,
       "by_p": {
         "0.0": {
-          "recomputed_total": 276005,
-          "missed_total": 27075,
+          "recomputed_total": 276570,
+          "missed_total": 27041,
           "events": 39600,
           "by_kind": {
             "param": {
-              "recomputed": 248243,
+              "recomputed": 248717,
               "missed": 0,
               "events": 23762
             },
             "evict": {
-              "recomputed": 27762,
+              "recomputed": 27853,
               "missed": 0,
               "events": 11846
             },
             "revise": {
               "recomputed": 0,
-              "missed": 27075,
+              "missed": 27041,
               "events": 3992
             }
           },
           "by_kind_native": {
             "param": {
-              "recomputed": 248243,
+              "recomputed": 248717,
               "missed": 0,
               "absent": 0,
               "events": 23762
@@ -10155,36 +10155,36 @@
             },
             "revise": {
               "recomputed": 0,
-              "missed": 27075,
+              "missed": 27041,
               "absent": 0,
               "events": 3992
             }
           }
         },
         "0.5": {
-          "recomputed_total": 309525,
-          "missed_total": 19259,
+          "recomputed_total": 309926,
+          "missed_total": 19215,
           "events": 39600,
           "by_kind": {
             "param": {
-              "recomputed": 245131,
+              "recomputed": 245376,
               "missed": 0,
               "events": 23762
             },
             "evict": {
-              "recomputed": 22226,
+              "recomputed": 22425,
               "missed": 0,
               "events": 11846
             },
             "revise": {
-              "recomputed": 42168,
-              "missed": 19259,
+              "recomputed": 42125,
+              "missed": 19215,
               "events": 3992
             }
           },
           "by_kind_native": {
             "param": {
-              "recomputed": 245131,
+              "recomputed": 245376,
               "missed": 0,
               "absent": 0,
               "events": 23762
@@ -10196,20 +10196,20 @@
               "events": 11846
             },
             "revise": {
-              "recomputed": 42168,
-              "missed": 19259,
+              "recomputed": 42125,
+              "missed": 19215,
               "absent": 0,
               "events": 3992
             }
           }
         },
         "1.0": {
-          "recomputed_total": 334120,
+          "recomputed_total": 334229,
           "missed_total": 0,
           "events": 39600,
           "by_kind": {
             "param": {
-              "recomputed": 239314,
+              "recomputed": 239463,
               "missed": 0,
               "events": 23762
             },
@@ -10219,14 +10219,14 @@
               "events": 11846
             },
             "revise": {
-              "recomputed": 82960,
+              "recomputed": 82920,
               "missed": 0,
               "events": 3992
             }
           },
           "by_kind_native": {
             "param": {
-              "recomputed": 239314,
+              "recomputed": 239463,
               "missed": 0,
               "absent": 0,
               "events": 23762
@@ -10238,7 +10238,7 @@
               "events": 11846
             },
             "revise": {
-              "recomputed": 82960,
+              "recomputed": 82920,
               "missed": 0,
               "absent": 0,
               "events": 3992
@@ -10256,34 +10256,34 @@
     },
     "dagster_eager": {
       "headline": "p=0.5, evict=forced",
-      "recomputed_total": 539507,
-      "missed_total": 20357,
+      "recomputed_total": 539674,
+      "missed_total": 20333,
       "events": 39600,
       "by_p": {
         "0.0": {
-          "recomputed_total": 497339,
-          "missed_total": 28656,
+          "recomputed_total": 497549,
+          "missed_total": 28709,
           "events": 39600,
           "by_kind": {
             "param": {
-              "recomputed": 328436,
+              "recomputed": 328600,
               "missed": 0,
               "events": 23762
             },
             "evict": {
-              "recomputed": 168903,
+              "recomputed": 168949,
               "missed": 0,
               "events": 11846
             },
             "revise": {
               "recomputed": 0,
-              "missed": 28656,
+              "missed": 28709,
               "events": 3992
             }
           },
           "by_kind_native": {
             "param": {
-              "recomputed": 328436,
+              "recomputed": 328600,
               "missed": 0,
               "absent": 0,
               "events": 23762
@@ -10296,36 +10296,36 @@
             },
             "revise": {
               "recomputed": 0,
-              "missed": 28656,
+              "missed": 28709,
               "absent": 0,
               "events": 3992
             }
           }
         },
         "0.5": {
-          "recomputed_total": 539507,
-          "missed_total": 20357,
+          "recomputed_total": 539674,
+          "missed_total": 20333,
           "events": 39600,
           "by_kind": {
             "param": {
-              "recomputed": 328436,
+              "recomputed": 328600,
               "missed": 0,
               "events": 23762
             },
             "evict": {
-              "recomputed": 168903,
+              "recomputed": 168949,
               "missed": 0,
               "events": 11846
             },
             "revise": {
-              "recomputed": 42168,
-              "missed": 20357,
+              "recomputed": 42125,
+              "missed": 20333,
               "events": 3992
             }
           },
           "by_kind_native": {
             "param": {
-              "recomputed": 328436,
+              "recomputed": 328600,
               "missed": 0,
               "absent": 0,
               "events": 23762
@@ -10337,37 +10337,37 @@
               "events": 11846
             },
             "revise": {
-              "recomputed": 42168,
-              "missed": 20357,
+              "recomputed": 42125,
+              "missed": 20333,
               "absent": 0,
               "events": 3992
             }
           }
         },
         "1.0": {
-          "recomputed_total": 580299,
+          "recomputed_total": 580469,
           "missed_total": 0,
           "events": 39600,
           "by_kind": {
             "param": {
-              "recomputed": 328436,
+              "recomputed": 328600,
               "missed": 0,
               "events": 23762
             },
             "evict": {
-              "recomputed": 168903,
+              "recomputed": 168949,
               "missed": 0,
               "events": 11846
             },
             "revise": {
-              "recomputed": 82960,
+              "recomputed": 82920,
               "missed": 0,
               "events": 3992
             }
           },
           "by_kind_native": {
             "param": {
-              "recomputed": 328436,
+              "recomputed": 328600,
               "missed": 0,
               "absent": 0,
               "events": 23762
@@ -10379,7 +10379,7 @@
               "events": 11846
             },
             "revise": {
-              "recomputed": 82960,
+              "recomputed": 82920,
               "missed": 0,
               "absent": 0,
               "events": 3992
@@ -10397,130 +10397,130 @@
     },
     "nextflow": {
       "headline": "p=0.5, evict=forced",
-      "recomputed_total": 539507,
-      "missed_total": 20357,
+      "recomputed_total": 539674,
+      "missed_total": 20333,
       "events": 39600,
       "by_p": {
         "0.0": {
-          "recomputed_total": 497339,
-          "missed_total": 28656,
+          "recomputed_total": 497549,
+          "missed_total": 28709,
           "events": 39600,
           "by_kind": {
             "param": {
-              "recomputed": 328436,
+              "recomputed": 328600,
               "missed": 0,
               "events": 23762
             },
             "evict": {
-              "recomputed": 168903,
+              "recomputed": 168949,
               "missed": 0,
               "events": 11846
             },
             "revise": {
               "recomputed": 0,
-              "missed": 28656,
+              "missed": 28709,
               "events": 3992
             }
           },
           "by_kind_native": {
             "param": {
-              "recomputed": 328436,
+              "recomputed": 328600,
               "missed": 0,
               "absent": 0,
               "events": 23762
             },
             "evict": {
-              "recomputed": 168903,
+              "recomputed": 168949,
               "missed": 0,
               "absent": 0,
               "events": 11846
             },
             "revise": {
               "recomputed": 0,
-              "missed": 28656,
+              "missed": 28709,
               "absent": 0,
               "events": 3992
             }
           }
         },
         "0.5": {
-          "recomputed_total": 539507,
-          "missed_total": 20357,
+          "recomputed_total": 539674,
+          "missed_total": 20333,
           "events": 39600,
           "by_kind": {
             "param": {
-              "recomputed": 328436,
+              "recomputed": 328600,
               "missed": 0,
               "events": 23762
             },
             "evict": {
-              "recomputed": 168903,
+              "recomputed": 168949,
               "missed": 0,
               "events": 11846
             },
             "revise": {
-              "recomputed": 42168,
-              "missed": 20357,
+              "recomputed": 42125,
+              "missed": 20333,
               "events": 3992
             }
           },
           "by_kind_native": {
             "param": {
-              "recomputed": 328436,
+              "recomputed": 328600,
               "missed": 0,
               "absent": 0,
               "events": 23762
             },
             "evict": {
-              "recomputed": 168903,
+              "recomputed": 168949,
               "missed": 0,
               "absent": 0,
               "events": 11846
             },
             "revise": {
-              "recomputed": 42168,
-              "missed": 20357,
+              "recomputed": 42125,
+              "missed": 20333,
               "absent": 0,
               "events": 3992
             }
           }
         },
         "1.0": {
-          "recomputed_total": 580299,
+          "recomputed_total": 580469,
           "missed_total": 0,
           "events": 39600,
           "by_kind": {
             "param": {
-              "recomputed": 328436,
+              "recomputed": 328600,
               "missed": 0,
               "events": 23762
             },
             "evict": {
-              "recomputed": 168903,
+              "recomputed": 168949,
               "missed": 0,
               "events": 11846
             },
             "revise": {
-              "recomputed": 82960,
+              "recomputed": 82920,
               "missed": 0,
               "events": 3992
             }
           },
           "by_kind_native": {
             "param": {
-              "recomputed": 328436,
+              "recomputed": 328600,
               "missed": 0,
               "absent": 0,
               "events": 23762
             },
             "evict": {
-              "recomputed": 168903,
+              "recomputed": 168949,
               "missed": 0,
               "absent": 0,
               "events": 11846
             },
             "revise": {
-              "recomputed": 82960,
+              "recomputed": 82920,
               "missed": 0,
               "absent": 0,
               "events": 3992
@@ -10532,101 +10532,101 @@
     },
     "nextflow_deep": {
       "headline": "p=0.5, evict=forced",
-      "recomputed_total": 309525,
-      "missed_total": 19259,
+      "recomputed_total": 309926,
+      "missed_total": 19215,
       "events": 39600,
       "by_p": {
         "0.0": {
-          "recomputed_total": 276005,
-          "missed_total": 27075,
+          "recomputed_total": 276570,
+          "missed_total": 27041,
           "events": 39600,
           "by_kind": {
             "param": {
-              "recomputed": 248243,
+              "recomputed": 248717,
               "missed": 0,
               "events": 23762
             },
             "evict": {
-              "recomputed": 27762,
+              "recomputed": 27853,
               "missed": 0,
               "events": 11846
             },
             "revise": {
               "recomputed": 0,
-              "missed": 27075,
+              "missed": 27041,
               "events": 3992
             }
           },
           "by_kind_native": {
             "param": {
-              "recomputed": 248243,
+              "recomputed": 248717,
               "missed": 0,
               "absent": 0,
               "events": 23762
             },
             "evict": {
-              "recomputed": 27762,
+              "recomputed": 27853,
               "missed": 0,
               "absent": 0,
               "events": 11846
             },
             "revise": {
               "recomputed": 0,
-              "missed": 27075,
+              "missed": 27041,
               "absent": 0,
               "events": 3992
             }
           }
         },
         "0.5": {
-          "recomputed_total": 309525,
-          "missed_total": 19259,
+          "recomputed_total": 309926,
+          "missed_total": 19215,
           "events": 39600,
           "by_kind": {
             "param": {
-              "recomputed": 245131,
+              "recomputed": 245376,
               "missed": 0,
               "events": 23762
             },
             "evict": {
-              "recomputed": 22226,
+              "recomputed": 22425,
               "missed": 0,
               "events": 11846
             },
             "revise": {
-              "recomputed": 42168,
-              "missed": 19259,
+              "recomputed": 42125,
+              "missed": 19215,
               "events": 3992
             }
           },
           "by_kind_native": {
             "param": {
-              "recomputed": 245131,
+              "recomputed": 245376,
               "missed": 0,
               "absent": 0,
               "events": 23762
             },
             "evict": {
-              "recomputed": 22226,
+              "recomputed": 22425,
               "missed": 0,
               "absent": 0,
               "events": 11846
             },
             "revise": {
-              "recomputed": 42168,
-              "missed": 19259,
+              "recomputed": 42125,
+              "missed": 19215,
               "absent": 0,
               "events": 3992
             }
           }
         },
         "1.0": {
-          "recomputed_total": 334120,
+          "recomputed_total": 334229,
           "missed_total": 0,
           "events": 39600,
           "by_kind": {
             "param": {
-              "recomputed": 239314,
+              "recomputed": 239463,
               "missed": 0,
               "events": 23762
             },
@@ -10636,14 +10636,14 @@
               "events": 11846
             },
             "revise": {
-              "recomputed": 82960,
+              "recomputed": 82920,
               "missed": 0,
               "events": 3992
             }
           },
           "by_kind_native": {
             "param": {
-              "recomputed": 239314,
+              "recomputed": 239463,
               "missed": 0,
               "absent": 0,
               "events": 23762
@@ -10655,7 +10655,7 @@
               "events": 11846
             },
             "revise": {
-              "recomputed": 82960,
+              "recomputed": 82920,
               "missed": 0,
               "absent": 0,
               "events": 3992
@@ -10667,101 +10667,101 @@
     },
     "bazel": {
       "headline": "p=0.5, evict=forced",
-      "recomputed_total": 309525,
-      "missed_total": 19259,
+      "recomputed_total": 309926,
+      "missed_total": 19215,
       "events": 39600,
       "by_p": {
         "0.0": {
-          "recomputed_total": 276005,
-          "missed_total": 27075,
+          "recomputed_total": 276570,
+          "missed_total": 27041,
           "events": 39600,
           "by_kind": {
             "param": {
-              "recomputed": 248243,
+              "recomputed": 248717,
               "missed": 0,
               "events": 23762
             },
             "evict": {
-              "recomputed": 27762,
+              "recomputed": 27853,
               "missed": 0,
               "events": 11846
             },
             "revise": {
               "recomputed": 0,
-              "missed": 27075,
+              "missed": 27041,
               "events": 3992
             }
           },
           "by_kind_native": {
             "param": {
-              "recomputed": 248243,
+              "recomputed": 248717,
               "missed": 0,
               "absent": 0,
               "events": 23762
             },
             "evict": {
-              "recomputed": 27762,
+              "recomputed": 27853,
               "missed": 0,
               "absent": 0,
               "events": 11846
             },
             "revise": {
               "recomputed": 0,
-              "missed": 27075,
+              "missed": 27041,
               "absent": 0,
               "events": 3992
             }
           }
         },
         "0.5": {
-          "recomputed_total": 309525,
-          "missed_total": 19259,
+          "recomputed_total": 309926,
+          "missed_total": 19215,
           "events": 39600,
           "by_kind": {
             "param": {
-              "recomputed": 245131,
+              "recomputed": 245376,
               "missed": 0,
               "events": 23762
             },
             "evict": {
-              "recomputed": 22226,
+              "recomputed": 22425,
               "missed": 0,
               "events": 11846
             },
             "revise": {
-              "recomputed": 42168,
-              "missed": 19259,
+              "recomputed": 42125,
+              "missed": 19215,
               "events": 3992
             }
           },
           "by_kind_native": {
             "param": {
-              "recomputed": 245131,
+              "recomputed": 245376,
               "missed": 0,
               "absent": 0,
               "events": 23762
             },
             "evict": {
-              "recomputed": 22226,
+              "recomputed": 22425,
               "missed": 0,
               "absent": 0,
               "events": 11846
             },
             "revise": {
-              "recomputed": 42168,
-              "missed": 19259,
+              "recomputed": 42125,
+              "missed": 19215,
               "absent": 0,
               "events": 3992
             }
           }
         },
         "1.0": {
-          "recomputed_total": 334120,
+          "recomputed_total": 334229,
           "missed_total": 0,
           "events": 39600,
           "by_kind": {
             "param": {
-              "recomputed": 239314,
+              "recomputed": 239463,
               "missed": 0,
               "events": 23762
             },
@@ -10771,14 +10771,14 @@
               "events": 11846
             },
             "revise": {
-              "recomputed": 82960,
+              "recomputed": 82920,
               "missed": 0,
               "events": 3992
             }
           },
           "by_kind_native": {
             "param": {
-              "recomputed": 239314,
+              "recomputed": 239463,
               "missed": 0,
               "absent": 0,
               "events": 23762
@@ -10790,7 +10790,7 @@
               "events": 11846
             },
             "revise": {
-              "recomputed": 82960,
+              "recomputed": 82920,
               "missed": 0,
               "absent": 0,
               "events": 3992
@@ -10802,46 +10802,46 @@
     },
     "hyppo_cascade": {
       "headline": "p=0.5, evict=forced",
-      "recomputed_total": 580299,
+      "recomputed_total": 580469,
       "missed_total": 0,
       "events": 39600,
       "by_p": {
         "0.0": {
-          "recomputed_total": 580299,
+          "recomputed_total": 580469,
           "missed_total": 0,
           "events": 39600,
           "by_kind": {
             "param": {
-              "recomputed": 328436,
+              "recomputed": 328600,
               "missed": 0,
               "events": 23762
             },
             "evict": {
-              "recomputed": 168903,
+              "recomputed": 168949,
               "missed": 0,
               "events": 11846
             },
             "revise": {
-              "recomputed": 82960,
+              "recomputed": 82920,
               "missed": 0,
               "events": 3992
             }
           },
           "by_kind_native": {
             "param": {
-              "recomputed": 328436,
+              "recomputed": 328600,
               "missed": 0,
               "absent": 0,
               "events": 23762
             },
             "evict": {
-              "recomputed": 168903,
+              "recomputed": 168949,
               "missed": 0,
               "absent": 0,
               "events": 11846
             },
             "revise": {
-              "recomputed": 82960,
+              "recomputed": 82920,
               "missed": 0,
               "absent": 0,
               "events": 3992
@@ -10849,41 +10849,41 @@
           }
         },
         "0.5": {
-          "recomputed_total": 580299,
+          "recomputed_total": 580469,
           "missed_total": 0,
           "events": 39600,
           "by_kind": {
             "param": {
-              "recomputed": 328436,
+              "recomputed": 328600,
               "missed": 0,
               "events": 23762
             },
             "evict": {
-              "recomputed": 168903,
+              "recomputed": 168949,
               "missed": 0,
               "events": 11846
             },
             "revise": {
-              "recomputed": 82960,
+              "recomputed": 82920,
               "missed": 0,
               "events": 3992
             }
           },
           "by_kind_native": {
             "param": {
-              "recomputed": 328436,
+              "recomputed": 328600,
               "missed": 0,
               "absent": 0,
               "events": 23762
             },
             "evict": {
-              "recomputed": 168903,
+              "recomputed": 168949,
               "missed": 0,
               "absent": 0,
               "events": 11846
             },
             "revise": {
-              "recomputed": 82960,
+              "recomputed": 82920,
               "missed": 0,
               "absent": 0,
               "events": 3992
@@ -10891,41 +10891,41 @@
           }
         },
         "1.0": {
-          "recomputed_total": 580299,
+          "recomputed_total": 580469,
           "missed_total": 0,
           "events": 39600,
           "by_kind": {
             "param": {
-              "recomputed": 328436,
+              "recomputed": 328600,
               "missed": 0,
               "events": 23762
             },
             "evict": {
-              "recomputed": 168903,
+              "recomputed": 168949,
               "missed": 0,
               "events": 11846
             },
             "revise": {
-              "recomputed": 82960,
+              "recomputed": 82920,
               "missed": 0,
               "events": 3992
             }
           },
           "by_kind_native": {
             "param": {
-              "recomputed": 328436,
+              "recomputed": 328600,
               "missed": 0,
               "absent": 0,
               "events": 23762
             },
             "evict": {
-              "recomputed": 168903,
+              "recomputed": 168949,
               "missed": 0,
               "absent": 0,
               "events": 11846
             },
             "revise": {
-              "recomputed": 82960,
+              "recomputed": 82920,
               "missed": 0,
               "absent": 0,
               "events": 3992
@@ -10937,17 +10937,17 @@
     },
     "hyppo_safe": {
       "headline": "p=0.5, evict=forced",
-      "recomputed_total": 423242,
+      "recomputed_total": 423366,
       "missed_total": 0,
       "events": 39600,
       "by_p": {
         "0.0": {
-          "recomputed_total": 423242,
+          "recomputed_total": 423366,
           "missed_total": 0,
           "events": 39600,
           "by_kind": {
             "param": {
-              "recomputed": 328436,
+              "recomputed": 328600,
               "missed": 0,
               "events": 23762
             },
@@ -10957,14 +10957,14 @@
               "events": 11846
             },
             "revise": {
-              "recomputed": 82960,
+              "recomputed": 82920,
               "missed": 0,
               "events": 3992
             }
           },
           "by_kind_native": {
             "param": {
-              "recomputed": 328436,
+              "recomputed": 328600,
               "missed": 0,
               "absent": 0,
               "events": 23762
@@ -10976,7 +10976,7 @@
               "events": 11846
             },
             "revise": {
-              "recomputed": 82960,
+              "recomputed": 82920,
               "missed": 0,
               "absent": 0,
               "events": 3992
@@ -10984,12 +10984,12 @@
           }
         },
         "0.5": {
-          "recomputed_total": 423242,
+          "recomputed_total": 423366,
           "missed_total": 0,
           "events": 39600,
           "by_kind": {
             "param": {
-              "recomputed": 328436,
+              "recomputed": 328600,
               "missed": 0,
               "events": 23762
             },
@@ -10999,14 +10999,14 @@
               "events": 11846
             },
             "revise": {
-              "recomputed": 82960,
+              "recomputed": 82920,
               "missed": 0,
               "events": 3992
             }
           },
           "by_kind_native": {
             "param": {
-              "recomputed": 328436,
+              "recomputed": 328600,
               "missed": 0,
               "absent": 0,
               "events": 23762
@@ -11018,7 +11018,7 @@
               "events": 11846
             },
             "revise": {
-              "recomputed": 82960,
+              "recomputed": 82920,
               "missed": 0,
               "absent": 0,
               "events": 3992
@@ -11026,12 +11026,12 @@
           }
         },
         "1.0": {
-          "recomputed_total": 423242,
+          "recomputed_total": 423366,
           "missed_total": 0,
           "events": 39600,
           "by_kind": {
             "param": {
-              "recomputed": 328436,
+              "recomputed": 328600,
               "missed": 0,
               "events": 23762
             },
@@ -11041,14 +11041,14 @@
               "events": 11846
             },
             "revise": {
-              "recomputed": 82960,
+              "recomputed": 82920,
               "missed": 0,
               "events": 3992
             }
           },
           "by_kind_native": {
             "param": {
-              "recomputed": 328436,
+              "recomputed": 328600,
               "missed": 0,
               "absent": 0,
               "events": 23762
@@ -11060,7 +11060,7 @@
               "events": 11846
             },
             "revise": {
-              "recomputed": 82960,
+              "recomputed": 82920,
               "missed": 0,
               "absent": 0,
               "events": 3992
@@ -11076,45 +11076,45 @@
     "by_p": {
       "0.0": {
         "dvc": {
-          "fewer_safe": 789,
-          "fewer_with_miss": 8344,
-          "more": 1952,
-          "equal": 28515,
+          "fewer_safe": 802,
+          "fewer_with_miss": 8320,
+          "more": 1956,
+          "equal": 28522,
           "fewer_safe_by_kind": {
-            "param": 789,
+            "param": 802,
             "evict": 0,
             "revise": 0
           }
         },
         "dagster": {
-          "fewer_safe": 789,
-          "fewer_with_miss": 8344,
-          "more": 1952,
-          "equal": 28515,
+          "fewer_safe": 802,
+          "fewer_with_miss": 8320,
+          "more": 1956,
+          "equal": 28522,
           "fewer_safe_by_kind": {
-            "param": 789,
+            "param": 802,
             "evict": 0,
             "revise": 0
           }
         },
         "nextflow_deep": {
-          "fewer_safe": 789,
-          "fewer_with_miss": 8344,
-          "more": 1952,
-          "equal": 28515,
+          "fewer_safe": 802,
+          "fewer_with_miss": 8320,
+          "more": 1956,
+          "equal": 28522,
           "fewer_safe_by_kind": {
-            "param": 789,
+            "param": 802,
             "evict": 0,
             "revise": 0
           }
         },
         "bazel": {
-          "fewer_safe": 789,
-          "fewer_with_miss": 8344,
-          "more": 1952,
-          "equal": 28515,
+          "fewer_safe": 802,
+          "fewer_with_miss": 8320,
+          "more": 1956,
+          "equal": 28522,
           "fewer_safe_by_kind": {
-            "param": 789,
+            "param": 802,
             "evict": 0,
             "revise": 0
           }
@@ -11122,45 +11122,45 @@
       },
       "0.5": {
         "dvc": {
-          "fewer_safe": 1317,
-          "fewer_with_miss": 7038,
+          "fewer_safe": 1318,
+          "fewer_with_miss": 7032,
           "more": 1172,
-          "equal": 30073,
+          "equal": 30078,
           "fewer_safe_by_kind": {
-            "param": 1317,
+            "param": 1318,
             "evict": 0,
             "revise": 0
           }
         },
         "dagster": {
-          "fewer_safe": 1317,
-          "fewer_with_miss": 7038,
+          "fewer_safe": 1318,
+          "fewer_with_miss": 7032,
           "more": 1172,
-          "equal": 30073,
+          "equal": 30078,
           "fewer_safe_by_kind": {
-            "param": 1317,
+            "param": 1318,
             "evict": 0,
             "revise": 0
           }
         },
         "nextflow_deep": {
-          "fewer_safe": 1317,
-          "fewer_with_miss": 7038,
+          "fewer_safe": 1318,
+          "fewer_with_miss": 7032,
           "more": 1172,
-          "equal": 30073,
+          "equal": 30078,
           "fewer_safe_by_kind": {
-            "param": 1317,
+            "param": 1318,
             "evict": 0,
             "revise": 0
           }
         },
         "bazel": {
-          "fewer_safe": 1317,
-          "fewer_with_miss": 7038,
+          "fewer_safe": 1318,
+          "fewer_with_miss": 7032,
           "more": 1172,
-          "equal": 30073,
+          "equal": 30078,
           "fewer_safe_by_kind": {
-            "param": 1317,
+            "param": 1318,
             "evict": 0,
             "revise": 0
           }
@@ -11226,134 +11226,134 @@
         "per_system": {
           "snakemake": {
             "0.0": {
-              "recomputed": 497339,
-              "missed": 28656
+              "recomputed": 497549,
+              "missed": 28709
             },
             "0.5": {
-              "recomputed": 539507,
-              "missed": 20357
+              "recomputed": 539674,
+              "missed": 20333
             },
             "1.0": {
-              "recomputed": 580299,
+              "recomputed": 580469,
               "missed": 0
             }
           },
           "dvc": {
             "0.0": {
-              "recomputed": 223901,
-              "missed": 26518
+              "recomputed": 224450,
+              "missed": 26524
             },
             "0.5": {
-              "recomputed": 253677,
-              "missed": 18836
+              "recomputed": 254186,
+              "missed": 18893
             },
             "1.0": {
-              "recomputed": 272644,
+              "recomputed": 272726,
               "missed": 0
             }
           },
           "dagster": {
             "0.0": {
-              "recomputed": 223901,
-              "missed": 26518
+              "recomputed": 224450,
+              "missed": 26524
             },
             "0.5": {
-              "recomputed": 253677,
-              "missed": 18836
+              "recomputed": 254186,
+              "missed": 18893
             },
             "1.0": {
-              "recomputed": 272644,
+              "recomputed": 272726,
               "missed": 0
             }
           },
           "dagster_eager": {
             "0.0": {
-              "recomputed": 497339,
-              "missed": 28656
+              "recomputed": 497549,
+              "missed": 28709
             },
             "0.5": {
-              "recomputed": 539507,
-              "missed": 20357
+              "recomputed": 539674,
+              "missed": 20333
             },
             "1.0": {
-              "recomputed": 580299,
+              "recomputed": 580469,
               "missed": 0
             }
           },
           "nextflow": {
             "0.0": {
-              "recomputed": 497339,
-              "missed": 28656
+              "recomputed": 497549,
+              "missed": 28709
             },
             "0.5": {
-              "recomputed": 539507,
-              "missed": 20357
+              "recomputed": 539674,
+              "missed": 20333
             },
             "1.0": {
-              "recomputed": 580299,
+              "recomputed": 580469,
               "missed": 0
             }
           },
           "nextflow_deep": {
             "0.0": {
-              "recomputed": 223901,
-              "missed": 26518
+              "recomputed": 224450,
+              "missed": 26524
             },
             "0.5": {
-              "recomputed": 253677,
-              "missed": 18836
+              "recomputed": 254186,
+              "missed": 18893
             },
             "1.0": {
-              "recomputed": 272644,
+              "recomputed": 272726,
               "missed": 0
             }
           },
           "bazel": {
             "0.0": {
-              "recomputed": 223901,
-              "missed": 26518
+              "recomputed": 224450,
+              "missed": 26524
             },
             "0.5": {
-              "recomputed": 253677,
-              "missed": 18836
+              "recomputed": 254186,
+              "missed": 18893
             },
             "1.0": {
-              "recomputed": 272644,
+              "recomputed": 272726,
               "missed": 0
             }
           },
           "hyppo_cascade": {
             "0.0": {
-              "recomputed": 580299,
+              "recomputed": 580469,
               "missed": 0
             },
             "0.5": {
-              "recomputed": 580299,
+              "recomputed": 580469,
               "missed": 0
             },
             "1.0": {
-              "recomputed": 580299,
+              "recomputed": 580469,
               "missed": 0
             }
           },
           "hyppo_safe": {
             "0.0": {
-              "recomputed": 423242,
+              "recomputed": 423366,
               "missed": 0
             },
             "0.5": {
-              "recomputed": 423242,
+              "recomputed": 423366,
               "missed": 0
             },
             "1.0": {
-              "recomputed": 423242,
+              "recomputed": 423366,
               "missed": 0
             }
           }
         },
         "dvc_fewer_safe": {
-          "0.0": 1232,
-          "0.5": 2053,
+          "0.0": 1240,
+          "0.5": 2070,
           "1.0": 10635
         }
       },
@@ -11361,134 +11361,134 @@
         "per_system": {
           "snakemake": {
             "0.0": {
-              "recomputed": 497339,
-              "missed": 28656
+              "recomputed": 497549,
+              "missed": 28709
             },
             "0.5": {
-              "recomputed": 539507,
-              "missed": 20357
+              "recomputed": 539674,
+              "missed": 20333
             },
             "1.0": {
-              "recomputed": 580299,
+              "recomputed": 580469,
               "missed": 0
             }
           },
           "dvc": {
             "0.0": {
-              "recomputed": 276005,
-              "missed": 27075
+              "recomputed": 276570,
+              "missed": 27041
             },
             "0.5": {
-              "recomputed": 309525,
-              "missed": 19259
+              "recomputed": 309926,
+              "missed": 19215
             },
             "1.0": {
-              "recomputed": 334120,
+              "recomputed": 334229,
               "missed": 0
             }
           },
           "dagster": {
             "0.0": {
-              "recomputed": 276005,
-              "missed": 27075
+              "recomputed": 276570,
+              "missed": 27041
             },
             "0.5": {
-              "recomputed": 309525,
-              "missed": 19259
+              "recomputed": 309926,
+              "missed": 19215
             },
             "1.0": {
-              "recomputed": 334120,
+              "recomputed": 334229,
               "missed": 0
             }
           },
           "dagster_eager": {
             "0.0": {
-              "recomputed": 497339,
-              "missed": 28656
+              "recomputed": 497549,
+              "missed": 28709
             },
             "0.5": {
-              "recomputed": 539507,
-              "missed": 20357
+              "recomputed": 539674,
+              "missed": 20333
             },
             "1.0": {
-              "recomputed": 580299,
+              "recomputed": 580469,
               "missed": 0
             }
           },
           "nextflow": {
             "0.0": {
-              "recomputed": 497339,
-              "missed": 28656
+              "recomputed": 497549,
+              "missed": 28709
             },
             "0.5": {
-              "recomputed": 539507,
-              "missed": 20357
+              "recomputed": 539674,
+              "missed": 20333
             },
             "1.0": {
-              "recomputed": 580299,
+              "recomputed": 580469,
               "missed": 0
             }
           },
           "nextflow_deep": {
             "0.0": {
-              "recomputed": 276005,
-              "missed": 27075
+              "recomputed": 276570,
+              "missed": 27041
             },
             "0.5": {
-              "recomputed": 309525,
-              "missed": 19259
+              "recomputed": 309926,
+              "missed": 19215
             },
             "1.0": {
-              "recomputed": 334120,
+              "recomputed": 334229,
               "missed": 0
             }
           },
           "bazel": {
             "0.0": {
-              "recomputed": 276005,
-              "missed": 27075
+              "recomputed": 276570,
+              "missed": 27041
             },
             "0.5": {
-              "recomputed": 309525,
-              "missed": 19259
+              "recomputed": 309926,
+              "missed": 19215
             },
             "1.0": {
-              "recomputed": 334120,
+              "recomputed": 334229,
               "missed": 0
             }
           },
           "hyppo_cascade": {
             "0.0": {
-              "recomputed": 580299,
+              "recomputed": 580469,
               "missed": 0
             },
             "0.5": {
-              "recomputed": 580299,
+              "recomputed": 580469,
               "missed": 0
             },
             "1.0": {
-              "recomputed": 580299,
+              "recomputed": 580469,
               "missed": 0
             }
           },
           "hyppo_safe": {
             "0.0": {
-              "recomputed": 423242,
+              "recomputed": 423366,
               "missed": 0
             },
             "0.5": {
-              "recomputed": 423242,
+              "recomputed": 423366,
               "missed": 0
             },
             "1.0": {
-              "recomputed": 423242,
+              "recomputed": 423366,
               "missed": 0
             }
           }
         },
         "dvc_fewer_safe": {
-          "0.0": 789,
-          "0.5": 1317,
+          "0.0": 802,
+          "0.5": 1318,
           "1.0": 6357
         }
       },
@@ -11496,134 +11496,134 @@
         "per_system": {
           "snakemake": {
             "0.0": {
-              "recomputed": 497339,
-              "missed": 28656
+              "recomputed": 497549,
+              "missed": 28709
             },
             "0.5": {
-              "recomputed": 539507,
-              "missed": 20357
+              "recomputed": 539674,
+              "missed": 20333
             },
             "1.0": {
-              "recomputed": 580299,
+              "recomputed": 580469,
               "missed": 0
             }
           },
           "dvc": {
             "0.0": {
-              "recomputed": 328428,
-              "missed": 27906
+              "recomputed": 328848,
+              "missed": 27928
             },
             "0.5": {
-              "recomputed": 364650,
-              "missed": 19847
+              "recomputed": 364953,
+              "missed": 19790
             },
             "1.0": {
-              "recomputed": 394484,
+              "recomputed": 394627,
               "missed": 0
             }
           },
           "dagster": {
             "0.0": {
-              "recomputed": 328428,
-              "missed": 27906
+              "recomputed": 328848,
+              "missed": 27928
             },
             "0.5": {
-              "recomputed": 364650,
-              "missed": 19847
+              "recomputed": 364953,
+              "missed": 19790
             },
             "1.0": {
-              "recomputed": 394484,
+              "recomputed": 394627,
               "missed": 0
             }
           },
           "dagster_eager": {
             "0.0": {
-              "recomputed": 497339,
-              "missed": 28656
+              "recomputed": 497549,
+              "missed": 28709
             },
             "0.5": {
-              "recomputed": 539507,
-              "missed": 20357
+              "recomputed": 539674,
+              "missed": 20333
             },
             "1.0": {
-              "recomputed": 580299,
+              "recomputed": 580469,
               "missed": 0
             }
           },
           "nextflow": {
             "0.0": {
-              "recomputed": 497339,
-              "missed": 28656
+              "recomputed": 497549,
+              "missed": 28709
             },
             "0.5": {
-              "recomputed": 539507,
-              "missed": 20357
+              "recomputed": 539674,
+              "missed": 20333
             },
             "1.0": {
-              "recomputed": 580299,
+              "recomputed": 580469,
               "missed": 0
             }
           },
           "nextflow_deep": {
             "0.0": {
-              "recomputed": 328428,
-              "missed": 27906
+              "recomputed": 328848,
+              "missed": 27928
             },
             "0.5": {
-              "recomputed": 364650,
-              "missed": 19847
+              "recomputed": 364953,
+              "missed": 19790
             },
             "1.0": {
-              "recomputed": 394484,
+              "recomputed": 394627,
               "missed": 0
             }
           },
           "bazel": {
             "0.0": {
-              "recomputed": 328428,
-              "missed": 27906
+              "recomputed": 328848,
+              "missed": 27928
             },
             "0.5": {
-              "recomputed": 364650,
-              "missed": 19847
+              "recomputed": 364953,
+              "missed": 19790
             },
             "1.0": {
-              "recomputed": 394484,
+              "recomputed": 394627,
               "missed": 0
             }
           },
           "hyppo_cascade": {
             "0.0": {
-              "recomputed": 580299,
+              "recomputed": 580469,
               "missed": 0
             },
             "0.5": {
-              "recomputed": 580299,
+              "recomputed": 580469,
               "missed": 0
             },
             "1.0": {
-              "recomputed": 580299,
+              "recomputed": 580469,
               "missed": 0
             }
           },
           "hyppo_safe": {
             "0.0": {
-              "recomputed": 423242,
+              "recomputed": 423366,
               "missed": 0
             },
             "0.5": {
-              "recomputed": 423242,
+              "recomputed": 423366,
               "missed": 0
             },
             "1.0": {
-              "recomputed": 423242,
+              "recomputed": 423366,
               "missed": 0
             }
           }
         },
         "dvc_fewer_safe": {
-          "0.0": 253,
-          "0.5": 441,
+          "0.0": 261,
+          "0.5": 438,
           "1.0": 2178
         }
       },
@@ -11631,127 +11631,127 @@
         "per_system": {
           "snakemake": {
             "0.0": {
-              "recomputed": 497339,
-              "missed": 28656
+              "recomputed": 497549,
+              "missed": 28709
             },
             "0.5": {
-              "recomputed": 539507,
-              "missed": 20357
+              "recomputed": 539674,
+              "missed": 20333
             },
             "1.0": {
-              "recomputed": 580299,
+              "recomputed": 580469,
               "missed": 0
             }
           },
           "dvc": {
             "0.0": {
-              "recomputed": 354117,
-              "missed": 28066
+              "recomputed": 354514,
+              "missed": 28117
             },
             "0.5": {
-              "recomputed": 391287,
-              "missed": 19974
+              "recomputed": 391570,
+              "missed": 19963
             },
             "1.0": {
-              "recomputed": 423242,
+              "recomputed": 423366,
               "missed": 0
             }
           },
           "dagster": {
             "0.0": {
-              "recomputed": 354117,
-              "missed": 28066
+              "recomputed": 354514,
+              "missed": 28117
             },
             "0.5": {
-              "recomputed": 391287,
-              "missed": 19974
+              "recomputed": 391570,
+              "missed": 19963
             },
             "1.0": {
-              "recomputed": 423242,
+              "recomputed": 423366,
               "missed": 0
             }
           },
           "dagster_eager": {
             "0.0": {
-              "recomputed": 497339,
-              "missed": 28656
+              "recomputed": 497549,
+              "missed": 28709
             },
             "0.5": {
-              "recomputed": 539507,
-              "missed": 20357
+              "recomputed": 539674,
+              "missed": 20333
             },
             "1.0": {
-              "recomputed": 580299,
+              "recomputed": 580469,
               "missed": 0
             }
           },
           "nextflow": {
             "0.0": {
-              "recomputed": 497339,
-              "missed": 28656
+              "recomputed": 497549,
+              "missed": 28709
             },
             "0.5": {
-              "recomputed": 539507,
-              "missed": 20357
+              "recomputed": 539674,
+              "missed": 20333
             },
             "1.0": {
-              "recomputed": 580299,
+              "recomputed": 580469,
               "missed": 0
             }
           },
           "nextflow_deep": {
             "0.0": {
-              "recomputed": 354117,
-              "missed": 28066
+              "recomputed": 354514,
+              "missed": 28117
             },
             "0.5": {
-              "recomputed": 391287,
-              "missed": 19974
+              "recomputed": 391570,
+              "missed": 19963
             },
             "1.0": {
-              "recomputed": 423242,
+              "recomputed": 423366,
               "missed": 0
             }
           },
           "bazel": {
             "0.0": {
-              "recomputed": 354117,
-              "missed": 28066
+              "recomputed": 354514,
+              "missed": 28117
             },
             "0.5": {
-              "recomputed": 391287,
-              "missed": 19974
+              "recomputed": 391570,
+              "missed": 19963
             },
             "1.0": {
-              "recomputed": 423242,
+              "recomputed": 423366,
               "missed": 0
             }
           },
           "hyppo_cascade": {
             "0.0": {
-              "recomputed": 580299,
+              "recomputed": 580469,
               "missed": 0
             },
             "0.5": {
-              "recomputed": 580299,
+              "recomputed": 580469,
               "missed": 0
             },
             "1.0": {
-              "recomputed": 580299,
+              "recomputed": 580469,
               "missed": 0
             }
           },
           "hyppo_safe": {
             "0.0": {
-              "recomputed": 423242,
+              "recomputed": 423366,
               "missed": 0
             },
             "0.5": {
-              "recomputed": 423242,
+              "recomputed": 423366,
               "missed": 0
             },
             "1.0": {
-              "recomputed": 423242,
+              "recomputed": 423366,
               "missed": 0
             }
           }
@@ -11760,6 +11760,344 @@
           "0.0": 0,
           "0.5": 0,
           "1.0": 0
+        }
+      }
+    }
+  },
+  "seed_sensitivity": {
+    "p_output_changed": 0.7,
+    "seeds": [
+      1,
+      2,
+      3
+    ],
+    "ps": [
+      0.5,
+      1.0
+    ],
+    "systems": [
+      "dvc",
+      "dagster",
+      "nextflow_deep",
+      "bazel",
+      "hyppo_safe"
+    ],
+    "note": "main results use seed=20261013; worlds differ between seeds (generator seeded by 'seed:graph name')",
+    "by_seed": {
+      "1": {
+        "per_system": {
+          "dvc": {
+            "0.5": {
+              "recomputed": 302686,
+              "missed": 19051
+            },
+            "1.0": {
+              "recomputed": 328152,
+              "missed": 0
+            }
+          },
+          "dagster": {
+            "0.5": {
+              "recomputed": 302686,
+              "missed": 19051
+            },
+            "1.0": {
+              "recomputed": 328152,
+              "missed": 0
+            }
+          },
+          "nextflow_deep": {
+            "0.5": {
+              "recomputed": 302686,
+              "missed": 19051
+            },
+            "1.0": {
+              "recomputed": 328152,
+              "missed": 0
+            }
+          },
+          "bazel": {
+            "0.5": {
+              "recomputed": 302686,
+              "missed": 19051
+            },
+            "1.0": {
+              "recomputed": 328152,
+              "missed": 0
+            }
+          },
+          "hyppo_safe": {
+            "0.5": {
+              "recomputed": 420932,
+              "missed": 0
+            },
+            "1.0": {
+              "recomputed": 420932,
+              "missed": 0
+            }
+          }
+        },
+        "fewer_safe": {
+          "0.5": {
+            "dvc": 1321,
+            "dagster": 1321,
+            "nextflow_deep": 1321,
+            "bazel": 1321
+          },
+          "1.0": {
+            "dvc": 6355,
+            "dagster": 6355,
+            "nextflow_deep": 6355,
+            "bazel": 6355
+          }
+        }
+      },
+      "2": {
+        "per_system": {
+          "dvc": {
+            "0.5": {
+              "recomputed": 303359,
+              "missed": 20497
+            },
+            "1.0": {
+              "recomputed": 327753,
+              "missed": 0
+            }
+          },
+          "dagster": {
+            "0.5": {
+              "recomputed": 303359,
+              "missed": 20497
+            },
+            "1.0": {
+              "recomputed": 327753,
+              "missed": 0
+            }
+          },
+          "nextflow_deep": {
+            "0.5": {
+              "recomputed": 303359,
+              "missed": 20497
+            },
+            "1.0": {
+              "recomputed": 327753,
+              "missed": 0
+            }
+          },
+          "bazel": {
+            "0.5": {
+              "recomputed": 303359,
+              "missed": 20497
+            },
+            "1.0": {
+              "recomputed": 327753,
+              "missed": 0
+            }
+          },
+          "hyppo_safe": {
+            "0.5": {
+              "recomputed": 417496,
+              "missed": 0
+            },
+            "1.0": {
+              "recomputed": 417496,
+              "missed": 0
+            }
+          }
+        },
+        "fewer_safe": {
+          "0.5": {
+            "dvc": 1280,
+            "dagster": 1280,
+            "nextflow_deep": 1280,
+            "bazel": 1280
+          },
+          "1.0": {
+            "dvc": 6406,
+            "dagster": 6406,
+            "nextflow_deep": 6406,
+            "bazel": 6406
+          }
+        }
+      },
+      "3": {
+        "per_system": {
+          "dvc": {
+            "0.5": {
+              "recomputed": 313092,
+              "missed": 18655
+            },
+            "1.0": {
+              "recomputed": 339194,
+              "missed": 0
+            }
+          },
+          "dagster": {
+            "0.5": {
+              "recomputed": 313092,
+              "missed": 18655
+            },
+            "1.0": {
+              "recomputed": 339194,
+              "missed": 0
+            }
+          },
+          "nextflow_deep": {
+            "0.5": {
+              "recomputed": 313092,
+              "missed": 18655
+            },
+            "1.0": {
+              "recomputed": 339194,
+              "missed": 0
+            }
+          },
+          "bazel": {
+            "0.5": {
+              "recomputed": 313092,
+              "missed": 18655
+            },
+            "1.0": {
+              "recomputed": 339194,
+              "missed": 0
+            }
+          },
+          "hyppo_safe": {
+            "0.5": {
+              "recomputed": 431812,
+              "missed": 0
+            },
+            "1.0": {
+              "recomputed": 431812,
+              "missed": 0
+            }
+          }
+        },
+        "fewer_safe": {
+          "0.5": {
+            "dvc": 1202,
+            "dagster": 1202,
+            "nextflow_deep": 1202,
+            "bazel": 1202
+          },
+          "1.0": {
+            "dvc": 6379,
+            "dagster": 6379,
+            "nextflow_deep": 6379,
+            "bazel": 6379
+          }
+        }
+      }
+    },
+    "range": {
+      "dvc": {
+        "0.5": {
+          "recomputed": [
+            302686,
+            313092
+          ],
+          "missed": [
+            18655,
+            20497
+          ]
+        },
+        "1.0": {
+          "recomputed": [
+            327753,
+            339194
+          ],
+          "missed": [
+            0,
+            0
+          ]
+        }
+      },
+      "dagster": {
+        "0.5": {
+          "recomputed": [
+            302686,
+            313092
+          ],
+          "missed": [
+            18655,
+            20497
+          ]
+        },
+        "1.0": {
+          "recomputed": [
+            327753,
+            339194
+          ],
+          "missed": [
+            0,
+            0
+          ]
+        }
+      },
+      "nextflow_deep": {
+        "0.5": {
+          "recomputed": [
+            302686,
+            313092
+          ],
+          "missed": [
+            18655,
+            20497
+          ]
+        },
+        "1.0": {
+          "recomputed": [
+            327753,
+            339194
+          ],
+          "missed": [
+            0,
+            0
+          ]
+        }
+      },
+      "bazel": {
+        "0.5": {
+          "recomputed": [
+            302686,
+            313092
+          ],
+          "missed": [
+            18655,
+            20497
+          ]
+        },
+        "1.0": {
+          "recomputed": [
+            327753,
+            339194
+          ],
+          "missed": [
+            0,
+            0
+          ]
+        }
+      },
+      "hyppo_safe": {
+        "0.5": {
+          "recomputed": [
+            417496,
+            431812
+          ],
+          "missed": [
+            0,
+            0
+          ]
+        },
+        "1.0": {
+          "recomputed": [
+            417496,
+            431812
+          ],
+          "missed": [
+            0,
+            0
+          ]
         }
       }
     }

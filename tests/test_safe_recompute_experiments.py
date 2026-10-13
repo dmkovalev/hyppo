@@ -277,6 +277,19 @@ def test_e6_native_by_kind_and_sensitivity(tmp_path):
         assert all(x["missed"] == 0 for x in P["per_system"]["hyppo_safe"].values())
 
 
+def test_e6_seed_sensitivity():
+    r = e6_systems.seed_sensitivity(events_per_graph=20, graphs_limit=3, seeds=(1, 2))
+    assert r["p_output_changed"] == 0.7 and set(r["by_seed"]) == {"1", "2"}
+    assert set(r["systems"]) == {"dvc", "dagster", "nextflow_deep", "bazel", "hyppo_safe"}
+    for p in ("0.5", "1.0"):
+        lo, hi = r["range"]["hyppo_safe"][p]["missed"]
+        assert lo == hi == 0
+        for s in r["systems"]:
+            lo, hi = r["range"][s][p]["recomputed"]
+            assert lo <= hi
+    assert r["by_seed"]["1"] != r["by_seed"]["2"]
+
+
 def test_e1_smoke(tmp_path):
     out = e1_eviction.main(steps=4, seeds=1, out=tmp_path / "e1.json", graphs_limit=3)
     for tag, row in out.items():

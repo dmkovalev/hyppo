@@ -20,6 +20,7 @@
 
 Запуск:  python -m examples.research.safe_recompute.e6_systems real small|full
          python -m examples.research.safe_recompute.e6_systems scale 200
+         (корпуса, чувствительность к P и к seed; реальные прогоны в JSON сохраняются)
 """
 from __future__ import annotations
 
@@ -702,6 +703,32 @@ def sensitivity(events_per_graph: int = 200, graphs_limit: int | None = None, se
     return out
 
 
+SEEDS_SENSITIVITY = (1, 2, 3)
+
+
+def seed_sensitivity(events_per_graph: int = 200, graphs_limit: int | None = None,
+                     seeds=SEEDS_SENSITIVITY, P: float = P_OUTPUT_CHANGED, ps=(0.5, 1.0)) -> dict:
+    """Чувствительность к seed генератора миров при P(output_changed)=P: recomputed/missed
+    систем с ранним отсечением и hyppo_safe при p из ps; range -- [min, max] по seeds."""
+    systems = tuple(s for s in sim.SYSTEMS if s in sim.EARLY_CUTOFF) + ("hyppo_safe",)
+    by_seed = {}
+    for sd in seeds:
+        c = simulate_corpora(events_per_graph, graphs_limit=graphs_limit, seed=sd, ps=ps, systems=systems, p_out=P)
+        by_seed[str(sd)] = {
+            "per_system": {s: {p: {"recomputed": x["recomputed_total"], "missed": x["missed_total"]}
+                               for p, x in v["by_p"].items()} for s, v in c["per_system"].items()},
+            "fewer_safe": {p: {s: f["fewer_safe"] for s, f in v.items()}
+                           for p, v in c["favourable_worlds"]["by_p"].items()},
+        }
+    rng = {s: {str(p): {k: [min(b["per_system"][s][str(p)][k] for b in by_seed.values()),
+                            max(b["per_system"][s][str(p)][k] for b in by_seed.values())]
+                        for k in ("recomputed", "missed")} for p in ps} for s in systems}
+    return {"p_output_changed": P, "seeds": list(seeds), "ps": list(ps), "systems": list(systems),
+            "note": "main results use seed=%d; worlds differ between seeds (generator seeded by "
+                    "'seed:graph name')" % SEED,
+            "by_seed": by_seed, "range": rng}
+
+
 # ---------- CLI ----------
 META = {
     "modes": {
@@ -789,6 +816,7 @@ def main(argv=None) -> None:
         data["per_system"] = corp["per_system"]
         data["favourable_worlds"] = corp["favourable_worlds"]
         data["sensitivity"] = sensitivity(a.events, graphs_limit=a.limit)
+        data["seed_sensitivity"] = seed_sensitivity(a.events, graphs_limit=a.limit)
         for k, v in corp["per_system"].items():
             print(k, {p: (x["recomputed_total"], x["missed_total"]) for p, x in v["by_p"].items()})
     refresh(data)
