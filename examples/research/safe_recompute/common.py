@@ -41,15 +41,25 @@ def nfcore_graphs() -> dict[str, nx.DiGraph]:
     return out
 
 
+def _wfcommons_manifest() -> set[tuple[str, str]]:
+    """Зафиксированный корпус: 171 трасса из `planning/data/wfcommons_validation_results.json`.
+    Повторная загрузка из WfCommons приносит новые трассы; они в корпус не входят."""
+    rows = json.loads((PLANNING_DATA / "wfcommons_validation_results.json").read_text(encoding="utf-8"))
+    return {(w["family"].split("/")[0], w["label"].split("/")[-1]) for w in rows["per_workflow"]}
+
+
 def wfcommons_graphs(limit: int | None = None) -> dict[str, nx.DiGraph]:
     """Корпус Э2 диссертации: 171 трасса WfCommons на уровне задач (nextflow/snakemake/pegasus).
     Разбор совпадает с `_parse_wfformat` из `planning/scripts/draw_fig2_composite.py`:
     узлы -- `t["id"]`, рёбра -- `children`. Ключ: «семейство/имя файла»."""
     if limit is not None and limit <= 0:
         raise ValueError("limit must be positive or None")
+    corpus = _wfcommons_manifest()
     out: dict[str, nx.DiGraph] = {}
     for fam in ("nextflow", "snakemake", "pegasus"):
         for path in sorted((PLANNING_CACHE / "wfcommons" / fam).rglob("*.json")):
+            if (fam, path.stem) not in corpus:
+                continue  # трассы, добавленные в WfCommons после фиксации корпуса
             tasks = json.loads(path.read_text(encoding="utf-8"))["workflow"]["specification"]["tasks"]
             ids = {t["id"] for t in tasks}
             dag = nx.DiGraph()
