@@ -437,22 +437,28 @@ def test_c7_accepts_grounded_and_rejects_ungrounded_variable():
     assert skip.details["c7"] == "skipped"
 
 
-# --- Paper conditions 4 and 5 (§2.4): projectile example ----------------------
-# ids: h1a=0,h1b=1,h1=2, h2^0=3,h2^1=4,h2^2=5, h3=6,h4=7,h5=8,h6=9
-_PROJ_GRAPH = {0: {2}, 1: {2}, 2: {3, 4, 5}, 3: {6, 7, 8}, 4: {6, 7, 8},
-                 5: {6, 7, 8}, 6: {9}, 7: set(), 8: set(), 9: set()}
-_PROJ_TASKS = {"t1": [0, 1], "t2": [2], "t3": [3, 4, 5],
-               "t4": [6], "t5": [7], "t6": [8], "t7": [9]}
-_PROJ_WF = [("t1", "t2"), ("t2", "t3"), ("t3", "t4"),
-            ("t3", "t5"), ("t3", "t6"), ("t4", "t7")]
-_PROJ_DOM = {i: [0, 1] for i in range(10)}
+# --- Paper conditions 4 and 5 (§2.4): CRM running example (ch. 2) ---------------
+# ids: H1..H16 -> 1..16; 19 edges of Algorithm 1 (chapter 4 graph)
+_CRM_EDGES = [(1, 2), (1, 3), (2, 4), (3, 4), (4, 5), (6, 5), (15, 5), (4, 7),
+              (5, 8), (7, 8), (8, 9), (9, 10), (9, 11), (10, 12), (11, 12),
+              (12, 13), (13, 14), (8, 16), (14, 16)]
+_CRM_GRAPH = {i: set() for i in range(1, 17)}
+for _a, _b in _CRM_EDGES:
+    _CRM_GRAPH[_a].add(_b)
+_CRM_TASKS = {"t1": [1], "t2": [2, 3], "t3": [4], "t4": [6], "t5": [15], "t6": [5],
+              "t7": [7], "t8": [8], "t9": [9], "t10": [10, 11], "t11": [12],
+              "t12": [13], "t13": [14], "t14": [16]}
+_CRM_WF = [("t1", "t2"), ("t2", "t3"), ("t3", "t6"), ("t4", "t6"), ("t5", "t6"),
+           ("t3", "t7"), ("t6", "t8"), ("t7", "t8"), ("t8", "t9"), ("t9", "t10"),
+           ("t10", "t11"), ("t11", "t12"), ("t12", "t13"), ("t13", "t14")]
+_CRM_DOM = {i: [0, 1] for i in range(1, 17)}
 
 
 def _proj(hyp_graph=None, forbidden=None):
     return check_consistency(
-        None, None, hyp_graph or _PROJ_GRAPH, run_hermit=False,
-        task_hypotheses=_PROJ_TASKS, workflow_edges=_PROJ_WF,
-        param_domains=_PROJ_DOM, forbidden_combos=forbidden or [],
+        None, None, hyp_graph or _CRM_GRAPH, run_hermit=False,
+        task_hypotheses=_CRM_TASKS, workflow_edges=_CRM_WF,
+        param_domains=_CRM_DOM, forbidden_combos=forbidden or [],
     )
 
 
@@ -460,26 +466,26 @@ def test_condition5_accepts_correct_and_rejects_backward_dependency():
     """Условие 5 (alg. consistence): причинный порядок согласован с потоком работ."""
     ok = _proj()
     assert ok.ok and ok.details["cond5"].startswith("passed")
-    # h3 (задача t4) зависит от h6 (задача t7, потомок t4) — встречная поставка
-    bad_lat = {k: set(v) for k, v in _PROJ_GRAPH.items()}
-    bad_lat[6] = set()      # убираем h3->h6, чтобы не было 2-цикла
-    bad_lat[9] = {6}        # h6->h3: h3 зависит от h6 из более поздней задачи
+    # модификация 2: баланс H9 (задача t9) читает f_w от H12 (задача t11, потомок t9)
+    bad_lat = {k: set(v) for k, v in _CRM_GRAPH.items()}
+    bad_lat[12] = {13, 9}
+    bad_lat[9] = set()      # без рёбер H9->H10, H9->H11, чтобы не было цикла
     bad = _proj(hyp_graph=bad_lat)
     assert not bad.ok and bad.status == Status.COND5_VIOLATED
-    assert bad.details["cond5"]["task"] == "t4"
-    assert bad.details["cond5"]["dependency_task"] == "t7"
+    assert bad.details["cond5"]["task"] == "t9"
+    assert bad.details["cond5"]["dependency_task"] == "t11"
 
 
 def test_condition4_accepts_nonempty_and_rejects_empty_projection():
     """Условие 4: pi_t(V) != empty для каждой задачи (CSP-выполнимость)."""
     ok = _proj()
     assert ok.ok and ok.details["cond4"].startswith("passed")
-    # запрет обоих значений домена h2^0 обнуляет проекцию задачи t3
-    empty = _proj(forbidden=[{3: 0}, {3: 1}])
+    # запрет обоих значений показателя Кори H10 обнуляет проекцию задачи t10
+    empty = _proj(forbidden=[{10: 0}, {10: 1}])
     assert not empty.ok and empty.status == Status.COND4_VIOLATED
-    assert empty.details["cond4_task"] == "t3"
-    # запрет одной совместной пары не обнуляет проекцию — эксперимент принимается
-    sat = _proj(forbidden=[{3: 0, 4: 0}])
+    assert empty.details["cond4_task"] == "t10"
+    # запрет одной совместной пары (n_w, n_o) не обнуляет проекцию
+    sat = _proj(forbidden=[{10: 0, 11: 0}])
     assert sat.ok and sat.details["cond4"].startswith("passed")
 
 
