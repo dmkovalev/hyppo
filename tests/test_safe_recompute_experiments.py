@@ -282,3 +282,13 @@ def test_e1_smoke(tmp_path):
     for tag, row in out.items():
         assert row["median_ratio_cascade_to_safe"] >= 1.0
     assert "lru:0.75" in out and "random:0.75" in out
+
+
+def test_figures_smoke(tmp_path):
+    from examples.research.safe_recompute import figures
+
+    paths = figures.main(out_dir=tmp_path)
+    assert len(paths) >= 4
+    for p in paths:
+        assert p.exists() and p.stat().st_size > 1000 and p.read_bytes()[:4] == b"%PDF"
+    assert figures.fig_e1(data_dir=tmp_path, out_dir=tmp_path) is None  # нет JSON -- пропуск
