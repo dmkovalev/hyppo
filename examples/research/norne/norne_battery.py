@@ -37,7 +37,7 @@ NORNE = [
     ("H6", "q_prim = q_prev*exp(-dt*taup)"),
     ("GRP", "J = J0 + dJ_grp"),
     ("H5", "q_liq_phys = J*q_c + q_prim"),
-    ("H7", "l_ml = MLP(x_hist)"),
+    ("H7", "l_ml = w0 + w1*q_c + w2*l_prev + w3*I_mean"),
     ("H8", "l = g*q_liq_phys + (1-g)*l_ml"),
     ("H11", "Sw = Sw_prev + (Winj - l)*dt/Vp"),
     ("H12", "krw = ((Sw-Swc)/(1-Swc-Sor))**nw"),
@@ -97,10 +97,10 @@ def main():
     nodes = [n for n, _ in NORNE]
     nxg = nx.DiGraph(edges)
     nxg.add_nodes_from(nodes)
-    assert nxg.number_of_nodes() == 16 and nxg.number_of_edges() == 18
+    assert nxg.number_of_nodes() == 16 and nxg.number_of_edges() == 19
     assert nx.is_directed_acyclic_graph(nxg)
     assert nx.dag_longest_path_length(nxg) == 10
-    print(f"Algorithm 1 graph: 16 nodes, 18 edges, depth 10 -- OK")
+    print(f"Algorithm 1 graph: 16 nodes, 19 edges, depth 10 -- OK")
 
     t0 = time.time()
     results = {"rule4": [], "rule7": [], "edges": edges}

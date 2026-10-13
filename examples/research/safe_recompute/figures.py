@@ -221,12 +221,12 @@ def fig_e3(data_dir=DATA, out_dir=FIG):
         n = len(rc)
         n_gt = sum(r["N_coarse"] > r["N_fine"] for r in rc)
         n_eq = sum(r["N_caus_coarse_components"] == r["N_coarse"] for r in rc)
-        all_eq = "во всех" if n_eq == n else f"в {n_eq} из"
+        all_eq = f"во всех {n} случаях" if n_eq == n else f"в {n_eq} из {n} случаев"
         nc = r"N_{\mathrm{caus}}"
         txt = (f"CRM, мелкие гипотезы: ${nc}=N$ во всех {fine['cases']} случаях;\n"
                f"CRM, укрупнённые: $N$ на графе компонент больше,\n"
                f"чем на мелком, в {_num(100 * n_gt / n, 1)} % ({n_gt}/{n}); ${nc}=N$\n"
-               f"{all_eq} {n} случаях")
+               f"{all_eq}")
         ax2.text(0.03, 0.06, txt, transform=ax2.transAxes, ha="left", va="bottom", fontsize=7.5,
                  bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="0.6", lw=0.5))
     return _save(fig, out_dir, "e3_causal.pdf")

@@ -22,7 +22,7 @@ from hyppo.coa._base import Equation, Structure
 G = GraphConstructor(hypotheses, workflow).graph   # networkx.DiGraph
 ```
 
-**Golden**: exactly 18 edges `NORNE_GOLDEN_EDGES` (see test
+**Golden**: exactly 19 edges `NORNE_GOLDEN_EDGES` (see test
 `test_alg1_norne_graph_matches_figure`), 16 nodes, DAG, depth 10.
 
 **Visualization**: graph (two branches + merge, as in Fig. 3 of the paper).

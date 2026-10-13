@@ -10,7 +10,7 @@ Usage:
 
 The script is self-checking: it exits 0 and prints ``PRIMER OK`` only if
 every act reproduces the golden values pinned by tests/test_golden_claims.py
-(16 nodes, 18 edges, DAG depth 10, Lemma 2 equivalence, Theorem 1).
+(16 nodes, 19 edges, DAG depth 10, Lemma 2 equivalence, Theorem 1).
 """
 
 from __future__ import annotations
@@ -36,7 +36,7 @@ HYPS: list[tuple[str, str, str, str]] = [
     ("H4", "H4", "q_c = w_f*q_f + (1-w_f)*q_s", "channel mixing"),
     ("H5", "H5", "q_liq_phys = J*q_c + q_prim", "physics liquid rate"),
     ("H6", "H6", "q_prim = q_prev*exp(-dt*taup)", "primary decline"),
-    ("H7", "H7", "l_ml = MLP(x_hist)", "ML liquid correction"),
+    ("H7", "H7", "l_ml = w0 + w1*q_c + w2*l_prev + w3*I_mean", "ML liquid correction"),
     ("H8", "H8", "l = g*q_liq_phys + (1-g)*l_ml", "LPR fusion"),
     ("H11", "H9", "Sw = Sw_prev + (Winj - l)*dt/Vp", "material balance"),
     ("H12", "H10", "krw = ((Sw-Swc)/(1-Swc-Sor))**nw", "Corey krw"),
@@ -174,7 +174,7 @@ def act_2_algorithm1() -> tuple[GraphConstructor, nx.DiGraph]:
         f"\nNodes: {g.number_of_nodes()}   Edges: {g.number_of_edges()}   "
         f"DAG: {nx.is_directed_acyclic_graph(g)}   Depth: {depth}"
     )
-    print("Golden (paper [SVD], fig. 3): 16 nodes, 18 edges, depth 10.")
+    print("Golden (dissertation ch. 4): 16 nodes, 19 edges, depth 10.")
     _pause()
     return hyp_graph, g
 
@@ -324,11 +324,11 @@ def act_7_selfcheck(g: nx.DiGraph) -> None:
     _act(7, "Self-check against golden claims")
     ok = (
         g.number_of_nodes() == 16
-        and g.number_of_edges() == 18
+        and g.number_of_edges() == 19
         and nx.is_directed_acyclic_graph(g)
         and nx.dag_longest_path_length(g) == 10
     )
-    print(f"\n16 nodes / 18 edges / DAG / depth 10: {ok}")
+    print(f"\n16 nodes / 19 edges / DAG / depth 10: {ok}")
     if not ok:
         raise SystemExit("GOLDEN SELF-CHECK FAILED")
     print("\nPRIMER OK")

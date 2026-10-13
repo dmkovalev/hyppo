@@ -36,7 +36,7 @@ NORNE_HYPS = [
     ("H6", "q_prim = q_prev*exp(-dt*taup)"),
     ("GRP", "J = J0 + dJ_grp"),
     ("H5", "q_liq_phys = J*q_c + q_prim"),
-    ("H7", "l_ml = MLP(x_hist)"),
+    ("H7", "l_ml = w0 + w1*q_c + w2*l_prev + w3*I_mean"),
     ("H8", "l = g*q_liq_phys + (1-g)*l_ml"),
     # Материальный баланс связан с прогнозом жидкости H8 (выход l), а не с сырым
     # замером Wlout: закачка минус спрогнозированный отбор жидкости [SVD §3.9].
@@ -49,7 +49,7 @@ NORNE_HYPS = [
     ("H19", "q_oil = l * o"),
 ]
 
-# The 18 derived_by edges of Figure 3 in [SVD] (hand-derivable from the LHS/RHS
+# The 19 derived_by edges of the CRM graph (dissertation ch. 4; hand-derivable from the LHS/RHS
 # variable flow of the equations above, independently of the implementation).
 # H8->H11 links the liquid-prediction branch to the material balance (H11 uses l).
 NORNE_GOLDEN_EDGES = {
@@ -58,6 +58,7 @@ NORNE_GOLDEN_EDGES = {
     ("H2", "H4"),
     ("H3", "H4"),
     ("H4", "H5"),
+    ("H4", "H7"),
     ("H6", "H5"),
     ("GRP", "H5"),
     ("H5", "H8"),
@@ -106,13 +107,13 @@ def _named_edges(g: nx.DiGraph) -> set[tuple[str, str]]:
 
 
 def test_alg1_norne_graph_matches_figure():
-    """[SVD] «16 гипотез и 18 рёбер зависимостей (глубина графа 10)»,
+    """Гл. 4 диссертации: «16~гипотез ... 19~рёбер при~глубине графа~10»,
     «рёбра выведены автоматически из потока переменных уравнений»."""
     hyps = [_Hyp(n, f) for n, f in NORNE_HYPS]
     g = _build_graph(hyps)
     assert _named_edges(g) == NORNE_GOLDEN_EDGES
     assert g.number_of_nodes() == 16
-    assert g.number_of_edges() == 18
+    assert g.number_of_edges() == 19
     assert nx.is_directed_acyclic_graph(g)
     assert nx.dag_longest_path_length(g) == 10
 

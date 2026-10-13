@@ -404,8 +404,8 @@
       "crm_brugge": {
         "n": 16,
         "capacity": 12,
-        "cascade_runs_median": 527.5,
-        "safe_runs_median": 364.5,
+        "cascade_runs_median": 564.0,
+        "safe_runs_median": 375.5,
         "full_runs": 640
       },
       "nfcore_rnaseq": {
@@ -597,15 +597,15 @@
       0.3715651135005974,
       0.4375
     ],
-    "crm_ratio": 1.4471879286694103
+    "crm_ratio": 1.5019973368841544
   },
   "lru:1.0": {
     "graphs": {
       "crm_brugge": {
         "n": 16,
         "capacity": 16,
-        "cascade_runs_median": 231.5,
-        "safe_runs_median": 231.5,
+        "cascade_runs_median": 238.5,
+        "safe_runs_median": 238.5,
         "full_runs": 640
       },
       "nfcore_rnaseq": {
@@ -804,8 +804,8 @@
       "crm_brugge": {
         "n": 16,
         "capacity": 32,
-        "cascade_runs_median": 219.5,
-        "safe_runs_median": 216.5,
+        "cascade_runs_median": 225.5,
+        "safe_runs_median": 222.5,
         "full_runs": 640
       },
       "nfcore_rnaseq": {
@@ -997,15 +997,15 @@
       0.0,
       0.002941176470588225
     ],
-    "crm_ratio": 1.0138568129330254
+    "crm_ratio": 1.0134831460674156
   },
   "random:0.25": {
     "graphs": {
       "crm_brugge": {
         "n": 16,
         "capacity": 4,
-        "cascade_runs_median": 606.5,
-        "safe_runs_median": 542.5,
+        "cascade_runs_median": 614.5,
+        "safe_runs_median": 545.0,
         "full_runs": 640
       },
       "nfcore_rnaseq": {
@@ -1195,17 +1195,17 @@
     "median_saving_of_safe": 0.1001855287569573,
     "saving_iqr": [
       0.09200743494423791,
-      0.1068052930056711
+      0.10697674418604652
     ],
-    "crm_ratio": 1.1179723502304149
+    "crm_ratio": 1.1275229357798164
   },
   "random:0.5": {
     "graphs": {
       "crm_brugge": {
         "n": 16,
         "capacity": 8,
-        "cascade_runs_median": 564.5,
-        "safe_runs_median": 464.5,
+        "cascade_runs_median": 582.5,
+        "safe_runs_median": 463.0,
         "full_runs": 640
       },
       "nfcore_rnaseq": {
@@ -1394,18 +1394,18 @@
     "median_ratio_cascade_to_safe": 1.263819095477387,
     "median_saving_of_safe": 0.20874751491053678,
     "saving_iqr": [
-      0.19383259911894268,
+      0.1953125,
       0.23167155425219943
     ],
-    "crm_ratio": 1.2152852529601723
+    "crm_ratio": 1.2580993520518358
   },
   "random:0.75": {
     "graphs": {
       "crm_brugge": {
         "n": 16,
         "capacity": 12,
-        "cascade_runs_median": 524.5,
-        "safe_runs_median": 404.5,
+        "cascade_runs_median": 551.0,
+        "safe_runs_median": 417.0,
         "full_runs": 640
       },
       "nfcore_rnaseq": {
@@ -1597,15 +1597,15 @@
       0.264218009478673,
       0.30740037950664134
     ],
-    "crm_ratio": 1.2966625463535228
+    "crm_ratio": 1.3213429256594724
   },
   "random:1.0": {
     "graphs": {
       "crm_brugge": {
         "n": 16,
         "capacity": 16,
-        "cascade_runs_median": 493.0,
-        "safe_runs_median": 357.0,
+        "cascade_runs_median": 519.5,
+        "safe_runs_median": 373.0,
         "full_runs": 640
       },
       "nfcore_rnaseq": {
@@ -1797,15 +1797,15 @@
       0.3121319199057715,
       0.3570759137769447
     ],
-    "crm_ratio": 1.380952380952381
+    "crm_ratio": 1.3927613941018766
   },
   "random:2.0": {
     "graphs": {
       "crm_brugge": {
         "n": 16,
         "capacity": 32,
-        "cascade_runs_median": 407.0,
-        "safe_runs_median": 288.0,
+        "cascade_runs_median": 405.0,
+        "safe_runs_median": 284.5,
         "full_runs": 640
       },
       "nfcore_rnaseq": {
@@ -1997,6 +1997,6 @@
       0.30480480480480476,
       0.3455571227080395
     ],
-    "crm_ratio": 1.4131944444444444
+    "crm_ratio": 1.4235500878734622
   }
 }
