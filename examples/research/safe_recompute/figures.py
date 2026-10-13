@@ -206,7 +206,8 @@ def fig_e3(data_dir=DATA, out_dir=FIG):
     ax.set_title("(а)", loc="left", pad=2)
     ax2.plot(x, ratio, "^-", color="C3", ms=3.5)
     ax2.set_ylabel(r"$|N_{\mathrm{caus}}|/|N|$")
-    ax2.set_ylim(0.95, 1.003)
+    ax2.set_ylim(0.915, 1.004)  # место для врезки CRM под кривой
+    ax2.set_yticks([0.92, 0.96, 1.0])
     ax2.yaxis.set_major_formatter(_comma)
     ax2.set_xlabel("доля многовыходных гипотез, %")
     ax2.set_title("(б)", loc="left", pad=2)
@@ -214,14 +215,18 @@ def fig_e3(data_dir=DATA, out_dir=FIG):
         a.grid(alpha=0.3, lw=0.4)
     fine, coarse = d.get("crm_fine"), d.get("crm_coarse")
     if fine and coarse:
+        # На графе компонент N_caus совпадает с N (n_caus_components_mean == n_mean);
+        # укрупнение увеличивает сам план N относительно мелкого графа.
         rc = coarse.get("rows", [])
-        n_strict = sum(r["N_caus"] < r["N_coarse"] for r in rc)
-        mr = statistics.mean(r["N_caus"] / r["N_coarse"] for r in rc) if rc else float("nan")
+        n = len(rc)
+        n_gt = sum(r["N_coarse"] > r["N_fine"] for r in rc)
+        n_eq = sum(r["N_caus_coarse_components"] == r["N_coarse"] for r in rc)
+        all_eq = "во всех" if n_eq == n else f"в {n_eq} из"
         nc = r"N_{\mathrm{caus}}"
         txt = (f"CRM, мелкие гипотезы: ${nc}=N$ во всех {fine['cases']} случаях;\n"
-               f"CRM, укрупнённые: ${nc}\\subsetneq N$ в "
-               f"{_num(100 * coarse['frac_coarse_gt_caus'], 1)} % ({n_strict}/{coarse['cases']}),\n"
-               f"среднее $|{nc}|/|N|={_mnum(round(mr, 2))}$")
+               f"CRM, укрупнённые: $N$ на графе компонент больше,\n"
+               f"чем на мелком, в {_num(100 * n_gt / n, 1)} % ({n_gt}/{n}); ${nc}=N$\n"
+               f"{all_eq} {n} случаях")
         ax2.text(0.03, 0.06, txt, transform=ax2.transAxes, ha="left", va="bottom", fontsize=7.5,
                  bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="0.6", lw=0.5))
     return _save(fig, out_dir, "e3_causal.pdf")
