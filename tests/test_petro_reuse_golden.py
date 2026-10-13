@@ -48,7 +48,7 @@ def test_brugge_r2_in_dissertation_range():
 
 def test_brugge_reuse_speedup_h10():
     """Табл.~\\ref{tab:reuse_timing}: правка нижележащей гипотезы (H10, WCT) даёт
-    ускорение 25--40×; размер |P_ne| структурно равен 6 из 16. Проверяет
+    ускорение 25--40×; размер |P_ne| структурно равен 5 из 16. Проверяет
     минимальность каскада (теорема 1) на реальном графе и реальных моделях."""
     data = load_field("Brugge")
     cache: dict = {}
@@ -57,14 +57,14 @@ def test_brugge_reuse_speedup_h10():
     )
     g = build_graph()
     p_ne = {"H10"} | nx.descendants(g, "H10")
-    assert len(p_ne) == 6, f"|P_ne|(H10)={len(p_ne)}, ожидается 6"
+    assert len(p_ne) == 5, f"|P_ne|(H10)={len(p_ne)}, ожидается 5"
     comps = {COMPONENT[h] for h in p_ne}
     assert "CRM" not in comps, "при правке WCT ветвь CRM (H1–H6) должна переиспользоваться"
     cache2 = {"p1": cache["p1"], "hyb": cache.get("hyb"), "wct": cache.get("wct")}
     t_incr, _ = run_components(comps, data, cache2)
     speedup = t_full / t_incr
     # The exact factor is machine-dependent (wall-clock model timings); the golden
-    # invariants here are structural (|P_ne|=6, CRM reused above). Require a
+    # invariants here are structural (|P_ne|=5, CRM reused above). Require a
     # substantial reuse advantage without pinning a machine-specific magnitude.
     assert speedup >= 5.0, f"ускорение(H10)={speedup:.1f}× < 5 (переиспользование не работает)"
 

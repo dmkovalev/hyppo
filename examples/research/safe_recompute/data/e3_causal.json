@@ -1,0 +1,434 @@
+{
+  "seed": 20261012,
+  "projectile_exact": {
+    "cases": 24,
+    "strict_cases": 7,
+    "n_mean": 5.666666666666667,
+    "n_caus_mean": 5.375,
+    "strict": [
+      {
+        "param": "X:g",
+        "N": 9,
+        "N_caus": 8,
+        "saved": [
+          "h21"
+        ]
+      },
+      {
+        "param": "X:rho",
+        "N": 8,
+        "N_caus": 7,
+        "saved": [
+          "h21"
+        ]
+      },
+      {
+        "param": "cd0",
+        "N": 8,
+        "N_caus": 7,
+        "saved": [
+          "h21"
+        ]
+      },
+      {
+        "param": "h1a.M",
+        "N": 8,
+        "N_caus": 7,
+        "saved": [
+          "h21"
+        ]
+      },
+      {
+        "param": "h1b.M",
+        "N": 8,
+        "N_caus": 7,
+        "saved": [
+          "h21"
+        ]
+      },
+      {
+        "param": "kN",
+        "N": 7,
+        "N_caus": 6,
+        "saved": [
+          "h21"
+        ]
+      },
+      {
+        "param": "psi",
+        "N": 8,
+        "N_caus": 7,
+        "saved": [
+          "h21"
+        ]
+      }
+    ]
+  },
+  "projectile_aligned": {
+    "cases": 24,
+    "strict_cases": 0,
+    "n_mean": 6.125,
+    "n_caus_mean": 6.125,
+    "strict": []
+  },
+  "crm_fine": {
+    "hypotheses": 16,
+    "edges": 18,
+    "cases": 43,
+    "strict_cases": 0,
+    "n_mean": 7.953488372093023,
+    "n_caus_mean": 7.953488372093023
+  },
+  "crm_coarse": {
+    "components": 9,
+    "edges": 9,
+    "cases": 43,
+    "n_mean": 9.720930232558139,
+    "n_caus_mean": 7.953488372093023,
+    "n_caus_components_mean": 9.720930232558139,
+    "frac_coarse_gt_caus": 0.6046511627906976,
+    "frac_coarse_gt_fine": 0.6046511627906976,
+    "variable_level_invariance_ok": true,
+    "rows": [
+      {
+        "param": "GRP.J0",
+        "N_fine": 10,
+        "N_coarse": 15,
+        "N_caus": 10,
+        "N_caus_coarse_components": 15
+      },
+      {
+        "param": "GRP.M",
+        "N_fine": 10,
+        "N_coarse": 15,
+        "N_caus": 10,
+        "N_caus_coarse_components": 15
+      },
+      {
+        "param": "GRP.dJ_grp",
+        "N_fine": 10,
+        "N_coarse": 15,
+        "N_caus": 10,
+        "N_caus_coarse_components": 15
+      },
+      {
+        "param": "H1.M",
+        "N_fine": 13,
+        "N_coarse": 14,
+        "N_caus": 13,
+        "N_caus_coarse_components": 14
+      },
+      {
+        "param": "H1.w_ij",
+        "N_fine": 13,
+        "N_coarse": 14,
+        "N_caus": 13,
+        "N_caus_coarse_components": 14
+      },
+      {
+        "param": "H11.M",
+        "N_fine": 7,
+        "N_coarse": 7,
+        "N_caus": 7,
+        "N_caus_coarse_components": 7
+      },
+      {
+        "param": "H11.Vp",
+        "N_fine": 7,
+        "N_coarse": 7,
+        "N_caus": 7,
+        "N_caus_coarse_components": 7
+      },
+      {
+        "param": "H12.M",
+        "N_fine": 5,
+        "N_coarse": 6,
+        "N_caus": 5,
+        "N_caus_coarse_components": 6
+      },
+      {
+        "param": "H12.nw",
+        "N_fine": 5,
+        "N_coarse": 6,
+        "N_caus": 5,
+        "N_caus_coarse_components": 6
+      },
+      {
+        "param": "H12b.M",
+        "N_fine": 5,
+        "N_coarse": 6,
+        "N_caus": 5,
+        "N_caus_coarse_components": 6
+      },
+      {
+        "param": "H12b.no",
+        "N_fine": 5,
+        "N_coarse": 6,
+        "N_caus": 5,
+        "N_caus_coarse_components": 6
+      },
+      {
+        "param": "H13.M",
+        "N_fine": 4,
+        "N_coarse": 4,
+        "N_caus": 4,
+        "N_caus_coarse_components": 4
+      },
+      {
+        "param": "H13.muo",
+        "N_fine": 4,
+        "N_coarse": 4,
+        "N_caus": 4,
+        "N_caus_coarse_components": 4
+      },
+      {
+        "param": "H13.muw",
+        "N_fine": 4,
+        "N_coarse": 4,
+        "N_caus": 4,
+        "N_caus_coarse_components": 4
+      },
+      {
+        "param": "H14.M",
+        "N_fine": 3,
+        "N_coarse": 4,
+        "N_caus": 3,
+        "N_caus_coarse_components": 4
+      },
+      {
+        "param": "H15.M",
+        "N_fine": 2,
+        "N_coarse": 2,
+        "N_caus": 2,
+        "N_caus_coarse_components": 2
+      },
+      {
+        "param": "H15.gw",
+        "N_fine": 2,
+        "N_coarse": 2,
+        "N_caus": 2,
+        "N_caus_coarse_components": 2
+      },
+      {
+        "param": "H19.M",
+        "N_fine": 1,
+        "N_coarse": 1,
+        "N_caus": 1,
+        "N_caus_coarse_components": 1
+      },
+      {
+        "param": "H2.M",
+        "N_fine": 11,
+        "N_coarse": 14,
+        "N_caus": 11,
+        "N_caus_coarse_components": 14
+      },
+      {
+        "param": "H2.a_f",
+        "N_fine": 11,
+        "N_coarse": 14,
+        "N_caus": 11,
+        "N_caus_coarse_components": 14
+      },
+      {
+        "param": "H2.b_f",
+        "N_fine": 11,
+        "N_coarse": 14,
+        "N_caus": 11,
+        "N_caus_coarse_components": 14
+      },
+      {
+        "param": "H3.M",
+        "N_fine": 11,
+        "N_coarse": 14,
+        "N_caus": 11,
+        "N_caus_coarse_components": 14
+      },
+      {
+        "param": "H3.a_s",
+        "N_fine": 11,
+        "N_coarse": 14,
+        "N_caus": 11,
+        "N_caus_coarse_components": 14
+      },
+      {
+        "param": "H3.b_s",
+        "N_fine": 11,
+        "N_coarse": 14,
+        "N_caus": 11,
+        "N_caus_coarse_components": 14
+      },
+      {
+        "param": "H4.M",
+        "N_fine": 10,
+        "N_coarse": 14,
+        "N_caus": 10,
+        "N_caus_coarse_components": 14
+      },
+      {
+        "param": "H4.w_f",
+        "N_fine": 10,
+        "N_coarse": 14,
+        "N_caus": 10,
+        "N_caus_coarse_components": 14
+      },
+      {
+        "param": "H5.M",
+        "N_fine": 9,
+        "N_coarse": 14,
+        "N_caus": 9,
+        "N_caus_coarse_components": 14
+      },
+      {
+        "param": "H6.M",
+        "N_fine": 10,
+        "N_coarse": 14,
+        "N_caus": 10,
+        "N_caus_coarse_components": 14
+      },
+      {
+        "param": "H6.taup",
+        "N_fine": 10,
+        "N_coarse": 14,
+        "N_caus": 10,
+        "N_caus_coarse_components": 14
+      },
+      {
+        "param": "H7.M",
+        "N_fine": 9,
+        "N_coarse": 9,
+        "N_caus": 9,
+        "N_caus_coarse_components": 9
+      },
+      {
+        "param": "H8.M",
+        "N_fine": 8,
+        "N_coarse": 8,
+        "N_caus": 8,
+        "N_caus_coarse_components": 8
+      },
+      {
+        "param": "H8.g",
+        "N_fine": 8,
+        "N_coarse": 8,
+        "N_caus": 8,
+        "N_caus_coarse_components": 8
+      },
+      {
+        "param": "X:I_j",
+        "N_fine": 13,
+        "N_coarse": 14,
+        "N_caus": 13,
+        "N_caus_coarse_components": 14
+      },
+      {
+        "param": "X:Sor",
+        "N_fine": 6,
+        "N_coarse": 6,
+        "N_caus": 6,
+        "N_caus_coarse_components": 6
+      },
+      {
+        "param": "X:Sw_prev",
+        "N_fine": 7,
+        "N_coarse": 7,
+        "N_caus": 7,
+        "N_caus_coarse_components": 7
+      },
+      {
+        "param": "X:Swc",
+        "N_fine": 6,
+        "N_coarse": 6,
+        "N_caus": 6,
+        "N_caus_coarse_components": 6
+      },
+      {
+        "param": "X:Winj",
+        "N_fine": 7,
+        "N_coarse": 7,
+        "N_caus": 7,
+        "N_caus_coarse_components": 7
+      },
+      {
+        "param": "X:dt",
+        "N_fine": 10,
+        "N_coarse": 14,
+        "N_caus": 10,
+        "N_caus_coarse_components": 14
+      },
+      {
+        "param": "X:o_m",
+        "N_fine": 2,
+        "N_coarse": 2,
+        "N_caus": 2,
+        "N_caus_coarse_components": 2
+      },
+      {
+        "param": "X:q_f_prev",
+        "N_fine": 11,
+        "N_coarse": 14,
+        "N_caus": 11,
+        "N_caus_coarse_components": 14
+      },
+      {
+        "param": "X:q_prev",
+        "N_fine": 10,
+        "N_coarse": 14,
+        "N_caus": 10,
+        "N_caus_coarse_components": 14
+      },
+      {
+        "param": "X:q_s_prev",
+        "N_fine": 11,
+        "N_coarse": 14,
+        "N_caus": 11,
+        "N_caus_coarse_components": 14
+      },
+      {
+        "param": "X:x_hist",
+        "N_fine": 9,
+        "N_coarse": 9,
+        "N_caus": 9,
+        "N_caus_coarse_components": 9
+      }
+    ]
+  },
+  "synthetic": {
+    "0.0": {
+      "instances": 500,
+      "cases": 4598,
+      "multi_output_share": 0.0,
+      "median_ratio": 1.0,
+      "mean_ratio": 1.0,
+      "frac_strict": 0.0,
+      "frac_instances_strict": 0.0
+    },
+    "0.25": {
+      "instances": 500,
+      "cases": 4486,
+      "multi_output_share": 0.23986486486486486,
+      "median_ratio": 1.0,
+      "mean_ratio": 0.9916220835190965,
+      "frac_strict": 0.018724921979491754,
+      "frac_instances_strict": 0.098
+    },
+    "0.5": {
+      "instances": 500,
+      "cases": 4532,
+      "multi_output_share": 0.488031914893617,
+      "median_ratio": 1.0,
+      "mean_ratio": 0.9799205648720212,
+      "frac_strict": 0.0441306266548985,
+      "frac_instances_strict": 0.224
+    },
+    "0.75": {
+      "instances": 500,
+      "cases": 4361,
+      "multi_output_share": 0.7349152542372881,
+      "median_ratio": 1.0,
+      "mean_ratio": 0.9762669112588855,
+      "frac_strict": 0.05021783994496675,
+      "frac_instances_strict": 0.276
+    }
+  }
+}

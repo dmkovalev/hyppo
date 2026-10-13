@@ -1,0 +1,94 @@
+{
+  "field": "Norne",
+  "full_ms": 58583.70069996454,
+  "r2": {
+    "CRM": 0.674,
+    "Hybrid": 0.696,
+    "WCT": 0.901,
+    "OPR": 0.672
+  },
+  "per_component_ms": {
+    "CRM": 58025.98180004861,
+    "ML": 0.40844996692612767,
+    "FUS": 0.40844996692612767,
+    "MB": 139.21200000913814,
+    "COREY": 139.21200000913814,
+    "BL": 139.21200000913814,
+    "WCTF": 139.21200000913814,
+    "GTM": 0.001,
+    "OPR": 0.053999945521354675
+  },
+  "scenarios": [
+    {
+      "edit": "H10",
+      "pne_size": 5,
+      "components": [
+        "BL",
+        "COREY",
+        "OPR",
+        "WCTF"
+      ],
+      "incr_ms": 562.5215000472963,
+      "speedup": 104.1
+    },
+    {
+      "edit": "H7",
+      "pne_size": 9,
+      "components": [
+        "BL",
+        "COREY",
+        "FUS",
+        "MB",
+        "ML",
+        "OPR",
+        "WCTF"
+      ],
+      "incr_ms": 552.9802001547068,
+      "speedup": 105.9
+    },
+    {
+      "edit": "H8",
+      "pne_size": 8,
+      "components": [
+        "BL",
+        "COREY",
+        "FUS",
+        "MB",
+        "OPR",
+        "WCTF"
+      ],
+      "incr_ms": 544.5483999792486,
+      "speedup": 107.6
+    },
+    {
+      "edit": "H2",
+      "pne_size": 11,
+      "components": [
+        "BL",
+        "COREY",
+        "CRM",
+        "FUS",
+        "MB",
+        "OPR",
+        "WCTF"
+      ],
+      "incr_ms": 58793.05679991376,
+      "speedup": 1.0
+    },
+    {
+      "edit": "H1",
+      "pne_size": 13,
+      "components": [
+        "BL",
+        "COREY",
+        "CRM",
+        "FUS",
+        "MB",
+        "OPR",
+        "WCTF"
+      ],
+      "incr_ms": 59013.53060011752,
+      "speedup": 1.0
+    }
+  ]
+}
