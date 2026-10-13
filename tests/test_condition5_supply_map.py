@@ -40,16 +40,17 @@ def test_counter_supply_order_conflict_is_rejected():
     assert res.details["cond5"]["task"] == "t1"
 
 
-def test_projectile_h3bad_is_rejected():
-    """Running example: h3^bad (task t4) needs theta*, produced by h6 in t7."""
-    tasks = {"t3": [5], "t4": [6], "t7": [9]}
-    wf = [("t3", "t4"), ("t4", "t7")]
-    sigs = {5: {"in": set(), "out": {"traj"}},
-            6: {"in": {"traj", "theta_star"}, "out": {"R"}},
-            9: {"in": {"R", "theta"}, "out": {"theta_star"}}}
+def test_crm_split_balance_is_rejected():
+    """Running example (ch. 2, modification 2): the balance H9* (task t9) needs
+    f_w, produced by H12 only in the later task t11."""
+    tasks = {"t8": [8], "t9": [9], "t11": [12]}
+    wf = [("t8", "t9"), ("t9", "t11")]
+    sigs = {8: {"in": set(), "out": {"l"}},
+            9: {"in": {"S_w_prev", "W_inj", "l", "f_w", "dt", "V_p"}, "out": {"S_w"}},
+            12: {"in": {"k_ro", "k_rw", "mu_w", "mu_o"}, "out": {"f_w"}}}
     res = _check(tasks, wf, sigs)
     assert not res.ok and res.status == Status.COND5_VIOLATED
-    assert res.details["cond5"]["dependency_task"] == "t7"
+    assert res.details["cond5"]["dependency_task"] == "t11"
 
 
 def test_mutual_supply_reports_merge_candidate():
