@@ -1,0 +1,131 @@
+{
+  "field": "Brugge",
+  "full_ms": 13881.915600039065,
+  "r2": {
+    "CRM": 0.985,
+    "Hybrid": 0.985,
+    "WCT": 0.979,
+    "OPR": 0.975
+  },
+  "alpha": 100,
+  "protocol": {
+    "fit_window": [
+      0,
+      93
+    ],
+    "eval_window": [
+      0,
+      133
+    ],
+    "r2": "pooled, SST from mean over masked points"
+  },
+  "holdout": {
+    "fit_window": [
+      0,
+      93
+    ],
+    "eval_window": [
+      93,
+      133
+    ],
+    "all_wells": {
+      "CRM": 0.9648084149290277,
+      "Hybrid": 0.9647330945490156,
+      "OPR": 0.9701362209563028
+    },
+    "wells_with_history": {
+      "n_wells": 20,
+      "n_points": 752,
+      "n_points_all": 752,
+      "CRM": 0.9648084149290277,
+      "Hybrid": 0.9647330945490156,
+      "OPR": 0.9701362209563028
+    }
+  },
+  "per_component_ms": {
+    "CRM": 13436.049799900502,
+    "ML": 0.2096000825986266,
+    "FUS": 0.2096000825986266,
+    "MB": 111.35997500969097,
+    "COREY": 111.35997500969097,
+    "BL": 111.35997500969097,
+    "WCTF": 111.35997500969097,
+    "GTM": 0.001,
+    "OPR": 0.0066999346017837524
+  },
+  "scenarios": [
+    {
+      "edit": "H10",
+      "pne_size": 5,
+      "components": [
+        "BL",
+        "COREY",
+        "OPR",
+        "WCTF"
+      ],
+      "incr_ms": 449.4535999838263,
+      "speedup": 30.9
+    },
+    {
+      "edit": "H7",
+      "pne_size": 9,
+      "components": [
+        "BL",
+        "COREY",
+        "FUS",
+        "MB",
+        "ML",
+        "OPR",
+        "WCTF"
+      ],
+      "incr_ms": 451.44230010919273,
+      "speedup": 30.8
+    },
+    {
+      "edit": "H8",
+      "pne_size": 8,
+      "components": [
+        "BL",
+        "COREY",
+        "FUS",
+        "MB",
+        "OPR",
+        "WCTF"
+      ],
+      "incr_ms": 450.57069999165833,
+      "speedup": 30.8
+    },
+    {
+      "edit": "H2",
+      "pne_size": 12,
+      "components": [
+        "BL",
+        "COREY",
+        "CRM",
+        "FUS",
+        "MB",
+        "ML",
+        "OPR",
+        "WCTF"
+      ],
+      "incr_ms": 14367.532899836078,
+      "speedup": 1.0
+    },
+    {
+      "edit": "H1",
+      "pne_size": 14,
+      "components": [
+        "BL",
+        "COREY",
+        "CRM",
+        "FUS",
+        "MB",
+        "ML",
+        "OPR",
+        "WCTF"
+      ],
+      "incr_ms": 14410.908199846745,
+      "speedup": 1.0
+    }
+  ]
+}
