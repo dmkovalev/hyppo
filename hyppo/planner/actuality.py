@@ -49,7 +49,9 @@ def chained_keys(
     """Chained cache configurations ``{h: key_dict}`` in one topological pass.
 
     ``key_dict = {"cfg": own config, "model": model id, "up": {pred: digest}}``;
-    O(|V| + |E|). ``nodes_topo`` must list every node after its predecessors;
+    Each node is hashed once. Canonical JSON sorting additionally costs
+    O(sum(d_in * log(d_in))) plus sorting within parameter dictionaries.
+    ``nodes_topo`` must list every node after its predecessors;
     ``edges`` are derived_by edges ``(source, dependent)``. ``epochs`` are the
     revision epochs eps_g of the predecessors (absent or 0: ``digest``,
     else ``digest@eps_g``)."""
@@ -60,13 +62,17 @@ def chained_keys(
     for u, v in edges:
         preds.setdefault(v, set()).add(u)
     keys: dict = {}
+    digests: dict = {}
     for h in nodes_topo:
+        missing = preds.get(h, set()) - digests.keys()
+        if missing:
+            raise ValueError("nodes_topo must contain every source before its consumer")
         up = {
-            str(p): _digest(keys[p]) + (f"@{epochs[p]}" if epochs.get(p) else "")
-            for p in sorted(preds.get(h, ()), key=str)
-            if p in keys
+            str(p): digests[p] + (f"@{epochs[p]}" if epochs.get(p) else "")
+            for p in preds.get(h, ())
         }
         keys[h] = {"cfg": configs.get(h, {}), "model": model_ids.get(h), "up": up}
+        digests[h] = _digest(keys[h])
     return keys
 
 

@@ -19,5 +19,9 @@ class Metrics(TypedDict, total=False):
 
     r2: float
     aic: float
+    aicc: float
     bic: float
+    n: int
+    k: int
+    stat: float
     mse: float

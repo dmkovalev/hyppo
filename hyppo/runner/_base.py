@@ -94,6 +94,7 @@ class Runner:
         theta_sup: float = 0.7,
         theta_aic: float = 10.0,
         cache_configs: dict[str, dict] | None = None,
+        ranking_weights: dict[str, float] | None = None,
     ) -> dict[str, dict]:
         """Execute plan and return results.
 
@@ -104,6 +105,8 @@ class Runner:
             graph_edges: list of (parent, child) derived_by edges
             competes: {hypothesis_id: set of competing hypothesis IDs} -- used to
                 assign the SUPERSEDED epistemic status via Delta AIC.
+            ranking_weights: weights for r2/aic/bic/stat; defaults to aic=1.
+                Provide n,k metrics for automatic AICc; caller ensures comparability.
             theta_sup: R^2 support threshold for SUPPORTED/REFUTED (default 0.7).
             theta_aic: Delta AIC threshold for SUPERSEDED (default 10).
 
@@ -191,7 +194,7 @@ class Runner:
             if pool:
                 pool.shutdown(wait=True)
 
-        self._assign_epistemic_status(results, competes or {}, theta_sup, theta_aic)
+        self._assign_epistemic_status(results, competes or {}, theta_sup, theta_aic, ranking_weights)
         return results
 
     def _attempt(self, h_id: str, model_fn, config: dict):
@@ -233,35 +236,29 @@ class Runner:
         return out
 
     def _assign_epistemic_status(
-        self,
-        results: dict[str, dict],
-        competes: dict[str, set[str]],
-        theta_sup: float,
-        theta_aic: float,
+        self, results, competes, theta_sup, theta_aic, ranking_weights=None,
     ) -> None:
-        """Write ``epistemic_status`` for every result (Section 2). A successfully
-        evaluated hypothesis is SUPPORTED/REFUTED by its R^2, or SUPERSEDED if a
-        competitor's AIC beats it by more than ``theta_aic``; anything not evaluated
-        (no R^2, or FAILED/SKIPPED) stays PROPOSED."""
+        """Require combined-score improvement AND an AIC/AICc gap.
 
-        def aic_of(hid: str) -> float | None:
-            r = results.get(hid)
-            if r and r["status"] == Status.SUCCESS.value:
-                return r["metrics"].get("aic")
-            return None
+        Rival groups must have a common response and observations. Pass metrics
+        n,k for automatic small-sample correction (k includes variance).
+        Missing n,k retain legacy AIC; default weights select only AIC/AICc.
+        """
+        from ._ranking import status_ranking
 
+        effective, scores = status_ranking(results, competes, ranking_weights)
         for h_id, res in results.items():
             if res["status"] != Status.SUCCESS.value:
                 res["epistemic_status"] = EpistemicStatus.PROPOSED.value
                 continue
-            r2 = res["metrics"].get("r2")
-            own_aic = res["metrics"].get("aic")
-            competitor_aics = [
-                a for c in competes.get(h_id, set()) if (a := aic_of(c)) is not None
+            candidates = [
+                effective[c] for c in competes.get(h_id, set())
+                if c in effective and h_id in scores and scores[c] > scores[h_id]
             ]
-            best = min(competitor_aics) if competitor_aics else None
             status = evaluate_status(
-                r2, own_aic, best, theta_sup=theta_sup, theta_aic=theta_aic
+                res["metrics"].get("r2"), effective.get(h_id),
+                min(candidates) if candidates else None,
+                theta_sup=theta_sup, theta_aic=theta_aic,
             )
             res["epistemic_status"] = status.value
 

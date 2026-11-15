@@ -71,6 +71,7 @@ class Manager:
         competes: dict[str, set[str]] | None = None,
         individuals: dict | None = None,
         ontology=None,
+        ranking_weights: dict[str, float] | None = None,
     ) -> dict[str, dict]:
         """Run full virtual experiment lifecycle.
 
@@ -85,6 +86,7 @@ class Manager:
             model_ids: model identifiers for the chained cache keys (def:12)
             stale: hypotheses marked StaleHypothesis by the ontology layer
             competes: {h: competitors} -- for the SUPERSEDED status (Delta AIC)
+            ranking_weights: comparable-group criterion weights forwarded to Runner.
             individuals, ontology: optional OWL individuals {h: individual} and
                 their ontology; if given, REFUTED/SUPERSEDED statuses are written
                 as InvalidHypothesis and the cascade is derived by RL
@@ -140,6 +142,7 @@ class Manager:
             graph_edges=graph_edges,
             cache_configs=keys,
             competes=competes,
+            ranking_weights=ranking_weights,
         )
 
         # recomputed hypotheses are fresh again

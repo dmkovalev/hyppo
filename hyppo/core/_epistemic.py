@@ -9,6 +9,8 @@ scientific verdict after a hypothesis has been evaluated against data:
 * ``REFUTED``    -- quality metric below the threshold (R^2 < theta_sup);
 * ``SUPERSEDED`` -- a competing hypothesis is decisively better
   (Delta AIC = AIC(h) - AIC(h') > theta_aic), regardless of R^2.
+  Runner passes AICc when required and first filters competitors by a strictly
+  better combined score; this low-level function evaluates only the margin.
 
 The transition is a pure function so it can be tested in isolation; the
 :class:`hyppo.runner.Runner` is the only place that gathers the inputs (R^2, AIC,

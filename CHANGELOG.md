@@ -4,9 +4,24 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [1.3.1] - 2026-11-15
 
 ### Fixed
+
+- Cascade planning no longer repeatedly merges the accumulated recompute set;
+  vertices enter the cascade once, restoring O(V + E) work with constant-time
+  set operations. Regression checks cover disconnected nodes, shared descendants,
+  and preservation of cached independent branches.
+- Runner requires both a better combined score and an AIC/AICc margin for
+  supersession; Manager forwards `ranking_weights`. Comparable groups use AICc
+  when any member has `n/k < 40`; pass `n` and total likelihood parameter count
+  `k` (including variance). Legacy metrics without these fields retain AIC.
+- Chained keys hash each node once while preserving existing cache digests;
+  invalid topological input now raises instead of silently omitting a source.
+- Incremental insertion checks reachability from the smaller boundary, rejects
+  cycles before mutation, and documents the separate precondition-check cost.
+- Regression tests cover ranking disagreement, AICc reversals, cache-key
+  compatibility, hashing work, and insertion correctness.
 
 - Rivalry no longer suppresses dependency (definition def:derived): an output
   collision is recorded as `competes`, but the derivability edge
@@ -25,6 +40,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- BGM and HCP experiment adapters, equation-derived graphs, consistency checks,
+  and domain regression tests for the dissertation's Chapter 4.
+- Persisted revision epochs in chained cache keys prevent reuse of results
+  predating a status event, including after a parameter is restored.
 - `Manager(plan_mode="safe")` recomputes exactly N (thm:safe);
   `MetadataRepository.evict`. Experiment
   `examples/research/planning/scripts/eviction_safe_vs_cascade.py`.

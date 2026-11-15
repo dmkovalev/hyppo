@@ -211,14 +211,37 @@ class HypothesisGraph:
         is preserved. If the new node opens a path ``p -> new -> s`` between
         previously unrelated nodes, the incremental result would be incomplete,
         so the graph is rebuilt in full (and :attr:`last_add_was_rebuild` is set).
+        The precondition check costs O(min(|preds|, |succs|) * (|V|+|E|));
+        the subsequent incremental step has the bound above. Thus the entire
+        call, excluding sorting the returned edges, is linear on sparse workflows
+        only when that minimum is bounded (and no full rebuild is needed).
         Returns the new node index."""
+        preds, succs = tuple(set(preds)), tuple(set(succs))
+        n = len(self._hyps)
+        if any(not 0 <= v < n for v in (*preds, *succs)):
+            raise IndexError("hypothesis index out of range")
         if not hasattr(self, "hyp_graph"):
             self.build()
+        radj: dict = {}
+        for u, v in self._edges:
+            radj.setdefault(v, set()).add(u)
+        # A new path through the inserted vertex must not introduce a cycle.
+        seen = set(succs)
+        stack = list(succs)
+        while stack:
+            for v in self._adj.get(stack.pop(), ()):
+                if v not in seen:
+                    seen.add(v)
+                    stack.append(v)
+        if seen.intersection(preds):
+            raise ValueError("insertion would create a workflow cycle")
         new_paths = False
         if preds and succs:
-            for pnode in preds:
-                r = self._reach_from(pnode, self._adj)
-                if any(snode != pnode and snode not in r for snode in succs):
+            # Traverse from the smaller boundary, reversing edges when needed.
+            starts, targets, adj = (preds, succs, self._adj) if len(preds) <= len(succs) else (succs, preds, radj)
+            for node in starts:
+                r = self._reach_from(node, adj)
+                if any(target not in r for target in targets):
                     new_paths = True
                     break
         idx = self.add(equations, inputs)
@@ -255,7 +278,9 @@ class HypothesisGraph:
         recompute set ``P_ne``: every non-cached node and, transitively, all of its
         ``derived_by`` dependents (the *cascade effect* -- an invalidated fragment
         forces recomputation of everything downstream). Processes nodes in
-        topological order so each is settled before its dependents are reached."""
+        topological order so each is settled before its dependents are reached.
+        Each vertex enters the cascade at most once; total work is O(V + E)
+        with constant-time set operations."""
         cached = set(cached)
         n = len(self._hyps)
         indeg = {i: 0 for i in range(n)}
@@ -272,9 +297,8 @@ class HypothesisGraph:
                     q.append(nb)
 
         p_ne: set[int] = set()
-        processed: set[int] = set()
         for h in topo:
-            if h in processed:
+            if h in p_ne:
                 continue
             if h not in cached:
                 p_ne.add(h)
@@ -285,9 +309,6 @@ class HypothesisGraph:
                         if dep not in p_ne:
                             p_ne.add(dep)
                             st.append(dep)
-                processed |= p_ne
-            else:
-                processed.add(h)
         return p_ne
 
 
